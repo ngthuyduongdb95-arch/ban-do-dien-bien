@@ -200,7 +200,15 @@ body{
 
     display:grid;
 
-    grid-template-columns:240px 1fr 340px;
+    grid-template-columns:260px 1fr 340px;
+
+    gap:16px;
+
+    padding:0 20px 20px;
+
+    align-items:stretch;
+
+}
 
     gap:16px;
 
@@ -226,7 +234,7 @@ body{
 
 /* Content */
 
-.content{
+.main{
 
     display:grid;
 
