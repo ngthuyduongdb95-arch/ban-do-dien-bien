@@ -194,3 +194,82 @@ body{
     text-align:center;
 
 }
+/* ================= WEBGIS ================= */
+
+.webgis{
+
+    display:grid;
+
+    grid-template-columns:240px 1fr 340px;
+
+    gap:16px;
+
+    padding:0 20px 20px;
+
+    height:calc(100vh - 260px);
+
+}
+
+/* Sidebar */
+
+.sidebar{
+
+    background:#fff;
+
+    border-radius:12px;
+
+    box-shadow:0 2px 10px rgba(0,0,0,.08);
+
+    padding:18px;
+
+}
+
+/* Content */
+
+.content{
+
+    display:grid;
+
+    grid-template-rows:55px 1fr;
+
+    gap:12px;
+
+}
+
+/* Toolbar */
+
+.toolbar{
+
+    background:#fff;
+
+    border-radius:12px;
+
+    box-shadow:0 2px 10px rgba(0,0,0,.08);
+
+}
+
+/* Map */
+
+.map{
+
+    background:#fff;
+
+    border-radius:12px;
+
+    box-shadow:0 2px 10px rgba(0,0,0,.08);
+
+}
+
+/* Panel */
+
+.panel{
+
+    background:#fff;
+
+    border-radius:12px;
+
+    box-shadow:0 2px 10px rgba(0,0,0,.08);
+
+    padding:18px;
+
+}
