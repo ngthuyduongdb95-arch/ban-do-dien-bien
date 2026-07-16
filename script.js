@@ -1,40 +1,34 @@
 // Khởi tạo bản đồ
-const map = L.map('map').setView([21.386,103.023],9);
+const map = L.map('map').setView([21.386, 103.023], 9);
 
 // Bản đồ nền OpenStreetMap
-L.tileLayer(
-'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-{
-    attribution:'© OpenStreetMap'
-}
-).addTo(map);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+}).addTo(map);
+
+// Đọc file GeoJSON
 fetch("dienbien_xa.geojson")
-  .then(response => response.json())
-  .then(data => {
+    .then(response => response.json())
+    .then(data => {
 
-    let geojson;
+        L.geoJSON(data, {
 
-fetch("dienbien_xa.geojson")
-  .then(response => response.json())
-  .then(data => {
+            style: {
+                color: "#0066cc",
+                weight: 2,
+                fillColor: "#66ccff",
+                fillOpacity: 0.3
+            },
 
-    geojson = L.geoJSON(data, {
+            onEachFeature: function (feature, layer) {
 
-      style: {
-        color: "#0066cc",
-        weight: 2,
-        fillColor: "#66ccff",
-        fillOpacity: 0.3
-      },
+                console.log(feature.properties);
 
-      onEachFeature: function (feature, layer) {
+                layer.bindPopup("Đây là một xã");
 
-        console.log(feature.properties);
+            }
 
-        layer.bindPopup("Đây là một xã");
+        }).addTo(map);
 
-      }
-
-    }).addTo(map);
-
-  });
+    })
+    .catch(error => console.error(error));
