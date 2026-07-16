@@ -8,7 +8,7 @@ L.tileLayer(
     attribution:'© OpenStreetMap'
 }
 ).addTo(map);
-fetch("data/dienbien.geojson")
+fetch("data/dienbien_xa.geojson")
   .then(response => response.json())
   .then(data => {
 
