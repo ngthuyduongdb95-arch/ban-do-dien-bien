@@ -35,11 +35,75 @@ body{
 /* ================= DASHBOARD ================= */
 
 .dashboard{
-    height:90px;
-    background:white;
+
+    display:grid;
+
+    grid-template-columns:repeat(6,1fr);
+
+    gap:15px;
+
     margin:15px;
-    border-radius:10px;
+
+}
+
+.card{
+
+    background:white;
+
+    border-radius:12px;
+
+    padding:18px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
     box-shadow:0 2px 8px rgba(0,0,0,.08);
+
+    transition:.25s;
+
+}
+
+.card:hover{
+
+    transform:translateY(-4px);
+
+    box-shadow:0 6px 18px rgba(0,0,0,.15);
+
+}
+
+.card i{
+
+    font-size:28px;
+
+    color:#1565C0;
+
+    margin-bottom:10px;
+
+}
+
+.number{
+
+    font-size:32px;
+
+    font-weight:bold;
+
+    color:#222;
+
+}
+
+.title{
+
+    margin-top:8px;
+
+    font-size:15px;
+
+    color:#666;
+
 }
 
 /* ================= LAYOUT ================= */
