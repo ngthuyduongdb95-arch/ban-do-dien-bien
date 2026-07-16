@@ -12,13 +12,29 @@ fetch("dienbien_xa.geojson")
   .then(response => response.json())
   .then(data => {
 
-    L.geoJSON(data,{
-      style:{
-        color:"#0066cc",
-        weight:2,
-        fillColor:"#66ccff",
-        fillOpacity:0.3
+    let geojson;
+
+fetch("dienbien_xa.geojson")
+  .then(response => response.json())
+  .then(data => {
+
+    geojson = L.geoJSON(data, {
+
+      style: {
+        color: "#0066cc",
+        weight: 2,
+        fillColor: "#66ccff",
+        fillOpacity: 0.3
+      },
+
+      onEachFeature: function (feature, layer) {
+
+        console.log(feature.properties);
+
+        layer.bindPopup("Đây là một xã");
+
       }
+
     }).addTo(map);
 
   });
