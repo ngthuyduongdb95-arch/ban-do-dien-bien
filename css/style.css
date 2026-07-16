@@ -1,162 +1,56 @@
-/* Reset */
+/* ================= RESET ================= */
+
 *{
     margin:0;
     padding:0;
     box-sizing:border-box;
-    font-family:Arial, Helvetica, sans-serif;
+    font-family:Arial,Helvetica,sans-serif;
 }
 
 body{
+
     background:#f4f6f9;
-    height:100vh;
+
 }
 
 /* ================= HEADER ================= */
 
 .header{
-    background:#0b5cab;
-    color:#fff;
+
+    background:#1565C0;
+
+    color:white;
+
     padding:18px 30px;
-    box-shadow:0 2px 8px rgba(0,0,0,.15);
+
+    box-shadow:0 2px 10px rgba(0,0,0,.12);
+
 }
 
-.header-top{
+.agency-line1{
+
     font-size:14px;
-    line-height:22px;
-    opacity:.95;
-}
 
-.header h1{
-    margin-top:10px;
-    font-size:28px;
-    font-weight:bold;
-}
-
-/* ================= DASHBOARD ================= */
-
-.dashboard{
-
-    display:grid;
-
-    grid-template-columns:repeat(6,minmax(160px,1fr));
-
-    gap:18px;
-
-    padding:15px;
+    font-weight:500;
 
 }
 
-.card{
-
-    background:#fff;
-
-    border-radius:12px;
-
-    min-height:120px;
-
-    display:flex;
-
-    flex-direction:column;
-
-    justify-content:center;
-
-    align-items:center;
-
-    box-shadow:0 2px 8px rgba(0,0,0,.08);
-
-    transition:.3s;
-
-}
-
-.card:hover{
-
-    transform:translateY(-4px);
-
-    box-shadow:0 6px 18px rgba(0,0,0,.15);
-
-}
-
-.card i{
-
-    font-size:28px;
-
-    color:#1565C0;
-
-    margin-bottom:10px;
-
-}
-
-.number{
-
-    font-size:32px;
-
-    font-weight:bold;
-
-    color:#222;
-
-}
-
-.title{
-
-    margin-top:8px;
+.agency-line2{
 
     font-size:15px;
 
-    color:#666;
+    font-weight:700;
+
+    margin-top:4px;
 
 }
 
-/* ================= LAYOUT ================= */
+.header h1{
 
-.container{
+    margin-top:12px;
 
-    display:grid;
+    font-size:28px;
 
-    grid-template-columns:
-        260px
-        1fr
-        340px;
-
-    gap:15px;
-
-    margin:0 15px 15px 15px;
-
-    height:calc(100vh - 190px);
-
-}
-
-/* ================= SIDEBAR ================= */
-
-.sidebar{
-
-    background:white;
-
-    border-radius:10px;
-
-    box-shadow:0 2px 8px rgba(0,0,0,.08);
-
-}
-
-/* ================= MAP ================= */
-
-.map-area{
-
-    background:white;
-
-    border-radius:10px;
-
-    box-shadow:0 2px 8px rgba(0,0,0,.08);
-
-}
-
-/* ================= PANEL ================= */
-
-.info-panel{
-
-    background:white;
-
-    border-radius:10px;
-
-    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    font-weight:700;
 
 }
