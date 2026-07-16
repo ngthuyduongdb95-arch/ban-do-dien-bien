@@ -7,7 +7,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 // Đọc file GeoJSON
-fetch("dienbien_xa.geojson")
+fetch("data/dienbien_xa.geojson")
     .then(response => response.json())
     .then(data => {
 
