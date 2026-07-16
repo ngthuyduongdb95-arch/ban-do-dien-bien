@@ -8,3 +8,17 @@ L.tileLayer(
     attribution:'© OpenStreetMap'
 }
 ).addTo(map);
+fetch("data/dienbien.geojson")
+  .then(response => response.json())
+  .then(data => {
+
+    L.geoJSON(data,{
+      style:{
+        color:"#0066cc",
+        weight:2,
+        fillColor:"#66ccff",
+        fillOpacity:0.3
+      }
+    }).addTo(map);
+
+  });
