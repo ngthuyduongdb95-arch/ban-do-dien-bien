@@ -70,6 +70,9 @@ function zoomToFeature(e) {
 
 // Gắn sự kiện
 function onEachFeature(feature, layer) {
+
+    console.log("Đã gắn sự kiện:", feature.properties.TenXa);
+
     layer.on({
         mouseover: highlightFeature,
         mouseout: resetHighlight,
