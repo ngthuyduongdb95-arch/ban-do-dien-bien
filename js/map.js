@@ -57,70 +57,69 @@ console.log(d);
         return;
     }
 
-  panel.innerHTML = {`
+ panel.innerHTML = `
 <h2>${tenXa}</h2>
 
 <hr>
 
 <div class="info-section">
-<h4>🐷 DỊCH TẢ LỢN CHÂU PHI</h4>
+    <h4>🐷 DỊCH TẢ LỢN CHÂU PHI</h4>
 
-<p><b>Trạng thái:</b> ${d?.["DTLCP_Trạng thái"] || "--"}</p>
-<p><b>Số ổ dịch:</b> ${d?.["DTLCP_Ổ dịch"] || 0}</p>
-<p><b>Tiêu hủy:</b> ${d?.["DTLCP_Chết"] || 0} con</p>
-<p><b>Trọng lượng:</b> ${d?.["DTLCP_Trọng lượng"] || 0} kg</p>
-<p><b>Ngày cuối:</b> ${d?.["DTLCP_Ngày cuối"] || "--"}</p>
-<p><b>Số ngày:</b> ${d?.["DTLCP_Số ngày"] || "--"}</p>
+    <p><b>Trạng thái:</b> ${d?.["DTLCP_Trạng thái"] || "--"}</p>
+    <p><b>Số ổ dịch:</b> ${d?.["DTLCP_Ổ dịch"] || 0}</p>
+    <p><b>Tiêu hủy:</b> ${d?.["DTLCP_Chết"] || 0} con</p>
+    <p><b>Trọng lượng:</b> ${d?.["DTLCP_Trọng lượng"] || 0} kg</p>
+    <p><b>Ngày cuối:</b> ${d?.["DTLCP_Ngày cuối"] || "--"}</p>
+    <p><b>Số ngày:</b> ${d?.["DTLCP_Số ngày"] || "--"}</p>
 </div>
 
 <div class="info-section">
-<h4>🐔 CÚM GIA CẦM</h4>
+    <h4>🐔 CÚM GIA CẦM</h4>
 
-<p><b>Trạng thái:</b> ${d?.["CGC_Trạng thái"] || "--"}</p>
-<p><b>Số ổ dịch:</b> ${d?.["CGC_Ổ dịch"] || 0}</p>
-<p><b>Tiêu hủy:</b> ${d?.["CGC_Chết"] || 0} con</p>
-<p><b>Trọng lượng:</b> ${d?.["CGC_Trọng lượng"] || 0} kg</p>
-<p><b>Ngày cuối:</b> ${d?.["CGC_Ngày cuối"] || "--"}</p>
-<p><b>Số ngày:</b> ${d?.["CGC_Số ngày"] || "--"}</p>
+    <p><b>Trạng thái:</b> ${d?.["CGC_Trạng thái"] || "--"}</p>
+    <p><b>Số ổ dịch:</b> ${d?.["CGC_Ổ dịch"] || 0}</p>
+    <p><b>Tiêu hủy:</b> ${d?.["CGC_Chết"] || 0} con</p>
+    <p><b>Trọng lượng:</b> ${d?.["CGC_Trọng lượng"] || 0} kg</p>
+    <p><b>Ngày cuối:</b> ${d?.["CGC_Ngày cuối"] || "--"}</p>
+    <p><b>Số ngày:</b> ${d?.["CGC_Số ngày"] || "--"}</p>
 </div>
 
 <div class="info-section">
-<h4>🐄 VIÊM DA NỔI CỤC</h4>
+    <h4>🐄 VIÊM DA NỔI CỤC</h4>
 
-<p><b>Trạng thái:</b> ${d?.["VDNC_Trạng thái"] || "--"}</p>
-<p><b>Số ổ dịch:</b> ${d?.["VDNC_Ổ dịch"] || 0}</p>
-<p><b>Mắc bệnh:</b> ${d?.["VDNC_Mắc"] || 0} con</p>
-<p><b>Chết:</b> ${d?.["VDNC_Chết"] || 0} con</p>
-<p><b>Trọng lượng:</b> ${d?.["VDNC_Trọng lượng"] || 0} kg</p>
-<p><b>Ngày cuối:</b> ${d?.["VDNC_Ngày cuối"] || "--"}</p>
-<p><b>Số ngày:</b> ${d?.["VDNC_Số ngày"] || "--"}</p>
+    <p><b>Trạng thái:</b> ${d?.["VDNC_Trạng thái"] || "--"}</p>
+    <p><b>Số ổ dịch:</b> ${d?.["VDNC_Ổ dịch"] || 0}</p>
+    <p><b>Mắc bệnh:</b> ${d?.["VDNC_Mắc"] || 0} con</p>
+    <p><b>Chết:</b> ${d?.["VDNC_Chết"] || 0} con</p>
+    <p><b>Trọng lượng:</b> ${d?.["VDNC_Trọng lượng"] || 0} kg</p>
+    <p><b>Ngày cuối:</b> ${d?.["VDNC_Ngày cuối"] || "--"}</p>
+    <p><b>Số ngày:</b> ${d?.["VDNC_Số ngày"] || "--"}</p>
 </div>
 
 <div class="info-section">
-<h4>🧴 PHUN PHÒNG</h4>
+    <h4>🧴 PHUN PHÒNG</h4>
 
-<p><b>Tiến độ:</b> ${d?.["PHUN_Tiến độ"] || "--"}</p>
-<p><b>Vòng:</b> ${d?.["PHUN_Vòng"] || "--"}</p>
-<p><b>Số hộ:</b> ${d?.["PHUN_Số hộ"] || 0}</p>
-<p><b>Diện tích:</b> ${d?.["PHUN_Diện tích"] || 0}</p>
-<p><b>Hóa chất:</b> ${d?.["PHUN_Hóa chất"] || "--"}</p>
-<p><b>Ngày:</b> ${d?.["PHUN_Ngày"] || "--"}</p>
+    <p><b>Tiến độ:</b> ${d?.["PHUN_Tiến độ"] || "--"}</p>
+    <p><b>Vòng:</b> ${d?.["PHUN_Vòng"] || "--"}</p>
+    <p><b>Số hộ:</b> ${d?.["PHUN_Số hộ"] || 0}</p>
+    <p><b>Diện tích:</b> ${d?.["PHUN_Diện tích"] || 0}</p>
+    <p><b>Hóa chất:</b> ${d?.["PHUN_Hóa chất"] || "--"}</p>
+    <p><b>Ngày:</b> ${d?.["PHUN_Ngày"] || "--"}</p>
 </div>
 
 <div class="info-section">
-<h4>💊 CƠ SỞ BUÔN BÁN THUỐC THÚ Y</h4>
+    <h4>💊 CƠ SỞ BUÔN BÁN THUỐC THÚ Y</h4>
 
-<p><b>Số cơ sở:</b> ${d?.["CSBBTTY_Cơ sở"] || 0}</p>
+    <p><b>Số cơ sở:</b> ${d?.["CSBBTTY_Cơ sở"] || 0}</p>
 </div>
 
 <div class="info-section">
-<h4>🏭 KIỂM SOÁT GIẾT MỔ</h4>
+    <h4>🏭 KIỂM SOÁT GIẾT MỔ</h4>
 
-<p><b>Trạng thái:</b> ${d?.["KSGM_Trạng thái"] || "--"}</p>
-<p><b>Số cơ sở:</b> ${d?.["KSGM_Cơ sở"] || 0}</p>
+    <p><b>Trạng thái:</b> ${d?.["KSGM_Trạng thái"] || "--"}</p>
+    <p><b>Số cơ sở:</b> ${d?.["KSGM_Cơ sở"] || 0}</p>
 </div>
 `;
-}
 // Đọc GeoJSON
    loadGISData().then(() => {
 
