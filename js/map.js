@@ -59,23 +59,52 @@ function zoomToFeature(e) {
 
     <hr>
 
-    <b>🐷 Dịch tả lợn Châu Phi</b><br>
-    Trạng thái: Chưa có dữ liệu<br><br>
+    <div class="info-section">
+        <h4>🐷 DỊCH TẢ LỢN CHÂU PHI</h4>
 
-    <b>🐔 Cúm gia cầm</b><br>
-    Trạng thái: Chưa có dữ liệu<br><br>
+        <p><b>Trạng thái:</b> --</p>
+        <p><b>Số ổ dịch:</b> --</p>
+        <p><b>Tiêu hủy:</b> -- con</p>
+        <p><b>Trọng lượng:</b> -- kg</p>
+        <p><b>Ngày cuối:</b> --</p>
+        <p><b>Số ngày:</b> --</p>
+    </div>
 
-    <b>🐄 Viêm da nổi cục</b><br>
-    Trạng thái: Chưa có dữ liệu<br><br>
+    <div class="info-section">
+        <h4>🐔 CÚM GIA CẦM</h4>
 
-    <b>🧴 Phun phòng</b><br>
-    Chưa có dữ liệu<br><br>
+        <p><b>Trạng thái:</b> --</p>
+        <p><b>Số ổ dịch:</b> --</p>
+        <p><b>Tiêu hủy:</b> -- con</p>
+        <p><b>Trọng lượng:</b> -- kg</p>
+        <p><b>Ngày cuối:</b> --</p>
+        <p><b>Số ngày:</b> --</p>
+    </div>
 
-    <b>💊 Cơ sở buôn bán thuốc thú y</b><br>
-    Chưa có dữ liệu
+    <div class="info-section">
+        <h4>🐄 VIÊM DA NỔI CỤC</h4>
+
+        <p><b>Trạng thái:</b> --</p>
+        <p><b>Số ổ dịch:</b> --</p>
+        <p><b>Mắc bệnh:</b> --</p>
+        <p><b>Chết:</b> --</p>
+        <p><b>Trọng lượng:</b> -- kg</p>
+        <p><b>Ngày cuối:</b> --</p>
+        <p><b>Số ngày:</b> --</p>
+    </div>
+
+    <div class="info-section">
+        <h4>🧴 PHUN PHÒNG</h4>
+
+        <p><b>Tiến độ:</b> --</p>
+    </div>
+
+    <div class="info-section">
+        <h4>💊 CƠ SỞ BUÔN BÁN THUỐC THÚ Y</h4>
+
+        <p><b>Số cơ sở:</b> --</p>
+    </div>
 `;
-
-}
 
 // Gắn sự kiện
 function onEachFeature(feature, layer) {
