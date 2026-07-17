@@ -119,13 +119,17 @@ function onEachFeature(feature, layer) {
 }
 
 // Đọc GeoJSON
-fetch("data/dienbien_xa.geojson")
-    .then(r => r.json())
-    .then(data => {
+   loadGISData().then(() => {
 
-        geojson = L.geoJSON(data, {
-            style: style,
-            onEachFeature: onEachFeature
-        }).addTo(map);
+    fetch("data/dienbien_xa.geojson")
+        .then(r => r.json())
+        .then(data => {
 
-    });
+            geojson = L.geoJSON(data, {
+                style: style,
+                onEachFeature: onEachFeature
+            }).addTo(map);
+
+        });
+
+});
