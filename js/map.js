@@ -9,28 +9,60 @@ L.tileLayer(
     }
 ).addTo(map);
 
+let geojson;
+
+// Kiểu hiển thị mặc định
+function style(feature) {
+    return {
+        color: "#1976D2",
+        weight: 1.5,
+        fillColor: "#64B5F6",
+        fillOpacity: 0.35
+    };
+}
+
+// Khi di chuột vào
+function highlightFeature(e) {
+    const layer = e.target;
+
+    layer.setStyle({
+        weight: 3,
+        color: "#ff0000",
+        fillOpacity: 0.6
+    });
+
+    layer.bringToFront();
+}
+
+// Khi di chuột ra
+function resetHighlight(e) {
+    geojson.resetStyle(e.target);
+}
+
+// Khi click
+function zoomToFeature(e) {
+    map.fitBounds(e.target.getBounds());
+
+    console.log("Tên xã:", e.target.feature.properties.TenXa);
+}
+
+// Gắn sự kiện
+function onEachFeature(feature, layer) {
+    layer.on({
+        mouseover: highlightFeature,
+        mouseout: resetHighlight,
+        click: zoomToFeature
+    });
+}
+
 // Đọc GeoJSON
 fetch("data/dienbien_xa.geojson")
-    .then(response => {
-        console.log("Status:", response.status);
-        console.log("Content-Type:", response.headers.get("content-type"));
-        return response.text();
-    })
-    .then(text => {
-        console.log("Nội dung đầu file:");
-        console.log(text.substring(0, 200));
+    .then(r => r.json())
+    .then(data => {
 
-        const data = JSON.parse(text);
-
-        L.geoJSON(data, {
-            style: {
-                color: "#1976D2",
-                weight: 1.5,
-                fillColor: "#64B5F6",
-                fillOpacity: 0.35
-            }
+        geojson = L.geoJSON(data, {
+            style: style,
+            onEachFeature: onEachFeature
         }).addTo(map);
-    })
-    .catch(err => {
-        console.error("Lỗi:", err);
+
     });
