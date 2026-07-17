@@ -105,7 +105,7 @@ function zoomToFeature(e) {
         <p><b>Số cơ sở:</b> --</p>
     </div>
 `;
-
+}
 // Gắn sự kiện
 function onEachFeature(feature, layer) {
 
