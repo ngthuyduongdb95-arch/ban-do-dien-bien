@@ -78,7 +78,9 @@ console.log(d);
 <p><b>Số ngày:</b> ${d?.["DTLCP_Số ngày"] || "--"}</p>
 
 </div>
-`;
+    
+    `;
+}
 // Gắn sự kiện
 function onEachFeature(feature, layer) {
 
