@@ -51,9 +51,9 @@ function zoomToFeature(e) {
 
     map.fitBounds(e.target.getBounds());
 
-    const tenXa = e.target.feature.properties.TenXa;
+    const idXa = e.target.feature.properties.ID;
 
-    const d = gisData[tenXa];
+    const d = gisData[idXa];
 
     const panel = document.getElementById("info-panel");
 
