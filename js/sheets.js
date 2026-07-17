@@ -12,7 +12,7 @@ async function loadGISData() {
 
     data.forEach(item => {
 
-        gisData[item["Tên xã"]] = item;
+        gisData[item["ID"]] = item;
 
     });
 
