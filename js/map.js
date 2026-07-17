@@ -57,7 +57,7 @@ console.log(d);
         return;
     }
 
-  panel.innerHTML = `
+  panel.innerHTML = {`
 <h2>${tenXa}</h2>
 
 <hr>
@@ -119,7 +119,8 @@ console.log(d);
 <p><b>Trạng thái:</b> ${d?.["KSGM_Trạng thái"] || "--"}</p>
 <p><b>Số cơ sở:</b> ${d?.["KSGM_Cơ sở"] || 0}</p>
 </div>
-`;}
+`;
+}
 // Đọc GeoJSON
    loadGISData().then(() => {
 
