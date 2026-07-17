@@ -54,11 +54,16 @@ function zoomToFeature(e) {
         return;
     }
 
-    panel.innerHTML = `
-        <h2>${tenXa}</h2>
-        <p>Đã click thành công</p>
-    `;
-}
+  panel.innerHTML = `
+    <div style="
+        background:yellow;
+        color:red;
+        font-size:30px;
+        padding:20px;
+    ">
+        ${tenXa}
+    </div>
+`;
 
 // Gắn sự kiện
 function onEachFeature(feature, layer) {
