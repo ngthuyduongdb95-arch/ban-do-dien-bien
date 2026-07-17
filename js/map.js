@@ -65,6 +65,8 @@ function zoomToFeature(e) {
     </div>
 `;
 
+}
+
 // Gắn sự kiện
 function onEachFeature(feature, layer) {
 
