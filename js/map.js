@@ -41,12 +41,23 @@ function resetHighlight(e) {
 // Khi click
 function zoomToFeature(e) {
 
-    alert("Đã click!");
-
-    console.log("Click");
-
     map.fitBounds(e.target.getBounds());
 
+    const tenXa = e.target.feature.properties.TenXa;
+
+    const panel = document.getElementById("info-panel");
+
+    console.log(panel);
+
+    if (!panel) {
+        alert("Không tìm thấy info-panel");
+        return;
+    }
+
+    panel.innerHTML = `
+        <h2>${tenXa}</h2>
+        <p>Đã click thành công</p>
+    `;
 }
 
 // Gắn sự kiện
