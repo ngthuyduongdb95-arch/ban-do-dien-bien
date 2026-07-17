@@ -44,6 +44,9 @@ function zoomToFeature(e) {
     map.fitBounds(e.target.getBounds());
 
     const tenXa = e.target.feature.properties.TenXa;
+    const d = gisData[tenXa];
+
+console.log(d);
 
     const panel = document.getElementById("info-panel");
 
@@ -55,57 +58,27 @@ function zoomToFeature(e) {
     }
 
   panel.innerHTML = `
-    <h2>${tenXa}</h2>
+<h2>${tenXa}</h2>
 
-    <hr>
+<hr>
 
-    <div class="info-section">
-        <h4>🐷 DỊCH TẢ LỢN CHÂU PHI</h4>
+<div class="info-section">
+<h4>🐷 DỊCH TẢ LỢN CHÂU PHI</h4>
 
-        <p><b>Trạng thái:</b> --</p>
-        <p><b>Số ổ dịch:</b> --</p>
-        <p><b>Tiêu hủy:</b> -- con</p>
-        <p><b>Trọng lượng:</b> -- kg</p>
-        <p><b>Ngày cuối:</b> --</p>
-        <p><b>Số ngày:</b> --</p>
-    </div>
+<p><b>Trạng thái:</b> ${d?.["DTLCP_Trạng thái"] || "--"}</p>
 
-    <div class="info-section">
-        <h4>🐔 CÚM GIA CẦM</h4>
+<p><b>Số ổ dịch:</b> ${d?.["DTLCP_Ổ dịch"] || 0}</p>
 
-        <p><b>Trạng thái:</b> --</p>
-        <p><b>Số ổ dịch:</b> --</p>
-        <p><b>Tiêu hủy:</b> -- con</p>
-        <p><b>Trọng lượng:</b> -- kg</p>
-        <p><b>Ngày cuối:</b> --</p>
-        <p><b>Số ngày:</b> --</p>
-    </div>
+<p><b>Tiêu hủy:</b> ${d?.["DTLCP_Chết"] || 0}</p>
 
-    <div class="info-section">
-        <h4>🐄 VIÊM DA NỔI CỤC</h4>
+<p><b>Trọng lượng:</b> ${d?.["DTLCP_Trọng lượng"] || 0} kg</p>
 
-        <p><b>Trạng thái:</b> --</p>
-        <p><b>Số ổ dịch:</b> --</p>
-        <p><b>Mắc bệnh:</b> --</p>
-        <p><b>Chết:</b> --</p>
-        <p><b>Trọng lượng:</b> -- kg</p>
-        <p><b>Ngày cuối:</b> --</p>
-        <p><b>Số ngày:</b> --</p>
-    </div>
+<p><b>Ngày cuối:</b> ${d?.["DTLCP_Ngày cuối"] || "--"}</p>
 
-    <div class="info-section">
-        <h4>🧴 PHUN PHÒNG</h4>
+<p><b>Số ngày:</b> ${d?.["DTLCP_Số ngày"] || "--"}</p>
 
-        <p><b>Tiến độ:</b> --</p>
-    </div>
-
-    <div class="info-section">
-        <h4>💊 CƠ SỞ BUÔN BÁN THUỐC THÚ Y</h4>
-
-        <p><b>Số cơ sở:</b> --</p>
-    </div>
+</div>
 `;
-}
 // Gắn sự kiện
 function onEachFeature(feature, layer) {
 
