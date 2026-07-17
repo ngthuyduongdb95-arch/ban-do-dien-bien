@@ -55,14 +55,24 @@ function zoomToFeature(e) {
     }
 
   panel.innerHTML = `
-    <div style="
-        background:yellow;
-        color:red;
-        font-size:30px;
-        padding:20px;
-    ">
-        ${tenXa}
-    </div>
+    <h2>${tenXa}</h2>
+
+    <hr>
+
+    <b>🐷 Dịch tả lợn Châu Phi</b><br>
+    Trạng thái: Chưa có dữ liệu<br><br>
+
+    <b>🐔 Cúm gia cầm</b><br>
+    Trạng thái: Chưa có dữ liệu<br><br>
+
+    <b>🐄 Viêm da nổi cục</b><br>
+    Trạng thái: Chưa có dữ liệu<br><br>
+
+    <b>🧴 Phun phòng</b><br>
+    Chưa có dữ liệu<br><br>
+
+    <b>💊 Cơ sở buôn bán thuốc thú y</b><br>
+    Chưa có dữ liệu
 `;
 
 }
