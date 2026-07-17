@@ -31,7 +31,6 @@ function highlightFeature(e) {
         fillOpacity: 0.6
     });
 
-    layer.bringToFront();
 }
 
 // Khi di chuột ra
@@ -42,30 +41,12 @@ function resetHighlight(e) {
 // Khi click
 function zoomToFeature(e) {
 
+    alert("Đã click!");
+
+    console.log("Click");
+
     map.fitBounds(e.target.getBounds());
 
-    const tenXa = e.target.feature.properties.TenXa;
-
-    document.getElementById("info-panel").innerHTML = `
-        <h2>${tenXa}</h2>
-
-        <hr>
-
-        <b>🐷 Dịch tả lợn Châu Phi</b><br>
-        Trạng thái: Chưa có dữ liệu<br><br>
-
-        <b>🐔 Cúm gia cầm</b><br>
-        Trạng thái: Chưa có dữ liệu<br><br>
-
-        <b>🐄 Viêm da nổi cục</b><br>
-        Trạng thái: Chưa có dữ liệu<br><br>
-
-        <b>🧴 Phun phòng</b><br>
-        Chưa có dữ liệu<br><br>
-
-        <b>💊 Cơ sở buôn bán thuốc thú y</b><br>
-        Chưa có dữ liệu
-    `;
 }
 
 // Gắn sự kiện
