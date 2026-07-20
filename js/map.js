@@ -1,5 +1,5 @@
 // ================= KHỞI TẠO BẢN ĐỒ =================
-
+console.log("MAP VERSION 2026-07-20 09:50");
 const map = L.map("map").setView([21.386, 103.023], 9);
 
 L.tileLayer(
