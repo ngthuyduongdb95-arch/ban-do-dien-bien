@@ -15,17 +15,46 @@ let geojson;
 
 // ================= MÀU CÚM GIA CẦM =================
 
-function getCGCColor(soGiaCam) {
+function getColor(value) {
 
-    if (soGiaCam == 0) return "#D9D9D9";
-    if (soGiaCam <= 100) return "#4CAF50";
-    if (soGiaCam <= 500) return "#FFD54F";
-    if (soGiaCam <= 1000) return "#FB8C00";
+    switch (currentLayer) {
 
-    return "#E53935";
+        // ================= DTLCP =================
+        case "DTLCP":
+            if (value == 0) return "#D9D9D9";
+            if (value <= 50) return "#4CAF50";
+            if (value <= 200) return "#FFD54F";
+            if (value <= 2000) return "#FB8C00";
+            return "#E53935";
 
+        // ================= CÚM GIA CẦM =================
+        case "CGC":
+            if (value == 0) return "#D9D9D9";
+            if (value <= 500) return "#4CAF50";
+            if (value <= 2000) return "#FFD54F";
+            if (value <= 5000) return "#FB8C00";
+            return "#E53935";
+
+        // ================= VIÊM DA NỔI CỤC =================
+        case "VDNC":
+            if (value == 0) return "#D9D9D9";
+            if (value <= 10) return "#4CAF50";
+            if (value <= 20) return "#FFD54F";
+            if (value <= 40) return "#FB8C00";
+            return "#E53935";
+
+        // ================= BỆNH DẠI =================
+        case "DAI":
+            if (value == 0) return "#D9D9D9";
+            if (value <= 1) return "#4CAF50";
+            if (value <= 3) return "#FFD54F";
+            if (value <= 5) return "#FB8C00";
+            return "#E53935";
+
+        default:
+            return "#D9D9D9";
+    }
 }
-
 // ================= STYLE =================
 
 function style(feature) {
@@ -33,17 +62,33 @@ function style(feature) {
     const id = feature.properties.ID;
     const d = gisData[id];
 
-    const soGiaCam = Number(d?.["CGC_Chết"] || 0);
+    let value = 0;
+
+    switch (currentLayer) {
+
+        case "DTLCP":
+            value = Number(d?.["DTLCP_Chết"] || 0);
+            break;
+
+        case "CGC":
+            value = Number(d?.["CGC_Chết"] || 0);
+            break;
+
+        case "VDNC":
+            value = Number(d?.["VDNC_Mắc"] || 0);
+            break;
+
+        case "DAI":
+            value = Number(d?.["DAI_Chết"] || 0);
+            break;
+    }
 
     return {
-
         color: "#1976D2",
         weight: 1.5,
-        fillColor: getCGCColor(soGiaCam),
+        fillColor: getColor(value),
         fillOpacity: 0.6
-
     };
-
 }
 
 // ================= HOVER =================
@@ -201,7 +246,7 @@ loadGISData().then(() => {
 
 });
 
-// ================= CHÚ GIẢ =================
+// ================= CHÚ GIẢI =================
 
 const legend = L.control({
     position: "bottomright"
@@ -209,24 +254,58 @@ const legend = L.control({
 
 legend.onAdd = function () {
 
-    const div = L.DomUtil.create("div", "legend");
+    this._div = L.DomUtil.create("div", "legend");
+    updateLegend();
 
-    div.innerHTML = `
-        <b>🐔 Cúm gia cầm</b><br><br>
-
-        <i style="background:#D9D9D9"></i>0 con<br>
-
-        <i style="background:#4CAF50"></i>1 - 100 con<br>
-
-        <i style="background:#FFD54F"></i>101 - 500 con<br>
-
-        <i style="background:#FB8C00"></i>501 - 1.000 con<br>
-
-        <i style="background:#E53935"></i>> 1.000 con
-    `;
-
-    return div;
-
+    return this._div;
 };
 
 legend.addTo(map);
+
+function updateLegend() {
+
+    let title = "";
+    let grades = [];
+
+    switch (currentLayer) {
+
+        case "DTLCP":
+            title = "🐷 Dịch tả lợn Châu Phi";
+            grades = ["0", "1 - 50", "51 - 200", "201 - 2.000", "> 2.000"];
+            break;
+
+        case "CGC":
+            title = "🐔 Cúm gia cầm";
+            grades = ["0", "1 - 500", "501 - 2.000", "2.001 - 5.000", "> 5.000"];
+            break;
+
+        case "VDNC":
+            title = "🐄 Viêm da nổi cục";
+            grades = ["0", "1 - 10", "11 - 20", "21 - 40", "> 40"];
+            break;
+
+        case "DAI":
+            title = "🐕 Bệnh Dại";
+            grades = ["0", "1", "2 - 3", "4 - 5", "> 5"];
+            break;
+    }
+
+    const colors = [
+        "#D9D9D9",
+        "#4CAF50",
+        "#FFD54F",
+        "#FB8C00",
+        "#E53935"
+    ];
+
+    let html = `<b>${title}</b><br><br>`;
+
+    for (let i = 0; i < grades.length; i++) {
+        html += `
+            <i style="background:${colors[i]}"></i>
+            ${grades[i]} con<br>
+        `;
+    }
+
+    legend._div.innerHTML = html;
+}
