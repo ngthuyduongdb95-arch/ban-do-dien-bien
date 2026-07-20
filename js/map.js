@@ -1,5 +1,7 @@
 // ================= KHỞI TẠO BẢN ĐỒ =================
-console.log("MAP VERSION 2026-07-20 09:50");
+
+console.log("MAP VERSION 2026-07-20");
+
 const map = L.map("map").setView([21.386, 103.023], 9);
 
 L.tileLayer(
@@ -9,7 +11,10 @@ L.tileLayer(
     }
 ).addTo(map);
 
-let ;
+let geojson;
+
+// ================= MÀU CÚM GIA CẦM =================
+
 function getCGCColor(soGiaCam) {
 
     if (soGiaCam == 0) return "#D9D9D9";
@@ -18,8 +23,10 @@ function getCGCColor(soGiaCam) {
     if (soGiaCam <= 1000) return "#FB8C00";
 
     return "#E53935";
+
 }
-// ================= KIỂU HIỂN THỊ =================
+
+// ================= STYLE =================
 
 function style(feature) {
 
@@ -29,11 +36,14 @@ function style(feature) {
     const soGiaCam = Number(d?.["CGC_Chết"] || 0);
 
     return {
+
         color: "#1976D2",
         weight: 1.5,
         fillColor: getCGCColor(soGiaCam),
         fillOpacity: 0.6
+
     };
+
 }
 
 // ================= HOVER =================
@@ -41,9 +51,11 @@ function style(feature) {
 function highlightFeature(e) {
 
     e.target.setStyle({
+
         weight: 3,
         color: "#ff0000",
-        fillOpacity: 0.6
+        fillOpacity: 0.8
+
     });
 
 }
@@ -65,10 +77,6 @@ function zoomToFeature(e) {
 
     const d = gisData[idXa];
 
-    console.log("ID:", idXa);
-    console.log("Tên:", tenXa);
-    console.log("Dữ liệu:", d);
-
     const panel = document.getElementById("info-panel");
 
     if (!panel) return;
@@ -78,7 +86,7 @@ function zoomToFeature(e) {
         panel.innerHTML = `
             <h2>${tenXa}</h2>
             <hr>
-            <p style="color:red"><b>Không tìm thấy dữ liệu cho ID: ${idXa}</b></p>
+            <p style="color:red">Không tìm thấy dữ liệu.</p>
         `;
 
         return;
@@ -86,6 +94,7 @@ function zoomToFeature(e) {
     }
 
     panel.innerHTML = `
+
 <h2>${tenXa}</h2>
 
 <hr>
@@ -122,7 +131,7 @@ function zoomToFeature(e) {
 
 <p><b>Trạng thái:</b> ${d["VDNC_Trạng thái"] || "--"}</p>
 <p><b>Số ổ dịch:</b> ${d["VDNC_Ổ dịch"] || 0}</p>
-<p><b>Mắc bệnh:</b> ${d["VDNC_Mắc"] || 0} con</p>
+<p><b>Mắc:</b> ${d["VDNC_Mắc"] || 0} con</p>
 <p><b>Chết:</b> ${d["VDNC_Chết"] || 0} con</p>
 <p><b>Trọng lượng:</b> ${d["VDNC_Trọng lượng"] || 0} kg</p>
 <p><b>Ngày cuối:</b> ${d["VDNC_Ngày cuối"] || "--"}</p>
@@ -159,10 +168,10 @@ function zoomToFeature(e) {
 <p><b>Số cơ sở:</b> ${d["KSGM_Cơ sở"] || 0}</p>
 
 </div>
+
 `;
 
 }
-
 // ================= GẮN SỰ KIỆN =================
 
 function onEachFeature(feature, layer) {
@@ -179,11 +188,11 @@ function onEachFeature(feature, layer) {
 
 loadGISData().then(() => {
 
-    fetch("data/dienbien_xa.")
-        .then(r => r.json())
+    fetch("data/dienbien_xa.geojson")
+        .then(response => response.json())
         .then(data => {
 
-             = L.(data, {
+            geojson = L.geoJSON(data, {
                 style: style,
                 onEachFeature: onEachFeature
             }).addTo(map);
@@ -191,27 +200,33 @@ loadGISData().then(() => {
         });
 
 });
-// =======================
-// Legend Cúm gia cầm
-// =======================
 
-const legend = L.control({ position: "bottomright" });
+// ================= CHÚ GIẢ =================
+
+const legend = L.control({
+    position: "bottomright"
+});
 
 legend.onAdd = function () {
 
     const div = L.DomUtil.create("div", "legend");
 
     div.innerHTML = `
-        <b>Cúm gia cầm</b><br><br>
+        <b>🐔 Cúm gia cầm</b><br><br>
 
         <i style="background:#D9D9D9"></i>0 con<br>
+
         <i style="background:#4CAF50"></i>1 - 100 con<br>
+
         <i style="background:#FFD54F"></i>101 - 500 con<br>
+
         <i style="background:#FB8C00"></i>501 - 1.000 con<br>
+
         <i style="background:#E53935"></i>> 1.000 con
     `;
 
     return div;
+
 };
 
 legend.addTo(map);
