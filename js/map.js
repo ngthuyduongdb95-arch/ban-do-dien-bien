@@ -177,3 +177,27 @@ loadGISData().then(() => {
         });
 
 });
+// =======================
+// Legend Cúm gia cầm
+// =======================
+
+const legend = L.control({ position: "bottomright" });
+
+legend.onAdd = function () {
+
+    const div = L.DomUtil.create("div", "legend");
+
+    div.innerHTML = `
+        <b>Cúm gia cầm</b><br><br>
+
+        <i style="background:#D9D9D9"></i>0 con<br>
+        <i style="background:#4CAF50"></i>1 - 100 con<br>
+        <i style="background:#FFD54F"></i>101 - 500 con<br>
+        <i style="background:#FB8C00"></i>501 - 1.000 con<br>
+        <i style="background:#E53935"></i>> 1.000 con
+    `;
+
+    return div;
+};
+
+legend.addTo(map);
