@@ -9,16 +9,30 @@ L.tileLayer(
     }
 ).addTo(map);
 
-let geojson;
+let ;
+function getCGCColor(soGiaCam) {
 
+    if (soGiaCam == 0) return "#D9D9D9";
+    if (soGiaCam <= 100) return "#4CAF50";
+    if (soGiaCam <= 500) return "#FFD54F";
+    if (soGiaCam <= 1000) return "#FB8C00";
+
+    return "#E53935";
+}
 // ================= KIỂU HIỂN THỊ =================
 
 function style(feature) {
+
+    const id = feature.properties.ID;
+    const d = gisData[id];
+
+    const soGiaCam = Number(d?.["CGC_Chết"] || 0);
+
     return {
         color: "#1976D2",
         weight: 1.5,
-        fillColor: "#64B5F6",
-        fillOpacity: 0.35
+        fillColor: getCGCColor(soGiaCam),
+        fillOpacity: 0.6
     };
 }
 
@@ -165,11 +179,11 @@ function onEachFeature(feature, layer) {
 
 loadGISData().then(() => {
 
-    fetch("data/dienbien_xa.geojson")
+    fetch("data/dienbien_xa.")
         .then(r => r.json())
         .then(data => {
 
-            geojson = L.geoJSON(data, {
+             = L.(data, {
                 style: style,
                 onEachFeature: onEachFeature
             }).addTo(map);
