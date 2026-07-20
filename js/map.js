@@ -327,3 +327,191 @@ if (layerSelect) {
     });
 
 }
+// ================= CHÚ GIẢI =================
+
+const legend = L.control({
+    position: "bottomright"
+});
+
+legend.onAdd = function () {
+
+    this._div = L.DomUtil.create("div", "legend");
+
+    updateLegend();
+
+    return this._div;
+
+};
+
+legend.addTo(map);
+
+function updateLegend() {
+
+    let title = "";
+    let grades = [];
+
+    switch (currentLayer) {
+
+        case "DTLCP":
+
+            title = "🐷 Dịch tả lợn Châu Phi";
+
+            grades = [
+                "0",
+                "1 - 50",
+                "51 - 200",
+                "201 - 2.000",
+                "> 2.000"
+            ];
+
+            break;
+
+        case "CGC":
+
+            title = "🐔 Cúm gia cầm";
+
+            grades = [
+                "0",
+                "1 - 500",
+                "501 - 2.000",
+                "2.001 - 5.000",
+                "> 5.000"
+            ];
+
+            break;
+
+        case "VDNC":
+
+            title = "🐄 Viêm da nổi cục";
+
+            grades = [
+                "0",
+                "1 - 10",
+                "11 - 20",
+                "21 - 40",
+                "> 40"
+            ];
+
+            break;
+
+        case "DAI":
+
+            title = "🐕 Bệnh Dại";
+
+            grades = [
+                "0",
+                "1",
+                "2 - 3",
+                "4 - 5",
+                "> 5"
+            ];
+
+            break;
+
+        case "PHUN":
+
+            title = "🧴 Phun khử trùng";
+
+            grades = [
+                "0",
+                "1 - 20",
+                "21 - 50",
+                "51 - 100",
+                ">100"
+            ];
+
+            break;
+
+        case "KSGM":
+
+            title = "🏭 Kiểm soát giết mổ";
+
+            grades = [
+                "0",
+                "Có cơ sở"
+            ];
+
+            break;
+
+        case "CSBBTTY":
+
+            title = "💊 Cơ sở buôn bán thuốc thú y";
+
+            grades = [
+                "0",
+                "1",
+                "2 - 3",
+                ">3"
+            ];
+
+            break;
+
+    }
+
+    let colors = [];
+
+    switch (currentLayer) {
+
+        case "KSGM":
+
+            colors = [
+                "#EEEEEE",
+                "#5E35B1"
+            ];
+
+            break;
+
+        case "CSBBTTY":
+
+            colors = [
+                "#EEEEEE",
+                "#81C784",
+                "#43A047",
+                "#1B5E20"
+            ];
+
+            break;
+
+        default:
+
+            colors = [
+                "#D9D9D9",
+                "#4CAF50",
+                "#FFD54F",
+                "#FB8C00",
+                "#E53935"
+            ];
+
+    }
+
+    let html = `
+        <div style="
+            font-weight:bold;
+            margin-bottom:8px;
+            font-size:14px;">
+            ${title}
+        </div>
+    `;
+
+    for (let i = 0; i < grades.length; i++) {
+
+        html += `
+        <div style="margin-bottom:6px;">
+            <span style="
+                display:inline-block;
+                width:18px;
+                height:18px;
+                background:${colors[i]};
+                border:1px solid #666;
+                margin-right:8px;">
+            </span>
+
+            ${grades[i]}
+        </div>
+        `;
+
+    }
+
+    legend._div.innerHTML = html;
+
+}
