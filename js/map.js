@@ -292,7 +292,7 @@ function popupContent(feature){
     if(!row){
 
         return `
-            <b>${getName(feature)}</b>
+            <b>${row["Tên xã"] || getName(feature)}</b>
             <hr>
             Không có dữ liệu
         `;
@@ -306,7 +306,7 @@ function popupContent(feature){
 
         <hr>
 
-        <b>📍 ${getName(feature)}</b>
+        <b>📍 ${row["Tên xã"] || getName(feature)}</b>
     `;
 
     switch(currentLayer){
