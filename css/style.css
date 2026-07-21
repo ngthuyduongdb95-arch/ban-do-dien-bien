@@ -219,3 +219,33 @@ body{
     .dashboard{grid-template-columns:repeat(2,1fr);}
     #txtSearch{width:160px;}
 }
+.popup-card{
+    min-width:260px;
+    line-height:1.7;
+    font-size:14px;
+}
+
+.popup-card h3{
+    margin:0;
+    color:#1565C0;
+    font-size:16px;
+    text-align:center;
+}
+
+.popup-card hr{
+    margin:8px 0 10px;
+    border:none;
+    border-top:1px solid #ddd;
+}
+
+.leaflet-popup-content{
+    margin:12px 14px;
+}
+
+.leaflet-popup-content-wrapper{
+    border-radius:12px;
+}
+
+.leaflet-popup-tip{
+    background:#fff;
+}
