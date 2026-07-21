@@ -17,7 +17,6 @@ async function loadSheet(){
     if(!SHEET_URL){
 
         console.warn("Chưa cấu hình SHEET_URL");
-
         return;
 
     }
@@ -26,21 +25,23 @@ async function loadSheet(){
 
         const res = await fetch(SHEET_URL);
 
-        if(!res.ok){
-
-            throw new Error("Không đọc được Google Sheets");
-
-        }
+        console.log("HTTP:", res.status);
 
         const data = await res.json();
 
+        console.log("Google Sheets:", data);
+        console.log("Số dòng:", data.length);
+
         buildSheetData(data);
+
+        console.log("sheetData:", sheetData);
+        console.log("sheetData[1]:", sheetData[1]);
 
     }
 
     catch(err){
 
-        console.error(err);
+        console.error("Lỗi loadSheet:", err);
 
     }
 
