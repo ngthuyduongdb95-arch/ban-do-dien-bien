@@ -2,140 +2,303 @@
 <html lang="vi">
 
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HỆ THỐNG WEBGIS QUẢN LÝ DỊCH BỆNH ĐỘNG VẬT TỈNH ĐIỆN BIÊN</title>
+
+    <title>
+        HỆ THỐNG WEBGIS QUẢN LÝ DỊCH BỆNH ĐỘNG VẬT
+    </title>
 
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet -->
+    <link rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/style.css">
+    <!-- CSS -->
+    <link rel="stylesheet"
+        href="css/style.css">
+
 </head>
 
 <body>
 
-    <!-- ================= HEADER ================= -->
-    <header class="header">
-        <div class="agency">
-            <div class="agency-line1">
-                SỞ NÔNG NGHIỆP VÀ MÔI TRƯỜNG TỈNH ĐIỆN BIÊN
-            </div>
-            <div class="agency-line2">
-                CHI CỤC NÔNG NGHIỆP
-            </div>
-        </div>
-        <h1>
-            HỆ THỐNG WEBGIS QUẢN LÝ DỊCH BỆNH ĐỘNG VẬT
-        </h1>
-    </header>
+<header class="header">
 
-    <!-- ================= DASHBOARD ================= -->
-    <section class="dashboard">
-        <div class="card card-blue">
-            <div class="card-icon">
-                <i class="fa-solid fa-map-location-dot"></i>
-            </div>
-            <div class="card-number">45</div>
-            <div class="card-title">Xã, phường</div>
+    <div class="agency">
+
+        <div class="agency-line1">
+            SỞ NÔNG NGHIỆP VÀ MÔI TRƯỜNG TỈNH ĐIỆN BIÊN
         </div>
 
-        <div class="card card-red">
-            <div class="card-icon">
-                <i class="fa-solid fa-virus"></i>
-            </div>
-            <div class="card-number">0</div>
-            <div class="card-title">Xã có DTLCP</div>
+        <div class="agency-line2">
+            CHI CỤC NÔNG NGHIỆP
         </div>
-
-        <div class="card card-yellow">
-            <div class="card-icon">
-                <i class="fa-solid fa-drumstick-bite"></i>
-            </div>
-            <div class="card-number">0</div>
-            <div class="card-title">Xã có CGC</div>
-        </div>
-
-        <div class="card card-orange">
-            <div class="card-icon">
-                <i class="fa-solid fa-cow"></i>
-            </div>
-            <div class="card-number">0</div>
-            <div class="card-title">Xã có VDNC</div>
-        </div>
-
-        <div class="card card-green">
-            <div class="card-icon">
-                <i class="fa-solid fa-pump-soap"></i>
-            </div>
-            <div class="card-number">39</div>
-            <div class="card-title">Đã phun phòng</div>
-        </div>
-
-        <div class="card card-purple">
-            <div class="card-icon">
-                <i class="fa-solid fa-capsules"></i>
-            </div>
-            <div class="card-number">87</div>
-            <div class="card-title">CSBB thuốc TY</div>
-        </div>
-    </section>
-
-    <!-- ================= WEBGIS ================= -->
-    <div class="webgis">
-
-        <!-- Sidebar (Bên trái) -->
-        <aside class="sidebar">
-            <!-- Bạn có thể bổ sung các bộ lọc hoặc chú thích phụ ở đây -->
-        </aside>
-
-        <!-- Khu vực bản đồ (Ở giữa) -->
-        <div class="main">
-            
-            <!-- Toolbar chọn lớp dữ liệu -->
-            <div class="toolbar">
-                <label><b>Lớp dữ liệu:</b></label>
-                <select id="layerSelect">
-                    <option value="DTLCP">🐷 Dịch tả lợn Châu Phi</option>
-                    <option value="CGC">🐔 Cúm gia cầm</option>
-                    <option value="VDNC">🐄 Viêm da nổi cục</option>
-                    <option value="DAI">🐕 Bệnh Dại</option>
-                    <option value="PHUN">🧴 Phun khử trùng</option>
-                    <option value="KSGM">🏭 Kiểm soát giết mổ</option>
-                    <option value="CSBBTTY">💊 Cơ sở buôn bán thuốc thú y</option>
-                </select>
-            </div>
-
-            <!-- Khung chứa bản đồ và ô tìm kiếm -->
-            <div style="position: relative; width: 100%; height: 100%;">
-                <div id="searchBox">
-                    <input type="text" id="txtSearch" placeholder="🔍 Tìm xã/phường...">
-                    <button id="btnSearch">Tìm</button>
-                </div>
-                <div id="map"></div>
-            </div>
-
-        </div>
-
-        <!-- Panel thông tin (Bên phải) -->
-        <aside class="panel">
-            <h3>THÔNG TIN XÃ</h3>
-            <div id="info-panel">
-                <p>Nhấn vào một xã để xem thông tin.</p>
-            </div>
-        </aside>
 
     </div>
 
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <h1>
+        HỆ THỐNG WEBGIS QUẢN LÝ DỊCH BỆNH ĐỘNG VẬT
+    </h1>
 
-    <!-- Custom JS -->
-    <script src="js/sheets.js"></script>
-    <script src="js/map.js"></script>
+</header>
+
+<!-- DASHBOARD -->
+
+<section class="dashboard">
+
+    <div class="card card-blue">
+
+        <div class="card-icon">
+            <i class="fa-solid fa-map-location-dot"></i>
+        </div>
+
+        <div
+            class="card-number"
+            id="tongXa">
+
+            45
+
+        </div>
+
+        <div class="card-title">
+
+            Xã, phường
+
+        </div>
+
+    </div>
+
+    <div class="card card-red">
+
+        <div class="card-icon">
+            <i class="fa-solid fa-virus"></i>
+        </div>
+
+        <div
+            class="card-number"
+            id="tongDTLCP">
+
+            0
+
+        </div>
+
+        <div class="card-title">
+
+            Xã có DTLCP
+
+        </div>
+
+    </div>
+
+    <div class="card card-yellow">
+
+        <div class="card-icon">
+            <i class="fa-solid fa-drumstick-bite"></i>
+        </div>
+
+        <div
+            class="card-number"
+            id="tongCGC">
+
+            0
+
+        </div>
+
+        <div class="card-title">
+
+            Xã có CGC
+
+        </div>
+
+    </div>
+
+    <div class="card card-orange">
+
+        <div class="card-icon">
+            <i class="fa-solid fa-cow"></i>
+        </div>
+
+        <div
+            class="card-number"
+            id="tongVDNC">
+
+            0
+
+        </div>
+
+        <div class="card-title">
+
+            Xã có VDNC
+
+        </div>
+
+    </div>
+
+    <div class="card card-green">
+
+        <div class="card-icon">
+            <i class="fa-solid fa-pump-soap"></i>
+        </div>
+
+        <div
+            class="card-number"
+            id="tongPhun">
+
+            0
+
+        </div>
+
+        <div class="card-title">
+
+            Đã phun khử trùng
+
+        </div>
+
+    </div>
+
+    <div class="card card-purple">
+
+        <div class="card-icon">
+            <i class="fa-solid fa-capsules"></i>
+        </div>
+
+        <div
+            class="card-number"
+            id="tongCSBB">
+
+            0
+
+        </div>
+
+        <div class="card-title">
+
+            CS buôn bán thuốc TY
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- WEBGIS -->
+
+<div class="webgis">
+
+    <!-- Sidebar -->
+
+    <aside class="sidebar">
+
+        <h3>
+
+            LỚP DỮ LIỆU
+
+        </h3>
+
+        <p>
+
+            Chọn lớp dữ liệu để hiển thị trên bản đồ.
+
+        </p>
+
+    </aside>
+
+    <!-- MAP -->
+
+    <div class="main">
+
+        <div class="toolbar">
+
+            <label>
+
+                <b>Lớp dữ liệu</b>
+
+            </label>
+
+            <select id="layerSelect">
+
+                <option value="DTLCP">
+                    🐷 Dịch tả lợn Châu Phi
+                </option>
+
+                <option value="CGC">
+                    🐔 Cúm gia cầm
+                </option>
+
+                <option value="VDNC">
+                    🐄 Viêm da nổi cục
+                </option>
+
+                <option value="DAI">
+                    🐕 Bệnh Dại
+                </option>
+
+                <option value="PHUN">
+                    🧴 Phun khử trùng
+                </option>
+
+                <option value="KSGM">
+                    🏭 Kiểm soát giết mổ
+                </option>
+
+                <option value="CSBBTTY">
+                    💊 Cơ sở buôn bán thuốc thú y
+                </option>
+
+            </select>
+
+        </div>
+
+        <div id="searchBox">
+
+            <input
+                id="txtSearch"
+                type="text"
+                placeholder="🔍 Nhập tên xã/phường">
+
+            <button id="btnSearch">
+
+                Tìm
+
+            </button>
+
+        </div>
+
+        <div id="map"></div>
+
+    </div>
+        <!-- PANEL -->
+
+    <aside class="panel">
+
+        <h3>THÔNG TIN XÃ/PHƯỜNG</h3>
+
+        <div id="info-panel">
+
+            <p>
+                Chọn một xã/phường trên bản đồ để xem thông tin chi tiết.
+            </p>
+
+        </div>
+
+    </aside>
+
+</div>
+
+<!-- ================= LEAFLET ================= -->
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- ================= GOOGLE SHEETS ================= -->
+
+<script src="js/sheets.js"></script>
+
+<!-- ================= MAP ================= -->
+
+<script src="js/map.js"></script>
 
 </body>
 
