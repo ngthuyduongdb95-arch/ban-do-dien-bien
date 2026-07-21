@@ -251,7 +251,9 @@ KHỞI TẠO
 <script>
 
 document.addEventListener("DOMContentLoaded",()=>{
-
+document
+    .getElementById("btnExportMap")
+    .addEventListener("click", exportMap);
     // Đổi lớp dữ liệu
     document
         .getElementById("layerSelect")
