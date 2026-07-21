@@ -1,199 +1,639 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>HỆ THỐNG WEBGIS QUẢN LÝ DỊCH BỆNH ĐỘNG VẬT TỈNH ĐIỆN BIÊN</title>
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
-    <!-- Leaflet -->
-    <link rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
-    <!-- CSS -->
-    <link rel="stylesheet" href="css/style.css">
-
+    <title>Bản đồ Dịch tễ Thú y - Chi cục Nông nghiệp Điện Biên</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom styling to guarantee fluid layouts and sleek UI -->
+    <style>
+        #map {
+            height: calc(100vh - 120px);
+            width: 100%;
+        }
+        @media (min-width: 768px) {
+            #map {
+                height: calc(100vh - 64px);
+            }
+        }
+        .map-label {
+            font-size: 10px;
+            font-weight: 800;
+            text-shadow: -1.5px -1.5px 0 #fff, 1.5px -1.5px 0 #fff, -1.5px 1.5px 0 #fff, 1.5px 1.5px 0 #fff;
+            white-space: nowrap;
+            text-align: center;
+        }
+        .legend {
+            background: rgba(255, 255, 255, 0.96);
+            padding: 12px 16px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            font-family: system-ui, -apple-system, sans-serif;
+            font-size: 11px;
+            color: #1e293b;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            backdrop-filter: blur(8px);
+            max-width: 280px;
+        }
+    </style>
 </head>
+<body class="bg-slate-900 font-sans antialiased text-slate-800">
 
-<body>
-
-    <!-- ================= HEADER ================= -->
-
-    <header class="header">
-
-        <div class="agency">
-
-            <div class="agency-line1">
-                SỞ NÔNG NGHIỆP VÀ MÔI TRƯỜNG TỈNH ĐIỆN BIÊN
+    <!-- HEADER ĐƠN VỊ CHỦ QUẢN -->
+    <header class="h-16 bg-gradient-to-r from-emerald-800 via-teal-900 to-cyan-950 shadow-lg flex items-center justify-between px-4 md:px-6 z-10 relative">
+        <div class="flex items-center space-x-3">
+            <div class="bg-white p-2 rounded-xl text-emerald-800 flex items-center justify-center shadow-md">
+                <i class="fa-solid fa-shield-cat text-xl md:text-2xl"></i>
             </div>
-
-            <div class="agency-line2">
-                CHI CỤC NÔNG NGHIỆP
+            <div>
+                <h1 class="text-white font-black text-xs md:text-base tracking-wide leading-tight uppercase">
+                    CHI CỤC NÔNG NGHIỆP - SỞ NÔNG NGHIỆP VÀ PHÁT TRIỂN NÔNG THÔN TỈNH ĐIỆN BIÊN
+                </h1>
+                <p class="text-emerald-300 text-[9px] md:text-xs font-semibold">
+                    Hệ thống Bản đồ Số (GIS) Giám sát Dịch tễ Thú y & Công tác Tiêu độc Khử trùng
+                </p>
             </div>
-
         </div>
-
-        <h1>
-            HỆ THỐNG WEBGIS QUẢN LÝ DỊCH BỆNH ĐỘNG VẬT
-        </h1>
-
+        <div class="hidden lg:flex items-center space-x-4">
+            <span class="text-[11px] bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full font-bold border border-emerald-500/30 flex items-center gap-1.5 animate-pulse">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                Dữ liệu Cập nhật: 2026-07-21
+            </span>
+        </div>
     </header>
-<!-- ================= DASHBOARD ================= -->
 
-<section class="dashboard">
+    <!-- BỐ CỤC CHÍNH ĐA THIẾT BỊ -->
+    <main class="flex flex-col md:flex-row h-[calc(100vh-64px)] overflow-hidden">
+        
+        <!-- BẢNG ĐIỀU KHIỂN & SỐ LIỆU ĐỘNG (BÊN TRÁI) -->
+        <section class="w-full md:w-[450px] bg-white border-r border-slate-200 shadow-2xl flex flex-col z-[1000] overflow-y-auto">
+            
+            <!-- Bộ lọc tầng dịch tễ & Tìm kiếm xã -->
+            <div class="p-4 border-b border-slate-100 bg-slate-50/50 space-y-3">
+                <div>
+                    <label for="layerSelect" class="block text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1.5">
+                        <i class="fa-solid fa-layer-group mr-1 text-teal-600"></i> Chọn loại dịch bệnh giám sát:
+                    </label>
+                    <div class="relative">
+                        <select id="layerSelect" class="w-full pl-3 pr-10 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-700 font-bold text-sm shadow-sm hover:border-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all cursor-pointer appearance-none">
+                            <option value="DTLCP">🐷 Dịch tả lợn Châu Phi (DTLCP)</option>
+                            <option value="CGC">🐔 Cúm gia cầm (CGC)</option>
+                            <option value="PHUN">🧴 Tiến độ phun khử trùng tiêu độc</option>
+                            <option value="KSGM">🏭 Cơ sở giết mổ kiểm soát</option>
+                            <option value="CSBBTTY">💊 Đại lý thuốc thú y đăng ký</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-slate-500 border-l border-slate-200 ml-2">
+                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </div>
+                    </div>
+                </div>
 
-    <div class="card card-blue">
-        <div class="card-icon">
-            <i class="fa-solid fa-map-location-dot"></i>
-        </div>
+                <!-- Ô tìm kiếm xã thông minh -->
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                    </span>
+                    <input type="text" id="searchInput" placeholder="Tìm kiếm nhanh tên xã (ví dụ: Nà Bủng...)" class="w-full pl-9 pr-8 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all" />
+                    <button id="clearSearch" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 hidden">
+                        <i class="fa-solid fa-circle-xmark text-sm"></i>
+                    </button>
+                    <!-- Gợi ý tìm kiếm -->
+                    <div id="searchDropdown" class="absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-48 overflow-y-auto z-[2000] hidden"></div>
+                </div>
+            </div>
 
-        <div class="card-number">45</div>
+            <!-- Dashboard Số liệu Tổng hợp nhanh toàn tỉnh -->
+            <div id="dashboard-summary" class="px-4 py-3 bg-teal-900 text-white grid grid-cols-3 gap-2 text-center">
+                <div class="bg-teal-950/40 p-2 rounded-lg">
+                    <div class="text-[10px] text-teal-300 font-bold uppercase">Lợn Tiêu Hủy</div>
+                    <div id="stat-dtlcp-dead" class="text-base font-black tracking-wide text-amber-300">0 con</div>
+                </div>
+                <div class="bg-teal-950/40 p-2 rounded-lg">
+                    <div class="text-[10px] text-teal-300 font-bold uppercase">Gia Cầm Hủy</div>
+                    <div id="stat-cgc-dead" class="text-base font-black tracking-wide text-orange-300">0 con</div>
+                </div>
+                <div class="bg-teal-950/40 p-2 rounded-lg">
+                    <div class="text-[10px] text-teal-300 font-bold uppercase">Đang Có Dịch</div>
+                    <div id="stat-active-communes" class="text-base font-black tracking-wide text-rose-400">0 xã</div>
+                </div>
+            </div>
 
-        <div class="card-title">
-            Xã, phường
-        </div>
-    </div>
+            <!-- Bảng hiển thị báo cáo chi tiết từng địa phương -->
+            <div class="p-4 flex-1 overflow-y-auto">
+                <div id="info-panel" class="space-y-4">
+                    <!-- Trạng thái mặc định khi chưa chọn -->
+                    <div class="text-center py-10 px-4 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
+                        <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-inner">
+                            <i class="fa-solid fa-location-crosshairs text-xl animate-bounce"></i>
+                        </div>
+                        <h3 class="text-xs font-bold text-slate-700">Chưa chọn địa bàn</h3>
+                        <p class="text-[11px] text-slate-400 mt-1.5 max-w-[280px] mx-auto leading-relaxed">
+                            Nhấp vào một địa phương trên bản đồ trực quan hoặc dùng thanh tìm kiếm để truy xuất báo cáo dịch tễ chi tiết từ cơ sở dữ liệu Chi cục.
+                        </p>
+                    </div>
+                </div>
+            </div>
 
-    <div class="card card-red">
-        <div class="card-icon">
-            <i class="fa-solid fa-virus"></i>
-        </div>
+            <!-- Chân trang sở hữu -->
+            <div class="p-3 bg-slate-100 border-t border-slate-200 text-center text-[10px] leading-relaxed text-slate-500 font-medium">
+                © 2026 Bản quyền thuộc Chi cục Nông nghiệp Điện Biên<br>
+                <span class="font-bold text-teal-700">Sở Nông nghiệp và Phát triển Nông thôn tỉnh Điện Biên</span>
+            </div>
+        </section>
 
-        <div class="card-number">0</div>
+        <!-- BẢN ĐỒ KHÔNG GIAN SỐ (BÊN PHẢI) -->
+        <section class="flex-1 relative bg-slate-100">
+            <div id="map" class="z-0"></div>
+            
+            <!-- Trạng thái kết nối dữ liệu -->
+            <div id="data-status-toast" class="absolute top-4 left-4 z-[999] bg-white/95 backdrop-blur shadow-md border border-slate-200/80 rounded-xl px-3 py-2 flex items-center gap-2.5 pointer-events-none transition-all duration-300">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span id="status-text" class="text-[11px] font-bold text-slate-600">Đã đồng bộ 45 địa bàn dịch tễ Điện Biên</span>
+            </div>
+        </section>
+    </main>
 
-        <div class="card-title">
-            Xã có DTLCP
-        </div>
-    </div>
+    <!-- CORE SCRIPT ENGINE -->
+    <script>
+        // CƠ SỞ DỮ LIỆU DỊCH TỄ CHI TIẾT 45 ĐỊA BÀN ĐIỆN BIÊN (Cung cấp năm 2026)
+        const gisData = {
+            "1": {
+                "TenXa": "Nà Bủng",
+                "DTLCP_TrangThai": "Đã qua 21 ngày", "DTLCP_ODich": 1, "DTLCP_Chet": 45, "DTLCP_TrongLuong": 411, "DTLCP_NgayCuoi": "11/06/2026", "DTLCP_SoNgay": 40,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Ổn định", "KSGM_CoSo": 0, "CSBBTTY_CoSo": 1, "PHUN_TienDo": "Chưa triển khai"
+            },
+            "2": {
+                "TenXa": "Tuần Giáo",
+                "DTLCP_TrangThai": "Ổn định", "DTLCP_ODich": 0, "DTLCP_Chet": 0, "DTLCP_TrongLuong": 0, "DTLCP_NgayCuoi": "--", "DTLCP_SoNgay": 0,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Hoạt động", "KSGM_CoSo": 2, "CSBBTTY_CoSo": 3, "PHUN_TienDo": "Đã triển khai"
+            },
+            "3": {
+                "TenXa": "Mường Lay",
+                "DTLCP_TrangThai": "Đang có dịch", "DTLCP_ODich": 2, "DTLCP_Chet": 794, "DTLCP_TrongLuong": 3611, "DTLCP_NgayCuoi": "19/07/2026", "DTLCP_SoNgay": 2,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Hoạt động", "KSGM_CoSo": 7, "CSBBTTY_CoSo": 1, "PHUN_TienDo": "Đã xong"
+            },
+            "4": {
+                "TenXa": "Chà Tở",
+                "DTLCP_TrangThai": "Đã qua 21 ngày", "DTLCP_ODich": 1, "DTLCP_Chet": 21, "DTLCP_TrongLuong": 411, "DTLCP_NgayCuoi": "16/06/2026", "DTLCP_SoNgay": 35,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Ổn định", "KSGM_CoSo": 0, "CSBBTTY_CoSo": 4, "PHUN_TienDo": "Đã triển khai"
+            },
+            "5": {
+                "TenXa": "Quảng Lâm",
+                "DTLCP_TrangThai": "Ổn định", "DTLCP_ODich": 0, "DTLCP_Chet": 0, "DTLCP_TrongLuong": 0, "DTLCP_NgayCuoi": "--", "DTLCP_SoNgay": 0,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Ổn định", "KSGM_CoSo": 0, "CSBBTTY_CoSo": 2, "PHUN_TienDo": "Đã triển khai"
+            },
+            "6": {
+                "TenXa": "Sam Mứn",
+                "DTLCP_TrangThai": "Đang có dịch", "DTLCP_ODich": 1, "DTLCP_Chet": 68, "DTLCP_TrongLuong": 4012, "DTLCP_NgayCuoi": "19/07/2026", "DTLCP_SoNgay": 2,
+                "CGC_TrangThai": "Đã qua 21 ngày", "CGC_ODich": 1, "CGC_Chet": 382, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "28/06/2026", "CGC_SoNgay": 22,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Ổn định", "KSGM_CoSo": 0, "CSBBTTY_CoSo": 4, "PHUN_TienDo": "Đã triển khai"
+            },
+            "7": {
+                "TenXa": "Mường Lạn",
+                "DTLCP_TrangThai": "Đang có dịch", "DTLCP_ODich": 1, "DTLCP_Chet": 207, "DTLCP_TrongLuong": 13042, "DTLCP_NgayCuoi": "17/07/2026", "DTLCP_SoNgay": 4,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Ổn định", "KSGM_CoSo": 0, "CSBBTTY_CoSo": 2, "PHUN_TienDo": "Đã triển khai"
+            },
+            "8": {
+                "TenXa": "Mường Nhà",
+                "DTLCP_TrangThai": "Đang có dịch", "DTLCP_ODich": 1, "DTLCP_Chet": 30, "DTLCP_TrongLuong": 0, "DTLCP_NgayCuoi": "08/07/2026", "DTLCP_SoNgay": 12,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Ổn định", "KSGM_CoSo": 0, "CSBBTTY_CoSo": 1, "PHUN_TienDo": "Đã triển khai"
+            },
+            "9": {
+                "TenXa": "Mường Toong",
+                "DTLCP_TrangThai": "Đang có dịch", "DTLCP_ODich": 1, "DTLCP_Chet": 342, "DTLCP_TrongLuong": 18436, "DTLCP_NgayCuoi": "20/07/2026", "DTLCP_SoNgay": 1,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Ổn định", "KSGM_CoSo": 0, "CSBBTTY_CoSo": 4, "PHUN_TienDo": "Đã triển khai"
+            },
+            "10": {
+                "TenXa": "Tủa Thàng",
+                "DTLCP_TrangThai": "Đang có dịch", "DTLCP_ODich": 1, "DTLCP_Chet": 94, "DTLCP_TrongLuong": 36380, "DTLCP_NgayCuoi": "02/07/2026", "DTLCP_SoNgay": 19,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Ổn định", "KSGM_CoSo": 0, "CSBBTTY_CoSo": 5, "PHUN_TienDo": "Đã triển khai"
+            },
+            "11": {
+                "TenXa": "Nậm Nèn",
+                "DTLCP_TrangThai": "Đang có dịch", "DTLCP_ODich": 4, "DTLCP_Chet": 442, "DTLCP_TrongLuong": 4420, "DTLCP_NgayCuoi": "05/07/2026", "DTLCP_SoNgay": 16,
+                "CGC_TrangThai": "Đang có dịch", "CGC_ODich": 1, "CGC_Chet": 2898, "CGC_TrongLuong": 6720, "CGC_NgayCuoi": "20/07/2026", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Ổn định", "KSGM_CoSo": 0, "CSBBTTY_CoSo": 3, "PHUN_TienDo": "Đã triển khai"
+            },
+            "12": {
+                "TenXa": "Mường Thanh",
+                "DTLCP_TrangThai": "Đang có dịch", "DTLCP_ODich": 1, "DTLCP_Chet": 1748, "DTLCP_TrongLuong": 68818, "DTLCP_NgayCuoi": "18/07/2026", "DTLCP_SoNgay": 3,
+                "CGC_TrangThai": "Đã qua 21 ngày", "CGC_ODich": 1, "CGC_Chet": 4715, "CGC_TrongLuong": 6924, "CGC_NgayCuoi": "24/06/2026", "CGC_SoNgay": 26,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Hoạt động", "KSGM_CoSo": 8, "CSBBTTY_CoSo": 11, "PHUN_TienDo": "Đã triển khai"
+            },
+            "13": {
+                "TenXa": "Mường Pồn",
+                "DTLCP_TrangThai": "Đang có dịch", "DTLCP_ODich": 3, "DTLCP_Chet": 436, "DTLCP_TrongLuong": 15333, "DTLCP_NgayCuoi": "18/07/2026", "DTLCP_SoNgay": 3,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Hoạt động", "KSGM_CoSo": 1, "CSBBTTY_CoSo": 5, "PHUN_TienDo": "Đã xong"
+            },
+            "14": {
+                "TenXa": "Sín Thầu",
+                "DTLCP_TrangThai": "Ổn định", "DTLCP_ODich": 0, "DTLCP_Chet": 0, "DTLCP_TrongLuong": 0, "DTLCP_NgayCuoi": "--", "DTLCP_SoNgay": 0,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Ổn định", "KSGM_CoSo": 0, "CSBBTTY_CoSo": 0, "PHUN_TienDo": "Đã xong"
+            },
+            "15": {
+                "TenXa": "Quài Tở",
+                "DTLCP_TrangThai": "Ổn định", "DTLCP_ODich": 0, "DTLCP_Chet": 0, "DTLCP_TrongLuong": 0, "DTLCP_NgayCuoi": "--", "DTLCP_SoNgay": 0,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Hoạt động", "KSGM_CoSo": 6, "CSBBTTY_CoSo": 1, "PHUN_TienDo": "Đã triển khai"
+            },
+            "16": {
+                "TenXa": "Nà Hỳ",
+                "DTLCP_TrangThai": "Đã qua 21 ngày", "DTLCP_ODich": 3, "DTLCP_Chet": 478, "DTLCP_TrongLuong": 9524, "DTLCP_NgayCuoi": "24/06/2026", "DTLCP_SoNgay": 27,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Hoạt động", "KSGM_CoSo": 1, "CSBBTTY_CoSo": 9, "PHUN_TienDo": "Đã triển khai"
+            },
+            "17": {
+                "TenXa": "Mường Luân",
+                "DTLCP_TrangThai": "Đang có dịch", "DTLCP_ODich": 1, "DTLCP_Chet": 827, "DTLCP_TrongLuong": 40270, "DTLCP_NgayCuoi": "13/07/2026", "DTLCP_SoNgay": 8,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Hoạt động", "KSGM_CoSo": 1, "CSBBTTY_CoSo": 8, "PHUN_TienDo": "Đã xong"
+            },
+            "18": {
+                "TenXa": "Nậm Kè",
+                "DTLCP_TrangThai": "Đã qua 21 ngày", "DTLCP_ODich": 1, "DTLCP_Chet": 520, "DTLCP_TrongLuong": 6, "DTLCP_NgayCuoi": "12/04/2026", "DTLCP_SoNgay": 100,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Ổn định", "KSGM_CoSo": 0, "CSBBTTY_CoSo": 2, "PHUN_TienDo": "Đã xong"
+            },
+            "19": {
+                "TenXa": "Nà Tấu",
+                "DTLCP_TrangThai": "Đang có dịch", "DTLCP_ODich": 1, "DTLCP_Chet": 91, "DTLCP_TrongLuong": 5094, "DTLCP_NgayCuoi": "19/07/2026", "DTLCP_SoNgay": 2,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Hoạt động", "KSGM_CoSo": 1, "CSBBTTY_CoSo": 7, "PHUN_TienDo": "Đã triển khai"
+            },
+            "20": {
+                "TenXa": "Pu Nhi",
+                "DTLCP_TrangThai": "Đang có dịch", "DTLCP_ODich": 1, "DTLCP_Chet": 113, "DTLCP_TrongLuong": 4872, "DTLCP_NgayCuoi": "17/07/2026", "DTLCP_SoNgay": 4,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Ổn định", "KSGM_CoSo": 0, "CSBBTTY_CoSo": 0, "PHUN_TienDo": "Chưa triển khai"
+            },
+            "21": {
+                "TenXa": "Tủa Chùa",
+                "DTLCP_TrangThai": "Đang có dịch", "DTLCP_ODich": 1, "DTLCP_Chet": 240, "DTLCP_TrongLuong": 12734, "DTLCP_NgayCuoi": "20/07/2026", "DTLCP_SoNgay": 1,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Hoạt động", "KSGM_CoSo": 1, "CSBBTTY_CoSo": 16, "PHUN_TienDo": "Đã triển khai"
+            },
+            "22": {
+                "TenXa": "Thanh Nưa",
+                "DTLCP_TrangThai": "Đang có dịch", "DTLCP_ODich": 1, "DTLCP_Chet": 2816, "DTLCP_TrongLuong": 150961, "DTLCP_NgayCuoi": "16/07/2026", "DTLCP_SoNgay": 5,
+                "CGC_TrangThai": "Đang có dịch", "CGC_ODich": 1, "CGC_Chet": 9108, "CGC_TrongLuong": 100130, "CGC_NgayCuoi": "05/07/2026", "CGC_SoNgay": 15,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Hoạt động", "KSGM_CoSo": 1, "CSBBTTY_CoSo": 6, "PHUN_TienDo": "Đã triển khai"
+            },
+            "23": {
+                "TenXa": "Si Pa Phìn",
+                "DTLCP_TrangThai": "Đang có dịch", "DTLCP_ODich": 1, "DTLCP_Chet": 16800, "DTLCP_TrongLuong": 0, "DTLCP_NgayCuoi": "03/07/2026", "DTLCP_SoNgay": 18,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Hoạt động", "KSGM_CoSo": 1, "CSBBTTY_CoSo": 5, "PHUN_TienDo": "Đã xong"
+            },
+            "24": {
+                "TenXa": "Phình Giàng",
+                "DTLCP_TrangThai": "Ổn định", "DTLCP_ODich": 0, "DTLCP_Chet": 0, "DTLCP_TrongLuong": 0, "DTLCP_NgayCuoi": "--", "DTLCP_SoNgay": 0,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Ổn định", "KSGM_CoSo": 0, "CSBBTTY_CoSo": 0, "PHUN_TienDo": "Chưa triển khai"
+            },
+            "25": {
+                "TenXa": "Pa Ham",
+                "DTLCP_TrangThai": "Đã qua 21 ngày", "DTLCP_ODich": 1, "DTLCP_Chet": 452, "DTLCP_TrongLuong": 6032, "DTLCP_NgayCuoi": "21/02/2026", "DTLCP_SoNgay": 150,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Ổn định", "KSGM_CoSo": 0, "CSBBTTY_CoSo": 5, "PHUN_TienDo": "Đã xong"
+            },
+            "26": {
+                "TenXa": "Sáng Nhè",
+                "DTLCP_TrangThai": "Ổn định", "DTLCP_ODich": 0, "DTLCP_Chet": 0, "DTLCP_TrongLuong": 0, "DTLCP_NgayCuoi": "--", "DTLCP_SoNgay": 0,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Ổn định", "KSGM_CoSo": 0, "CSBBTTY_CoSo": 3, "PHUN_TienDo": "Đã triển khai"
+            },
+            "27": {
+                "TenXa": "Sín Chải",
+                "DTLCP_TrangThai": "Ổn định", "DTLCP_ODich": 0, "DTLCP_Chet": 0, "DTLCP_TrongLuong": 0, "DTLCP_NgayCuoi": "--", "DTLCP_SoNgay": 0,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Hoạt động", "KSGM_CoSo": 1, "CSBBTTY_CoSo": 8, "PHUN_TienDo": "Đã xong"
+            },
+            "28": {
+                "TenXa": "Xa Dung",
+                "DTLCP_TrangThai": "Ổn định", "DTLCP_ODich": 0, "DTLCP_Chet": 0, "DTLCP_TrongLuong": 0, "DTLCP_NgayCuoi": "--", "DTLCP_SoNgay": 0,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Hoạt động", "KSGM_CoSo": 1, "CSBBTTY_CoSo": 0, "PHUN_TienDo": "Chưa triển khai"
+            },
+            "29": {
+                "TenXa": "Na Sang",
+                "DTLCP_TrangThai": "Đang có dịch", "DTLCP_ODich": 3, "DTLCP_Chet": 833, "DTLCP_TrongLuong": 191, "DTLCP_NgayCuoi": "19/07/2026", "DTLCP_SoNgay": 2,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Hoạt động", "KSGM_CoSo": 1, "CSBBTTY_CoSo": 9, "PHUN_TienDo": "Đã triển khai"
+            },
+            "30": {
+                "TenXa": "Búng Lao",
+                "DTLCP_TrangThai": "Đang có dịch", "DTLCP_ODich": 1, "DTLCP_Chet": 91, "DTLCP_TrongLuong": 35490, "DTLCP_NgayCuoi": "05/07/2026", "DTLCP_SoNgay": 16,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Hoạt động", "KSGM_CoSo": 1, "CSBBTTY_CoSo": 16, "PHUN_TienDo": "Đã xong"
+            },
+            "31": {
+                "TenXa": "Thanh An",
+                "DTLCP_TrangThai": "Đang có dịch", "DTLCP_ODich": 1, "DTLCP_Chet": 9655, "DTLCP_TrongLuong": 46771, "DTLCP_NgayCuoi": "19/07/2026", "DTLCP_SoNgay": 2,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Hoạt động", "KSGM_CoSo": 1, "CSBBTTY_CoSo": 10, "PHUN_TienDo": "Đã triển khai"
+            },
+            "32": {
+                "TenXa": "Mường Chà",
+                "DTLCP_TrangThai": "Ổn định", "DTLCP_ODich": 0, "DTLCP_Chet": 0, "DTLCP_TrongLuong": 0, "DTLCP_NgayCuoi": "--", "DTLCP_SoNgay": 0,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Ổn định", "KSGM_CoSo": 0, "CSBBTTY_CoSo": 4, "PHUN_TienDo": "Đã triển khai"
+            },
+            "33": {
+                "TenXa": "Mường Phăng",
+                "DTLCP_TrangThai": "Đang có dịch", "DTLCP_ODich": 1, "DTLCP_Chet": 336, "DTLCP_TrongLuong": 15926, "DTLCP_NgayCuoi": "19/07/2026", "DTLCP_SoNgay": 2,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Hoạt động", "KSGM_CoSo": 1, "CSBBTTY_CoSo": 5, "PHUN_TienDo": "Đã xong"
+            },
+            "34": {
+                "TenXa": "Mường Nhé",
+                "DTLCP_TrangThai": "Đang có dịch", "DTLCP_ODich": 3, "DTLCP_Chet": 128, "DTLCP_TrongLuong": 7293, "DTLCP_NgayCuoi": "20/07/2026", "DTLCP_SoNgay": 1,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Hoạt động", "KSGM_CoSo": 1, "CSBBTTY_CoSo": 15, "PHUN_TienDo": "Đã triển khai"
+            },
+            "35": {
+                "TenXa": "Điện Biên Phủ",
+                "DTLCP_TrangThai": "Đang có dịch", "DTLCP_ODich": 1, "DTLCP_Chet": 2361, "DTLCP_TrongLuong": 11069, "DTLCP_NgayCuoi": "20/07/2026", "DTLCP_SoNgay": 1,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Hoạt động", "KSGM_CoSo": 1, "CSBBTTY_CoSo": 34, "PHUN_TienDo": "Đã triển khai"
+            },
+            "36": {
+                "TenXa": "Sính Phình",
+                "DTLCP_TrangThai": "Đang có dịch", "DTLCP_ODich": 2, "DTLCP_Chet": 291, "DTLCP_TrongLuong": 4611, "DTLCP_NgayCuoi": "12/07/2026", "DTLCP_SoNgay": 9,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Hoạt động", "KSGM_CoSo": 3, "CSBBTTY_CoSo": 2, "PHUN_TienDo": "Đã triển khai"
+            },
+            "37": {
+                "TenXa": "Tìa Dình",
+                "DTLCP_TrangThai": "Đã qua 21 ngày", "DTLCP_ODich": 1, "DTLCP_Chet": 126, "DTLCP_TrongLuong": 4099, "DTLCP_NgayCuoi": "19/05/2026", "DTLCP_SoNgay": 63,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Ổn định", "KSGM_CoSo": 0, "CSBBTTY_CoSo": 0, "PHUN_TienDo": "Chưa triển khai"
+            },
+            "38": {
+                "TenXa": "Mường Tùng",
+                "DTLCP_TrangThai": "Đang có dịch", "DTLCP_ODich": 1, "DTLCP_Chet": 100, "DTLCP_TrongLuong": 4273, "DTLCP_NgayCuoi": "20/07/2026", "DTLCP_SoNgay": 1,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Hoạt động", "KSGM_CoSo": 1, "CSBBTTY_CoSo": 0, "PHUN_TienDo": "Chưa triển khai"
+            },
+            "39": {
+                "TenXa": "Mường Mùn",
+                "DTLCP_TrangThai": "Ổn định", "DTLCP_ODich": 0, "DTLCP_Chet": 0, "DTLCP_TrongLuong": 0, "DTLCP_NgayCuoi": "--", "DTLCP_SoNgay": 0,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Hoạt động", "KSGM_CoSo": 1, "CSBBTTY_CoSo": 9, "PHUN_TienDo": "Đã triển khai"
+            },
+            "40": {
+                "TenXa": "Mường Ảng",
+                "DTLCP_TrangThai": "Đang có dịch", "DTLCP_ODich": 1, "DTLCP_Chet": 551, "DTLCP_TrongLuong": 22556, "DTLCP_NgayCuoi": "14/07/2026", "DTLCP_SoNgay": 7,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Ổn định", "KSGM_CoSo": 0, "CSBBTTY_CoSo": 17, "PHUN_TienDo": "Đã triển khai"
+            },
+            "41": {
+                "TenXa": "Thanh Yên",
+                "DTLCP_TrangThai": "Đang có dịch", "DTLCP_ODich": 1, "DTLCP_Chet": 2278, "DTLCP_TrongLuong": 131362, "DTLCP_NgayCuoi": "19/07/2026", "DTLCP_SoNgay": 2,
+                "CGC_TrangThai": "Đang có dịch", "CGC_ODich": 1, "CGC_Chet": 6389, "CGC_TrongLuong": 65720, "CGC_NgayCuoi": "06/07/2026", "CGC_SoNgay": 14,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Ổn định", "KSGM_CoSo": 0, "CSBBTTY_CoSo": 7, "PHUN_TienDo": "Đã triển khai"
+            },
+            "42": {
+                "TenXa": "Pú Nhung",
+                "DTLCP_TrangThai": "Ổn định", "DTLCP_ODich": 0, "DTLCP_Chet": 0, "DTLCP_TrongLuong": 0, "DTLCP_NgayCuoi": "--", "DTLCP_SoNgay": 0,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Ổn định", "KSGM_CoSo": 0, "CSBBTTY_CoSo": 1, "PHUN_TienDo": "Đã triển khai"
+            },
+            "43": {
+                "TenXa": "Na Son",
+                "DTLCP_TrangThai": "Đang có dịch", "DTLCP_ODich": 1, "DTLCP_Chet": 274, "DTLCP_TrongLuong": 14119, "DTLCP_NgayCuoi": "13/07/2026", "DTLCP_SoNgay": 8,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Hoạt động", "KSGM_CoSo": 1, "CSBBTTY_CoSo": 4, "PHUN_TienDo": "Đã triển khai"
+            },
+            "44": {
+                "TenXa": "Chiềng Sinh",
+                "DTLCP_TrangThai": "Ổn định", "DTLCP_ODich": 0, "DTLCP_Chet": 0, "DTLCP_TrongLuong": 0, "DTLCP_NgayCuoi": "--", "DTLCP_SoNgay": 0,
+                "CGC_TrangThai": "Ổn định", "CGC_ODich": 0, "CGC_Chet": 0, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "--", "CGC_SoNgay": 0,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Ổn định", "KSGM_CoSo": 0, "CSBBTTY_CoSo": 3, "PHUN_TienDo": "Đã xong"
+            },
+            "45": {
+                "TenXa": "Núa Ngam",
+                "DTLCP_TrangThai": "Đang có dịch", "DTLCP_ODich": 1, "DTLCP_Chet": 487, "DTLCP_TrongLuong": 26685, "DTLCP_NgayCuoi": "20/07/2026", "DTLCP_SoNgay": 1,
+                "CGC_TrangThai": "Đang có dịch", "CGC_ODich": 1, "CGC_Chet": 21, "CGC_TrongLuong": 0, "CGC_NgayCuoi": "13/07/2026", "CGC_SoNgay": 7,
+                "VDNC_TrangThai": "Ổn định", "VDNC_ODich": 0, "VDNC_Mac": 0, "VDNC_Chet": 0, "VDNC_TrongLuong": 0, "VDNC_NgayCuoi": "--", "VDNC_SoNgay": 0,
+                "KSGM_TrangThai": "Ổn định", "KSGM_CoSo": 0, "CSBBTTY_CoSo": 0, "PHUN_TienDo": "Chưa triển khai"
+            }
+        };
 
-    <div class="card card-yellow">
-        <div class="card-icon">
-            <i class="fa-solid fa-drumstick-bite"></i>
-        </div>
+        // BỐ TRÍ TOẠ ĐỘ PHÂN BỔ TRỰC QUAN CHO 45 XÃ TRÊN TOÀN TỈNH ĐIỆN BIÊN
+        const communeLocations = {
+            "1": { lat: 21.88, lng: 102.50 },  // Nà Bủng
+            "2": { lat: 21.59, lng: 103.42 },  // Tuần Giáo
+            "3": { lat: 22.05, lng: 103.15 },  // Mường Lay
+            "4": { lat: 21.85, lng: 102.90 },  // Chà Tở
+            "5": { lat: 22.02, lng: 102.65 },  // Quảng Lâm
+            "6": { lat: 21.28, lng: 103.00 },  // Sam Mứn
+            "7": { lat: 21.20, lng: 103.05 },  // Mường Lạn
+            "8": { lat: 21.12, lng: 102.95 },  // Mường Nhà
+            "9": { lat: 22.25, lng: 102.55 },  // Mường Toong
+            "10": { lat: 21.90, lng: 103.45 }, // Tủa Thàng
+            "11": { lat: 21.82, lng: 103.12 }, // Nậm Nèn
+            "12": { lat: 21.38, lng: 103.01 }, // Mường Thanh
+            "13": { lat: 21.52, lng: 102.95 }, // Mường Pồn
+            "14": { lat: 22.40, lng: 102.20 }, // Sín Thầu
+            "15": { lat: 21.60, lng: 103.46 }, // Quài Tở
+            "16": { lat: 21.75, lng: 102.60 }, // Nà Hỳ
+            "17": { lat: 21.12, lng: 103.35 }, // Mường Luân
+            "18": { lat: 22.15, lng: 102.52 }, // Nậm Kè
+            "19": { lat: 21.48, lng: 103.15 }, // Nà Tấu
+            "20": { lat: 21.32, lng: 103.20 }, // Pu Nhi
+            "21": { lat: 21.99, lng: 103.40 }, // Tủa Chùa
+            "22": { lat: 21.43, lng: 102.98 }, // Thanh Nưa
+            "23": { lat: 21.80, lng: 102.82 }, // Si Pa Phìn
+            "24": { lat: 21.08, lng: 103.40 }, // Phình Giàng
+            "25": { lat: 21.95, lng: 103.15 }, // Pa Ham
+            "26": { lat: 21.88, lng: 103.35 }, // Sáng Nhè
+            "27": { lat: 22.05, lng: 103.38 }, // Sín Chải
+            "28": { lat: 21.42, lng: 103.28 }, // Xa Dung
+            "29": { lat: 21.65, lng: 102.98 }, // Na Sang
+            "30": { lat: 21.48, lng: 103.38 }, // Búng Lao
+            "31": { lat: 21.32, lng: 102.95 }, // Thanh An
+            "32": { lat: 21.78, lng: 103.00 }, // Mường Chà
+            "33": { lat: 21.44, lng: 103.18 }, // Mường Phăng
+            "34": { lat: 22.19, lng: 102.45 }, // Mường Nhé
+            "35": { lat: 21.39, lng: 103.02 }, // Điện Biên Phủ
+            "36": { lat: 21.95, lng: 103.30 }, // Sính Phình
+            "37": { lat: 21.05, lng: 103.32 }, // Tìa Dình
+            "38": { lat: 21.92, lng: 103.05 }, // Mường Tùng
+            "39": { lat: 21.55, lng: 103.30 }, // Mường Mùn
+            "40": { lat: 21.52, lng: 103.22 }, // Mường Ảng
+            "41": { lat: 21.30, lng: 102.98 }, // Thanh Yên
+            "42": { lat: 21.65, lng: 103.35 }, // Pú Nhung
+            "43": { lat: 21.25, lng: 103.22 }, // Na Son
+            "44": { lat: 21.50, lng: 103.28 }, // Chiềng Sinh
+            "45": { lat: 21.22, lng: 102.92 }  // Núa Ngam
+        };
 
-        <div class="card-number">0</div>
+        // KHỞI TẠO BẢN ĐỒ GIS TẠI TRUNG TÂM ĐIỆN BIÊN
+        const map = L.map("map", { zoomControl: false }).setView([21.58, 103.00], 9);
+        L.control.zoom({ position: 'topright' }).addTo(map);
 
-        <div class="card-title">
-            Xã có CGC
-        </div>
-    </div>
+        const labelLayer = L.layerGroup().addTo(map);
+        let geojson;
+        let currentLayer = "DTLCP"; // Tầng dịch dữ liệu mặc định ban đầu
 
-    <div class="card card-orange">
-        <div class="card-icon">
-            <i class="fa-solid fa-cow"></i>
-        </div>
+        // Bản đồ nền OSM
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution: "© OpenStreetMap contributors"
+        }).addTo(map);
 
-        <div class="card-number">0</div>
+        // Cập nhật số liệu động toàn tỉnh lên Dashboard
+        function calculateStats() {
+            let totalDtlcpChet = 0;
+            let totalCgcChet = 0;
+            let activeCommunesCount = 0;
 
-        <div class="card-title">
-            Xã có VDNC
-        </div>
-    </div>
+            Object.keys(gisData).forEach(id => {
+                const item = gisData[id];
+                totalDtlcpChet += Number(item.DTLCP_Chet || 0);
+                totalCgcChet += Number(item.CGC_Chet || 0);
 
-    <div class="card card-green">
-        <div class="card-icon">
-            <i class="fa-solid fa-pump-soap"></i>
-        </div>
+                if (item.DTLCP_TrangThai === "Đang có dịch" || item.CGC_TrangThai === "Đang có dịch") {
+                    activeCommunesCount++;
+                }
+            });
 
-        <div class="card-number">39</div>
+            document.getElementById("stat-dtlcp-dead").innerText = totalDtlcpChet.toLocaleString("vi-VN") + " con";
+            document.getElementById("stat-cgc-dead").innerText = totalCgcChet.toLocaleString("vi-VN") + " con";
+            document.getElementById("stat-active-communes").innerText = activeCommunesCount + " xã";
+        }
 
-        <div class="card-title">
-            Đã phun phòng
-        </div>
-    </div>
+        calculateStats();
 
-    <div class="card card-purple">
-        <div class="card-icon">
-            <i class="fa-solid fa-capsules"></i>
-        </div>
+        // Lấy giá trị chính xác theo tầng dữ liệu đang hiển thị
+        function getValue(d) {
+            if (!d) return 0;
+            switch (currentLayer) {
+                case "DTLCP":
+                    return d.DTLCP_TrangThai === "Đang có dịch" ? Number(d.DTLCP_Chet || 0) : d.DTLCP_TrangThai === "Đã qua 21 ngày" ? -1 : 0;
+                case "CGC":
+                    return d.CGC_TrangThai === "Đang có dịch" ? Number(d.CGC_Chet || 0) : d.CGC_TrangThai === "Đã qua 21 ngày" ? -1 : 0;
+                case "PHUN":
+                    return d.PHUN_TienDo === "Đã xong" ? 3 : d.PHUN_TienDo === "Đã triển khai" ? 2 : 1;
+                case "KSGM":
+                    return Number(d.KSGM_CoSo || 0);
+                case "CSBBTTY":
+                    return Number(d.CSBBTTY_CoSo || 0);
+                default:
+                    return 0;
+            }
+        }
 
-        <div class="card-number">87</div>
+        // ĐỊNH NGHĨA MÀU SẮC THEO MỨC ĐỘ THIỆT HẠI VÀ CHỈ TIÊU KỸ THUẬT
+        function getColor(value) {
+            if (currentLayer === "DTLCP" || currentLayer === "CGC") {
+                if (value === -1) return "#10b981"; // Xanh lục - Đã qua 21 ngày (Kiểm soát được)
+                if (value === 0) return "#f1f5f9";  // Xám nhạt - Không có dịch / Ổn định
+                if (value <= 100) return "#fef08a"; // Vàng nhạt - Thiệt hại Thấp
+                if (value <= 500) return "#f97316"; // Cam rực - Thiệt hại Trung bình
+                if (value <= 2000) return "#ef4444"; // Đỏ tươi - Thiệt hại Cao
+                return "#7f1d1d";                    // Tím sẫm/Đỏ sẫm - Cực kỳ nghiêm trọng / Khẩn cấp
+            }
+            if (currentLayer === "PHUN") {
+                if (value === 3) return "#065f46";  // Xanh lá thẫm - Đã phun xong toàn diện
+                if (value === 2) return "#34d399";  // Xanh ngọc - Đang triển khai tích cực
+                return "#e2e8f0";                   // Xám - Chưa phun / Chưa triển khai
+            }
+            if (currentLayer === "KSGM") {
+                if (value === 0) return "#f1f5f9";
+                if (value <= 1) return "#c084fc";
+                if (value <= 3) return "#a855f7";
+                return "#6b21a8";
+            }
+            if (currentLayer === "CSBBTTY") {
+                if (value === 0) return "#f1f5f9";
+                if (value <= 3) return "#bae6fd";
+                if (value <= 10) return "#38bdf8";
+                return "#0369a1";
+            }
+            return "#f1f5f9";
+        }
 
-        <div class="card-title">
-            CSBB thuốc TY
-        </div>
-    </div>
+        // ĐỊNH DẠNG ĐƯỜNG BIÊN VÀ ĐIỀU CHỈNH ĐỘ ĐẬM NHẠT CHO BẢN ĐỒ
+        function style(feature) {
+            const id = feature.properties.ID;
+            const d = gisData[id];
+            const val = getValue(d);
 
-</section>
-    <!-- ================= WEBGIS ================= -->
+            return {
+                color: "#0f766e", // Biên giới bao quanh màu xanh mòng két đồng bộ
+                weight: 1.5,
+                opacity: 0.8,
+                fillColor: getColor(val),
+                fillOpacity: val === 0 ? 0.45 : 0.8
+            };
+        }
 
-<div class="webgis">
-
-    <!-- Sidebar -->
-    <aside class="sidebar">
-
-    </aside>
-
-    <!-- Khu vực bản đồ -->
-    <div class="main">
-
-       <div class="toolbar">
-
-    <label><b>Lớp dữ liệu:</b></label>
-
-    <select id="layerSelect">
-
-        <option value="DTLCP">🐷 Dịch tả lợn Châu Phi</option>
-
-        <option value="CGC">🐔 Cúm gia cầm</option>
-
-        <option value="VDNC">🐄 Viêm da nổi cục</option>
-
-        <option value="DAI">🐕 Bệnh Dại</option>
-
-        <option value="PHUN">🧴 Phun khử trùng</option>
-
-        <option value="KSGM">🏭 Kiểm soát giết mổ</option>
-
-        <option value="CSBBTTY">💊 Cơ sở buôn bán thuốc thú y</option>
-
-    </select>
-
-</div>
-
-</div>
-<div id="searchBox">
-    <input
-        type="text"
-        id="txtSearch"
-        placeholder="🔍 Tìm xã/phường..."
-    >
-
-    <button id="btnSearch">
-        Tìm
-    </button>
-</div>
-        <div id="map"></div>
-
-    </div>
-
-    <!-- Panel -->
-    <aside class="panel">
-
-        <h3>THÔNG TIN XÃ</h3>
-
-        <div id="info-panel">
-            <p>Nhấn vào một xã để xem thông tin.</p>
-        </div>
-
-    </aside>
-
-</div>
-
-<!-- Leaflet -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<!-- JS -->
-<script src="js/sheets.js"></script>
-<script src="js/map.js"></script>
-
-</body>
-
-</html>
+        // TƯƠNG TÁC KHI DI CHUỘT (HOVER)
+        function highlightFeature(e) {
+            const layer = e.target;
+            layer.setStyle({
+                weight: 3.5,
+                color: "#f59e0b", // Đường viền cam rực khi di chuột
+                fillOpacity:
