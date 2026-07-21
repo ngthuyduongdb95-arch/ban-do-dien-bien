@@ -573,11 +573,11 @@ function zoomToFeature(e){
 
 function onEachFeature(feature,layer){
 
+    layer.on("click", function () {
     layer.bindPopup(
-
         popupContent(feature)
-
-    );
+    ).openPopup();
+});
 
     layer.on({
 
