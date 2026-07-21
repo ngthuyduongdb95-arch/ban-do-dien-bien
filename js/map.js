@@ -685,7 +685,7 @@ async function loadGeoJSON(){
 
     try{
 
-        const res=await fetch("data/dienbien.geojson");
+        const res=await fetch("data/dienbien_xa.geojson");
 
         if(!res.ok){
 
