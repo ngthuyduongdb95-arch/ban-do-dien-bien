@@ -40,17 +40,16 @@ function formatDate(value){
 
 function getName(feature){
 
-    if(!feature) return "";
-
     const p = feature.properties || {};
 
     return (
+        p.TenXa ||
         p["Tên xã"] ||
-        p["TEN_XA"] ||
-        p["ten_xa"] ||
-        p["NAME"] ||
-        p["name"] ||
-        p["Name"] ||
+        p.TEN_XA ||
+        p.ten_xa ||
+        p.NAME ||
+        p.Name ||
+        p.name ||
         ""
     ).trim();
 
