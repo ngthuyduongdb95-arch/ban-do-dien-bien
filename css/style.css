@@ -356,3 +356,18 @@ body{
     margin-right: 8px;
     opacity: 1;
 }
+.map-label{
+
+    font-size:12px;
+
+    font-weight:bold;
+
+    white-space:nowrap;
+
+    text-shadow:
+        0 0 4px #fff,
+        1px 1px 2px #fff,
+        -1px -1px 2px #fff;
+
+    pointer-events:none;
+}
