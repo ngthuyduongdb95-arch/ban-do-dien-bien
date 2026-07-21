@@ -291,6 +291,22 @@ function onEachFeature(feature, layer) {
 
 }// ================= ĐỌC DỮ LIỆU =================
 
+// ================= GẮN SỰ KIỆN =================
+
+function onEachFeature(feature, layer) {
+
+    layer.on({
+
+        mouseover: highlightFeature,
+
+        mouseout: resetHighlight,
+
+        click: zoomToFeature
+
+    });
+
+}// ================= ĐỌC DỮ LIỆU =================
+
 loadGISData().then(() => {
 
     fetch("data/dienbien_xa.geojson")
@@ -304,6 +320,31 @@ updateLegend();
 drawLabels();
 
 });
+
+// ================= ĐỔI LỚP DỮ LIỆU =================
+
+const layerSelect = document.getElementById("layerSelect");
+
+if (layerSelect) {
+
+    layerSelect.addEventListener("change", function () {
+
+        currentLayer = this.value;
+
+        geojson.setStyle(style);
+
+updateLegend();
+
+drawLabels();
+        
+});
+}
+// ================= CHÚ GIẢI =================
+
+const legend = L.control({
+    position: "bottomright"
+});
+
 
 // ================= ĐỔI LỚP DỮ LIỆU =================
 
