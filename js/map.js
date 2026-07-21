@@ -431,10 +431,12 @@ function zoomToFeature(e){
             maxZoom:11
         }
     );
-}
+
     showPanel(layer.feature);
 
-// layer.openPopup();  // Bỏ dòng này
+    // layer.openPopup();
+
+}
 
 //======================================================
 // GẮN SỰ KIỆN CHO TỪNG XÃ
