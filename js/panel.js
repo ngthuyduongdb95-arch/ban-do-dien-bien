@@ -370,10 +370,10 @@ function showPanel(feature){
     }
 
     let html = `
-        <h2 class="panel-title">
-            📍 ${getName(feature)}
-        </h2>
-    `;
+    <h2 class="panel-title">
+        📍 ${row["Tên xã"] || getName(feature)}
+    </h2>
+`;
 
     //==================================================
     // DTLCP
