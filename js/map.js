@@ -1,50 +1,62 @@
-// ================= KHỞI TẠO BẢN ĐỒ =================
+//==================================================
+// WEBGIS ĐIỆN BIÊN
+// map.js
+//==================================================
 
-console.log("MAP VERSION 2026-07-20");
+console.log("WEBGIS DIEN BIEN 2026");
 
-const map = L.map("map").setView([21.386, 103.023], 9);
-labelLayer = L.layerGroup().addTo(map);
+//================= KHỞI TẠO =================
+
+const map = L.map("map", {
+    zoomControl: true
+}).setView([21.386,103.023],9);
+
 L.tileLayer(
     "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
     {
-        attribution: "© OpenStreetMap"
+        attribution:"© OpenStreetMap",
+        maxZoom:19
     }
 ).addTo(map);
 
-let geojson;
+//================= BIẾN TOÀN CỤC =================
 
-// Lớp dữ liệu mặc định
+let geojson = null;
+let labelLayer = L.layerGroup().addTo(map);
+
 let currentLayer = "DTLCP";
-let labelLayer;
 
-// ================= LẤY GIÁ TRỊ THEO LỚP =================
+// dữ liệu Google Sheets
+let gisData = {};
 
-function getValue(d) {
+//================= LẤY GIÁ TRỊ =================
 
-    if (!d) return 0;
+function getValue(data){
 
-    switch (currentLayer) {
+    if(!data) return 0;
+
+    switch(currentLayer){
 
         case "DTLCP":
-            return Number(d["DTLCP_Chết"] || 0);
+            return Number(data["DTLCP_Chết"]||0);
 
         case "CGC":
-            return Number(d["CGC_Chết"] || 0);
+            return Number(data["CGC_Chết"]||0);
 
         case "VDNC":
-            return Number(d["VDNC_Mắc"] || 0);
+            return Number(data["VDNC_Mắc"]||0);
 
         case "DAI":
-            return Number(d["DAI_Chết"] || 0);
+            return Number(data["DAI_Chết"]||0);
 
         case "PHUN":
-            return Number(d["PHUN_Số hộ"] || 0);
+            return Number(data["PHUN_Số hộ"]||0);
 
         case "KSGM":
-            return Number(d["KSGM_Cơ sở"] || 0);
+            return Number(data["KSGM_Cơ sở"]||0);
 
         case "CSBBTTY":
-            return Number(d["CSBBTTY_Cơ sở"] || 0);
+            return Number(data["CSBBTTY_Cơ sở"]||0);
 
         default:
             return 0;
@@ -53,74 +65,82 @@ function getValue(d) {
 
 }
 
-// ================= MÀU =================
+//================= MÀU =================
 
-function getColor(value) {
+function getColor(value){
 
-    switch (currentLayer) {
+    switch(currentLayer){
 
         case "DTLCP":
 
-            if (value == 0) return "#D9D9D9";
-            if (value <= 50) return "#4CAF50";
-            if (value <= 200) return "#FFD54F";
-            if (value <= 2000) return "#FB8C00";
+            if(value===0) return "#D9D9D9";
+            if(value<=50) return "#4CAF50";
+            if(value<=200) return "#FFD54F";
+            if(value<=2000) return "#FB8C00";
             return "#E53935";
+
 
         case "CGC":
 
-            if (value == 0) return "#D9D9D9";
-            if (value <= 500) return "#4CAF50";
-            if (value <= 2000) return "#FFD54F";
-            if (value <= 5000) return "#FB8C00";
+            if(value===0) return "#D9D9D9";
+            if(value<=500) return "#4CAF50";
+            if(value<=2000) return "#FFD54F";
+            if(value<=5000) return "#FB8C00";
             return "#E53935";
+
 
         case "VDNC":
 
-            if (value == 0) return "#D9D9D9";
-            if (value <= 10) return "#4CAF50";
-            if (value <= 20) return "#FFD54F";
-            if (value <= 40) return "#FB8C00";
+            if(value===0) return "#D9D9D9";
+            if(value<=10) return "#4CAF50";
+            if(value<=20) return "#FFD54F";
+            if(value<=40) return "#FB8C00";
             return "#E53935";
+
 
         case "DAI":
 
-            if (value == 0) return "#D9D9D9";
-            if (value <= 1) return "#4CAF50";
-            if (value <= 3) return "#FFD54F";
-            if (value <= 5) return "#FB8C00";
+            if(value===0) return "#D9D9D9";
+            if(value<=1) return "#4CAF50";
+            if(value<=3) return "#FFD54F";
+            if(value<=5) return "#FB8C00";
             return "#E53935";
+
 
         case "PHUN":
 
-            if (value == 0) return "#EEEEEE";
-            if (value <= 20) return "#B2DFDB";
-            if (value <= 50) return "#4DB6AC";
-            if (value <= 100) return "#009688";
+            if(value===0) return "#EEEEEE";
+            if(value<=20) return "#B2DFDB";
+            if(value<=50) return "#4DB6AC";
+            if(value<=100) return "#009688";
             return "#00695C";
+
 
         case "KSGM":
 
-            if (value == 0) return "#EEEEEE";
+            if(value===0) return "#EEEEEE";
             return "#5E35B1";
+
 
         case "CSBBTTY":
 
-            if (value == 0) return "#EEEEEE";
-            if (value == 1) return "#81C784";
-            if (value <= 3) return "#43A047";
+            if(value===0) return "#EEEEEE";
+            if(value===1) return "#81C784";
+            if(value<=3) return "#43A047";
             return "#1B5E20";
 
+
         default:
+
             return "#D9D9D9";
 
     }
 
 }
 
-// ================= STYLE =================
+//================= STYLE =================
 
-function style(feature) {
+function style(feature){
 
     const id = feature.properties.ID;
 
@@ -128,67 +148,84 @@ function style(feature) {
 
     const value = getValue(d);
 
-    return {
+    return{
 
-        color: "#1976D2",
-        weight: 1.5,
-        opacity: 1,
+        color:"#1976D2",
+        weight:1.2,
+        opacity:1,
 
-        fillColor: getColor(value),
+        fillColor:getColor(value),
 
-        fillOpacity: 0.7
+        fillOpacity:0.75
 
     };
 
 }
-// ================= HOVER =================
+//==================================================
+// HOVER
+//==================================================
 
-function highlightFeature(e) {
+function highlightFeature(e){
 
-    e.target.setStyle({
-        weight: 3,
-        color: "#ff0000",
-        fillOpacity: 0.9
+    const layer = e.target;
+
+    layer.setStyle({
+
+        weight:3,
+        color:"#ff0000",
+        fillOpacity:0.9
+
     });
 
-    e.target.bringToFront();
+    layer.bringToFront();
 
 }
 
-function resetHighlight(e) {
+function resetHighlight(e){
 
-    geojson.resetStyle(e.target);
+    if(geojson){
+
+        geojson.resetStyle(e.target);
+
+    }
 
 }
 
-// ================= CLICK =================
+//==================================================
+// PANEL THÔNG TIN
+//==================================================
 
-function zoomToFeature(e) {
+function showInfo(feature){
 
-    map.fitBounds(e.target.getBounds());
+    const id = feature.properties.ID;
 
-    const idXa = e.target.feature.properties.ID;
-    const tenXa = e.target.feature.properties.TenXa;
+    const tenXa =
+        feature.properties.TenXa ||
+        feature.properties["Tên xã"] ||
+        feature.properties.NAME ||
+        "Không xác định";
 
-    const d = gisData[idXa];
+    const d = gisData[id];
 
     const panel = document.getElementById("info-panel");
 
-    if (!panel) return;
+    if(!panel) return;
 
-    if (!d) {
+    if(!d){
 
-        panel.innerHTML = `
+        panel.innerHTML=`
             <h2>${tenXa}</h2>
             <hr>
-            <p style="color:red;">Không có dữ liệu.</p>
+            <p style="color:red">
+                Không có dữ liệu
+            </p>
         `;
 
         return;
 
     }
 
-    panel.innerHTML = `
+    panel.innerHTML=`
 
 <h2>${tenXa}</h2>
 
@@ -198,11 +235,15 @@ function zoomToFeature(e) {
 
 <h4>🐷 DỊCH TẢ LỢN CHÂU PHI</h4>
 
-<p><b>Trạng thái:</b> ${d["DTLCP_Trạng thái"] || "--"}</p>
-<p><b>Số ổ dịch:</b> ${d["DTLCP_Ổ dịch"] || 0}</p>
-<p><b>Tiêu hủy:</b> ${d["DTLCP_Chết"] || 0} con</p>
-<p><b>Trọng lượng:</b> ${d["DTLCP_Trọng lượng"] || 0} kg</p>
-<p><b>Ngày cuối:</b> ${d["DTLCP_Ngày cuối"] || "--"}</p>
+<p><b>Trạng thái:</b> ${d["DTLCP_Trạng thái"]||"--"}</p>
+
+<p><b>Số ổ dịch:</b> ${d["DTLCP_Ổ dịch"]||0}</p>
+
+<p><b>Tiêu hủy:</b> ${d["DTLCP_Chết"]||0} con</p>
+
+<p><b>Trọng lượng:</b> ${d["DTLCP_Trọng lượng"]||0} kg</p>
+
+<p><b>Ngày cuối:</b> ${d["DTLCP_Ngày cuối"]||"--"}</p>
 
 </div>
 
@@ -210,11 +251,15 @@ function zoomToFeature(e) {
 
 <h4>🐔 CÚM GIA CẦM</h4>
 
-<p><b>Trạng thái:</b> ${d["CGC_Trạng thái"] || "--"}</p>
-<p><b>Số ổ dịch:</b> ${d["CGC_Ổ dịch"] || 0}</p>
-<p><b>Tiêu hủy:</b> ${d["CGC_Chết"] || 0} con</p>
-<p><b>Trọng lượng:</b> ${d["CGC_Trọng lượng"] || 0} kg</p>
-<p><b>Ngày cuối:</b> ${d["CGC_Ngày cuối"] || "--"}</p>
+<p><b>Trạng thái:</b> ${d["CGC_Trạng thái"]||"--"}</p>
+
+<p><b>Số ổ dịch:</b> ${d["CGC_Ổ dịch"]||0}</p>
+
+<p><b>Tiêu hủy:</b> ${d["CGC_Chết"]||0} con</p>
+
+<p><b>Trọng lượng:</b> ${d["CGC_Trọng lượng"]||0} kg</p>
+
+<p><b>Ngày cuối:</b> ${d["CGC_Ngày cuối"]||"--"}</p>
 
 </div>
 
@@ -222,12 +267,15 @@ function zoomToFeature(e) {
 
 <h4>🐄 VIÊM DA NỔI CỤC</h4>
 
-<p><b>Trạng thái:</b> ${d["VDNC_Trạng thái"] || "--"}</p>
-<p><b>Số ổ dịch:</b> ${d["VDNC_Ổ dịch"] || 0}</p>
-<p><b>Mắc:</b> ${d["VDNC_Mắc"] || 0} con</p>
-<p><b>Chết:</b> ${d["VDNC_Chết"] || 0} con</p>
-<p><b>Trọng lượng:</b> ${d["VDNC_Trọng lượng"] || 0} kg</p>
-<p><b>Ngày cuối:</b> ${d["VDNC_Ngày cuối"] || "--"}</p>
+<p><b>Trạng thái:</b> ${d["VDNC_Trạng thái"]||"--"}</p>
+
+<p><b>Số ổ dịch:</b> ${d["VDNC_Ổ dịch"]||0}</p>
+
+<p><b>Mắc:</b> ${d["VDNC_Mắc"]||0} con</p>
+
+<p><b>Chết:</b> ${d["VDNC_Chết"]||0} con</p>
+
+<p><b>Ngày cuối:</b> ${d["VDNC_Ngày cuối"]||"--"}</p>
 
 </div>
 
@@ -235,10 +283,13 @@ function zoomToFeature(e) {
 
 <h4>🐕 BỆNH DẠI</h4>
 
-<p><b>Trạng thái:</b> ${d["DAI_Trạng thái"] || "--"}</p>
-<p><b>Số ổ dịch:</b> ${d["DAI_Ổ dịch"] || 0}</p>
-<p><b>Chết:</b> ${d["DAI_Chết"] || 0} con</p>
-<p><b>Ngày cuối:</b> ${d["DAI_Ngày cuối"] || "--"}</p>
+<p><b>Trạng thái:</b> ${d["DAI_Trạng thái"]||"--"}</p>
+
+<p><b>Số ổ dịch:</b> ${d["DAI_Ổ dịch"]||0}</p>
+
+<p><b>Chết:</b> ${d["DAI_Chết"]||0} con</p>
+
+<p><b>Ngày cuối:</b> ${d["DAI_Ngày cuối"]||"--"}</p>
 
 </div>
 
@@ -246,11 +297,11 @@ function zoomToFeature(e) {
 
 <h4>🧴 PHUN KHỬ TRÙNG</h4>
 
-<p><b>Tiến độ:</b> ${d["PHUN_Tiến độ"] || "--"}</p>
-<p><b>Vòng:</b> ${d["PHUN_Vòng"] || "--"}</p>
-<p><b>Số hộ:</b> ${d["PHUN_Số hộ"] || 0}</p>
-<p><b>Diện tích:</b> ${d["PHUN_Diện tích"] || 0}</p>
-<p><b>Ngày:</b> ${d["PHUN_Ngày"] || "--"}</p>
+<p><b>Tiến độ:</b> ${d["PHUN_Tiến độ"]||"--"}</p>
+
+<p><b>Số hộ:</b> ${d["PHUN_Số hộ"]||0}</p>
+
+<p><b>Diện tích:</b> ${d["PHUN_Diện tích"]||0}</p>
 
 </div>
 
@@ -258,8 +309,7 @@ function zoomToFeature(e) {
 
 <h4>🏭 KIỂM SOÁT GIẾT MỔ</h4>
 
-<p><b>Trạng thái:</b> ${d["KSGM_Trạng thái"] || "--"}</p>
-<p><b>Số cơ sở:</b> ${d["KSGM_Cơ sở"] || 0}</p>
+<p><b>Số cơ sở:</b> ${d["KSGM_Cơ sở"]||0}</p>
 
 </div>
 
@@ -267,7 +317,7 @@ function zoomToFeature(e) {
 
 <h4>💊 CƠ SỞ BUÔN BÁN THUỐC THÚ Y</h4>
 
-<p><b>Số cơ sở:</b> ${d["CSBBTTY_Cơ sở"] || 0}</p>
+<p><b>Số cơ sở:</b> ${d["CSBBTTY_Cơ sở"]||0}</p>
 
 </div>
 
@@ -275,104 +325,291 @@ function zoomToFeature(e) {
 
 }
 
-// ================= GẮN SỰ KIỆN =================
+//==================================================
+// CLICK
+//==================================================
 
-function onEachFeature(feature, layer) {
+function zoomToFeature(e){
+
+    map.fitBounds(e.target.getBounds());
+
+    showInfo(e.target.feature);
+
+}
+
+//==================================================
+// GẮN SỰ KIỆN
+//==================================================
+
+function onEachFeature(feature,layer){
 
     layer.on({
 
-        mouseover: highlightFeature,
+        mouseover:highlightFeature,
 
-        mouseout: resetHighlight,
+        mouseout:resetHighlight,
 
-        click: zoomToFeature
-
-    });
-
-}// ================= ĐỌC DỮ LIỆU =================
-
-// ================= GẮN SỰ KIỆN =================
-
-function onEachFeature(feature, layer) {
-
-    layer.on({
-
-        mouseover: highlightFeature,
-
-        mouseout: resetHighlight,
-
-        click: zoomToFeature
+        click:zoomToFeature
 
     });
 
-}// ================= ĐỌC DỮ LIỆU =================
+}
+//==================================================
+// ĐỌC DỮ LIỆU GOOGLE SHEETS
+//==================================================
 
-loadGISData().then(() => {
+async function loadMap(){
 
-    fetch("data/dienbien_xa.geojson")
-        .then(response => response.json())
-        .then(data => {
+    // lấy dữ liệu từ Apps Script
+    await loadGISData();
 
-            geojson = L.geoJSON(...).addTo(map);
+    // đọc GeoJSON
+    const response = await fetch("data/dienbien_xa.geojson");
 
-updateLegend();
+    const data = await response.json();
 
-drawLabels();
+    // tạo layer
+    geojson = L.geoJSON(data,{
 
-});
+        style:style,
 
-// ================= ĐỔI LỚP DỮ LIỆU =================
+        onEachFeature:onEachFeature
 
-const layerSelect = document.getElementById("layerSelect");
+    }).addTo(map);
 
-if (layerSelect) {
+    // cập nhật chú giải
+    updateLegend();
 
-    layerSelect.addEventListener("change", function () {
+    // vẽ tên xã
+    drawLabels();
 
-        currentLayer = this.value;
+}
 
+//==================================================
+// KHỞI ĐỘNG
+//==================================================
+
+loadMap();
+
+
+//==================================================
+// ĐỔI LỚP DỮ LIỆU
+//==================================================
+
+const layerSelect=document.getElementById("layerSelect");
+
+if(layerSelect){
+
+    layerSelect.addEventListener("change",function(){
+
+        currentLayer=this.value;
+
+        // đổi màu
         geojson.setStyle(style);
 
-updateLegend();
+        // đổi chú giải
+        updateLegend();
 
-drawLabels();
-        
-});
+        // đổi tên xã
+        drawLabels();
+
+    });
+
 }
-// ================= CHÚ GIẢI =================
+
+
+//==================================================
+// REFRESH DỮ LIỆU
+//==================================================
+
+async function refreshData(){
+
+    await loadGISData();
+
+    geojson.setStyle(style);
+
+    updateLegend();
+
+    drawLabels();
+
+}
+
+
+//==================================================
+// TỰ REFRESH SAU 5 PHÚT
+//==================================================
+
+setInterval(function(){
+
+    refreshData();
+
+},300000);
+
+
+//==================================================
+// REDRAW LABEL KHI ZOOM
+//==================================================
+
+map.on("zoomend",function(){
+
+    drawLabels();
+
+});
+
+
+//==================================================
+// REDRAW LABEL KHI KÉO BẢN ĐỒ
+//==================================================
+
+map.on("moveend",function(){
+
+    drawLabels();
+
+});
+
+
+//==================================================
+// CLICK RA NGOÀI THÌ RESET PANEL
+//==================================================
+
+map.on("click",function(e){
+
+    if(e.originalEvent.target.id==="map"){
+
+        // có thể bổ sung reset panel nếu muốn
+
+    }
+
+});
+//==================================================
+// HIỂN THỊ TÊN XÃ
+//==================================================
+
+function drawLabels(){
+
+    if(!geojson) return;
+
+    labelLayer.clearLayers();
+
+    const zoom = map.getZoom();
+
+    geojson.eachLayer(function(layer){
+
+        const feature = layer.feature;
+
+        if(!feature) return;
+
+        const id = feature.properties.ID;
+
+        const d = gisData[id];
+
+        const value = getValue(d);
+
+        // Zoom nhỏ chỉ hiện xã có dữ liệu
+        if(zoom < 10 && value === 0){
+
+            return;
+
+        }
+
+        const center = layer.getBounds().getCenter();
+
+        const name =
+            feature.properties.TenXa ||
+            feature.properties["Tên xã"] ||
+            feature.properties.NAME ||
+            "";
+
+        let color = "#666";
+        let fontSize = 11;
+        let fontWeight = "normal";
+
+        if(value > 0){
+
+            color = "#d32f2f";
+            fontWeight = "bold";
+
+        }
+
+        if(zoom >= 11){
+
+            fontSize = 12;
+
+        }
+
+        if(zoom >= 12){
+
+            fontSize = 13;
+
+        }
+
+        if(zoom >= 13){
+
+            fontSize = 14;
+
+        }
+
+        const icon = L.divIcon({
+
+            className:"",
+
+            iconSize:null,
+
+            html:`
+
+<div class="map-label"
+
+style="
+
+color:${color};
+
+font-size:${fontSize}px;
+
+font-weight:${fontWeight};
+
+text-shadow:
+1px 1px 2px white,
+-1px -1px 2px white,
+1px -1px 2px white,
+-1px 1px 2px white;
+
+white-space:nowrap;
+
+pointer-events:none;
+
+">
+
+${name}
+
+</div>
+
+`
+
+        });
+
+        L.marker(center,{
+
+            icon:icon,
+
+            interactive:false,
+
+            keyboard:false
+
+        }).addTo(labelLayer);
+
+    });
+
+}//==================================================
+// LEGEND
+//==================================================
 
 const legend = L.control({
-    position: "bottomright"
+    position:"bottomright"
 });
 
+legend.onAdd = function(){
 
-// ================= ĐỔI LỚP DỮ LIỆU =================
-
-const layerSelect = document.getElementById("layerSelect");
-
-if (layerSelect) {
-
-    layerSelect.addEventListener("change", function () {
-
-        currentLayer = this.value;
-
-        geojson.setStyle(style);
-
-updateLegend();
-
-drawLabels();
-        
-});
-}
-// ================= CHÚ GIẢI =================
-
-const legend = L.control({
-    position: "bottomright"
-});
-
-legend.onAdd = function () {
-
-    this._div = L.DomUtil.create("div", "legend");
+    this._div = L.DomUtil.create("div","legend");
 
     updateLegend();
 
@@ -382,18 +619,26 @@ legend.onAdd = function () {
 
 legend.addTo(map);
 
-function updateLegend() {
 
-    let title = "";
-    let grades = [];
+//==================================================
+// CẬP NHẬT CHÚ GIẢI
+//==================================================
 
-    switch (currentLayer) {
+function updateLegend(){
+
+    if(!legend._div) return;
+
+    let title="";
+    let grades=[];
+    let colors=[];
+
+    switch(currentLayer){
 
         case "DTLCP":
 
-            title = "🐷 Dịch tả lợn Châu Phi";
+            title="🐷 DỊCH TẢ LỢN CHÂU PHI";
 
-            grades = [
+            grades=[
                 "0",
                 "1 - 50",
                 "51 - 200",
@@ -401,13 +646,22 @@ function updateLegend() {
                 "> 2.000"
             ];
 
+            colors=[
+                "#D9D9D9",
+                "#4CAF50",
+                "#FFD54F",
+                "#FB8C00",
+                "#E53935"
+            ];
+
             break;
+
 
         case "CGC":
 
-            title = "🐔 Cúm gia cầm";
+            title="🐔 CÚM GIA CẦM";
 
-            grades = [
+            grades=[
                 "0",
                 "1 - 500",
                 "501 - 2.000",
@@ -415,13 +669,22 @@ function updateLegend() {
                 "> 5.000"
             ];
 
+            colors=[
+                "#D9D9D9",
+                "#4CAF50",
+                "#FFD54F",
+                "#FB8C00",
+                "#E53935"
+            ];
+
             break;
+
 
         case "VDNC":
 
-            title = "🐄 Viêm da nổi cục";
+            title="🐄 VIÊM DA NỔI CỤC";
 
-            grades = [
+            grades=[
                 "0",
                 "1 - 10",
                 "11 - 20",
@@ -429,13 +692,22 @@ function updateLegend() {
                 "> 40"
             ];
 
+            colors=[
+                "#D9D9D9",
+                "#4CAF50",
+                "#FFD54F",
+                "#FB8C00",
+                "#E53935"
+            ];
+
             break;
+
 
         case "DAI":
 
-            title = "🐕 Bệnh Dại";
+            title="🐕 BỆNH DẠI";
 
-            grades = [
+            grades=[
                 "0",
                 "1",
                 "2 - 3",
@@ -443,13 +715,22 @@ function updateLegend() {
                 "> 5"
             ];
 
+            colors=[
+                "#D9D9D9",
+                "#4CAF50",
+                "#FFD54F",
+                "#FB8C00",
+                "#E53935"
+            ];
+
             break;
+
 
         case "PHUN":
 
-            title = "🧴 Phun khử trùng";
+            title="🧴 PHUN KHỬ TRÙNG";
 
-            grades = [
+            grades=[
                 "0",
                 "1 - 20",
                 "21 - 50",
@@ -457,91 +738,46 @@ function updateLegend() {
                 ">100"
             ];
 
+            colors=[
+                "#EEEEEE",
+                "#B2DFDB",
+                "#4DB6AC",
+                "#009688",
+                "#00695C"
+            ];
+
             break;
+
 
         case "KSGM":
 
-            title = "🏭 Kiểm soát giết mổ";
+            title="🏭 KIỂM SOÁT GIẾT MỔ";
 
-            grades = [
+            grades=[
                 "0",
                 "Có cơ sở"
             ];
 
-            break;
-
-        case "CSBBTTY":
-
-            title = "💊 Cơ sở buôn bán thuốc thú y";
-
-            grades = [
-                "0",
-                "1",
-                "2 - 3",
-                ">3"
-            ];
-
-            break;
-
-    }
-function drawLabels(){
-
-    labelLayer.clearLayers();
-
-    geojson.eachLayer(function(layer){
-
-        const feature = layer.feature;
-        const d = gisData[feature.properties.ID];
-
-        if(!d) return;
-
-        const value = getValue(d);
-
-        if(map.getZoom() < 10 && value == 0) return;
-
-        const center = layer.getBounds().getCenter();
-
-        const name =
-            feature.properties.TenXa ||
-            feature.properties["Tên xã"] ||
-            feature.properties.NAME;
-
-        const color = value > 0 ? "#d32f2f" : "#666";
-
-        const marker = L.marker(center,{
-            interactive:false,
-            icon:L.divIcon({
-                className:"",
-                html:`
-                <div class="map-label"
-                     style="color:${color}">
-                    ${name}
-                </div>
-                `
-            })
-        });
-
-        marker.addTo(labelLayer);
-
-    });
-
-}
-    let colors = [];
-
-    switch (currentLayer) {
-
-        case "KSGM":
-
-            colors = [
+            colors=[
                 "#EEEEEE",
                 "#5E35B1"
             ];
 
             break;
 
+
         case "CSBBTTY":
 
-            colors = [
+            title="💊 CƠ SỞ BUÔN BÁN THUỐC THÚ Y";
+
+            grades=[
+                "0",
+                "1",
+                "2 - 3",
+                ">3"
+            ];
+
+            colors=[
                 "#EEEEEE",
                 "#81C784",
                 "#43A047",
@@ -550,51 +786,32 @@ function drawLabels(){
 
             break;
 
-        default:
-
-            colors = [
-                "#D9D9D9",
-                "#4CAF50",
-                "#FFD54F",
-                "#FB8C00",
-                "#E53935"
-            ];
-
     }
 
-    let html = `
-        <div style="
-            font-weight:bold;
-            margin-bottom:8px;
-            font-size:14px;">
+    let html=`
+        <div class="legend-title">
             ${title}
         </div>
     `;
 
-    for (let i = 0; i < grades.length; i++) {
+    grades.forEach((g,i)=>{
 
-        html += `
-        <div style="margin-bottom:6px;">
-            <span style="
-                display:inline-block;
-                width:18px;
-                height:18px;
-                background:${colors[i]};
-                border:1px solid #666;
-                margin-right:8px;">
+        html+=`
+
+        <div class="legend-item">
+
+            <span class="legend-color"
+
+            style="background:${colors[i]}">
+
             </span>
 
-            ${grades[i]}
+            <span>${g}</span>
+
         </div>
+
         `;
 
-    }
+    });
 
-    legend._div.innerHTML = html;
-
-}
-    map.on("zoomend", function(){
-
-    drawLabels();
-
-});
+    
