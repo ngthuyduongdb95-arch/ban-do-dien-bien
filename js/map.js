@@ -312,26 +312,165 @@ function resetHighlight(e){
 
 function popupContent(feature){
 
-    const row=getRow(feature);
+    const row = getRow(feature);
 
-    const value=getValue(row);
+    const tenXa = getName(feature);
 
-    return `
+    if(!row){
 
-        <b>${getName(feature)}</b>
+        return `
+            <div class="popup-card">
+                <h3>${tenXa}</h3>
+                <hr>
+                Không có dữ liệu.
+            </div>
+        `;
 
-        <hr>
+    }
 
-        ${layerConfig[currentLayer].title}
+    switch(currentLayer){
 
-        <br><br>
+        case "DTLCP":
 
-        <b>Giá trị:</b>
+            return `
+            <div class="popup-card">
+                <h3>🐷 DỊCH TẢ LỢN CHÂU PHI</h3>
+                <hr>
 
-        ${formatNumber(value)}
+                <p><b>📍 ${tenXa}</b></p>
 
-    `;
+                <p><b>Trạng thái:</b> ${row["DTLCP_Trạng thái"]||"--"}</p>
 
+                <p><b>Số ổ dịch:</b> ${row["DTLCP_Ổ dịch"]||0}</p>
+
+                <p><b>Tiêu hủy:</b> ${formatNumber(row["DTLCP_Chết"])} con</p>
+
+                <p><b>Khối lượng:</b> ${formatNumber(row["DTLCP_Trọng lượng"])} kg</p>
+
+                <p><b>Ngày cuối:</b> ${row["DTLCP_Ngày cuối"]||"--"}</p>
+            </div>
+            `;
+
+        case "CGC":
+
+            return `
+            <div class="popup-card">
+                <h3>🐔 CÚM GIA CẦM</h3>
+                <hr>
+
+                <p><b>📍 ${tenXa}</b></p>
+
+                <p><b>Trạng thái:</b> ${row["CGC_Trạng thái"]||"--"}</p>
+
+                <p><b>Số ổ dịch:</b> ${row["CGC_Ổ dịch"]||0}</p>
+
+                <p><b>Tiêu hủy:</b> ${formatNumber(row["CGC_Chết"])} con</p>
+
+                <p><b>Khối lượng:</b> ${formatNumber(row["CGC_Trọng lượng"])} kg</p>
+
+                <p><b>Ngày cuối:</b> ${row["CGC_Ngày cuối"]||"--"}</p>
+            </div>
+            `;
+
+        case "VDNC":
+
+            return `
+            <div class="popup-card">
+                <h3>🐄 VIÊM DA NỔI CỤC</h3>
+                <hr>
+
+                <p><b>📍 ${tenXa}</b></p>
+
+                <p><b>Trạng thái:</b> ${row["VDNC_Trạng thái"]||"--"}</p>
+
+                <p><b>Số ổ dịch:</b> ${row["VDNC_Ổ dịch"]||0}</p>
+
+                <p><b>Mắc:</b> ${formatNumber(row["VDNC_Mắc"])} con</p>
+
+                <p><b>Chết:</b> ${formatNumber(row["VDNC_Chết"])} con</p>
+
+                <p><b>Khối lượng:</b> ${formatNumber(row["VDNC_Trọng lượng"])} kg</p>
+
+                <p><b>Ngày cuối:</b> ${row["VDNC_Ngày cuối"]||"--"}</p>
+            </div>
+            `;
+
+        case "DAI":
+
+            return `
+            <div class="popup-card">
+                <h3>🐕 BỆNH DẠI</h3>
+                <hr>
+
+                <p><b>📍 ${tenXa}</b></p>
+
+                <p><b>Trạng thái:</b> ${row["DAI_Trạng thái"]||"--"}</p>
+
+                <p><b>Số ổ dịch:</b> ${row["DAI_Ổ dịch"]||0}</p>
+
+                <p><b>Số chết:</b> ${formatNumber(row["DAI_Chết"])} con</p>
+
+                <p><b>Ngày cuối:</b> ${row["DAI_Ngày cuối"]||"--"}</p>
+            </div>
+            `;
+
+        case "PHUN":
+
+            return `
+            <div class="popup-card">
+                <h3>🧴 PHUN KHỬ TRÙNG</h3>
+                <hr>
+
+                <p><b>📍 ${tenXa}</b></p>
+
+                <p><b>Tiến độ:</b> ${row["PHUN_Tiến độ"]||"--"}</p>
+
+                <p><b>Vòng:</b> ${row["PHUN_Vòng"]||"--"}</p>
+
+                <p><b>Số hộ:</b> ${formatNumber(row["PHUN_Số hộ"])}</p>
+
+                <p><b>Diện tích:</b> ${formatNumber(row["PHUN_Diện tích"])} m²</p>
+
+                <p><b>Ngày:</b> ${row["PHUN_Ngày"]||"--"}</p>
+            </div>
+            `;
+
+        case "KSGM":
+
+            return `
+            <div class="popup-card">
+                <h3>🏭 KIỂM SOÁT GIẾT MỔ</h3>
+                <hr>
+
+                <p><b>📍 ${tenXa}</b></p>
+
+                <p><b>Trạng thái:</b> ${row["KSGM_Trạng thái"]||"--"}</p>
+
+                <p><b>Số cơ sở:</b> ${formatNumber(row["KSGM_Cơ sở"])}</p>
+            </div>
+            `;
+
+        case "CSBBTTY":
+
+            return `
+            <div class="popup-card">
+                <h3>💊 CƠ SỞ BUÔN BÁN THUỐC THÚ Y</h3>
+                <hr>
+
+                <p><b>📍 ${tenXa}</b></p>
+
+                <p><b>Số cơ sở:</b> ${formatNumber(row["CSBBTTY_Cơ sở"])}</p>
+            </div>
+            `;
+
+        default:
+
+            return `
+                <div class="popup-card">
+                    <h3>${tenXa}</h3>
+                </div>
+            `;
+    }
 }
 
 //========================
