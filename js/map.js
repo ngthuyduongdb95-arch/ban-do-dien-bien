@@ -444,11 +444,6 @@ function zoomToFeature(e){
 
 function onEachFeature(feature,layer){
 
-    layer.bindPopup(
-        ()=>popupContent(feature),
-        popupOptions
-    );
-
     layer.on({
 
         mouseover:highlightFeature,
