@@ -2,175 +2,124 @@
 // DASHBOARD.JS
 //======================================================
 
-//==============================
-// LẤY DANH SÁCH DỮ LIỆU
-//==============================
+const dashboard = {
 
-function getRows(){
+    update:function(){
 
-    if(!window.sheetData) return [];
+        if(typeof sheetData==="undefined") return;
 
-    return sheetData;
+        const rows = Object.values(sheetData);
 
-}
+        const stat = {
 
-//==============================
-// ĐẾM SỐ XÃ
-//==============================
+            dtlcpXa:0,
+            dtlcpCon:0,
 
-function countCommunes(field){
+            cgcXa:0,
+            cgcCon:0,
 
-    return getRows().filter(r=>{
+            vdncXa:0,
+            vdncMac:0,
 
-        return Number(r[field])>0;
+            phunXa:0,
+            phunHo:0,
 
-    }).length;
+            ksgm:0,
 
-}
+            csbbtty:0
 
-//==============================
-// TÍNH TỔNG
-//==============================
+        };
 
-function sum(field){
+        rows.forEach(row=>{
 
-    return getRows().reduce((t,row)=>{
+            // DTLCP
+            const dtlcp=Number(row["DTLCP_Chết"]||0);
 
-        return t + Number(row[field]||0);
+            if(dtlcp>0){
 
-    },0);
+                stat.dtlcpXa++;
 
-}//==============================
-// TẠO CARD
-//==============================
+                stat.dtlcpCon+=dtlcp;
 
-function dashboardCard(icon,title,value,sub,color){
+            }
 
-    return `
+            // CGC
+            const cgc=Number(row["CGC_Chết"]||0);
 
-    <div class="dashboard-card">
+            if(cgc>0){
 
-        <div class="dashboard-icon"
-            style="background:${color}">
+                stat.cgcXa++;
 
-            ${icon}
+                stat.cgcCon+=cgc;
 
-        </div>
+            }
 
-        <div class="dashboard-body">
+            // VDNC
+            const vdnc=Number(row["VDNC_Mắc"]||0);
 
-            <h4>${title}</h4>
+            if(vdnc>0){
 
-            <div class="dashboard-value">
+                stat.vdncXa++;
 
-                ${value}
+                stat.vdncMac+=vdnc;
 
-            </div>
+            }
 
-            <small>${sub}</small>
+            // PHUN
+            const phun=Number(row["PHUN_Số hộ"]||0);
 
-        </div>
+            if(phun>0){
 
-    </div>
+                stat.phunXa++;
 
-    `;
+                stat.phunHo+=phun;
 
-}//==============================
-// CẬP NHẬT DASHBOARD
-//==============================
+            }
 
-function updateDashboard(){
+            // KSGM
+            stat.ksgm+=Number(row["KSGM_Cơ sở"]||0);
 
-    const div=document.getElementById("dashboard");
+            // CSBBTTY
+            stat.csbbtty+=Number(row["CSBBTTY_Cơ sở"]||0);
 
-    if(!div) return;
+        });
 
-    let html="";
+        setText("dbDTLCPXa",stat.dtlcpXa);
 
-    html+=dashboardCard(
+        setText("dbDTLCPCon",formatNumber(stat.dtlcpCon));
 
-        "🐷",
+        setText("dbCGCXa",stat.cgcXa);
 
-        "DTLCP",
+        setText("dbCGCCon",formatNumber(stat.cgcCon));
 
-        countCommunes("DTLCP_Ổ dịch"),
+        setText("dbVDNCXa",stat.vdncXa);
 
-        `${formatNumber(sum("DTLCP_Chết"))} con`,
+        setText("dbVDNCMac",formatNumber(stat.vdncMac));
 
-        "#E53935"
+        setText("dbPhunXa",stat.phunXa);
 
-    );
+        setText("dbPhunHo",formatNumber(stat.phunHo));
 
-    html+=dashboardCard(
+        setText("dbKSGM",formatNumber(stat.ksgm));
 
-        "🐔",
+        setText("dbCSBBTTY",formatNumber(stat.csbbtty));
 
-        "CGC",
+    }
 
-        countCommunes("CGC_Ổ dịch"),
+};
 
-        `${formatNumber(sum("CGC_Chết"))} con`,
+//======================================================
+// GÁN TEXT
+//======================================================
 
-        "#FB8C00"
+function setText(id,value){
 
-    );
+    const el=document.getElementById(id);
 
-    html+=dashboardCard(
+    if(el){
 
-        "🐄",
+        el.textContent=value;
 
-        "VDNC",
-
-        countCommunes("VDNC_Ổ dịch"),
-
-        `${formatNumber(sum("VDNC_Mắc"))} con mắc`,
-
-        "#8E24AA"
-
-    );
-
-    html+=dashboardCard(
-
-        "🧴",
-
-        "PHUN",
-
-        countCommunes("PHUN_Số hộ"),
-
-        `${formatNumber(sum("PHUN_Số hộ"))} hộ`,
-
-        "#00ACC1"
-
-    );
-
-    html+=dashboardCard(
-
-        "🏭",
-
-        "KSGM",
-
-        sum("KSGM_Cơ sở"),
-
-        "cơ sở",
-
-        "#8D6E63"
-
-    );
-
-    html+=dashboardCard(
-
-        "💊",
-
-        "CSBBTTY",
-
-        sum("CSBBTTY_Cơ sở"),
-
-        "cơ sở",
-
-        "#43A047"
-
-    );
-
-    div.innerHTML=html;
+    }
 
 }
