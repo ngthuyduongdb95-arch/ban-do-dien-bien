@@ -32,18 +32,21 @@ async function loadSheet(){
         console.log("Google Sheets:", data);
         console.log("Số dòng:", data.length);
 
-        buildSheetData(data);
+        function buildSheetData(rows){
 
-        console.log("sheetData:", sheetData);
-        console.log("sheetData[1]:", sheetData[1]);
+    sheetData = {};
 
-    }
+    rows.forEach(row => {
 
-    catch(err){
+        const id = Number(row["ID"]);
 
-        console.error("Lỗi loadSheet:", err);
+        if(!isNaN(id)){
 
-    }
+            sheetData[id] = row;
+
+        }
+
+    });
 
 }
 //======================================================
