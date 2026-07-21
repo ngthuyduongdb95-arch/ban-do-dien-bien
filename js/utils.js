@@ -1,25 +1,22 @@
 //======================================================
 // UTILS.JS
-// Hàm dùng chung
 //======================================================
 
-//==============================
-// ĐỊNH DẠNG SỐ
-//==============================
+//------------------------------------------------------
+// Định dạng số
+//------------------------------------------------------
 
 function formatNumber(value){
 
-    const num = Number(value);
-
-    if(isNaN(num)) return "0";
+    const num = Number(value || 0);
 
     return num.toLocaleString("vi-VN");
 
 }
 
-//==============================
-// ĐỊNH DẠNG NGÀY
-//==============================
+//------------------------------------------------------
+// Định dạng ngày
+//------------------------------------------------------
 
 function formatDate(value){
 
@@ -27,121 +24,144 @@ function formatDate(value){
 
     const d = new Date(value);
 
-    if(isNaN(d)) return value;
+    if(isNaN(d.getTime())){
+
+        return value;
+
+    }
 
     return d.toLocaleDateString("vi-VN");
 
-}//==============================
-// LẤY TÊN XÃ
-//==============================
+}
+
+//------------------------------------------------------
+// Lấy tên xã từ GeoJSON
+//------------------------------------------------------
 
 function getName(feature){
 
-    return feature.properties["Tên xã"] ||
-           feature.properties["ten_xa"] ||
-           feature.properties["NAME"] ||
-           "";
+    if(!feature) return "";
+
+    const p = feature.properties || {};
+
+    return (
+        p["Tên xã"] ||
+        p["TEN_XA"] ||
+        p["ten_xa"] ||
+        p["NAME"] ||
+        p["name"] ||
+        p["Name"] ||
+        ""
+    ).trim();
 
 }
 
-//==============================
-// TÌM DÒNG GOOGLE SHEET
-//==============================
-
-function getRow(feature){
-
-    if(!window.sheetData) return null;
-
-    const name = getName(feature).trim();
-
-    return sheetData.find(r=>
-
-        (r["Tên xã"]||"").trim()===name
-
-    );
-
-}//==============================
-// KIỂM TRA CÓ DỮ LIỆU
-//==============================
+//------------------------------------------------------
+// Có dữ liệu hay không
+//------------------------------------------------------
 
 function hasValue(value){
 
-    return !(
-
-        value===null ||
-
-        value===undefined ||
-
-        value==="" ||
-
-        value==="--"
-
-    );
+    return value!==null &&
+           value!==undefined &&
+           value!=="" &&
+           value!=="0";
 
 }
 
-//==============================
-// CHUYỂN SỐ
-//==============================
+//------------------------------------------------------
+// Chuyển sang số
+//------------------------------------------------------
 
 function toNumber(value){
 
-    return Number(value)||0;
+    return Number(value || 0);
 
-}//==============================
-// TỔNG
-//==============================
+}
 
-function sumField(field){
+//------------------------------------------------------
+// Cộng một trường
+//------------------------------------------------------
 
-    if(!window.sheetData) return 0;
+function sumField(rows,field){
 
-    return sheetData.reduce((t,row)=>{
+    return rows.reduce(function(sum,row){
 
-        return t+toNumber(row[field]);
+        return sum + Number(row[field] || 0);
 
     },0);
 
 }
 
-//==============================
-// ĐẾM
-//==============================
+//------------------------------------------------------
+// Đếm số xã có dữ liệu
+//------------------------------------------------------
 
-function countField(field){
+function countField(rows,field){
 
-    if(!window.sheetData) return 0;
+    return rows.filter(function(row){
 
-    return sheetData.filter(r=>
+        return Number(row[field] || 0) > 0;
 
-        toNumber(r[field])>0
+    }).length;
 
-    ).length;
+}
 
-}//==============================
-// MÀU THEO TRẠNG THÁI
-//==============================
+//------------------------------------------------------
+// Màu trạng thái
+//------------------------------------------------------
 
 function getStatusColor(status){
 
-    switch((status||"").toLowerCase()){
+    if(!status) return "#9E9E9E";
 
-        case "có dịch":
+    status=status.toLowerCase();
 
-            return "#E53935";
+    if(status.includes("có dịch"))
+        return "#D32F2F";
 
-        case "an toàn":
+    if(status.includes("hết dịch"))
+        return "#388E3C";
 
-            return "#43A047";
+    if(status.includes("đang"))
+        return "#F57C00";
 
-        case "đang xử lý":
+    if(status.includes("phun"))
+        return "#1976D2";
 
-            return "#FB8C00";
+    return "#757575";
 
-        default:
+}
 
-            return "#90A4AE";
+//------------------------------------------------------
+// Tạo dòng thông tin
+//------------------------------------------------------
 
+function createRow(label,value){
+
+    if(
+        value===undefined ||
+        value===null ||
+        value===""
+    ){
+        value="--";
     }
+
+    return `
+        <div class="info-row">
+            <span>${label}</span>
+            <span>${value}</span>
+        </div>
+    `;
+
+}
+
+//------------------------------------------------------
+// Lấy phần tử HTML
+//------------------------------------------------------
+
+function $(id){
+
+    return document.getElementById(id);
 
 }
