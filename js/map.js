@@ -345,7 +345,7 @@ function updateLegend() {
             break;
         case "PHUN":
             title = "🧴 Phun khử trùng";
-            grades = ["0", "1 - 20", "21 - 50", "51 - 100", ">100"];
+            grades = [đã triển khai, chưa triển khai];
             break;
         case "KSGM":
             title = "🏭 Kiểm soát giết mổ";
