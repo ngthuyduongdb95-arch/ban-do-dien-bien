@@ -484,27 +484,27 @@ function drawLabels(){
 
     geojsonLayer.eachLayer(function(layer){
 
-        const center=layer.getBounds().getCenter();
+        const row = getRow(layer.feature);
 
-        const name=getName(layer.feature);
+// Chỉ hiển thị tên xã khi có giá trị ở lớp đang xem
+if (getValue(row) > 0) {
 
-        const label=L.marker(center,{
+    const center = layer.getBounds().getCenter();
 
-            interactive:false,
+    const name = row["Tên xã"] || getName(layer.feature);
 
-            icon:L.divIcon({
+    const label = L.marker(center, {
+        interactive: false,
+        icon: L.divIcon({
+            className: "map-label",
+            html: `<div>${name}</div>`,
+            iconSize: [120, 20]
+        })
+    });
 
-                className:"map-label",
+    labelLayer.addLayer(label);
 
-                html:`<div>${name}</div>`,
-
-                iconSize:[120,20]
-
-            })
-
-        });
-
-        labelLayer.addLayer(label);
+}
 
     });
 
