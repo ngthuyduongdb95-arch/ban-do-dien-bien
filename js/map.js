@@ -434,9 +434,7 @@ function zoomToFeature(e){
 
     showPanel(layer.feature);
 
-    layer.openPopup();
-
-}
+// layer.openPopup();  // Bỏ dòng này
 
 //======================================================
 // GẮN SỰ KIỆN CHO TỪNG XÃ
@@ -616,7 +614,7 @@ function searchFeature(keyword){
 
             showPanel(layer.feature);
 
-            layer.openPopup();
+// layer.openPopup();
 
         }
 
@@ -636,17 +634,9 @@ function refreshMap(){
 
     geojsonLayer.eachLayer(function(layer){
 
-        layer.unbindPopup();
+    layer.unbindPopup();
 
-        layer.bindPopup(
-
-            ()=>popupContent(layer.feature),
-
-            popupOptions
-
-        );
-
-    });
+});
 
     drawLabels();
 
