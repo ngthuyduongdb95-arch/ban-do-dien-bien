@@ -40,6 +40,8 @@ function formatDate(value){
 
 function getName(feature){
 
+    if(!feature) return "";
+
     const p = feature.properties || {};
 
     return (
