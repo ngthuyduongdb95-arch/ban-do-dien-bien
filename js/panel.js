@@ -356,7 +356,7 @@ function createRabiesCard(row){
 //======================================================
 
 function showPanel(feature){
-
+console.log("showPanel chạy");
     if(!panel) return;
 
     const row = getRow(feature);
