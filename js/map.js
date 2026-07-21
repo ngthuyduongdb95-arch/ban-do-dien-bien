@@ -3,7 +3,7 @@
 console.log("MAP VERSION 2026-07-20");
 
 const map = L.map("map").setView([21.386, 103.023], 9);
-
+labelLayer = L.layerGroup().addTo(map);
 L.tileLayer(
     "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
     {
@@ -15,6 +15,7 @@ let geojson;
 
 // Lớp dữ liệu mặc định
 let currentLayer = "DTLCP";
+let labelLayer;
 
 // ================= LẤY GIÁ TRỊ THEO LỚP =================
 
@@ -296,17 +297,11 @@ loadGISData().then(() => {
         .then(response => response.json())
         .then(data => {
 
-            geojson = L.geoJSON(data, {
+            geojson = L.geoJSON(...).addTo(map);
 
-                style: style,
+updateLegend();
 
-                onEachFeature: onEachFeature
-
-            }).addTo(map);
-
-            updateLegend();
-
-        });
+drawLabels();
 
 });
 
@@ -322,10 +317,11 @@ if (layerSelect) {
 
         geojson.setStyle(style);
 
-        updateLegend();
+updateLegend();
 
-    });
-
+drawLabels();
+        
+});
 }
 // ================= CHÚ GIẢI =================
 
@@ -447,7 +443,48 @@ function updateLegend() {
             break;
 
     }
+function drawLabels(){
 
+    labelLayer.clearLayers();
+
+    geojson.eachLayer(function(layer){
+
+        const feature = layer.feature;
+        const d = gisData[feature.properties.ID];
+
+        if(!d) return;
+
+        const value = getValue(d);
+
+        if(map.getZoom() < 10 && value == 0) return;
+
+        const center = layer.getBounds().getCenter();
+
+        const name =
+            feature.properties.TenXa ||
+            feature.properties["Tên xã"] ||
+            feature.properties.NAME;
+
+        const color = value > 0 ? "#d32f2f" : "#666";
+
+        const marker = L.marker(center,{
+            interactive:false,
+            icon:L.divIcon({
+                className:"",
+                html:`
+                <div class="map-label"
+                     style="color:${color}">
+                    ${name}
+                </div>
+                `
+            })
+        });
+
+        marker.addTo(labelLayer);
+
+    });
+
+}
     let colors = [];
 
     switch (currentLayer) {
@@ -515,3 +552,8 @@ function updateLegend() {
     legend._div.innerHTML = html;
 
 }
+    map.on("zoomend", function(){
+
+    drawLabels();
+
+});
