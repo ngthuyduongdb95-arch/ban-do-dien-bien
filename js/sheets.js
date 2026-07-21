@@ -1,123 +1,96 @@
-//=========================================
-// GOOGLE SHEETS API
-//=========================================
+//======================================================
+// SHEETS.JS
+//======================================================
 
-const API_URL =
-"https://script.google.com/macros/s/AKfycbxvF3U6jCOPVrV-9iSivSiX4ynVeusbjSF4nJmCrMuSok_dEaKSvGi-CRSXCPlrQ43d/exec";
+// URL Apps Script Web App
+const SHEET_URL = "";
 
-let gisData = {};
+// Toàn bộ dữ liệu Google Sheets
+let sheetData = {};
 
-//=========================================
-// LOAD DATA
-//=========================================
+//======================================================
+// LOAD DỮ LIỆU
+//======================================================
 
-async function loadGISData(){
+async function loadSheet(){
+
+    if(!SHEET_URL){
+
+        console.warn("Chưa cấu hình SHEET_URL");
+
+        return;
+
+    }
 
     try{
 
-        console.log("Đang tải dữ liệu...");
+        const res = await fetch(SHEET_URL);
 
-        const response = await fetch(API_URL);
+        if(!res.ok){
 
-        if(!response.ok){
-
-            throw new Error(
-                "Không đọc được API."
-            );
+            throw new Error("Không đọc được Google Sheets");
 
         }
 
-        const data =
-            await response.json();
+        const data = await res.json();
 
-        gisData = {};
-
-        data.forEach(row=>{
-
-            const id = Number(
-                row.ID
-            );
-
-            if(!isNaN(id)){
-
-                gisData[id] = row;
-
-            }
-
-        });
-
-        console.log(
-            "Đã tải",
-            Object.keys(gisData).length,
-            "xã/phường."
-        );
-
-        return gisData;
+        buildSheetData(data);
 
     }
+
     catch(err){
 
         console.error(err);
 
-        alert(
-            "Không kết nối được Google Sheets."
-        );
-
-        return {};
-
     }
 
 }
+//======================================================
+// CHUYỂN DANH SÁCH THÀNH OBJECT
+//======================================================
 
-//=========================================
-// LẤY DỮ LIỆU THEO ID
-//=========================================
+function buildSheetData(rows){
 
-function getRowByID(id){
+    sheetData={};
 
-    return gisData[
-        Number(id)
-    ] || null;
+    rows.forEach(row=>{
 
-}
+        const name=(row["Tên xã"]||"").trim();
 
-//=========================================
-// LẤY GIÁ TRỊ
-//=========================================
+        if(name){
 
-function getField(id,field){
+            sheetData[name]=row;
 
-    const row =
-        getRowByID(id);
+        }
 
-    if(!row) return 0;
+    });
 
-    return row[field];
+}//======================================================
+// LẤY DỮ LIỆU XÃ
+//======================================================
 
-}
+function getRow(feature){
 
-//=========================================
-// ĐỊNH DẠNG SỐ
-//=========================================
+    const name=getName(feature);
 
-function formatNumber(value){
+    return sheetData[name] || null;
 
-    return Number(
-        value || 0
-    ).toLocaleString(
-        "vi-VN"
-    );
+}//======================================================
+// TÌM XÃ
+//======================================================
+
+function getByName(name){
+
+    return sheetData[name] || null;
 
 }
 
-//=========================================
-// KIỂM TRA DỮ LIỆU
-//=========================================
+//======================================================
+// DANH SÁCH
+//======================================================
 
-function hasData(id){
+function getRows(){
 
-    return gisData.hasOwnProperty(
-        Number(id)
-    );
+    return Object.values(sheetData);
 
 }
