@@ -176,7 +176,7 @@ const layerConfig = {
         "#16A34A"    // 4 - Vòng 4 
     ]
 
-}
+},
 
     KSGM:{
 
