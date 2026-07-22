@@ -61,7 +61,6 @@ const layerConfig = {
         unit:"con",
 
         color:[
-            color:[
             "#F5F5F5",
             "#FFD166",
             "#F8961E",
