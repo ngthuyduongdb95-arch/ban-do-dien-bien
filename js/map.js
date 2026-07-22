@@ -608,18 +608,22 @@ if(labelOffset[name]){
 }
 
 const label = L.marker([lat,lng],{
-        interactive: false,
-        icon: L.divIcon({
-            className: "map-label",
-            html: `<div>${name}</div>`,
-            iconSize:null,
-            iconAnchor:[0,0]
-        })
-    });
+    interactive:false,
+    icon:L.divIcon({
+        className:"map-label",
+        html:`<div>${name}</div>`,
+        iconSize:null,
+        iconAnchor:[0,0]
+    })
+});
 
-    labelLayer.addTo(map);
+labelLayer.addLayer(label);
 
-}
+}); 
+
+labelLayer.addTo(map);
+
+} 
 //======================================================
 // CẬP NHẬT CHÚ GIẢI
 //======================================================
