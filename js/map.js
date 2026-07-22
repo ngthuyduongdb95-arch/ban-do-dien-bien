@@ -318,19 +318,19 @@ function style(feature){
 
     return{
 
-        color:"#1976D2",
+    color:"#ffffff",
 
-        weight:1.2,
+    weight:2,
 
-        opacity:1,
+    opacity:1,
 
-        fillColor:getColor(
-            getValue(row)
-        ),
+    fillColor:getColor(
+        getValue(row)
+    ),
 
-        fillOpacity:0.75
+    fillOpacity:0.88
 
-    };
+};
 
 }
 
@@ -439,13 +439,13 @@ function highlightFeature(e){
 
     layer.setStyle({
 
-        weight:3,
+    weight:3,
 
-        color:"#FF5722",
+    color:"#FFD600",
 
-        fillOpacity:0.9
+    fillOpacity:1
 
-    });
+});
 
     if(
         !L.Browser.ie &&
