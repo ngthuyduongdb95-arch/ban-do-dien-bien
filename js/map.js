@@ -543,7 +543,9 @@ const labelOffset = {
     "Tuần Giáo": [0.006, -0.004],
     "Pú Nhung": [-0.004, 0.004],
     "Chà Tở": [0.000, 0.008],
+    
 };
+
 function drawLabels(){
 
     clearLabels();
