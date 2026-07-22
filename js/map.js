@@ -61,12 +61,13 @@ const layerConfig = {
         unit:"con",
 
         color:[
-            "#FFFFFF",
-            "#FDB5B5",
-            "#F87171",
-            "#DC2626",
-            "#7F1D1D"
-        ],
+            color:[
+            "#F5F5F5",
+            "#FFD166",
+            "#F8961E",
+            "#F94144",
+            "#9D0208"
+]
 
         breaks:[
             0,
