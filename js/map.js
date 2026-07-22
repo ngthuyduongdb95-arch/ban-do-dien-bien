@@ -607,7 +607,7 @@ if(labelOffset[name]){
 
 }
 
-const label = L.marker([lat,lng],{
+onst label = L.marker([lat,lng],{
     interactive:false,
     icon:L.divIcon({
         className:"map-label",
@@ -619,11 +619,13 @@ const label = L.marker([lat,lng],{
 
 labelLayer.addLayer(label);
 
-}; 
+}         
+
+});        
 
 labelLayer.addTo(map);
 
-} 
+}          
 //======================================================
 // CẬP NHẬT CHÚ GIẢI
 //======================================================
