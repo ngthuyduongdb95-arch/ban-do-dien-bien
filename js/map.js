@@ -86,7 +86,7 @@ const layerConfig = {
         unit:"con",
 
         color:[
-            "#C57CAC",
+            "#E8D3E3",
             "#AF4A92",
             "#A2007C",
             "#780062",
@@ -112,7 +112,7 @@ const layerConfig = {
         unit:"con",
 
         color:[
-            "#94AAD6",
+            "#BFCAE6",
             "#93C5FD",
             "#3B82F6",
             "#2563EB",
@@ -586,12 +586,34 @@ const label = L.marker([lat,lng],{
 });
 
 labelLayer.addLayer(label);
+// Hiển thị số cơ sở giết mổ
+if(currentLayer === "KSGM"){
 
+    const cs = Number(row["KSGM_Cơ sở"] || 0);
+
+    if(cs > 0){
+
+        const center = layer.getBounds().getCenter();
+
+        const marker = L.marker(center,{
+            interactive:false,
+            icon:L.divIcon({
+                className:"ksgm-number",
+                html:`<div>${cs}</div>`,
+                iconSize:[24,24],
+                iconAnchor:[12,12]
+            })
+        });
+
+        labelLayer.addLayer(marker);
+    }
+}
 }         
 
 });        
 
 labelLayer.addTo(map);
+    
 
 }          
 //======================================================
