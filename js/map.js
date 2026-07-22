@@ -21,7 +21,7 @@ L.tileLayer(
     }
 ).addTo(map);
 
-const printer = L.easyPrint({
+window.printer = L.easyPrint({
     hidden: true,
     exportOnly: true,
     sizeModes: ["Current"]
