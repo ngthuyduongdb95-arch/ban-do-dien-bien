@@ -15,7 +15,7 @@ const map = L.map("map", {
 }).setView([21.38, 103.02], 9);
 
 L.tileLayer(
-    https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png,
+    "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
     {
         attribution: "&copy; OpenStreetMap & CARTO",
         subdomains: "abcd",
@@ -66,7 +66,7 @@ const layerConfig = {
             "#F8961E",
             "#F94144",
             "#9D0208"
-]
+],
 
         breaks:[
             0,
