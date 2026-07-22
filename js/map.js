@@ -568,28 +568,37 @@ const name = row["Tên xã"] || getName(layer.feature);
 let lat = center.lat;
 let lng = center.lng;
 
-const minDistance = 0.02;
+const minDistance = 0.03;
 
-usedPoints.forEach(p=>{
+let moved = true;
 
-    const d = Math.sqrt(
+while (moved) {
 
-        Math.pow(lat-p.lat,2)+
+    moved = false;
 
-        Math.pow(lng-p.lng,2)
+    for (const p of usedPoints) {
 
-    );
+        const dx = lng - p.lng;
+        const dy = lat - p.lat;
 
-    if(d < minDistance){
+        const d = Math.sqrt(dx * dx + dy * dy);
 
-        const angle = Math.atan2(
+        if (d < minDistance) {
 
-            lat-p.lat,
+            const angle = Math.random() * Math.PI * 2;
 
-            lng-p.lng
+            lng += Math.cos(angle) * 0.006;
+            lat += Math.sin(angle) * 0.006;
 
-        );
+            moved = true;
+        }
+    }
+}
 
+usedPoints.push({
+    lat,
+    lng
+});
         lat += Math.sin(angle)*0.012;
 
         lng += Math.cos(angle)*0.012;
