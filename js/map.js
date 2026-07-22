@@ -527,7 +527,25 @@ function clearLabels(){
 //======================================================
 // VẼ TÊN XÃ
 //======================================================
+const labelOffset = {
 
+    "Điện Biên Phủ":[0.004,-0.008],
+
+    "Thanh Yên":[-0.004,0],
+
+    "Thanh An":[0.004,0],
+
+    "Mường Phăng":[0,-0.006],
+
+    "Na Sang":[0.004,0.004],
+
+    "Tủa Thàng":[0.004,0.006],
+
+    "Nà Tấu":[-0.003,0],
+
+    "Mường Ảng":[0.003,-0.003]
+
+};
 function drawLabels(){
 
     clearLabels();
@@ -541,16 +559,26 @@ function drawLabels(){
 // Chỉ hiển thị tên xã khi có giá trị ở lớp đang xem
 if (getValue(row) > 0) {
 
-    const center = layer.getBounds().getCenter();
+   const center = layer.getBounds().getCenter();
 
-    const name = row["Tên xã"] || getName(layer.feature);
+const name = row["Tên xã"] || getName(layer.feature);
 
-    const label = L.marker(center, {
+let lat = center.lat;
+let lng = center.lng;
+
+if(labelOffset[name]){
+
+    lat += labelOffset[name][0];
+    lng += labelOffset[name][1];
+
+}
+
+const label = L.marker([lat,lng],{
         interactive: false,
         icon: L.divIcon({
             className: "map-label",
             html: `<div>${name}</div>`,
-            iconSize: [120, 20]
+            iconSize:[90,18]
         })
     });
 
