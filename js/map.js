@@ -635,7 +635,7 @@ const label = L.marker([lat,lng],{
 
 }
 
-    });
+
 
     labelLayer.addTo(map);
 
