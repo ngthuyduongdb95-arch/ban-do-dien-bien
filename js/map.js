@@ -528,7 +528,7 @@ function clearLabels(){
 const labelOffset = {
     "Điện Biên Phủ": [0.010, -0.012],
     "Thanh Yên": [-0.006, 0.000],
-    "Thanh Nưa": [0, -0.018],
+    "Thanh Nưa": [0, -0.025],
     "Thanh An": [0.006, 0.000],
     "Mường Phăng": [0.000, -0.008],
     "Na Sang": [0.006, 0.006],
