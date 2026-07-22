@@ -36,7 +36,7 @@ let legendControl = null;
 let selectedFeature = null;
 
 let currentLayer = "DTLCP";
-
+let dynamicBreaks = [];
 const popupOptions = {
     maxWidth: 320,
     minWidth: 220,
