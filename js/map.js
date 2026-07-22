@@ -21,6 +21,11 @@ L.tileLayer(
     }
 ).addTo(map);
 
+const printer = L.easyPrint({
+    hidden: true,
+    exportOnly: true,
+    sizeModes: ["Current"]
+}).addTo(map);
 //===============================
 // BIẾN TOÀN CỤC
 //===============================
