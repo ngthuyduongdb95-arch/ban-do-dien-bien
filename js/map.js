@@ -607,7 +607,7 @@ if(labelOffset[name]){
 
 }
 
-onst label = L.marker([lat,lng],{
+const label = L.marker([lat,lng],{
     interactive:false,
     icon:L.divIcon({
         className:"map-label",
