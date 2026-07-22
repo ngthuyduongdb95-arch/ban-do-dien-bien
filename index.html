@@ -296,6 +296,18 @@ document
 
         });
 
+    document
+    .getElementById("btnExportMap")
+    .addEventListener("click", function () {
+
+        const today = new Date();
+
+        const filename =
+            `WEBGIS_${currentLayer}_${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`;
+
+        printer.printMap("CurrentSize", filename);
+
+    });
 });
 
 </script>
