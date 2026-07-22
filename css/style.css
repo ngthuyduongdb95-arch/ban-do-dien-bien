@@ -473,6 +473,14 @@ LABEL TÊN XÃ
 
 .map-label div{
 
+    display:inline-block;
+
+    width:auto;
+
+    white-space:nowrap;
+
+    padding:1px 3px;
+
     font-size:12px;
 
     font-weight:600;
