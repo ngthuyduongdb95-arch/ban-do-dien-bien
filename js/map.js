@@ -86,11 +86,11 @@ const layerConfig = {
         unit:"con",
 
         color:[
-            "#FFF5F0",
-            "#FCBBA1",
-            "#FB6A4A",
-            "#CB181D",
-            "#67000D"
+            "#C57CAC",
+            "#AF4A92",
+            "#A2007C",
+            "#780062",
+            "#64004B"
 
         ],
 
@@ -112,7 +112,7 @@ const layerConfig = {
         unit:"con",
 
         color:[
-            "#FFFFFF",
+            "#94AAD6",
             "#93C5FD",
             "#3B82F6",
             "#2563EB",
@@ -169,11 +169,11 @@ const layerConfig = {
     ],
 
     color:[
-        "#E5E7EB",   // 0 - Chưa triển khai
-        "#FACC15",   // 1 - Vòng 1
-        "#FB923C",   // 2 - Vòng 2
-        "#3B82F6",   // 3 - Vòng 3
-        "#16A34A"    // 4 - Vòng 4 
+        "#C8E2B1",   // 0 - Chưa triển khai
+        "#83C75D",   // 1 - Vòng 1
+        "#5BBD2B",   // 2 - Vòng 2
+        "#489620",   // 3 - Vòng 3
+        "#367517"    // 4 - Vòng 4 
     ]
 
 },
@@ -636,6 +636,21 @@ function updateLegend(){
             return div;
 
         }
+        // PHUN
+if(currentLayer==="PHUN"){
+
+    div.innerHTML=`
+        <h4>${cfg.title}</h4>
+
+        <div><i style="background:${cfg.color[0]}"></i>Chưa triển khai</div>
+        <div><i style="background:${cfg.color[1]}"></i>Vòng 1</div>
+        <div><i style="background:${cfg.color[2]}"></i>Vòng 2</div>
+        <div><i style="background:${cfg.color[3]}"></i>Vòng 3</div>
+        <div><i style="background:${cfg.color[4]}"></i>Vòng 4</div>
+    `;
+
+    return div;
+}
 
         // CSBBTTY
         if(currentLayer==="CSBBTTY"){
