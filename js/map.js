@@ -56,16 +56,16 @@ const layerConfig = {
 
         field:"DTLCP_Chết",
 
-        title:"Dịch tả lợn Châu Phi",
+        title:"Số lượng lợn tiêu hủy do DTLCP (con)",
 
         unit:"con",
 
         color:[
-            "#F5F5F5",
-            "#FFE082",
-            "#FFB74D",
-            "#FB8C00",
-            "#E53935"
+            "#FFFFFF",
+            "#FDB5B5",
+            "#F87171",
+            "#DC2626",
+            "#7F1D1D"
         ],
 
         breaks:[
@@ -81,16 +81,17 @@ const layerConfig = {
 
         field:"CGC_Chết",
 
-        title:"Cúm gia cầm",
+        title:"Số lượng gia cầm tiêu hủy (con)",
 
         unit:"con",
 
         color:[
-            "#F5F5F5",
-            "#C8E6C9",
-            "#81C784",
-            "#43A047",
-            "#1B5E20"
+            "#FFFFFF",
+            "#FED7AA",
+            "#FB923C",
+            "#EA580C",
+            "#9A3412"
+
         ],
 
         breaks:[
@@ -106,16 +107,16 @@ const layerConfig = {
 
         field:"VDNC_Mắc",
 
-        title:"Viêm da nổi cục",
+        title:"Số gia súc mắc bệnh VDNC (con)",
 
         unit:"con",
 
         color:[
-            "#F5F5F5",
-            "#BBDEFB",
-            "#64B5F6",
-            "#1E88E5",
-            "#0D47A1"
+            "#FFFFFF",
+            "#93C5FD",
+            "#3B82F6",
+            "#2563EB",
+            "#1E3A8A"
         ],
 
         breaks:[
@@ -131,16 +132,16 @@ const layerConfig = {
 
         field:"DAI_Chết",
 
-        title:"Bệnh Dại",
+        title:"Số chó, mèo mắc bệnh dại",
 
         unit:"con",
 
         color:[
-            "#F5F5F5",
-            "#F8BBD0",
-            "#F06292",
-            "#EC407A",
-            "#C2185B"
+            "#FFFFFF",
+            "#D8B4FE",
+            "#A855F7",
+            "#7E22CE",
+            "#581C87"
         ],
 
         breaks:[
@@ -154,40 +155,40 @@ const layerConfig = {
 
     PHUN:{
 
-        field:"PHUN_Số hộ",
+        field:"PHUN_Vòng",
 
-        title:"Phun khử trùng",
+        title:"Các xã đã triển khai Tháng VSKTTĐ",
 
-        unit:"hộ",
+        unit:"vòng",
 
-        color:[
-            "#F5F5F5",
-            "#FFF59D",
-            "#FFD54F",
-            "#FFCA28",
-            "#F57F17"
-        ],
+         breaks:[
+         0,
+         0.5,
+         1.5,
+         2.5
+    ],
 
-        breaks:[
-            0,
-            100,
-            500,
-            1000
-        ]
+    color:[
+        "#E5E7EB",   // 0 - Chưa triển khai
+        "#FACC15",   // 1 - Vòng 1
+        "#FB923C",   // 2 - Vòng 2
+        "#3B82F6",   // 3 - Vòng 3
+        "#16A34A"    // 4 - Vòng 4 
+    ]
 
-    },
+}
 
     KSGM:{
 
-        field:"KSGM_Cơ sở",
+        field:"KSGM_Trạng thái",
 
         title:"Kiểm soát giết mổ",
 
-        unit:"cơ sở",
+        unit:"trạng thái",
 
         color:[
-            "#ECEFF1",
-            "#607D8B"
+            "#B2F5EA",
+            "#0F766E"
         ]
 
     },
