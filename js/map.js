@@ -344,13 +344,11 @@ function popupContent(feature){
     if(!row){
 
         return `
-            <b>${row["Tên xã"] || getName(feature)}</b>
-            <hr>
-            Không có dữ liệu
-        `;
-
-    }
-
+    <b>${getName(feature)}</b>
+    <hr>
+    Không có dữ liệu
+`;
+}
     let html=`
         <div class="popup-card">
 
