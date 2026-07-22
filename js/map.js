@@ -617,9 +617,9 @@ const label = L.marker([lat,lng],{
         })
     });
 
-    labelLayer.addLayer(label);
+    labelLayer.addTo(map);
 
-});
+}
 //======================================================
 // CẬP NHẬT CHÚ GIẢI
 //======================================================
