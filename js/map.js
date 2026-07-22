@@ -619,7 +619,7 @@ const label = L.marker([lat,lng],{
 
 labelLayer.addLayer(label);
 
-}); 
+}; 
 
 labelLayer.addTo(map);
 
