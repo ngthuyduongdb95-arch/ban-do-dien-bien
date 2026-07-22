@@ -472,25 +472,20 @@ LABEL TÊN XÃ
 }
 
 .map-label div{
-
-    display:inline-block;
-
-    width:auto;
+    font-size:11px;
+    font-family: Arial, sans-serif;
+    font-weight:600;
+    color:#222;
 
     white-space:nowrap;
 
-    padding:1px 3px;
-
-    font-size:12px;
-
-    font-weight:600;
-
-    color:#1F2937;
-
     text-shadow:
-        0 0 3px #fff,
-        0 0 5px #fff;
+        1px 1px 2px #fff,
+        -1px -1px 2px #fff,
+        1px -1px 2px #fff,
+        -1px 1px 2px #fff;
 
+    pointer-events:none;
 }
 
 /*====================================================
