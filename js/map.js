@@ -550,72 +550,65 @@ function drawLabels(){
 
     clearLabels();
 
-    labelLayer=L.layerGroup();
+    labelLayer = L.layerGroup();
 
-    const usedPoints = [];
-    
     geojsonLayer.eachLayer(function(layer){
 
         const row = getRow(layer.feature);
 
-// Chỉ hiển thị tên xã khi có giá trị ở lớp đang xem
-if (getValue(row) > 0) {
+        // Chỉ hiển thị tên xã khi có giá trị ở lớp đang xem
+        if(getValue(row) > 0){
 
-   const center = layer.getBounds().getCenter();
+            const center = layer.getBounds().getCenter();
 
-const name = row["Tên xã"] || getName(layer.feature);
+            const name = row["Tên xã"] || getName(layer.feature);
 
-let lat = center.lat;
-let lng = center.lng;
-   
-if(labelOffset[name]){
+            let lat = center.lat;
+            let lng = center.lng;
 
-    lat += labelOffset[name][0];
-    lng += labelOffset[name][1];
+            if(labelOffset[name]){
+                lat += labelOffset[name][0];
+                lng += labelOffset[name][1];
+            }
 
-}
+            let html;
 
-const label = L.marker([lat,lng],{
-    interactive:false,
-    icon:L.divIcon({
-        className:"map-label",
-        html:`<div>${name}</div>`,
-        iconSize:null,
-        iconAnchor:[0,0]
-    })
-});
+            if(currentLayer === "KSGM"){
 
-labelLayer.addLayer(label);
-// Hiển thị số cơ sở giết mổ
-if(currentLayer === "KSGM"){
+                const cs = Number(row["KSGM_Cơ sở"] || 0);
 
-    const cs = Number(row["KSGM_Cơ sở"] || 0);
+                html = `
+                    <div>
+                        ${name}
+                        ${cs > 0 ? `<br><span class="ksgm-count">${cs}</span>` : ""}
+                    </div>
+                `;
 
-    if(cs > 0){
+            }else{
 
-        const center = layer.getBounds().getCenter();
+                html = `<div>${name}</div>`;
 
-        const marker = L.marker(center,{
-            interactive:false,
-            icon:L.divIcon({
-                className:"ksgm-number",
-                html:`<div>${cs}</div>`,
-                iconSize:[24,24],
-                iconAnchor:[12,12]
-            })
-        });
+            }
 
-        labelLayer.addLayer(marker);
-    }
-}
-}         
+            const label = L.marker([lat,lng],{
+                interactive:false,
+                icon:L.divIcon({
+                    className:"map-label",
+                    html:html,
+                    iconSize:null,
+                    iconAnchor:[0,0]
+                })
+            });
 
-});        
+            labelLayer.addLayer(label);
 
-labelLayer.addTo(map);
-    
+        } // <-- đóng if(getValue(row)>0)
 
-}          
+    }); // <-- đóng eachLayer
+
+    labelLayer.addTo(map);
+
+}        
 //======================================================
 // CẬP NHẬT CHÚ GIẢI
 //======================================================
