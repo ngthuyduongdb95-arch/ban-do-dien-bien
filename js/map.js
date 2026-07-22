@@ -552,6 +552,8 @@ function drawLabels(){
 
     labelLayer=L.layerGroup();
 
+    const usedPoints = [];
+    
     geojsonLayer.eachLayer(function(layer){
 
         const row = getRow(layer.feature);
@@ -566,6 +568,43 @@ const name = row["Tên xã"] || getName(layer.feature);
 let lat = center.lat;
 let lng = center.lng;
 
+const minDistance = 0.02;
+
+usedPoints.forEach(p=>{
+
+    const d = Math.sqrt(
+
+        Math.pow(lat-p.lat,2)+
+
+        Math.pow(lng-p.lng,2)
+
+    );
+
+    if(d < minDistance){
+
+        const angle = Math.atan2(
+
+            lat-p.lat,
+
+            lng-p.lng
+
+        );
+
+        lat += Math.sin(angle)*0.012;
+
+        lng += Math.cos(angle)*0.012;
+
+    }
+
+});
+
+usedPoints.push({
+
+    lat,
+
+    lng
+
+});    
 if(labelOffset[name]){
 
     lat += labelOffset[name][0];
@@ -578,7 +617,8 @@ const label = L.marker([lat,lng],{
         icon: L.divIcon({
             className: "map-label",
             html: `<div>${name}</div>`,
-            iconSize:null
+            iconSize:null,
+            iconAnchor:[0,0]
         })
     });
 
