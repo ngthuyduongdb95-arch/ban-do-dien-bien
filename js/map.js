@@ -266,6 +266,11 @@ function getValue(row){
 
     if(!row) return 0;
 
+    // Riêng lớp KSGM
+    if(currentLayer === "KSGM"){
+        return row["KSGM_Trạng thái"] === "Đã triển khai" ? 1 : 0;
+    }
+
     const field = layerConfig[currentLayer].field;
 
     return Number(row[field] || 0);
@@ -637,15 +642,12 @@ function updateLegend(){
             div.innerHTML=`
                 <h4>${cfg.title}</h4>
 
-                <div>
-                    <i style="background:${cfg.color[0]}"></i>
-                    Không có
-                </div>
+                <div><i style="background:${cfg.color[0]}"></i>Chưa triển khai</div>
+                <div><i style="background:${cfg.color[1]}"></i>Đã triển khai</div>
 
-                <div>
-                    <i style="background:${cfg.color[1]}"></i>
-                    Có cơ sở
-                </div>
+                <hr>
+
+                <div><b>Số màu đỏ trên tên xã:</b> Số cơ sở giết mổ</div>
             `;
 
             return div;
