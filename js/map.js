@@ -208,7 +208,53 @@ const layerConfig = {
     }
 
 };
+function updateBreaks() {
 
+    const cfg = layerConfig[currentLayer];
+
+    // Chỉ áp dụng cho các lớp có breaks
+    if (!cfg.breaks) return;
+
+    const values = [];
+
+    getRows().forEach(row => {
+
+        const value = Number(row[cfg.field] || 0);
+
+        if (value > 0) {
+            values.push(value);
+        }
+
+    });
+
+    if (values.length === 0) {
+
+        cfg.breaks = [0, 1, 2, 3];
+        return;
+
+    }
+
+    const max = Math.max(...values);
+
+    let step = Math.ceil(max / 4);
+
+    // Làm tròn khoảng
+    if (step >= 1000) {
+        step = Math.ceil(step / 100) * 100;
+    } else if (step >= 100) {
+        step = Math.ceil(step / 10) * 10;
+    }
+
+    cfg.breaks = [
+        0,
+        step,
+        step * 2,
+        step * 3
+    ];
+
+    console.log(cfg.title, cfg.breaks);
+
+}
 //===============================
 // LẤY GIÁ TRỊ THEO LỚP
 //===============================
@@ -635,6 +681,8 @@ function searchFeature(keyword){
 
 function refreshMap(){
 
+    updateBreaks();
+    
     if(!geojsonLayer) return;
 
     geojsonLayer.setStyle(style);
