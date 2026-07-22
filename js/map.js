@@ -526,23 +526,21 @@ function clearLabels(){
 // VẼ TÊN XÃ
 //======================================================
 const labelOffset = {
-
-    "Điện Biên Phủ":[0.004,-0.008],
-
-    "Thanh Yên":[-0.004,0],
-
-    "Thanh An":[0.004,0],
-
-    "Mường Phăng":[0,-0.006],
-
-    "Na Sang":[0.004,0.004],
-
-    "Tủa Thàng":[0.004,0.006],
-
-    "Nà Tấu":[-0.003,0],
-
-    "Mường Ảng":[0.003,-0.003]
-
+    "Điện Biên Phủ": [0.010, -0.012],
+    "Thanh Yên": [-0.006, 0.000],
+    "Thanh An": [0.006, 0.000],
+    "Mường Phăng": [0.000, -0.008],
+    "Na Sang": [0.006, 0.006],
+    "Tủa Thàng": [0.006, 0.008],
+    "Nà Tấu": [-0.005, 0.000],
+    "Mường Ảng": [0.005, -0.004],
+    "Mường Lay": [0.000, 0.006],
+    "Mường Chà": [0.000, -0.006],
+    "Mường Nhé": [0.006, -0.006],
+    "Sín Thầu": [-0.004, 0.004],
+    "Quài Tở": [0.000, 0.005],
+    "Tuần Giáo": [0.006, -0.004],
+    "Pú Nhung": [-0.004, 0.004]
 };
 function drawLabels(){
 
@@ -565,39 +563,7 @@ const name = row["Tên xã"] || getName(layer.feature);
 
 let lat = center.lat;
 let lng = center.lng;
-
-const minDistance = 0.03;
-
-let moved = true;
-
-while (moved) {
-
-    moved = false;
-
-    for (const p of usedPoints) {
-
-        const dx = lng - p.lng;
-        const dy = lat - p.lat;
-
-        const d = Math.sqrt(dx * dx + dy * dy);
-
-        if (d < minDistance) {
-
-            const angle = Math.random() * Math.PI * 2;
-
-            lng += Math.cos(angle) * 0.006;
-            lat += Math.sin(angle) * 0.006;
-
-            moved = true;
-        }
-    }
-}
-
-usedPoints.push({
-    lat,
-    lng
-});
-        
+   
 if(labelOffset[name]){
 
     lat += labelOffset[name][0];
