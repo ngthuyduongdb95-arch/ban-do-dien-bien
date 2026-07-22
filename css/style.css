@@ -521,8 +521,11 @@ SCROLLBAR
 .leaflet-tile{
 
     filter:
-        grayscale(35%)
-        brightness(92%)
-        contrast(90%);
+
+    grayscale(60%)
+
+    brightness(108%)
+
+    contrast(80%);
 
 }
