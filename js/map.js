@@ -15,9 +15,11 @@ const map = L.map("map", {
 }).setView([21.38, 103.02], 9);
 
 L.tileLayer(
-    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
     {
-        attribution: "&copy; OpenStreetMap"
+        attribution: "&copy; OpenStreetMap & CARTO",
+        subdomains: "abcd",
+        maxZoom: 20
     }
 ).addTo(map);
 
