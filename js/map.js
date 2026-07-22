@@ -578,7 +578,7 @@ const label = L.marker([lat,lng],{
         icon: L.divIcon({
             className: "map-label",
             html: `<div>${name}</div>`,
-            iconSize:[90,18]
+            iconSize:null
         })
     });
 
