@@ -599,21 +599,7 @@ usedPoints.push({
     lat,
     lng
 });
-        lat += Math.sin(angle)*0.012;
-
-        lng += Math.cos(angle)*0.012;
-
-    }
-
-});
-
-usedPoints.push({
-
-    lat,
-
-    lng
-
-});    
+        
 if(labelOffset[name]){
 
     lat += labelOffset[name][0];
