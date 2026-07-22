@@ -516,3 +516,13 @@ SCROLLBAR
     background:#78909C;
 
 }
+/* Làm mờ nền bản đồ */
+
+.leaflet-tile{
+
+    filter:
+        grayscale(35%)
+        brightness(92%)
+        contrast(90%);
+
+}
