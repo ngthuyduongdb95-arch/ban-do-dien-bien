@@ -86,11 +86,11 @@ const layerConfig = {
         unit:"con",
 
         color:[
-            "#FFFFFF",
-            "#FED7AA",
-            "#FB923C",
-            "#EA580C",
-            "#9A3412"
+            "#FFF5F0",
+            "#FCBBA1",
+            "#FB6A4A",
+            "#CB181D",
+            "#67000D"
 
         ],
 
@@ -317,19 +317,17 @@ function style(feature){
 
     const row = getRow(feature);
 
-    return{
+    return {
 
-    color:"#D9D9D9",
+    color: "#F8FAFC",
 
-    weight:0.5,
+    weight: 0.8,
 
-    opacity:1,
+    opacity: 1,
 
-    fillColor:getColor(
-        getValue(row)
-    ),
+    fillColor: getColor(getValue(row)),
 
-    fillOpacity:0.88
+    fillOpacity: 0.88
 
 };
 
