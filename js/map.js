@@ -675,10 +675,10 @@ if(currentLayer==="PHUN"){
             div.innerHTML=`
                 <h4>${cfg.title}</h4>
 
-                <div><i style="background:${cfg.color[0]}"></i>0</div>
-                <div><i style="background:${cfg.color[1]}"></i>1</div>
-                <div><i style="background:${cfg.color[2]}"></i>2 - 3</div>
-                <div><i style="background:${cfg.color[3]}"></i>>3</div>
+                <div><i style="background:${cfg.color[1]}"></i>1 - ${b[1]}</div>
+<div><i style="background:${cfg.color[2]}"></i>${b[1]+1} - ${b[2]}</div>
+<div><i style="background:${cfg.color[3]}"></i>${b[2]+1} - ${b[3]}</div>
+<div><i style="background:${cfg.color[4]}"></i>>${b[3]}</div>
             `;
 
             return div;
@@ -697,25 +697,31 @@ div.innerHTML = `
     <div><i style="background:${cfg.color[4]}"></i>>${b[3]}</div>
 
     ${
-        currentLayer === "DTLCP"
-        ? `
-        <hr>
-        <div>
-            <span style="
-                display:inline-block;
-                width:10px;
-                height:10px;
-                border-radius:50%;
-                background:#ff0000;
-                border:1.5px solid #fff;
-                margin-right:6px;
-                vertical-align:middle;
-            "></span>
-            Xã đang xảy ra dịch
-        </div>
-        `
-        : ""
-    }
+    currentLayer === "DTLCP"
+    ? `
+    <hr>
+
+    <div style="margin-bottom:6px;">
+        <i style="background:${cfg.color[0]}"></i>
+        Xã không có dịch xảy ra
+    </div>
+
+    <div>
+        <span style="
+            display:inline-block;
+            width:10px;
+            height:10px;
+            border-radius:50%;
+            background:#ff0000;
+            border:1.5px solid #fff;
+            margin-right:6px;
+            vertical-align:middle;
+        "></span>
+        Xã đang xảy ra dịch
+    </div>
+    `
+    : ""
+}
 `;
 
         return div;
