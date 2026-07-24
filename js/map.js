@@ -562,23 +562,20 @@ function drawLabels(){
 
         const row = getRow(layer.feature);
 
-        // Chỉ hiển thị tên xã khi có giá trị ở lớp đang xem
         if(getValue(row) > 0){
 
             const center = layer.getBounds().getCenter();
+
+            const name = row["Tên xã"] || getName(layer.feature);
+
             let lat = center.lat;
             let lng = center.lng;
-            L.circleMarker([lat, lng],{
 
+            if(labelOffset[name]){
+                lat += labelOffset[name][0];
+                lng += labelOffset[name][1];
+            }
 
-const name = row["Tên xã"] || getName(layer.feature);
-
-
-if(labelOffset[name]){
-    lat += labelOffset[name][0];
-    lng += labelOffset[name][1];
-}
-          
             let html;
 
             if(currentLayer === "KSGM"){
