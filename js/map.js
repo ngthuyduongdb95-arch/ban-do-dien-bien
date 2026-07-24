@@ -777,9 +777,9 @@ function refreshMap(){
         layer.unbindPopup();
     });
 
-    drawLabels();
-
+    
     drawOutbreakPoints();
+    drawLabels();
 
     updateLegend();
 
@@ -793,12 +793,10 @@ function refreshMap(){
 
    function drawOutbreakPoints(){
 
-    // Xóa lớp cũ
     if(outbreakLayer){
         map.removeLayer(outbreakLayer);
     }
 
-    // Chỉ hiển thị ở lớp DTLCP
     if(currentLayer !== "DTLCP") return;
 
     outbreakLayer = L.layerGroup();
@@ -813,26 +811,45 @@ function refreshMap(){
 
         const center = layer.getBounds().getCenter();
 
-        L.circleMarker(center,{
-            radius:4,
-            color:"#ffffff",
-            weight:1.2,
-            fillColor:"#ff0000",
-            fillOpacity:1
-        })
-        .bindTooltip(row["Tên xã"],{
-            direction:"top",
-            offset:[0,-8],
-            sticky:true
-        })
-        .addTo(outbreakLayer);
+        const name = row["Tên xã"] || getName(layer.feature);
+
+        let lat = center.lat;
+        let lng = center.lng;
+
+        // Dùng đúng offset của tên xã
+        if(labelOffset[name]){
+            lat += labelOffset[name][0];
+            lng += labelOffset[name][1];
+        }
+
+        // Chấm đỏ nằm bên trái tên xã
+        lng -= 0.004;
+
+        const dot = L.marker([lat,lng],{
+            interactive:false,
+            icon:L.divIcon({
+                className:"",
+                html:`
+                    <div style="
+                        width:8px;
+                        height:8px;
+                        background:#ff0000;
+                        border:1.5px solid #ffffff;
+                        border-radius:50%;
+                        box-shadow:0 0 3px rgba(0,0,0,.35);
+                    "></div>
+                `,
+                iconSize:[8,8],
+                iconAnchor:[4,4]
+            })
+        });
+
+        outbreakLayer.addLayer(dot);
 
     });
 
-   outbreakLayer.addTo(map);
+    outbreakLayer.addTo(map);
 
-// Vẽ lại label để luôn hiển thị đúng
-drawLabels();
 }
 //======================================================
 // CẬP NHẬT DASHBOARD
@@ -888,9 +905,8 @@ async function loadGeoJSON(){
             geojsonLayer.getBounds()
         );
 
-        drawLabels();
-
-drawOutbreakPoints();
+       drawOutbreakPoints();
+         drawLabels();
 
 updateLegend();
 
