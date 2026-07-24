@@ -36,6 +36,7 @@ let geojsonLayer = null;
 let labelLayer = null;
 let legendControl = null;
 let selectedFeature = null;
+let outbreakLayer = null;
 
 let currentLayer = "DTLCP";
 let dynamicBreaks = [];
@@ -747,29 +748,71 @@ function searchFeature(keyword){
 function refreshMap(){
 
     updateBreaks();
-    
+
     if(!geojsonLayer) return;
 
     geojsonLayer.setStyle(style);
 
     geojsonLayer.eachLayer(function(layer){
-
-    layer.unbindPopup();
-
-});
+        layer.unbindPopup();
+    });
 
     drawLabels();
+
+    drawOutbreakPoints();
 
     updateLegend();
 
     updateDashboard();
 
     if(selectedFeature){
-
         showPanel(selectedFeature);
-
     }
 
+}  
+
+   function drawOutbreakPoints(){
+
+    if(outbreakLayer){
+        map.removeLayer(outbreakLayer);
+    }
+
+    if(currentLayer !== "DTLCP"){
+        return;
+    }
+
+    outbreakLayer = L.layerGroup();
+
+    geojsonLayer.eachLayer(function(layer){
+
+        const row = getRow(layer.feature);
+
+        if(!row) return;
+
+        if(row["DTLCP_Trạng thái"] !== "Đang có dịch"){
+            return;
+        }
+
+        const center = layer.getBounds().getCenter();
+
+        L.circleMarker(center,{
+            radius:7,
+            color:"#ffffff",
+            weight:2,
+            fillColor:"#ff0000",
+            fillOpacity:1
+        })
+        .bindTooltip(row["Tên xã"],{
+            direction:"top",
+            sticky:true
+        })
+        .addTo(outbreakLayer);
+
+    });
+
+    outbreakLayer.addTo(map);
+
+}
 }//======================================================
 // CẬP NHẬT DASHBOARD
 //======================================================
