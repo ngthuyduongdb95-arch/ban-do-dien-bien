@@ -566,11 +566,13 @@ function drawLabels(){
         if(getValue(row) > 0){
 
             const center = layer.getBounds().getCenter();
+            let lat = center.lat;
+            let lng = center.lng;
+            L.circleMarker([lat, lng],{
+
 
 const name = row["Tên xã"] || getName(layer.feature);
 
-let lat = center.lat;
-let lng = center.lng;
 
 if(labelOffset[name]){
     lat += labelOffset[name][0];
