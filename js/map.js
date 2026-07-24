@@ -829,10 +829,10 @@ function refreshMap(){
 
     });
 
-    outbreakLayer.addTo(map);
+   outbreakLayer.addTo(map);
 
-    // Luôn nổi trên bản đồ
-    outbreakLayer.bringToFront();
+// Vẽ lại label để luôn hiển thị đúng
+drawLabels();
 }
 //======================================================
 // CẬP NHẬT DASHBOARD
