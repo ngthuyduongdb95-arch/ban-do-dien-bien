@@ -577,8 +577,6 @@ if(labelOffset[name]){
     lng += labelOffset[name][1];
 }
 
-// Chấm đỏ nằm bên trái tên xã
-lng -= 0.005;
 
            
             let html;
@@ -819,7 +817,18 @@ function refreshMap(){
         }
 
         const center = layer.getBounds().getCenter();
+const name = row["Tên xã"] || getName(layer.feature);
 
+let lat = center.lat;
+let lng = center.lng;
+
+if (labelOffset[name]) {
+    lat += labelOffset[name][0];
+    lng += labelOffset[name][1];
+}
+
+// Dịch chấm đỏ sang trái tên xã
+lng -= 0.005;
         L.circleMarker([lat, lng],{
     radius:4,
     color:"#ffffff",
@@ -894,9 +903,11 @@ async function loadGeoJSON(){
 
         drawLabels();
 
-        updateLegend();
+drawOutbreakPoints();
 
-        updateDashboard();
+updateLegend();
+
+updateDashboard();
 
     }
     catch(err){
