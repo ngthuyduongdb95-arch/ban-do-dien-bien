@@ -796,9 +796,9 @@ function refreshMap(){
         const center = layer.getBounds().getCenter();
 
         L.circleMarker(center,{
-            radius:7,
+            radius:5,
             color:"#ffffff",
-            weight:2,
+            weight:1.5,
             fillColor:"#ff0000",
             fillOpacity:1
         })
