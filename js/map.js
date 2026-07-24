@@ -829,13 +829,13 @@ function refreshMap(){
 
         const center = layer.getBounds().getCenter();
 
-        L.circleMarker(center,{
-            radius:5,
-            color:"#ffffff",
-            weight:1.5,
-            fillColor:"#ff0000",
-            fillOpacity:1
-        })
+        L.circleMarker([lat, lng],{
+    radius:4,
+    color:"#ffffff",
+    weight:1.2,
+    fillColor:"#ff0000",
+    fillOpacity:1
+})
         .bindTooltip(row["Tên xã"],{
             direction:"top",
             sticky:true
