@@ -567,6 +567,19 @@ function drawLabels(){
 
             const center = layer.getBounds().getCenter();
 
+const name = row["Tên xã"] || getName(layer.feature);
+
+let lat = center.lat;
+let lng = center.lng;
+
+if(labelOffset[name]){
+    lat += labelOffset[name][0];
+    lng += labelOffset[name][1];
+}
+
+// Chấm đỏ nằm bên trái tên xã
+lng -= 0.010;
+
             const name = row["Tên xã"] || getName(layer.feature);
 
             let lat = center.lat;
