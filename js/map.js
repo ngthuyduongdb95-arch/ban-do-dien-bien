@@ -578,18 +578,9 @@ if(labelOffset[name]){
 }
 
 // Chấm đỏ nằm bên trái tên xã
-lng -= 0.010;
+lng -= 0.005;
 
-            const name = row["Tên xã"] || getName(layer.feature);
-
-            let lat = center.lat;
-            let lng = center.lng;
-
-            if(labelOffset[name]){
-                lat += labelOffset[name][0];
-                lng += labelOffset[name][1];
-            }
-
+           
             let html;
 
             if(currentLayer === "KSGM"){
