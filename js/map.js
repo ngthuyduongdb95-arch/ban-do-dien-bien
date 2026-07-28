@@ -659,13 +659,15 @@ function updateLegend(){
         // KSGM
         if(currentLayer==="KSGM"){
 
-            div.innerHTML = `
+            ddiv.innerHTML = `
 <h4>${cfg.title}</h4>
 
-<div><i style="background:${cfg.color[0]}"></i>0 cơ sở</div>
-<div><i style="background:${cfg.color[1]}"></i>1 cơ sở</div>
-<div><i style="background:${cfg.color[2]}"></i>2 - 3 cơ sở</div>
-<div><i style="background:${cfg.color[3]}"></i>≥ 4 cơ sở</div>
+<div><i style="background:${cfg.color[0]}"></i>Chưa triển khai</div>
+<div><i style="background:${cfg.color[1]}"></i>Đã triển khai</div>
+
+<hr>
+
+<div><b>Số màu đỏ trên tên xã:</b> Số cơ sở giết mổ</div>
 `;
 
             return div;
@@ -690,18 +692,17 @@ if(currentLayer==="PHUN"){
         // CSBBTTY
         if(currentLayer==="CSBBTTY"){
 
-            div.innerHTML=`
-                <h4>${cfg.title}</h4>
+    div.innerHTML = `
+<h4>${cfg.title}</h4>
 
-                <div><i style="background:${cfg.color[1]}"></i>1 - ${b[1]}</div>
-<div><i style="background:${cfg.color[2]}"></i>${b[1]+1} - ${b[2]}</div>
-<div><i style="background:${cfg.color[3]}"></i>${b[2]+1} - ${b[3]}</div>
-<div><i style="background:${cfg.color[4]}"></i>>${b[3]}</div>
-            `;
+<div><i style="background:${cfg.color[0]}"></i>0 cơ sở</div>
+<div><i style="background:${cfg.color[1]}"></i>1 cơ sở</div>
+<div><i style="background:${cfg.color[2]}"></i>2 - 3 cơ sở</div>
+<div><i style="background:${cfg.color[3]}"></i>≥ 4 cơ sở</div>
+`;
 
-            return div;
-
-        }
+    return div;
+}
 
         const b = cfg.breaks;
 
