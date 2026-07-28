@@ -71,9 +71,9 @@ const layerConfig = {
 
         breaks:[
             0,
-            10,
-            100,
-            500
+            0,
+            0,
+            0
         ]
 
     },
@@ -97,9 +97,9 @@ const layerConfig = {
 
         breaks:[
             0,
-            100,
-            1000,
-            5000
+            0,
+            0,
+            0
         ]
 
     },
@@ -122,9 +122,9 @@ const layerConfig = {
 
         breaks:[
             0,
-            5,
-            20,
-            50
+            0,
+            0,
+            0
         ]
 
     },
@@ -237,94 +237,34 @@ function updateBreaks(){
 
     values.sort((a,b)=>a-b);
 
-    cfg.breaks = jenks(values,5);
+    const q1=quantile(values,0.25);
+    const q2=quantile(values,0.50);
+    const q3=quantile(values,0.75);
 
-}
-function jenks(data,nClass){
-
-    const mat1=[];
-    const mat2=[];
-
-    for(let i=0;i<data.length+1;i++){
-        mat1.push(new Array(nClass+1).fill(0));
-        mat2.push(new Array(nClass+1).fill(0));
-    }
-
-    for(let i=1;i<=nClass;i++){
-        mat1[0][i]=1;
-        mat2[0][i]=0;
-
-        for(let j=1;j<=data.length;j++){
-            mat2[j][i]=Infinity;
-        }
-    }
-
-    let variance=0;
-
-    for(let l=1;l<=data.length;l++){
-
-        let sum=0;
-        let sumSquares=0;
-        let w=0;
-
-        for(let m=1;m<=l;m++){
-
-            const lower=l-m+1;
-            const val=data[lower-1];
-
-            w++;
-
-            sum+=val;
-            sumSquares+=val*val;
-
-            variance=sumSquares-(sum*sum)/w;
-
-            if(lower!==1){
-
-                for(let j=2;j<=nClass;j++){
-
-                    if(mat2[l][j]>=variance+mat2[lower-1][j-1]){
-
-                        mat1[l][j]=lower;
-
-                        mat2[l][j]=variance+mat2[lower-1][j-1];
-
-                    }
-
-                }
-
-            }
-
-        }
-
-        mat1[l][1]=1;
-        mat2[l][1]=variance;
-
-    }
-
-    const kclass=new Array(nClass);
-
-    let k=data.length;
-
-    for(let j=nClass;j>=2;j--){
-
-        const id=mat1[k][j]-2;
-
-        kclass[j-2]=data[id];
-
-        k=mat1[k][j]-1;
-
-    }
-
-    return [
+    cfg.breaks=[
         0,
-        roundBreak(kclass[0]),
-        roundBreak(kclass[1]),
-        roundBreak(kclass[2])
+        niceBreak(q1),
+        niceBreak(q2),
+        niceBreak(q3)
     ];
 
 }
-function roundBreak(v){
+function quantile(arr,p){
+
+    const pos=(arr.length-1)*p;
+
+    const base=Math.floor(pos);
+
+    const rest=pos-base;
+
+    if(arr[base+1]!==undefined){
+        return arr[base]+rest*(arr[base+1]-arr[base]);
+    }
+
+    return arr[base];
+
+}
+function niceBreak(v){
 
     if(v<=10) return Math.ceil(v);
 
