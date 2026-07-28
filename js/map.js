@@ -279,34 +279,7 @@ function niceBreak(v){
     return Math.ceil(v/500)*500;
 
 }
-    });
-
-    if (values.length === 0) {
-
-        cfg.s = [0, 1, 2, 3];
-        return;
-
-    }
-
-    const max = Math.max(...values);
-
-    let step = Math.ceil(max / 4);
-
-    // Làm tròn khoảng
-    if (step >= 1000) {
-        step = Math.ceil(step / 100) * 100;
-    } else if (step >= 100) {
-        step = Math.ceil(step / 10) * 10;
-    }
-
-    cfg.breaks = [
-        0,
-        step,
-        step * 2,
-        step * 3
-    ];
-
-    console.log(cfg.title, cfg.breaks);
+   
 
 }
 //===============================
@@ -689,16 +662,14 @@ function updateLegend(){
         // KSGM
         if(currentLayer==="KSGM"){
 
-            div.innerHTML=`
-                <h4>${cfg.title}</h4>
+            div.innerHTML = `
+<h4>${cfg.title}</h4>
 
-                <div><i style="background:${cfg.color[0]}"></i>Chưa triển khai</div>
-                <div><i style="background:${cfg.color[1]}"></i>Đã triển khai</div>
-
-                <hr>
-
-                <div><b>Số màu đỏ trên tên xã:</b> Số cơ sở giết mổ</div>
-            `;
+<div><i style="background:${cfg.color[0]}"></i>0 cơ sở</div>
+<div><i style="background:${cfg.color[1]}"></i>1 cơ sở</div>
+<div><i style="background:${cfg.color[2]}"></i>2 - 3 cơ sở</div>
+<div><i style="background:${cfg.color[3]}"></i>≥ 4 cơ sở</div>
+`;
 
             return div;
 
@@ -740,7 +711,7 @@ if(currentLayer==="PHUN"){
 div.innerHTML = `
     <h4>${cfg.title}</h4>
 
-    <<div><i style="background:${cfg.color[1]}"></i>≤ 1</div>
+ <div><i style="background:${cfg.color[1]}"></i>≤ ${b[1]}</div>
 <div><i style="background:${cfg.color[2]}"></i>${b[1]+1} - ${b[2]}</div>
 <div><i style="background:${cfg.color[3]}"></i>${b[2]+1} - ${b[3]}</div>
 <div><i style="background:${cfg.color[4]}"></i>> ${b[3]}</div>
