@@ -690,11 +690,10 @@ if(currentLayer==="PHUN"){
 div.innerHTML = `
     <h4>${cfg.title}</h4>
 
-    <div><i style="background:${cfg.color[0]}"></i>0</div>
     <div><i style="background:${cfg.color[1]}"></i>≤ ${b[1]}</div>
-<div><i style="background:${cfg.color[2]}"></i>${b[1]+1} – ${b[2]}</div>
-<div><i style="background:${cfg.color[3]}"></i>${b[2]+1} – ${b[3]}</div>
-<div><i style="background:${cfg.color[4]}"></i>> ${b[3]}</div>
+    <div><i style="background:${cfg.color[2]}"></i>${b[1]+1} – ${b[2]}</div>
+    <div><i style="background:${cfg.color[3]}"></i>${b[2]+1} – ${b[3]}</div>
+    <div><i style="background:${cfg.color[4]}"></i>> ${b[3]}</div>
 
     ${
     currentLayer === "DTLCP"
