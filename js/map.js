@@ -212,28 +212,138 @@ const layerConfig = {
     }
 
 };
-function updateBreaks() {
+function updateBreaks(){
 
     const cfg = layerConfig[currentLayer];
 
-    // Chỉ áp dụng cho các lớp có breaks
-    if (!cfg.breaks) return;
+    if(!cfg.breaks) return;
 
-    const values = [];
+    const values=[];
 
-    getRows().forEach(row => {
+    getRows().forEach(row=>{
 
-        const value = Number(row[cfg.field] || 0);
+        const value=Number(row[cfg.field]||0);
 
-        if (value > 0) {
+        if(value>0){
             values.push(value);
         }
 
     });
 
+    if(values.length===0){
+        cfg.breaks=[0,1,2,3];
+        return;
+    }
+
+    values.sort((a,b)=>a-b);
+
+    cfg.breaks = jenks(values,5);
+
+}
+function jenks(data,nClass){
+
+    const mat1=[];
+    const mat2=[];
+
+    for(let i=0;i<data.length+1;i++){
+        mat1.push(new Array(nClass+1).fill(0));
+        mat2.push(new Array(nClass+1).fill(0));
+    }
+
+    for(let i=1;i<=nClass;i++){
+        mat1[0][i]=1;
+        mat2[0][i]=0;
+
+        for(let j=1;j<=data.length;j++){
+            mat2[j][i]=Infinity;
+        }
+    }
+
+    let variance=0;
+
+    for(let l=1;l<=data.length;l++){
+
+        let sum=0;
+        let sumSquares=0;
+        let w=0;
+
+        for(let m=1;m<=l;m++){
+
+            const lower=l-m+1;
+            const val=data[lower-1];
+
+            w++;
+
+            sum+=val;
+            sumSquares+=val*val;
+
+            variance=sumSquares-(sum*sum)/w;
+
+            if(lower!==1){
+
+                for(let j=2;j<=nClass;j++){
+
+                    if(mat2[l][j]>=variance+mat2[lower-1][j-1]){
+
+                        mat1[l][j]=lower;
+
+                        mat2[l][j]=variance+mat2[lower-1][j-1];
+
+                    }
+
+                }
+
+            }
+
+        }
+
+        mat1[l][1]=1;
+        mat2[l][1]=variance;
+
+    }
+
+    const kclass=new Array(nClass);
+
+    let k=data.length;
+
+    for(let j=nClass;j>=2;j--){
+
+        const id=mat1[k][j]-2;
+
+        kclass[j-2]=data[id];
+
+        k=mat1[k][j]-1;
+
+    }
+
+    return [
+        0,
+        roundBreak(kclass[0]),
+        roundBreak(kclass[1]),
+        roundBreak(kclass[2])
+    ];
+
+}
+function roundBreak(v){
+
+    if(v<=10) return Math.ceil(v);
+
+    if(v<=50) return Math.ceil(v/5)*5;
+
+    if(v<=100) return Math.ceil(v/10)*10;
+
+    if(v<=500) return Math.ceil(v/50)*50;
+
+    if(v<=1000) return Math.ceil(v/100)*100;
+
+    return Math.ceil(v/500)*500;
+
+}
+    });
+
     if (values.length === 0) {
 
-        cfg.breaks = [0, 1, 2, 3];
+        cfg.s = [0, 1, 2, 3];
         return;
 
     }
