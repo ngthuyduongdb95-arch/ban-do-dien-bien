@@ -196,27 +196,135 @@ const layerConfig = {
 
     CSBBTTY:{
 
-        field:"CSBBTTY_Cơ sở",
+    field:"CSBBTTY_Cơ sở",
 
-        title:"Cơ sở buôn bán thuốc thú y",
+    title:"Cơ sở buôn bán thuốc thú y",
 
-        unit:"cơ sở",
+    unit:"cơ sở",
 
-        color:[
-            "#ECEFF1",
-            "#B3E5FC",
-            "#4FC3F7",
-            "#0288D1"
-        ]
+    color:[
+        "#ECEFF1",
+        "#B3E5FC",
+        "#4FC3F7",
+        "#0288D1",
+        "#01579B"
+    ],
+
+    breaks:[
+        0,
+        0,
+        0,
+        0
+    ]
+
+}
+
+};
+function jenks(data, classes = 4) {
+
+    data = data
+        .filter(v => Number.isFinite(v) && v > 0)
+        .sort((a, b) => a - b);
+
+    if (data.length <= classes) {
+        return [
+            0,
+            data[0] || 0,
+            data[1] || data[0] || 0,
+            data[2] || data[data.length - 1] || 0
+        ];
+    }
+
+    const lower = [];
+    const variance = [];
+
+    for (let i = 0; i <= data.length; i++) {
+        lower.push(new Array(classes + 1).fill(0));
+        variance.push(new Array(classes + 1).fill(0));
+    }
+
+    for (let i = 1; i <= classes; i++) {
+        lower[1][i] = 1;
+        variance[1][i] = 0;
+        for (let j = 2; j <= data.length; j++) {
+            variance[j][i] = Infinity;
+        }
+    }
+
+    let sum = 0;
+    let sumSq = 0;
+    let w = 0;
+
+    for (let l = 2; l <= data.length; l++) {
+
+        sum = 0;
+        sumSq = 0;
+        w = 0;
+
+        for (let m = 1; m <= l; m++) {
+
+            const i3 = l - m + 1;
+            const val = data[i3 - 1];
+
+            w++;
+            sum += val;
+            sumSq += val * val;
+
+            const v = sumSq - (sum * sum) / w;
+
+            if (i3 !== 1) {
+
+                for (let j = 2; j <= classes; j++) {
+
+                    if (variance[l][j] >= v + variance[i3 - 1][j - 1]) {
+
+                        lower[l][j] = i3;
+                        variance[l][j] = v + variance[i3 - 1][j - 1];
+
+                    }
+
+                }
+
+            }
+
+        }
+
+        lower[l][1] = 1;
+        variance[l][1] = sumSq - (sum * sum) / w;
 
     }
 
-};
+    const kclass = new Array(classes + 1);
+
+    let k = data.length;
+
+    kclass[classes] = data[data.length - 1];
+
+    for (let j = classes; j >= 2; j--) {
+
+        const id = lower[k][j] - 2;
+
+        kclass[j - 1] = data[id];
+
+        k = lower[k][j] - 1;
+
+    }
+
+    return [
+        0,
+        Math.round(kclass[1]),
+        Math.round(kclass[2]),
+        Math.round(kclass[3])
+    ];
+
+}
 function updateBreaks(){
 
     const cfg = layerConfig[currentLayer];
 
-    if(!cfg.breaks) return;
+    if(!cfg.breaks) returif(currentLayer==="KSGM" || currentLayer==="PHUN"){
+    return;
+}
 
     const values=[];
 
@@ -310,16 +418,6 @@ function getColor(value){
         return value>0
             ? cfg.color[1]
             : cfg.color[0];
-
-    }
-
-    if(currentLayer==="CSBBTTY"){
-
-        if(value===0) return cfg.color[0];
-        if(value===1) return cfg.color[1];
-        if(value<=3) return cfg.color[2];
-
-        return cfg.color[3];
 
     }
 
