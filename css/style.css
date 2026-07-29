@@ -412,53 +412,58 @@ LEGEND
 ====================================================*/
 
 .legend{
-
-    background:#fff;
-
-    padding:10px 12px;
-
-    border-radius:8px;
-
-    box-shadow:0 2px 8px rgba(0,0,0,.2);
-
-    line-height:20px;
-
-    font-size:13px;
-
+    background:rgba(255,255,255,.96);
+    padding:12px 14px;
+    border-radius:12px;
+    box-shadow:0 8px 24px rgba(0,0,0,.18);
+    min-width:220px;
 }
 
 .legend h4{
-
-    margin-bottom:8px;
-
-    color:#1565C0;
-
+    margin:0 0 10px;
+    text-align:center;
+    font-size:15px;
+    font-weight:700;
 }
 
 .legend div{
-
     display:flex;
-
     align-items:center;
-
-    margin-bottom:5px;
-
+    margin:6px 0;
+    font-size:13px;
 }
 
 .legend i{
-
-    width:18px;
-
-    height:18px;
-
+    width:16px;
+    height:16px;
+    border-radius:3px;
     margin-right:8px;
-
-    border:1px solid #999;
-
-    display:inline-block;
-
+    border:1px solid rgba(0,0,0,.15);
+    flex-shrink:0;
 }
 
+.legend hr{
+    border:none;
+    border-top:1px solid #e5e7eb;
+    margin:10px 0;
+}
+
+.legend-dot-row{
+    display:flex;
+    align-items:flex-start;
+}
+
+.legend-red-dot{
+    width:10px;
+    height:10px;
+    background:#ff0000;
+    border:1.5px solid #fff;
+    border-radius:50%;
+    margin-right:10px;
+    margin-top:4px;
+    box-shadow:0 0 3px rgba(0,0,0,.35);
+    flex-shrink:0;
+}
 /*====================================================
 LABEL TÊN XÃ
 ====================================================*/
