@@ -638,112 +638,114 @@ function drawLabels(){
 // CẬP NHẬT CHÚ GIẢI
 //======================================================
 
-function updateLegend(){
+function updateLegend() {
 
-    if(legendControl){
-
+    if (legendControl) {
         map.removeControl(legendControl);
-
     }
 
-    legendControl=L.control({
-        position:"bottomright"
-    });
+    legendControl = L.control({ position: "bottomright" });
 
-    legendControl.onAdd=function(){
+    legendControl.onAdd = function () {
 
-        const div=L.DomUtil.create("div","legend");
+        const div = L.DomUtil.create("div", "legend");
+        const cfg = layerConfig[currentLayer];
 
-        const cfg=layerConfig[currentLayer];
+        //========================
+        // PHUN
+        //========================
+        if (currentLayer === "PHUN") {
 
-        // KSGM
-        if(currentLayer==="KSGM"){
+            div.innerHTML = `
+                <h4>${cfg.title}</h4>
 
-            ddiv.innerHTML = `
-<h4>${cfg.title}</h4>
-
-<div><i style="background:${cfg.color[0]}"></i>Chưa triển khai</div>
-<div><i style="background:${cfg.color[1]}"></i>Đã triển khai</div>
-
-<hr>
-
-<div><b>Số màu đỏ trên tên xã:</b> Số cơ sở giết mổ</div>
-`;
+                <div><i style="background:${cfg.color[0]}"></i>Chưa triển khai</div>
+                <div><i style="background:${cfg.color[1]}"></i>Vòng 1</div>
+                <div><i style="background:${cfg.color[2]}"></i>Vòng 2</div>
+                <div><i style="background:${cfg.color[3]}"></i>Vòng 3</div>
+                <div><i style="background:${cfg.color[4]}"></i>Vòng 4</div>
+            `;
 
             return div;
-
         }
-        // PHUN
-if(currentLayer==="PHUN"){
 
-    div.innerHTML=`
-        <h4>${cfg.title}</h4>
+        //========================
+        // KSGM
+        //========================
+        if (currentLayer === "KSGM") {
 
-        <div><i style="background:${cfg.color[0]}"></i>Chưa triển khai</div>
-        <div><i style="background:${cfg.color[1]}"></i>Vòng 1</div>
-        <div><i style="background:${cfg.color[2]}"></i>Vòng 2</div>
-        <div><i style="background:${cfg.color[3]}"></i>Vòng 3</div>
-        <div><i style="background:${cfg.color[4]}"></i>Vòng 4</div>
-    `;
+            div.innerHTML = `
+                <h4>${cfg.title}</h4>
 
-    return div;
-}
+                <div><i style="background:${cfg.color[0]}"></i>Chưa triển khai</div>
+                <div><i style="background:${cfg.color[1]}"></i>Đã triển khai</div>
 
+                <hr>
+
+                <div class="legend-dot-row">
+                    <span class="legend-red-dot"></span>
+                    <span>Số màu đỏ trên tên xã<br><b>= Số cơ sở giết mổ</b></span>
+                </div>
+            `;
+
+            return div;
+        }
+
+        //========================
         // CSBBTTY
-        if(currentLayer==="CSBBTTY"){
+        //========================
+        if (currentLayer === "CSBBTTY") {
 
-    div.innerHTML = `
-<h4>${cfg.title}</h4>
+            const b = cfg.breaks;
 
-<div><i style="background:${cfg.color[0]}"></i>0 cơ sở</div>
-<div><i style="background:${cfg.color[1]}"></i>1 cơ sở</div>
-<div><i style="background:${cfg.color[2]}"></i>2 - 3 cơ sở</div>
-<div><i style="background:${cfg.color[3]}"></i>≥ 4 cơ sở</div>
-`;
+            div.innerHTML = `
+                <h4>${cfg.title}</h4>
 
-    return div;
-}
+                <div><i style="background:${cfg.color[1]}"></i>1 - ${b[1]}</div>
+                <div><i style="background:${cfg.color[2]}"></i>${b[1] + 1} - ${b[2]}</div>
+                <div><i style="background:${cfg.color[3]}"></i>${b[2] + 1} - ${b[3]}</div>
+                <div><i style="background:${cfg.color[4]}"></i>> ${b[3]}</div>
+
+                <hr>
+
+                <div><i style="background:${cfg.color[0]}"></i>Không có cơ sở</div>
+            `;
+
+            return div;
+        }
+
+        //========================
+        // DTLCP - CGC - VDNC - DẠI
+        //========================
 
         const b = cfg.breaks;
 
-div.innerHTML = `
-<h4>${cfg.title}</h4>
+        div.innerHTML = `
+            <h4>${cfg.title}</h4>
 
-<div><i style="background:${cfg.color[1]}"></i>1 - ${b[1]}</div>
-<div><i style="background:${cfg.color[2]}"></i>${b[1]+1} - ${b[2]}</div>
-<div><i style="background:${cfg.color[3]}"></i>${b[2]+1} - ${b[3]}</div>
-<div><i style="background:${cfg.color[4]}"></i>> ${b[3]}</div>
+            <div><i style="background:${cfg.color[1]}"></i>1 - ${b[1]}</div>
+            <div><i style="background:${cfg.color[2]}"></i>${b[1] + 1} - ${b[2]}</div>
+            <div><i style="background:${cfg.color[3]}"></i>${b[2] + 1} - ${b[3]}</div>
+            <div><i style="background:${cfg.color[4]}"></i>> ${b[3]}</div>
 
-<hr>
+            <hr>
 
-<div>
-    <span style="
-        display:inline-block;
-        width:10px;
-        height:10px;
-        border-radius:50%;
-        background:#ff0000;
-        border:1.5px solid #fff;
-        margin-right:6px;
-        vertical-align:middle;
-    "></span>
-    Xã đang xảy ra dịch
-</div>
+            <div class="legend-dot-row">
+                <span class="legend-red-dot"></span>
+                <span>Xã đang xảy ra dịch</span>
+            </div>
 
-<div>
-    <i style="background:${cfg.color[0]}"></i>
-    Không có dịch
-</div>
-`;
+            <div>
+                <i style="background:${cfg.color[0]}"></i>
+                Không có dịch
+            </div>
+        `;
 
         return div;
-
     };
 
     legendControl.addTo(map);
-
 }
-
 //======================================================
 // TÌM XÃ
 //======================================================
