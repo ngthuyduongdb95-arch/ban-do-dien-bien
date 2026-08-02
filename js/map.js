@@ -322,15 +322,16 @@ function updateBreaks(){
 
     const cfg = layerConfig[currentLayer];
 
-    if(!cfg.breaks) returif(currentLayer==="KSGM" || currentLayer==="PHUN"){
-    return;
-}
+    // Hai lớp phân loại không cần tính khoảng
+    if(currentLayer==="KSGM" || currentLayer==="PHUN"){
+        return;
+    }
 
-    const values=[];
+    const values = [];
 
     getRows().forEach(row=>{
 
-        const value=Number(row[cfg.field]||0);
+        const value = Number(row[cfg.field] || 0);
 
         if(value>0){
             values.push(value);
@@ -343,50 +344,10 @@ function updateBreaks(){
         return;
     }
 
-    values.sort((a,b)=>a-b);
-
-    const q1=quantile(values,0.25);
-    const q2=quantile(values,0.50);
-    const q3=quantile(values,0.75);
-
-    cfg.breaks=[
-        0,
-        niceBreak(q1),
-        niceBreak(q2),
-        niceBreak(q3)
-    ];
+    cfg.breaks = jenks(values,4);
 
 }
-function quantile(arr,p){
 
-    const pos=(arr.length-1)*p;
-
-    const base=Math.floor(pos);
-
-    const rest=pos-base;
-
-    if(arr[base+1]!==undefined){
-        return arr[base]+rest*(arr[base+1]-arr[base]);
-    }
-
-    return arr[base];
-
-}
-function niceBreak(v){
-
-    if(v<=10) return Math.ceil(v);
-
-    if(v<=50) return Math.ceil(v/5)*5;
-
-    if(v<=100) return Math.ceil(v/10)*10;
-
-    if(v<=500) return Math.ceil(v/50)*50;
-
-    if(v<=1000) return Math.ceil(v/100)*100;
-
-    return Math.ceil(v/500)*500;
-
-}
 //===============================
 // LẤY GIÁ TRỊ THEO LỚP
 //===============================
