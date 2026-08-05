@@ -13,7 +13,13 @@ const map = L.map("map", {
     minZoom: 8,
     maxZoom: 15
 }).setView([21.38, 103.02], 9);
-
+map.addControl(new L.Control.Fullscreen({
+    position: "topleft",
+    title: {
+        false: "Xem toàn màn hình",
+        true: "Thoát toàn màn hình"
+    }
+}));
 L.tileLayer(
     "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
     {
