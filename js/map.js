@@ -28,47 +28,74 @@ window.printer = L.easyPrint({
     exportOnly: true,
     sizeModes: ["Current"]
 }).addTo(map);
-L.Control.FullScreen = L.Control.extend({
+//======================================================
+// THANH CÔNG CỤ GIS
+//======================================================
 
-    options: {
-        position: "topleft"
-    },
+function addMapTools() {
 
-    onAdd: function () {
+    const zoom = document.querySelector(".leaflet-control-zoom");
 
-        const container = L.DomUtil.create("div", "leaflet-bar leaflet-control");
+    if (!zoom) return;
 
-        const link = L.DomUtil.create("a", "", container);
+    // ===========================
+    // NÚT TOÀN MÀN HÌNH
+    // ===========================
+    const fullBtn = document.createElement("a");
 
-        link.href = "#";
-        link.title = "Toàn màn hình";
-        link.setAttribute("role", "button");
+    fullBtn.href = "#";
+    fullBtn.title = "Toàn màn hình";
 
-        link.innerHTML = `
-        <svg width="18" height="18" viewBox="0 0 24 24">
-            <path fill="#333"
-            d="M4 9V4h5v2H6v3H4zm10-5h6v6h-2V6h-4V4zM4 20v-6h2v4h4v2H4zm14-2v-4h2v6h-6v-2h4z"/>
-        </svg>`;
+    fullBtn.innerHTML = `
+    <svg viewBox="0 0 24 24" width="18" height="18">
+        <path fill="#444"
+        d="M4 9V4h5v2H6v3H4zm10-5h6v6h-2V6h-4V4zM4 20v-6h2v4h4v2H4zm14-2v-4h2v6h-6v-2h4z"/>
+    </svg>`;
 
-        L.DomEvent.on(link, "click", function (e) {
+    fullBtn.onclick = function (e) {
 
-            L.DomEvent.stop(e);
+        e.preventDefault();
 
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen();
-            } else {
-                document.exitFullscreen();
-            }
+        if (!document.fullscreenElement) {
 
-        });
+            document.documentElement.requestFullscreen();
 
-        return container;
+        } else {
 
-    }
+            document.exitFullscreen();
 
-});
+        }
 
-map.addControl(new L.Control.FullScreen());
+    };
+
+    zoom.appendChild(fullBtn);
+
+    // ===========================
+    // NÚT HOME
+    // ===========================
+
+    const homeBtn = document.createElement("a");
+
+    homeBtn.href = "#";
+    homeBtn.title = "Về toàn tỉnh";
+
+    homeBtn.innerHTML = "🏠";
+
+    homeBtn.onclick = function (e) {
+
+        e.preventDefault();
+
+        if (geojsonLayer) {
+
+            map.fitBounds(geojsonLayer.getBounds());
+
+        }
+
+    };
+
+    zoom.appendChild(homeBtn);
+
+}
 //===============================
 // BIẾN TOÀN CỤC
 //===============================
@@ -1105,13 +1132,12 @@ async function initMap(){
 //======================================================
 
 document.addEventListener(
-
     "DOMContentLoaded",
+    async function(){
 
-    function(){
+        await initMap();
 
-        initMap();
+        addMapTools();
 
     }
-
 );
