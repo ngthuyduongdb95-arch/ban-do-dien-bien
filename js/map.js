@@ -13,13 +13,7 @@ const map = L.map("map", {
     minZoom: 8,
     maxZoom: 15
 }).setView([21.38, 103.02], 9);
-map.addControl(new L.Control.Fullscreen({
-    position: "topleft",
-    title: {
-        false: "Xem toàn màn hình",
-        true: "Thoát toàn màn hình"
-    }
-}));
+
 L.tileLayer(
     "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
     {
@@ -33,6 +27,40 @@ window.printer = L.easyPrint({
     hidden: true,
     exportOnly: true,
     sizeModes: ["Current"]
+}).addTo(map);
+L.Control.FullScreen = L.Control.extend({
+
+    onAdd: function () {
+
+        const btn = L.DomUtil.create("button", "leaflet-bar fullscreen-btn");
+
+        btn.innerHTML = "⛶";
+        btn.title = "Toàn màn hình";
+
+        L.DomEvent.disableClickPropagation(btn);
+
+        btn.onclick = function () {
+
+            if (!document.fullscreenElement) {
+
+                document.documentElement.requestFullscreen();
+
+            } else {
+
+                document.exitFullscreen();
+
+            }
+
+        };
+
+        return btn;
+
+    }
+
+});
+
+new L.Control.FullScreen({
+    position: "topleft"
 }).addTo(map);
 //===============================
 // BIẾN TOÀN CỤC
