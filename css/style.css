@@ -579,3 +579,21 @@ SCROLLBAR
     background:#e5e7eb;
 
 }
+.leaflet-control a{
+
+    width:30px;
+    height:30px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    text-decoration:none;
+}
+
+.leaflet-control a svg{
+
+    width:18px;
+    height:18px;
+
+}
