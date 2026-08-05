@@ -30,38 +30,45 @@ window.printer = L.easyPrint({
 }).addTo(map);
 L.Control.FullScreen = L.Control.extend({
 
+    options: {
+        position: "topleft"
+    },
+
     onAdd: function () {
 
-        const btn = L.DomUtil.create("button", "leaflet-bar fullscreen-btn");
+        const container = L.DomUtil.create("div", "leaflet-bar leaflet-control");
 
-        btn.innerHTML = "⛶";
-        btn.title = "Toàn màn hình";
+        const link = L.DomUtil.create("a", "", container);
 
-        L.DomEvent.disableClickPropagation(btn);
+        link.href = "#";
+        link.title = "Toàn màn hình";
+        link.setAttribute("role", "button");
 
-        btn.onclick = function () {
+        link.innerHTML = `
+        <svg width="18" height="18" viewBox="0 0 24 24">
+            <path fill="#333"
+            d="M4 9V4h5v2H6v3H4zm10-5h6v6h-2V6h-4V4zM4 20v-6h2v4h4v2H4zm14-2v-4h2v6h-6v-2h4z"/>
+        </svg>`;
+
+        L.DomEvent.on(link, "click", function (e) {
+
+            L.DomEvent.stop(e);
 
             if (!document.fullscreenElement) {
-
                 document.documentElement.requestFullscreen();
-
             } else {
-
                 document.exitFullscreen();
-
             }
 
-        };
+        });
 
-        return btn;
+        return container;
 
     }
 
 });
 
-new L.Control.FullScreen({
-    position: "topleft"
-}).addTo(map);
+map.addControl(new L.Control.FullScreen());
 //===============================
 // BIẾN TOÀN CỤC
 //===============================
