@@ -1,129 +1,281 @@
-//======================================================// MAP.JS V3//======================================================
+//======================================================
+// MAP.JS V3
+//======================================================
 
 console.log("WEBGIS ĐIỆN BIÊN V3");
 
-//===============================// KHỞI TẠO BẢN ĐỒ//===============================
+//===============================
+// KHỞI TẠO BẢN ĐỒ
+//===============================
 
-const map = L.map("map", {zoomControl: true,minZoom: 8,maxZoom: 15}).setView([21.38, 103.02], 9);
+const map = L.map("map", {
+    zoomControl: true,
+    minZoom: 8,
+    maxZoom: 15
+}).setView([21.38, 103.02], 9);
 
-L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",{attribution: "© OpenStreetMap & CARTO",subdomains: "abcd",maxZoom: 20}).addTo(map);
+L.tileLayer(
+    "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+    {
+        attribution: "&copy; OpenStreetMap & CARTO",
+        subdomains: "abcd",
+        maxZoom: 20
+    }
+).addTo(map);
 
-window.printer = L.easyPrint({hidden: true,exportOnly: true,sizeModes: ["Current"]}).addTo(map);//======================================================// THANH CÔNG CỤ GIS//======================================================
+window.printer = L.easyPrint({
+    hidden: true,
+    exportOnly: true,
+    sizeModes: ["Current"]
+}).addTo(map);
+//======================================================
+// THANH CÔNG CỤ GIS
+//======================================================
 
 function addMapTools() {
 
-const zoom = document.querySelector(".leaflet-control-zoom");
+    const zoom = document.querySelector(".leaflet-control-zoom");
 
-if (!zoom) return;
+    if (!zoom) return;
 
-// ===========================
-// NÚT TOÀN MÀN HÌNH
-// ===========================
-const fullBtn = document.createElement("a");
+    // ===========================
+    // NÚT TOÀN MÀN HÌNH
+    // ===========================
+    const fullBtn = document.createElement("a");
 
-fullBtn.href = "#";
-fullBtn.title = "Toàn màn hình";
+    fullBtn.href = "#";
+    fullBtn.title = "Toàn màn hình";
 
-fullBtn.innerHTML = `
-<svg viewBox="0 0 24 24" width="18" height="18">
-    <path fill="#444"
-    d="M4 9V4h5v2H6v3H4zm10-5h6v6h-2V6h-4V4zM4 20v-6h2v4h4v2H4zm14-2v-4h2v6h-6v-2h4z"/>
-</svg>`;
+    fullBtn.innerHTML = `
+    <svg viewBox="0 0 24 24" width="18" height="18">
+        <path fill="#444"
+        d="M4 9V4h5v2H6v3H4zm10-5h6v6h-2V6h-4V4zM4 20v-6h2v4h4v2H4zm14-2v-4h2v6h-6v-2h4z"/>
+    </svg>`;
 
-fullBtn.onclick = function (e) {
+    fullBtn.onclick = function (e) {
 
-    e.preventDefault();
+        e.preventDefault();
 
-    if (!document.fullscreenElement) {
+        if (!document.fullscreenElement) {
 
-        document.documentElement.requestFullscreen();
+            document.documentElement.requestFullscreen();
 
-    } else {
+        } else {
 
-        document.exitFullscreen();
+            document.exitFullscreen();
 
-    }
+        }
 
+    };
+
+    zoom.appendChild(fullBtn);
+
+    // ===========================
+    // NÚT HOME
+    // ===========================
+
+    const homeBtn = document.createElement("a");
+
+    homeBtn.href = "#";
+    homeBtn.title = "Về toàn tỉnh";
+
+    homeBtn.innerHTML = "🏠";
+
+    homeBtn.onclick = function (e) {
+
+        e.preventDefault();
+
+        if (geojsonLayer) {
+
+            map.fitBounds(geojsonLayer.getBounds());
+
+        }
+
+    };
+
+    zoom.appendChild(homeBtn);
+
+}
+//===============================
+// BIẾN TOÀN CỤC
+//===============================
+
+let geojsonLayer = null;
+let labelLayer = null;
+let legendControl = null;
+let selectedFeature = null;
+let outbreakLayer = null;
+
+let currentLayer = "DTLCP";
+let dynamicBreaks = [];
+const popupOptions = {
+    maxWidth: 320,
+    minWidth: 220,
+    autoPan: true,
+    closeButton: true
 };
 
-zoom.appendChild(fullBtn);
-
-// ===========================
-// NÚT HOME
-// ===========================
-
-const homeBtn = document.createElement("a");
-
-homeBtn.href = "#";
-homeBtn.title = "Về toàn tỉnh";
-
-homeBtn.innerHTML = "🏠";
-
-homeBtn.onclick = function (e) {
-
-    e.preventDefault();
-
-    if (geojsonLayer) {
-
-        map.fitBounds(geojsonLayer.getBounds());
-
-    }
-
-};
-
-zoom.appendChild(homeBtn);
-
-}//===============================// BIẾN TOÀN CỤC//===============================
-
-let geojsonLayer = null;let labelLayer = null;let legendControl = null;let selectedFeature = null;let outbreakLayer = null;
-
-let currentLayer = "DTLCP";let dynamicBreaks = [];const popupOptions = {maxWidth: 320,minWidth: 220,autoPan: true,closeButton: true};
-
-//===============================// CẤU HÌNH CÁC LỚP//===============================
+//===============================
+// CẤU HÌNH CÁC LỚP
+//===============================
 
 const layerConfig = {
 
-DTLCP:{
+    DTLCP:{
 
-    field:"DTLCP_Chết",
+        field:"DTLCP_Chết",
 
-    title:"Số lượng lợn tiêu hủy do DTLCP (con)",
+        title:"Số lượng lợn tiêu hủy do DTLCP (con)",
 
-    unit:"con",
+        unit:"con",
 
-    color:[
-        "#CAE5E8",
-        "#6EC3C9",
-        "#00B2BF",
-        "#009298",
-        "#00676B"
-
+        color:[
+            "#CAE5E8",
+            "#6EC3C9",
+            "#00B2BF",
+            "#009298",
+            "#00676B"
 ],
 
-    breaks:[
-        0,
-        0,
-        0,
-        0
+        breaks:[
+            0,
+            0,
+            0,
+            0
+        ]
+
+    },
+
+    CGC:{
+
+        field:"CGC_Chết",
+
+        title:"Số lượng gia cầm tiêu hủy (con)",
+
+        unit:"con",
+
+        color:[
+            "#E8D3E3",
+            "#AF4A92",
+            "#A2007C",
+            "#780062",
+            "#64004B"
+
+        ],
+
+        breaks:[
+            0,
+            0,
+            0,
+            0
+        ]
+
+    },
+
+    VDNC:{
+
+        field:"VDNC_Mắc",
+
+        title:"Số gia súc mắc bệnh VDNC (con)",
+
+        unit:"con",
+
+        color:[
+            "#BFCAE6",
+            "#93C5FD",
+            "#3B82F6",
+            "#2563EB",
+            "#1E3A8A"
+        ],
+
+        breaks:[
+            0,
+            0,
+            0,
+            0
+        ]
+
+    },
+
+    DAI:{
+
+        field:"DAI_Chết",
+
+        title:"Số chó, mèo mắc bệnh dại",
+
+        unit:"con",
+
+        color:[
+            "#FFFFFF",
+            "#D8B4FE",
+            "#A855F7",
+            "#7E22CE",
+            "#581C87"
+        ],
+
+        breaks:[
+            0,
+            1,
+            3,
+            5
+        ]
+
+    },
+
+    PHUN:{
+
+        field:"PHUN_Vòng",
+
+        title:"Các xã đã triển khai Tháng VSKTTĐ",
+
+        unit:"vòng",
+
+         breaks:[
+         0,
+         0.5,
+         1.5,
+         2.5
+    ],
+
+    color:[
+        "#C8E2B1",   // 0 - Chưa triển khai
+        "#83C75D",   // 1 - Vòng 1
+        "#5BBD2B",   // 2 - Vòng 2
+        "#489620",   // 3 - Vòng 3
+        "#367517"    // 4 - Vòng 4 
     ]
 
 },
 
-CGC:{
+    KSGM:{
 
-    field:"CGC_Chết",
+        field:"KSGM_Trạng thái",
 
-    title:"Số lượng gia cầm tiêu hủy (con)",
+        title:"Kiểm soát giết mổ",
 
-    unit:"con",
+        unit:"trạng thái",
+
+        color:[
+            "#B2F5EA",
+            "#0F766E"
+        ]
+
+    },
+
+    CSBBTTY:{
+
+    field:"CSBBTTY_Cơ sở",
+
+    title:"Cơ sở buôn bán thuốc thú y",
+
+    unit:"cơ sở",
 
     color:[
-        "#E8D3E3",
-        "#AF4A92",
-        "#A2007C",
-        "#780062",
-        "#64004B"
-
+        "#ECEFF1",
+        "#B3E5FC",
+        "#4FC3F7",
+        "#0288D1",
+        "#01579B"
     ],
 
     breaks:[
@@ -133,183 +285,71 @@ CGC:{
         0
     ]
 
-},
-
-VDNC:{
-
-    field:"VDNC_Mắc",
-
-    title:"Số gia súc mắc bệnh VDNC (con)",
-
-    unit:"con",
-
-    color:[
-        "#BFCAE6",
-        "#93C5FD",
-        "#3B82F6",
-        "#2563EB",
-        "#1E3A8A"
-    ],
-
-    breaks:[
-        0,
-        0,
-        0,
-        0
-    ]
-
-},
-
-DAI:{
-
-    field:"DAI_Chết",
-
-    title:"Số chó, mèo mắc bệnh dại",
-
-    unit:"con",
-
-    color:[
-        "#FFFFFF",
-        "#D8B4FE",
-        "#A855F7",
-        "#7E22CE",
-        "#581C87"
-    ],
-
-    breaks:[
-        0,
-        1,
-        3,
-        5
-    ]
-
-},
-
-PHUN:{
-
-    field:"PHUN_Vòng",
-
-    title:"Các xã đã triển khai Tháng VSKTTĐ",
-
-    unit:"vòng",
-
-     breaks:[
-     0,
-     0.5,
-     1.5,
-     2.5
-],
-
-color:[
-    "#C8E2B1",   // 0 - Chưa triển khai
-    "#83C75D",   // 1 - Vòng 1
-    "#5BBD2B",   // 2 - Vòng 2
-    "#489620",   // 3 - Vòng 3
-    "#367517"    // 4 - Vòng 4 
-]
-
-},
-
-KSGM:{
-
-    field:"KSGM_Trạng thái",
-
-    title:"Kiểm soát giết mổ",
-
-    unit:"trạng thái",
-
-    color:[
-        "#B2F5EA",
-        "#0F766E"
-    ]
-
-},
-
-CSBBTTY:{
-
-field:"CSBBTTY_Cơ sở",
-
-title:"Cơ sở buôn bán thuốc thú y",
-
-unit:"cơ sở",
-
-color:[
-    "#ECEFF1",
-    "#B3E5FC",
-    "#4FC3F7",
-    "#0288D1",
-    "#01579B"
-],
-
-breaks:[
-    0,
-    0,
-    0,
-    0
-]
-
 }
 
-};function jenks(data, classes = 4) {
+};
+function jenks(data, classes = 4) {
 
-data = data
-    .filter(v => Number.isFinite(v) && v > 0)
-    .sort((a, b) => a - b);
+    data = data
+        .filter(v => Number.isFinite(v) && v > 0)
+        .sort((a, b) => a - b);
 
-if (data.length <= classes) {
-    return [
-        0,
-        data[0] || 0,
-        data[1] || data[0] || 0,
-        data[2] || data[data.length - 1] || 0
-    ];
-}
-
-const lower = [];
-const variance = [];
-
-for (let i = 0; i <= data.length; i++) {
-    lower.push(new Array(classes + 1).fill(0));
-    variance.push(new Array(classes + 1).fill(0));
-}
-
-for (let i = 1; i <= classes; i++) {
-    lower[1][i] = 1;
-    variance[1][i] = 0;
-    for (let j = 2; j <= data.length; j++) {
-        variance[j][i] = Infinity;
+    if (data.length <= classes) {
+        return [
+            0,
+            data[0] || 0,
+            data[1] || data[0] || 0,
+            data[2] || data[data.length - 1] || 0
+        ];
     }
-}
 
-let sum = 0;
-let sumSq = 0;
-let w = 0;
+    const lower = [];
+    const variance = [];
 
-for (let l = 2; l <= data.length; l++) {
+    for (let i = 0; i <= data.length; i++) {
+        lower.push(new Array(classes + 1).fill(0));
+        variance.push(new Array(classes + 1).fill(0));
+    }
 
-    sum = 0;
-    sumSq = 0;
-    w = 0;
+    for (let i = 1; i <= classes; i++) {
+        lower[1][i] = 1;
+        variance[1][i] = 0;
+        for (let j = 2; j <= data.length; j++) {
+            variance[j][i] = Infinity;
+        }
+    }
 
-    for (let m = 1; m <= l; m++) {
+    let sum = 0;
+    let sumSq = 0;
+    let w = 0;
 
-        const i3 = l - m + 1;
-        const val = data[i3 - 1];
+    for (let l = 2; l <= data.length; l++) {
 
-        w++;
-        sum += val;
-        sumSq += val * val;
+        sum = 0;
+        sumSq = 0;
+        w = 0;
 
-        const v = sumSq - (sum * sum) / w;
+        for (let m = 1; m <= l; m++) {
 
-        if (i3 !== 1) {
+            const i3 = l - m + 1;
+            const val = data[i3 - 1];
 
-            for (let j = 2; j <= classes; j++) {
+            w++;
+            sum += val;
+            sumSq += val * val;
 
-                if (variance[l][j] >= v + variance[i3 - 1][j - 1]) {
+            const v = sumSq - (sum * sum) / w;
 
-                    lower[l][j] = i3;
-                    variance[l][j] = v + variance[i3 - 1][j - 1];
+            if (i3 !== 1) {
+
+                for (let j = 2; j <= classes; j++) {
+
+                    if (variance[l][j] >= v + variance[i3 - 1][j - 1]) {
+
+                        lower[l][j] = i3;
+                        variance[l][j] = v + variance[i3 - 1][j - 1];
+
+                    }
 
                 }
 
@@ -317,432 +357,493 @@ for (let l = 2; l <= data.length; l++) {
 
         }
 
+        lower[l][1] = 1;
+        variance[l][1] = sumSq - (sum * sum) / w;
+
     }
 
-    lower[l][1] = 1;
-    variance[l][1] = sumSq - (sum * sum) / w;
+    const kclass = new Array(classes + 1);
 
-}
+    let k = data.length;
 
-const kclass = new Array(classes + 1);
+    kclass[classes] = data[data.length - 1];
 
-let k = data.length;
+    for (let j = classes; j >= 2; j--) {
 
-kclass[classes] = data[data.length - 1];
+        const id = lower[k][j] - 2;
 
-for (let j = classes; j >= 2; j--) {
+        kclass[j - 1] = data[id];
 
-    const id = lower[k][j] - 2;
+        k = lower[k][j] - 1;
 
-    kclass[j - 1] = data[id];
-
-    k = lower[k][j] - 1;
-
-}
-
-return [
-    0,
-    Math.round(kclass[1]),
-    Math.round(kclass[2]),
-    Math.round(kclass[3])
-];
-
-}function updateBreaks(){
-
-const cfg = layerConfig[currentLayer];
-
-// Hai lớp phân loại không cần tính khoảng
-if(currentLayer==="KSGM" || currentLayer==="PHUN"){
-    return;
-}
-
-const values = [];
-
-getRows().forEach(row=>{
-
-    const value = Number(row[cfg.field] || 0);
-
-    if(value>0){
-        values.push(value);
     }
 
-});
-
-if(values.length===0){
-    cfg.breaks=[0,1,2,3];
-    return;
-}
-
-cfg.breaks = jenks(values,4);
+    return [
+        0,
+        Math.round(kclass[1]),
+        Math.round(kclass[2]),
+        Math.round(kclass[3])
+    ];
 
 }
+function updateBreaks(){
 
-//===============================// LẤY GIÁ TRỊ THEO LỚP//===============================
+    const cfg = layerConfig[currentLayer];
+
+    // Hai lớp phân loại không cần tính khoảng
+    if(currentLayer==="KSGM" || currentLayer==="PHUN"){
+        return;
+    }
+
+    const values = [];
+
+    getRows().forEach(row=>{
+
+        const value = Number(row[cfg.field] || 0);
+
+        if(value>0){
+            values.push(value);
+        }
+
+    });
+
+    if(values.length===0){
+        cfg.breaks=[0,1,2,3];
+        return;
+    }
+
+    cfg.breaks = jenks(values,4);
+
+}
+
+//===============================
+// LẤY GIÁ TRỊ THEO LỚP
+//===============================
 
 function getValue(row){
 
-if(!row) return 0;
+    if(!row) return 0;
 
-// Riêng lớp KSGM
-if(currentLayer === "KSGM"){
-    return row["KSGM_Trạng thái"] === "Đã triển khai" ? 1 : 0;
+    // Riêng lớp KSGM
+    if(currentLayer === "KSGM"){
+        return row["KSGM_Trạng thái"] === "Đã triển khai" ? 1 : 0;
+    }
+
+    const field = layerConfig[currentLayer].field;
+
+    return Number(row[field] || 0);
+
 }
-
-const field = layerConfig[currentLayer].field;
-
-return Number(row[field] || 0);
-
-}//======================================================// MÀU THEO GIÁ TRỊ//======================================================
+//======================================================
+// MÀU THEO GIÁ TRỊ
+//======================================================
 
 function getColor(value){
 
-const cfg = layerConfig[currentLayer];
+    const cfg = layerConfig[currentLayer];
 
-if(currentLayer==="KSGM"){
+    if(currentLayer==="KSGM"){
 
-    return value>0
-        ? cfg.color[1]
-        : cfg.color[0];
+        return value>0
+            ? cfg.color[1]
+            : cfg.color[0];
+
+    }
+
+    if(value===0) return cfg.color[0];
+
+    if(value<=cfg.breaks[1]) return cfg.color[1];
+
+    if(value<=cfg.breaks[2]) return cfg.color[2];
+
+    if(value<=cfg.breaks[3]) return cfg.color[3];
+
+    return cfg.color[4];
 
 }
 
-if(value===0) return cfg.color[0];
-
-if(value<=cfg.breaks[1]) return cfg.color[1];
-
-if(value<=cfg.breaks[2]) return cfg.color[2];
-
-if(value<=cfg.breaks[3]) return cfg.color[3];
-
-return cfg.color[4];
-
-}
-
-//======================================================// STYLE//======================================================
+//======================================================
+// STYLE
+//======================================================
 
 function style(feature){
 
-const row = getRow(feature);
+    const row = getRow(feature);
 
-return {
+    return {
 
-color: "#F8FAFC",
+    color: "#F8FAFC",
 
-weight: 0.8,
+    weight: 0.8,
 
-opacity: 1,
+    opacity: 1,
 
-fillColor: getColor(getValue(row)),
+    fillColor: getColor(getValue(row)),
 
-fillOpacity: 0.88
+    fillOpacity: 0.88
 
 };
 
 }
 
-//======================================================// POPUP//======================================================
+//======================================================
+// POPUP
+//======================================================
 
 function popupContent(feature){
 
-const row=getRow(feature);
+    const row=getRow(feature);
 
-if(!row){
+    if(!row){
 
-    return `
-<b>${getName(feature)}</b>
-<hr>
-Không có dữ liệu
-
-;
-}
-    let html=<div class="popup-card">
-
-    <h3>${layerConfig[currentLayer].title}</h3>
-
+        return `
+    <b>${getName(feature)}</b>
     <hr>
-
-    <b>📍 ${row["Tên xã"] || getName(feature)}</b>
+    Không có dữ liệu
 `;
+}
+    let html=`
+        <div class="popup-card">
 
-switch(currentLayer){
+        <h3>${layerConfig[currentLayer].title}</h3>
 
-    case "DTLCP":
+        <hr>
 
-        html+=`
-            <p>Trạng thái: <b>${row["DTLCP_Trạng thái"]||"--"}</b></p>
-            <p>Ổ dịch: <b>${row["DTLCP_Ổ dịch"]||0}</b></p>
-            <p>Tiêu hủy: <b>${formatNumber(row["DTLCP_Chết"])} con</b></p>
-            <p>Khối lượng: <b>${formatNumber(row["DTLCP_Trọng lượng"])} kg</b></p>
-            <p>Ngày cuối: <b>${formatDate(row["DTLCP_Ngày cuối"])}</b></p>
-        `;
-        break;
+        <b>📍 ${row["Tên xã"] || getName(feature)}</b>
+    `;
 
-    case "CGC":
+    switch(currentLayer){
 
-        html+=`
-            <p>Trạng thái: <b>${row["CGC_Trạng thái"]||"--"}</b></p>
-            <p>Ổ dịch: <b>${row["CGC_Ổ dịch"]||0}</b></p>
-            <p>Tiêu hủy: <b>${formatNumber(row["CGC_Chết"])} con</b></p>
-            <p>Khối lượng: <b>${formatNumber(row["CGC_Trọng lượng"])} kg</b></p>
-            <p>Ngày cuối: <b>${formatDate(row["CGC_Ngày cuối"])}</b></p>
-        `;
-        break;
+        case "DTLCP":
 
-    case "VDNC":
+            html+=`
+                <p>Trạng thái: <b>${row["DTLCP_Trạng thái"]||"--"}</b></p>
+                <p>Ổ dịch: <b>${row["DTLCP_Ổ dịch"]||0}</b></p>
+                <p>Tiêu hủy: <b>${formatNumber(row["DTLCP_Chết"])} con</b></p>
+                <p>Khối lượng: <b>${formatNumber(row["DTLCP_Trọng lượng"])} kg</b></p>
+                <p>Ngày cuối: <b>${formatDate(row["DTLCP_Ngày cuối"])}</b></p>
+            `;
+            break;
 
-        html+=`
-            <p>Trạng thái: <b>${row["VDNC_Trạng thái"]||"--"}</b></p>
-            <p>Ổ dịch: <b>${row["VDNC_Ổ dịch"]||0}</b></p>
-            <p>Mắc: <b>${formatNumber(row["VDNC_Mắc"])} con</b></p>
-            <p>Chết: <b>${formatNumber(row["VDNC_Chết"])} con</b></p>
-            <p>Ngày cuối: <b>${formatDate(row["VDNC_Ngày cuối"])}</b></p>
-        `;
-        break;
+        case "CGC":
 
-    case "PHUN":
+            html+=`
+                <p>Trạng thái: <b>${row["CGC_Trạng thái"]||"--"}</b></p>
+                <p>Ổ dịch: <b>${row["CGC_Ổ dịch"]||0}</b></p>
+                <p>Tiêu hủy: <b>${formatNumber(row["CGC_Chết"])} con</b></p>
+                <p>Khối lượng: <b>${formatNumber(row["CGC_Trọng lượng"])} kg</b></p>
+                <p>Ngày cuối: <b>${formatDate(row["CGC_Ngày cuối"])}</b></p>
+            `;
+            break;
 
-        html+=`
-            <p>Tiến độ: <b>${row["PHUN_Tiến độ"]||"--"}</b></p>
-            <p>Vòng: <b>${row["PHUN_Vòng"]||"--"}</b></p>
-            <p>Số hộ: <b>${formatNumber(row["PHUN_Số hộ"])}</b></p>
-        `;
-        break;
+        case "VDNC":
 
-    case "KSGM":
+            html+=`
+                <p>Trạng thái: <b>${row["VDNC_Trạng thái"]||"--"}</b></p>
+                <p>Ổ dịch: <b>${row["VDNC_Ổ dịch"]||0}</b></p>
+                <p>Mắc: <b>${formatNumber(row["VDNC_Mắc"])} con</b></p>
+                <p>Chết: <b>${formatNumber(row["VDNC_Chết"])} con</b></p>
+                <p>Ngày cuối: <b>${formatDate(row["VDNC_Ngày cuối"])}</b></p>
+            `;
+            break;
 
-        html+=`
-            <p>Trạng thái: <b>${row["KSGM_Trạng thái"]||"--"}</b></p>
-            <p>Cơ sở: <b>${formatNumber(row["KSGM_Cơ sở"])}</b></p>
-        `;
-        break;
+        case "PHUN":
 
-    case "CSBBTTY":
+            html+=`
+                <p>Tiến độ: <b>${row["PHUN_Tiến độ"]||"--"}</b></p>
+                <p>Vòng: <b>${row["PHUN_Vòng"]||"--"}</b></p>
+                <p>Số hộ: <b>${formatNumber(row["PHUN_Số hộ"])}</b></p>
+            `;
+            break;
 
-        html+=`
-            <p>Cơ sở: <b>${formatNumber(row["CSBBTTY_Cơ sở"])}</b></p>
-        `;
-        break;
+        case "KSGM":
+
+            html+=`
+                <p>Trạng thái: <b>${row["KSGM_Trạng thái"]||"--"}</b></p>
+                <p>Cơ sở: <b>${formatNumber(row["KSGM_Cơ sở"])}</b></p>
+            `;
+            break;
+
+        case "CSBBTTY":
+
+            html+=`
+                <p>Cơ sở: <b>${formatNumber(row["CSBBTTY_Cơ sở"])}</b></p>
+            `;
+            break;
+
+    }
+
+    html+="</div>";
+
+    return html;
 
 }
 
-html+="</div>";
-
-return html;
-
-}
-
-//======================================================// HOVER//======================================================
+//======================================================
+// HOVER
+//======================================================
 
 function highlightFeature(e){
 
-const layer=e.target;
+    const layer=e.target;
 
-layer.setStyle({
+    layer.setStyle({
 
-weight:2,
+    weight:2,
 
-color:"#2563EB",
+    color:"#2563EB",
 
-fillOpacity:1
+    fillOpacity:1
 
 });
 
-if(
-    !L.Browser.ie &&
-    !L.Browser.opera &&
-    !L.Browser.edge
-){
-    layer.bringToFront();
-}
+    if(
+        !L.Browser.ie &&
+        !L.Browser.opera &&
+        !L.Browser.edge
+    ){
+        layer.bringToFront();
+    }
 
 }
 
 function resetHighlight(e){
 
-if(geojsonLayer){
+    if(geojsonLayer){
 
-    geojsonLayer.resetStyle(
-        e.target
-    );
+        geojsonLayer.resetStyle(
+            e.target
+        );
 
-}
+    }
 
-}//======================================================// CLICK XÃ//======================================================
+}//======================================================
+// CLICK XÃ
+//======================================================
 
 function zoomToFeature(e){
 
-const layer = e.target;
+    const layer = e.target;
 
-selectedFeature = layer.feature;
+    selectedFeature = layer.feature;
 
-map.fitBounds(
-    layer.getBounds(),
-    {
-        padding:[30,30],
-        maxZoom:11
-    }
-);
+    map.fitBounds(
+        layer.getBounds(),
+        {
+            padding:[30,30],
+            maxZoom:11
+        }
+    );
 
-showPanel(layer.feature);
+    showPanel(layer.feature);
 
-// layer.openPopup();
+    // layer.openPopup();
 
 }
 
-//======================================================// GẮN SỰ KIỆN CHO TỪNG XÃ//======================================================
+//======================================================
+// GẮN SỰ KIỆN CHO TỪNG XÃ
+//======================================================
 
 function onEachFeature(feature,layer){
 
-layer.on({
+    layer.on({
 
-    mouseover:highlightFeature,
+        mouseover:highlightFeature,
 
-    mouseout:resetHighlight,
+        mouseout:resetHighlight,
 
-    click:zoomToFeature
+        click:zoomToFeature
 
-});
+    });
 
 }
 
-//======================================================// XÓA LABEL//======================================================
+//======================================================
+// XÓA LABEL
+//======================================================
 
 function clearLabels(){
 
-if(labelLayer){
+    if(labelLayer){
 
-    map.removeLayer(labelLayer);
+        map.removeLayer(labelLayer);
 
-    labelLayer=null;
+        labelLayer=null;
+
+    }
 
 }
 
-}
-
-//======================================================// VẼ TÊN XÃ//======================================================const labelOffset = {"Điện Biên Phủ": [0.010, -0.012],"Thanh Yên": [-0.012, 0.015],"Thanh Nưa": [0.020, -0.060],"Thanh An": [0.006, 0.000],"Mường Phăng": [0.000, -0.008],"Na Sang": [0.006, 0.006],"Tủa Thàng": [0.006, 0.008],"Nà Tấu": [-0.005, 0.000],"Mường Ảng": [0.005, -0.004],"Mường Lay": [0.000, 0.006],"Mường Chà": [0.000, -0.006],"Mường Nhé": [0.006, -0.006],"Sín Thầu": [-0.004, 0.004],"Quài Tở": [0.000, 0.005],"Tuần Giáo": [0.006, -0.004],"Pú Nhung": [-0.004, 0.004],"Chà Tở": [0.000, 0.010],
-
+//======================================================
+// VẼ TÊN XÃ
+//======================================================
+const labelOffset = {
+    "Điện Biên Phủ": [0.010, -0.012],
+    "Thanh Yên": [-0.012, 0.015],
+    "Thanh Nưa": [0.020, -0.060],
+    "Thanh An": [0.006, 0.000],
+    "Mường Phăng": [0.000, -0.008],
+    "Na Sang": [0.006, 0.006],
+    "Tủa Thàng": [0.006, 0.008],
+    "Nà Tấu": [-0.005, 0.000],
+    "Mường Ảng": [0.005, -0.004],
+    "Mường Lay": [0.000, 0.006],
+    "Mường Chà": [0.000, -0.006],
+    "Mường Nhé": [0.006, -0.006],
+    "Sín Thầu": [-0.004, 0.004],
+    "Quài Tở": [0.000, 0.005],
+    "Tuần Giáo": [0.006, -0.004],
+    "Pú Nhung": [-0.004, 0.004],
+    "Chà Tở": [0.000, 0.010],
+    
 };
 
 function drawLabels(){
 
-clearLabels();
+    clearLabels();
 
-labelLayer = L.layerGroup();
+    labelLayer = L.layerGroup();
 
-geojsonLayer.eachLayer(function(layer){
+    geojsonLayer.eachLayer(function(layer){
 
-    const row = getRow(layer.feature);
+        const row = getRow(layer.feature);
 
-    if(getValue(row) > 0){
+        if(getValue(row) > 0){
 
-        const center = layer.getBounds().getCenter();
+            const center = layer.getBounds().getCenter();
 
-        const name = row["Tên xã"] || getName(layer.feature);
+            const name = row["Tên xã"] || getName(layer.feature);
 
-        let lat = center.lat;
-        let lng = center.lng;
+            let lat = center.lat;
+            let lng = center.lng;
 
-        if(labelOffset[name]){
-            lat += labelOffset[name][0];
-            lng += labelOffset[name][1];
-        }
+            if(labelOffset[name]){
+                lat += labelOffset[name][0];
+                lng += labelOffset[name][1];
+            }
 
-        let html;
+            let html;
 
-        if(currentLayer === "KSGM"){
+            if(currentLayer === "KSGM"){
 
-            const cs = Number(row["KSGM_Cơ sở"] || 0);
+                const cs = Number(row["KSGM_Cơ sở"] || 0);
 
-            html = `
-                <div>
-                    ${name}
-                    ${cs > 0 ? `<br><span class="ksgm-count">${cs}</span>` : ""}
-                </div>
-            `;
+                html = `
+                    <div>
+                        ${name}
+                        ${cs > 0 ? `<br><span class="ksgm-count">${cs}</span>` : ""}
+                    </div>
+                `;
 
-        }else{
+            }else{
 
-            html = `<div>${name}</div>`;
+                html = `<div>${name}</div>`;
 
-        }
+            }
 
-        const label = L.marker([lat,lng],{
-            interactive:false,
-            icon:L.divIcon({
-                className:"map-label",
-                html:html,
-                iconSize:null,
-                iconAnchor:[0,0]
-            })
-        });
+            const label = L.marker([lat,lng],{
+                interactive:false,
+                icon:L.divIcon({
+                    className:"map-label",
+                    html:html,
+                    iconSize:null,
+                    iconAnchor:[0,0]
+                })
+            });
 
-        labelLayer.addLayer(label);
+            labelLayer.addLayer(label);
 
-    } // <-- đóng if(getValue(row)>0)
+        } // <-- đóng if(getValue(row)>0)
 
-}); // <-- đóng eachLayer
+    }); // <-- đóng eachLayer
 
-labelLayer.addTo(map);
+    labelLayer.addTo(map);
 
-}//======================================================// CẬP NHẬT CHÚ GIẢI//======================================================
+}        
+//======================================================
+// CẬP NHẬT CHÚ GIẢI
+//======================================================
 
 function updateLegend() {
 
-if (legendControl) {
-    map.removeControl(legendControl);
-}
-
-legendControl = L.control({ position: "bottomright" });
-
-legendControl.onAdd = function () {
-
-    const div = L.DomUtil.create("div", "legend");
-    const cfg = layerConfig[currentLayer];
-
-    //========================
-    // PHUN
-    //========================
-    if (currentLayer === "PHUN") {
-
-        div.innerHTML = `
-            <h4>${cfg.title}</h4>
-
-            <div><i style="background:${cfg.color[0]}"></i>Chưa triển khai</div>
-            <div><i style="background:${cfg.color[1]}"></i>Vòng 1</div>
-            <div><i style="background:${cfg.color[2]}"></i>Vòng 2</div>
-            <div><i style="background:${cfg.color[3]}"></i>Vòng 3</div>
-            <div><i style="background:${cfg.color[4]}"></i>Vòng 4</div>
-        `;
-
-        return div;
+    if (legendControl) {
+        map.removeControl(legendControl);
     }
 
-    //========================
-    // KSGM
-    //========================
-    if (currentLayer === "KSGM") {
+    legendControl = L.control({ position: "bottomright" });
 
-        div.innerHTML = `
-            <h4>${cfg.title}</h4>
+    legendControl.onAdd = function () {
 
-            <div><i style="background:${cfg.color[0]}"></i>Chưa triển khai</div>
-            <div><i style="background:${cfg.color[1]}"></i>Đã triển khai</div>
+        const div = L.DomUtil.create("div", "legend");
+        const cfg = layerConfig[currentLayer];
 
-            <hr>
+        //========================
+        // PHUN
+        //========================
+        if (currentLayer === "PHUN") {
 
-            <div class="legend-dot-row">
-                <span class="legend-red-dot"></span>
-                <span>Số màu đỏ trên tên xã<br><b>= Số cơ sở giết mổ</b></span>
-            </div>
-        `;
+            div.innerHTML = `
+                <h4>${cfg.title}</h4>
 
-        return div;
-    }
+                <div><i style="background:${cfg.color[0]}"></i>Chưa triển khai</div>
+                <div><i style="background:${cfg.color[1]}"></i>Vòng 1</div>
+                <div><i style="background:${cfg.color[2]}"></i>Vòng 2</div>
+                <div><i style="background:${cfg.color[3]}"></i>Vòng 3</div>
+                <div><i style="background:${cfg.color[4]}"></i>Vòng 4</div>
+            `;
 
-    //========================
-    // CSBBTTY
-    //========================
-    if (currentLayer === "CSBBTTY") {
+            return div;
+        }
+
+        //========================
+        // KSGM
+        //========================
+        if (currentLayer === "KSGM") {
+
+            div.innerHTML = `
+                <h4>${cfg.title}</h4>
+
+                <div><i style="background:${cfg.color[0]}"></i>Chưa triển khai</div>
+                <div><i style="background:${cfg.color[1]}"></i>Đã triển khai</div>
+
+                <hr>
+
+                <div class="legend-dot-row">
+                    <span class="legend-red-dot"></span>
+                    <span>Số màu đỏ trên tên xã<br><b>= Số cơ sở giết mổ</b></span>
+                </div>
+            `;
+
+            return div;
+        }
+
+        //========================
+        // CSBBTTY
+        //========================
+        if (currentLayer === "CSBBTTY") {
+
+            const b = cfg.breaks;
+
+            div.innerHTML = `
+                <h4>${cfg.title}</h4>
+
+                <div><i style="background:${cfg.color[1]}"></i>1 - ${b[1]}</div>
+                <div><i style="background:${cfg.color[2]}"></i>${b[1] + 1} - ${b[2]}</div>
+                <div><i style="background:${cfg.color[3]}"></i>${b[2] + 1} - ${b[3]}</div>
+                <div><i style="background:${cfg.color[4]}"></i>> ${b[3]}</div>
+
+                <hr>
+
+                <div><i style="background:${cfg.color[0]}"></i>Không có cơ sở</div>
+            `;
+
+            return div;
+        }
+
+        //========================
+        // DTLCP - CGC - VDNC - DẠI
+        //========================
 
         const b = cfg.breaks;
 
@@ -756,291 +857,287 @@ legendControl.onAdd = function () {
 
             <hr>
 
-            <div><i style="background:${cfg.color[0]}"></i>Không có cơ sở</div>
+            <div class="legend-dot-row">
+                <span class="legend-red-dot"></span>
+                <span>Xã đang xảy ra dịch</span>
+            </div>
+
+            <div>
+                <i style="background:${cfg.color[0]}"></i>
+                Không có dịch
+            </div>
         `;
 
         return div;
-    }
+    };
 
-    //========================
-    // DTLCP - CGC - VDNC - DẠI
-    //========================
-
-    const b = cfg.breaks;
-
-    div.innerHTML = `
-        <h4>${cfg.title}</h4>
-
-        <div><i style="background:${cfg.color[1]}"></i>1 - ${b[1]}</div>
-        <div><i style="background:${cfg.color[2]}"></i>${b[1] + 1} - ${b[2]}</div>
-        <div><i style="background:${cfg.color[3]}"></i>${b[2] + 1} - ${b[3]}</div>
-        <div><i style="background:${cfg.color[4]}"></i>> ${b[3]}</div>
-
-        <hr>
-
-        <div class="legend-dot-row">
-            <span class="legend-red-dot"></span>
-            <span>Xã đang xảy ra dịch</span>
-        </div>
-
-        <div>
-            <i style="background:${cfg.color[0]}"></i>
-            Không có dịch
-        </div>
-    `;
-
-    return div;
-};
-
-legendControl.addTo(map);
-
-}//======================================================// TÌM XÃ//======================================================
+    legendControl.addTo(map);
+}
+//======================================================
+// TÌM XÃ
+//======================================================
 
 function searchFeature(keyword){
 
-if(!geojsonLayer) return;
+    if(!geojsonLayer) return;
 
-keyword=keyword.trim().toLowerCase();
+    keyword=keyword.trim().toLowerCase();
 
-geojsonLayer.eachLayer(function(layer){
+    geojsonLayer.eachLayer(function(layer){
 
-    const name=getName(layer.feature).toLowerCase();
+        const name=getName(layer.feature).toLowerCase();
 
-    if(name.includes(keyword)){
+        if(name.includes(keyword)){
 
-        selectedFeature=layer.feature;
+            selectedFeature=layer.feature;
 
-        map.fitBounds(layer.getBounds(),{
+            map.fitBounds(layer.getBounds(),{
 
-            padding:[30,30],
-            maxZoom:11
+                padding:[30,30],
+                maxZoom:11
 
-        });
+            });
 
-        showPanel(layer.feature);
+            showPanel(layer.feature);
 
 // layer.openPopup();
 
-    }
+        }
 
-});
+    });
 
 }
 
-//======================================================// LÀM MỚI BẢN ĐỒ//======================================================
+//======================================================
+// LÀM MỚI BẢN ĐỒ
+//======================================================
 
 function refreshMap(){
 
-updateBreaks();
+    updateBreaks();
 
-if(!geojsonLayer) return;
+    if(!geojsonLayer) return;
 
-geojsonLayer.setStyle(style);
+    geojsonLayer.setStyle(style);
 
-geojsonLayer.eachLayer(function(layer){
-    layer.unbindPopup();
-});
-
-
-drawOutbreakPoints();
-drawLabels();
-
-updateLegend();
-
-updateDashboard();
-
-if(selectedFeature){
-    showPanel(selectedFeature);
-}
-
-}
-
-function drawOutbreakPoints(){
-
-if(outbreakLayer){
-    map.removeLayer(outbreakLayer);
-}
-
-if(currentLayer !== "DTLCP") return;
-
-outbreakLayer = L.layerGroup();
-
-geojsonLayer.eachLayer(function(layer){
-
-    const row = getRow(layer.feature);
-
-    if(!row) return;
-
-    if(row["DTLCP_Trạng thái"] !== "Đang có dịch") return;
-
-    const center = layer.getBounds().getCenter();
-
-    const name = row["Tên xã"] || getName(layer.feature);
-
-    let lat = center.lat;
-    let lng = center.lng;
-
-    // Dùng đúng offset của tên xã
-    if(labelOffset[name]){
-        lat += labelOffset[name][0];
-        lng += labelOffset[name][1];
-    }
-
-    // Chấm đỏ nằm bên trái tên xã
-    lng -= 0.004;
-
-    const dot = L.marker([lat,lng],{
-        interactive:false,
-        icon:L.divIcon({
-            className:"",
-            html:`
-                <div style="
-                    width:8px;
-                    height:8px;
-                    background:#ff0000;
-                    border:1.5px solid #ffffff;
-                    border-radius:50%;
-                    box-shadow:0 0 3px rgba(0,0,0,.35);
-                "></div>
-            `,
-            iconSize:[8,8],
-            iconAnchor:[4,4]
-        })
+    geojsonLayer.eachLayer(function(layer){
+        layer.unbindPopup();
     });
 
-    outbreakLayer.addLayer(dot);
+    
+    drawOutbreakPoints();
+    drawLabels();
 
-});
+    updateLegend();
 
-outbreakLayer.addTo(map);
+    updateDashboard();
 
-}//======================================================// CẬP NHẬT DASHBOARD//======================================================
+    if(selectedFeature){
+        showPanel(selectedFeature);
+    }
+
+}  
+
+   function drawOutbreakPoints(){
+
+    if(outbreakLayer){
+        map.removeLayer(outbreakLayer);
+    }
+
+    if(currentLayer !== "DTLCP") return;
+
+    outbreakLayer = L.layerGroup();
+
+    geojsonLayer.eachLayer(function(layer){
+
+        const row = getRow(layer.feature);
+
+        if(!row) return;
+
+        if(row["DTLCP_Trạng thái"] !== "Đang có dịch") return;
+
+        const center = layer.getBounds().getCenter();
+
+        const name = row["Tên xã"] || getName(layer.feature);
+
+        let lat = center.lat;
+        let lng = center.lng;
+
+        // Dùng đúng offset của tên xã
+        if(labelOffset[name]){
+            lat += labelOffset[name][0];
+            lng += labelOffset[name][1];
+        }
+
+        // Chấm đỏ nằm bên trái tên xã
+        lng -= 0.004;
+
+        const dot = L.marker([lat,lng],{
+            interactive:false,
+            icon:L.divIcon({
+                className:"",
+                html:`
+                    <div style="
+                        width:8px;
+                        height:8px;
+                        background:#ff0000;
+                        border:1.5px solid #ffffff;
+                        border-radius:50%;
+                        box-shadow:0 0 3px rgba(0,0,0,.35);
+                    "></div>
+                `,
+                iconSize:[8,8],
+                iconAnchor:[4,4]
+            })
+        });
+
+        outbreakLayer.addLayer(dot);
+
+    });
+
+    outbreakLayer.addTo(map);
+
+}
+//======================================================
+// CẬP NHẬT DASHBOARD
+//======================================================
 
 function updateDashboard(){
 
-if(typeof dashboard==="undefined") return;
+    if(typeof dashboard==="undefined") return;
 
-dashboard.update();
+    dashboard.update();
 
 }
 
-//======================================================// LOAD GEOJSON//======================================================
+//======================================================
+// LOAD GEOJSON
+//======================================================
 
 async function loadGeoJSON(){
 
-try{
+    try{
 
-    const res=await fetch("data/dienbien_xa.geojson");
+        const res=await fetch("data/dienbien_xa.geojson");
 
-    if(!res.ok){
+        if(!res.ok){
 
-        throw new Error("Không đọc được GeoJSON");
-
-    }
-
-    const geojson=await res.json();
-
-    if(geojsonLayer){
-
-        map.removeLayer(geojsonLayer);
-
-    }
-
-    geojsonLayer=L.geoJSON(
-
-        geojson,
-
-        {
-
-            style:style,
-
-            onEachFeature:onEachFeature
+            throw new Error("Không đọc được GeoJSON");
 
         }
 
-    ).addTo(map);
+        const geojson=await res.json();
 
-    map.fitBounds(
-        geojsonLayer.getBounds()
-    );
+        if(geojsonLayer){
 
-   drawOutbreakPoints();
-     drawLabels();
+            map.removeLayer(geojsonLayer);
+
+        }
+
+        geojsonLayer=L.geoJSON(
+
+            geojson,
+
+            {
+
+                style:style,
+
+                onEachFeature:onEachFeature
+
+            }
+
+        ).addTo(map);
+
+        map.fitBounds(
+            geojsonLayer.getBounds()
+        );
+
+       drawOutbreakPoints();
+         drawLabels();
 
 updateLegend();
 
 updateDashboard();
 
+    }
+    catch(err){
+
+        console.error(err);
+
+        alert("Không thể tải dữ liệu bản đồ.");
+
+    }
+
 }
-catch(err){
 
-    console.error(err);
-
-    alert("Không thể tải dữ liệu bản đồ.");
-
-}
-
-}
-
-//======================================================// ĐỔI LỚP DỮ LIỆU//======================================================
+//======================================================
+// ĐỔI LỚP DỮ LIỆU
+//======================================================
 
 function setLayer(layerName){
 
-if(!layerConfig[layerName]) return;
+    if(!layerConfig[layerName]) return;
 
-currentLayer=layerName;
+    currentLayer=layerName;
 
-refreshMap();
+    refreshMap();
 
 }
 
-//======================================================// LÀM MỚI DỮ LIỆU GOOGLE SHEETS//======================================================
+//======================================================
+// LÀM MỚI DỮ LIỆU GOOGLE SHEETS
+//======================================================
 
 async function reloadData(){
 
-try{
+    try{
+
+        if(typeof loadSheet==="function"){
+
+            await loadSheet();
+
+        }
+
+        refreshMap();
+
+    }
+    catch(err){
+
+        console.error(err);
+
+    }
+
+}
+
+//======================================================
+// KHỞI TẠO
+//======================================================
+
+async function initMap(){
+
+    await loadGeoJSON();
 
     if(typeof loadSheet==="function"){
 
         await loadSheet();
 
+        refreshMap();
+
     }
 
-    refreshMap();
-
-}
-catch(err){
-
-    console.error(err);
-
 }
 
-}
+//======================================================
+// BẮT ĐẦU
+//======================================================
 
-//======================================================// KHỞI TẠO//======================================================
+document.addEventListener(
+    "DOMContentLoaded",
+    async function(){
 
-async function initMap(){
+        await initMap();
 
-await loadGeoJSON();
+        addMapTools();
 
-if(typeof loadSheet==="function"){
-
-    await loadSheet();
-
-    refreshMap();
-
-}
-
-}
-
-//======================================================// BẮT ĐẦU//======================================================
-
-document.addEventListener("DOMContentLoaded",async function(){
-
-    await initMap();
-
-    addMapTools();
-
-}
-
+    }
 );
