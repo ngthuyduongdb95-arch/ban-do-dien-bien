@@ -626,3 +626,114 @@ SCROLLBAR
     height:18px;
 
 }
+
+/* ==========================================
+   TỔNG QUAN TOÀN TỈNH
+========================================== */
+
+.overview{
+    padding:4px;
+}
+
+.overview-head{
+    padding:4px 2px 10px;
+}
+
+.overview-title{
+    font-size:20px;
+    font-weight:800;
+    color:#172033;
+}
+
+.overview-subtitle{
+    margin-top:3px;
+    font-size:12px;
+    color:#64748b;
+}
+
+.overview-card{
+    margin-bottom:12px;
+    padding:13px;
+    border-radius:14px;
+    background:#fff;
+    border-left:4px solid #64748b;
+    box-shadow:0 3px 12px rgba(15,23,42,.08);
+}
+
+.overview-card-title{
+    margin-bottom:10px;
+    font-size:14px;
+    font-weight:800;
+    color:#172033;
+}
+
+.overview-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+}
+
+.overview-grid > div{
+    padding:9px;
+    background:#f8fafc;
+    border-radius:9px;
+}
+
+.overview-grid .wide{
+    grid-column:1 / -1;
+}
+
+.overview-grid span{
+    display:block;
+    font-size:11px;
+    line-height:1.35;
+    color:#64748b;
+}
+
+.overview-grid b{
+    display:block;
+    margin-top:4px;
+    font-size:16px;
+    color:#172033;
+}
+
+.overview-card.dtlcp{
+    border-left-color:#009298;
+}
+
+.overview-card.cgc{
+    border-left-color:#A2007C;
+}
+
+.overview-card.vdnc{
+    border-left-color:#2563EB;
+}
+
+.overview-card.ksgm{
+    border-left-color:#0288D1;
+}
+
+.overview-card.bbtty{
+    border-left-color:#5E35B1;
+}
+
+@media(max-width:600px){
+
+    .overview-title{
+        font-size:18px;
+    }
+
+    .overview-card{
+        padding:10px;
+        margin-bottom:9px;
+    }
+
+    .overview-grid{
+        gap:6px;
+    }
+
+    .overview-grid b{
+        font-size:14px;
+    }
+
+}
