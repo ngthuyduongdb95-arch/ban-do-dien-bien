@@ -999,17 +999,305 @@ function refreshMap(){
 
 }
 //======================================================
-// CẬP NHẬT DASHBOARD
+// CẬP NHẬT TỔNG QUAN
 //======================================================
 
 function updateDashboard(){
 
-    if(typeof dashboard==="undefined") return;
+    const rows = getRows();
 
-    dashboard.update();
+    if(!rows || !rows.length) return;
 
+    const num = v => {
+        const n = Number(v);
+        return Number.isFinite(n) ? n : 0;
+    };
+
+    const fmt = v => num(v).toLocaleString("vi-VN");
+
+
+    //==================================================
+    // DTLCP
+    //==================================================
+
+    const dtlcpLuyKe = rows.filter(r =>
+        r["DTLCP_Trạng thái"] === "Đang có dịch" ||
+        r["DTLCP_Trạng thái"] === "Đã qua 21 ngày"
+    ).length;
+
+    const dtlcpDangDich = rows.filter(r =>
+        r["DTLCP_Trạng thái"] === "Đang có dịch"
+    ).length;
+
+    const dtlcpChet = rows.reduce(
+        (s,r) => s + num(r["DTLCP_Chết"]), 0
+    );
+
+    const dtlcpTrongLuong = rows.reduce(
+        (s,r) => s + num(r["DTLCP_Trọng lượng"]), 0
+    );
+
+
+    //==================================================
+    // CGC
+    //==================================================
+
+    const cgcLuyKe = rows.filter(r =>
+        r["CGC_Trạng thái"] === "Đang có dịch" ||
+        r["CGC_Trạng thái"] === "Đã qua 21 ngày"
+    ).length;
+
+    const cgcDangDich = rows.filter(r =>
+        r["CGC_Trạng thái"] === "Đang có dịch"
+    ).length;
+
+    const cgcChet = rows.reduce(
+        (s,r) => s + num(r["CGC_Chết"]), 0
+    );
+
+    const cgcTrongLuong = rows.reduce(
+        (s,r) => s + num(r["CGC_Trọng lượng"]), 0
+    );
+
+
+    //==================================================
+    // VDNC
+    //==================================================
+
+    const vdncLuyKe = rows.filter(r =>
+        r["VDNC_Trạng thái"] === "Đang có dịch" ||
+        r["VDNC_Trạng thái"] === "Đã qua 21 ngày"
+    ).length;
+
+    const vdncDangDich = rows.filter(r =>
+        r["VDNC_Trạng thái"] === "Đang có dịch"
+    ).length;
+
+    const vdncMac = rows.reduce(
+        (s,r) => s + num(r["VDNC_Mắc"]), 0
+    );
+
+
+    //==================================================
+    // KSGM
+    //==================================================
+
+    const ksgmCoSo = rows.reduce(
+        (s,r) => s + num(r["KSGM_Cơ sở"]), 0
+    );
+
+    const ksgmXa = rows.filter(r =>
+        r["KSGM_Trạng thái"] === "Đã triển khai"
+    ).length;
+
+
+    //==================================================
+    // BBTTY
+    //==================================================
+
+    const bbttyCoSo = rows.reduce(
+        (s,r) => s + num(r["CSBBTTY_Cơ sở"]), 0
+    );
+
+    const bbttyXa = rows.filter(r =>
+        num(r["CSBBTTY_Cơ sở"]) > 0
+    ).length;
+
+
+    //==================================================
+    // TÌM PANEL TỔNG QUAN HIỆN TẠI
+    //==================================================
+
+    const panel =
+        document.querySelector("#info-panel") ||
+        document.querySelector(".info-panel") ||
+        document.querySelector("#dashboard") ||
+        document.querySelector(".dashboard");
+
+    if(!panel) return;
+
+
+    //==================================================
+    // GIAO DIỆN TỔNG QUAN
+    //==================================================
+
+    panel.innerHTML = `
+
+    <div class="overview">
+
+        <div class="overview-head">
+            <div class="overview-title">
+                TỔNG QUAN TOÀN TỈNH
+            </div>
+
+            <div class="overview-subtitle">
+                Tình hình dịch bệnh và mạng lưới cơ sở
+            </div>
+        </div>
+
+
+        <!-- DTLCP -->
+
+        <div class="overview-card dtlcp">
+
+            <div class="overview-card-title">
+                🐖 DỊCH TẢ LỢN CHÂU PHI
+            </div>
+
+            <div class="overview-grid">
+
+                <div>
+                    <span>Số xã có dịch lũy kế</span>
+                    <b>${fmt(dtlcpLuyKe)} xã</b>
+                </div>
+
+                <div>
+                    <span>Số xã đang có dịch</span>
+                    <b>${fmt(dtlcpDangDich)} xã</b>
+                </div>
+
+                <div>
+                    <span>Số lợn chết</span>
+                    <b>${fmt(dtlcpChet)} con</b>
+                </div>
+
+                <div>
+                    <span>Số lợn tiêu hủy</span>
+                    <b>${fmt(dtlcpChet)} con</b>
+                </div>
+
+                <div class="wide">
+                    <span>Tổng trọng lượng tiêu hủy</span>
+                    <b>${fmt(dtlcpTrongLuong)} kg</b>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CGC -->
+
+        <div class="overview-card cgc">
+
+            <div class="overview-card-title">
+                🐔 CÚM GIA CẦM
+            </div>
+
+            <div class="overview-grid">
+
+                <div>
+                    <span>Số xã có dịch lũy kế</span>
+                    <b>${fmt(cgcLuyKe)} xã</b>
+                </div>
+
+                <div>
+                    <span>Số xã đang có dịch</span>
+                    <b>${fmt(cgcDangDich)} xã</b>
+                </div>
+
+                <div>
+                    <span>Số gia cầm chết</span>
+                    <b>${fmt(cgcChet)} con</b>
+                </div>
+
+                <div>
+                    <span>Số gia cầm tiêu hủy</span>
+                    <b>${fmt(cgcChet)} con</b>
+                </div>
+
+                <div class="wide">
+                    <span>Tổng trọng lượng tiêu hủy</span>
+                    <b>${fmt(cgcTrongLuong)} kg</b>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- VDNC -->
+
+        <div class="overview-card vdnc">
+
+            <div class="overview-card-title">
+                🐄 VIÊM DA NỔI CỤC
+            </div>
+
+            <div class="overview-grid">
+
+                <div>
+                    <span>Số xã có dịch lũy kế</span>
+                    <b>${fmt(vdncLuyKe)} xã</b>
+                </div>
+
+                <div>
+                    <span>Số xã đang có dịch</span>
+                    <b>${fmt(vdncDangDich)} xã</b>
+                </div>
+
+                <div class="wide">
+                    <span>Số gia súc mắc bệnh</span>
+                    <b>${fmt(vdncMac)} con</b>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- KSGM -->
+
+        <div class="overview-card ksgm">
+
+            <div class="overview-card-title">
+                🔪 KIỂM SOÁT GIẾT MỔ
+            </div>
+
+            <div class="overview-grid">
+
+                <div>
+                    <span>Số cơ sở</span>
+                    <b>${fmt(ksgmCoSo)} cơ sở</b>
+                </div>
+
+                <div>
+                    <span>Số xã đã triển khai</span>
+                    <b>${fmt(ksgmXa)} xã</b>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- BBTTY -->
+
+        <div class="overview-card bbtty">
+
+            <div class="overview-card-title">
+                💊 CƠ SỞ BUÔN BÁN THUỐC THÚ Y
+            </div>
+
+            <div class="overview-grid">
+
+                <div>
+                    <span>Số cơ sở</span>
+                    <b>${fmt(bbttyCoSo)} cơ sở</b>
+                </div>
+
+                <div>
+                    <span>Số xã có cơ sở</span>
+                    <b>${fmt(bbttyXa)} xã</b>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    `;
 }
-
 //======================================================
 // LOAD GEOJSON
 //======================================================
