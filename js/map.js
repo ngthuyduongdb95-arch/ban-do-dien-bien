@@ -1991,30 +1991,248 @@ function clearMapOverlays(){
 
 function renderGeoJSON(){
 
-    if(
-    currentLayer === "DTLCP" ||
-    currentLayer === "CGC" ||
-    currentLayer === "VDNC" ||
-    currentLayer === "DAI"
-){
+    if(!map || !geojsonData){
 
-    const label =
-        createDiseaseLabel(feature);
-
-    if(label){
-
-        label.addTo(labelLayer);
-
-    }
-
-    addDiseaseMarker(feature);
-}{
+        console.warn(
+            "Chưa có map hoặc GeoJSON"
+        );
 
         return;
 
     }
 
 
+    //==================================================
+    // XÓA LAYER CŨ
+    //==================================================
+
+    if(geojsonLayer){
+
+        map.removeLayer(
+            geojsonLayer
+        );
+
+        geojsonLayer = null;
+
+    }
+
+
+    //==================================================
+    // XÓA NHÃN CŨ
+    //==================================================
+
+    if(labelLayer){
+
+        map.removeLayer(
+            labelLayer
+        );
+
+    }
+
+
+    labelLayer =
+        L.layerGroup()
+            .addTo(map);
+
+
+    //==================================================
+    // XÓA CHẤM ĐỎ CŨ
+    //==================================================
+
+    if(diseaseMarkerLayer){
+
+        map.removeLayer(
+            diseaseMarkerLayer
+        );
+
+    }
+
+
+    diseaseMarkerLayer =
+        L.layerGroup()
+            .addTo(map);
+
+
+    //==================================================
+    // TẠO GEOJSON
+    //==================================================
+
+    geojsonLayer = L.geoJSON(
+
+        geojsonData,
+
+        {
+
+            //==========================================
+            // MÀU XÃ
+            //==========================================
+
+            style: function(feature){
+
+                return getFeatureStyle(
+                    feature
+                );
+
+            },
+
+
+            //==========================================
+            // XỬ LÝ TỪNG XÃ
+            //==========================================
+
+            onEachFeature:
+                function(feature, layer){
+
+                    //==================================
+                    // CLICK XÃ
+                    //==================================
+
+                    layer.on(
+                        "click",
+                        function(){
+
+                            if(
+                                typeof showPanel ===
+                                "function"
+                            ){
+
+                                showPanel(
+                                    feature
+                                );
+
+                            }
+
+                        }
+                    );
+
+
+                    //==================================
+                    // HOVER
+                    //==================================
+
+                    layer.on(
+                        "mouseover",
+                        function(){
+
+                            this.setStyle({
+
+                                weight: 2,
+
+                                color: "#1976D2",
+
+                                fillOpacity: .85
+
+                            });
+
+                        }
+                    );
+
+
+                    layer.on(
+                        "mouseout",
+                        function(){
+
+                            if(
+                                geojsonLayer
+                            ){
+
+                                geojsonLayer.resetStyle(
+                                    this
+                                );
+
+                            }
+
+                        }
+                    );
+
+
+                    //==================================
+                    // CHỈ CÁC LỚP BỆNH
+                    //==================================
+
+                    if(
+
+                        currentLayer ===
+                        "DTLCP" ||
+
+                        currentLayer ===
+                        "CGC" ||
+
+                        currentLayer ===
+                        "VDNC" ||
+
+                        currentLayer ===
+                        "DAI"
+
+                    ){
+
+                        //================================
+                        // TÊN XÃ CÓ SỐ LIỆU
+                        //================================
+
+                        const label =
+                            createDiseaseLabel(
+                                feature
+                            );
+
+
+                        if(label){
+
+                            label.addTo(
+                                labelLayer
+                            );
+
+                        }
+
+
+                        //================================
+                        // CHẤM ĐỎ XÃ ĐANG CÓ DỊCH
+                        //================================
+
+                        addDiseaseMarker(
+                            feature
+                        );
+
+                    }
+
+                }
+
+        }
+
+    ).addTo(map);
+
+
+    //==================================================
+    // CĂN BẢN ĐỒ
+    //==================================================
+
+    const bounds =
+        geojsonLayer.getBounds();
+
+
+    if(
+        bounds &&
+        bounds.isValid()
+    ){
+
+        map.fitBounds(
+
+            bounds,
+
+            {
+
+                padding: [
+                    20,
+                    20
+                ]
+
+            }
+
+        );
+
+    }
+
+}
     //==================================================
     // XÓA BẢN ĐỒ CŨ
     //==================================================
