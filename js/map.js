@@ -1891,61 +1891,41 @@ function createDiseaseLabel(
 
 
 //======================================================
-// CHẤM ĐỎ XÃ ĐANG CÓ DỊCH
+// CHẤM ĐỎ NHẤP NHÁY - XÃ ĐANG CÓ DỊCH
 //======================================================
 
-function addDiseaseMarker(
-    feature
-){
+function addDiseaseMarker(feature){
 
     const row =
-        getFeatureRow(
-            feature
-        );
-
+        getFeatureRow(feature);
 
     const config =
-        LAYER_CONFIG[
-            currentLayer
-        ];
-
+        LAYER_CONFIG[currentLayer];
 
     if(
-
         !row ||
-
         !config ||
-
         !config.status
-
     ){
 
         return;
 
     }
 
-
-    // Chỉ xã đang có dịch
-
+    // Chỉ xã ĐANG CÓ DỊCH
     if(
-
         !isDiseaseActive(
             row,
             config.status
         )
-
     ){
 
         return;
 
     }
 
-
     const center =
-        getFeatureCenter(
-            feature
-        );
-
+        getFeatureCenter(feature);
 
     if(!center){
 
@@ -1953,11 +1933,8 @@ function addDiseaseMarker(
 
     }
 
-
     L.circleMarker(
-
         center,
-
         {
 
             radius: 3,
@@ -1970,17 +1947,16 @@ function addDiseaseMarker(
 
             fillOpacity: 1,
 
-            interactive: false
+            interactive: false,
+
+            className: "disease-pulse"
 
         }
-
     ).addTo(
         diseaseMarkerLayer
     );
 
 }
-
-
 //======================================================
 // XÓA CÁC LAYER PHỤ
 //======================================================
