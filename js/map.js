@@ -251,35 +251,62 @@ function getFeatureRow(feature){
 
 
 //======================================================
-// LẤY TÊN XÃ
+// LẤY TÊN XÃ/PHƯỜNG
+// ƯU TIÊN TÊN TỪ GOOGLE SHEETS
 //======================================================
 
 function getName(feature){
 
-    if(
-        !feature ||
-        !feature.properties
-    ){
+    if(!feature){
         return "";
     }
 
+    //==============================================
+    // 1. Lấy từ Google Sheets theo ID
+    //==============================================
 
-    const p = feature.properties;
+    const row =
+        getFeatureRow(feature);
+
+    if(row){
+
+        const sheetName =
+            String(
+                row["Tên xã"] || ""
+            ).trim();
+
+        if(sheetName){
+            return sheetName;
+        }
+
+    }
 
 
-    return (
-        p["Tên xã"] ||
-        p["TEN_XA"] ||
-        p["TENXA"] ||
-        p["NAME"] ||
-        p["Name"] ||
-        p["name"] ||
-        ""
-    );
+    //==============================================
+    // 2. Nếu Sheet không có thì lấy từ GeoJSON
+    //==============================================
+
+    if(feature.properties){
+
+        const p =
+            feature.properties;
+
+        return (
+            p["Tên xã"] ||
+            p["TEN_XA"] ||
+            p["TENXA"] ||
+            p["NAME"] ||
+            p["Name"] ||
+            p["name"] ||
+            ""
+        );
+
+    }
+
+
+    return "";
 
 }
-
-
 //======================================================
 // CHUẨN HÓA TRẠNG THÁI
 //======================================================
