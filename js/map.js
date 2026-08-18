@@ -1891,7 +1891,7 @@ function createDiseaseLabel(
 
 
 //======================================================
-// CHẤM ĐỎ NHẤP NHÁY - XÃ ĐANG CÓ DỊCH
+// CHẤM TRÒN ĐỎ - XÃ ĐANG CÓ DỊCH
 //======================================================
 
 function addDiseaseMarker(feature){
@@ -1912,7 +1912,7 @@ function addDiseaseMarker(feature){
 
     }
 
-    // Chỉ xã ĐANG CÓ DỊCH
+    // Chỉ xã đang có dịch
     if(
         !isDiseaseActive(
             row,
@@ -1937,19 +1937,22 @@ function addDiseaseMarker(feature){
         center,
         {
 
-            radius: 3,
+            // Chấm nhỏ
+            radius: 4,
 
+            // Viền sáng
             color: "#FFFFFF",
 
-            weight: 1,
+            weight: 1.5,
 
+            // Lõi đỏ
             fillColor: "#FF0000",
 
             fillOpacity: 1,
 
-            interactive: false,
+            opacity: 1,
 
-            className: "disease-pulse"
+            interactive: false
 
         }
     ).addTo(
