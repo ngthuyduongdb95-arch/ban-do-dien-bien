@@ -1828,34 +1828,20 @@ function featureHasDisease(feature){
 
 }
 //======================================================
-// TẠO NHÃN TÊN XÃ
-//======================================================
-//
-// Chỉ hiện tên xã/phường có dịch.
+// TẠO TÊN XÃ/PHƯỜNG
+// Chỉ hiện nơi có số liệu của lớp đang chọn
 //======================================================
 
-function createDiseaseLabel(
-    feature
-){
+function createDiseaseLabel(feature){
 
-    if(
-
-        !featureHasDisease(
-            feature
-        )
-
-    ){
+    if(!featureHasDisease(feature)){
 
         return null;
 
     }
 
-
     const name =
-        getName(
-            feature
-        );
-
+        getName(feature);
 
     if(!name){
 
@@ -1863,12 +1849,8 @@ function createDiseaseLabel(
 
     }
 
-
     const center =
-        getFeatureCenter(
-            feature
-        );
-
+        getFeatureCenter(feature);
 
     if(!center){
 
@@ -1876,40 +1858,33 @@ function createDiseaseLabel(
 
     }
 
-
     return L.marker(
 
         center,
 
         {
 
-            icon:
-                L.divIcon({
+            icon: L.divIcon({
 
-                    className:
-                        "map-label",
+                className: "map-label",
 
-                    html:
-                        `<div>${name}</div>`,
+                html: `
+                    <div>${name}</div>
+                `,
 
-                    iconSize:
-                        null,
+                iconSize: null,
 
-                    iconAnchor:
-                        [0,0]
+                iconAnchor: [0,0]
 
-                }),
+            }),
 
-            interactive:
-                false
+            interactive: false
 
         }
 
     );
 
 }
-
-
 //======================================================
 // CHẤM TRÒN ĐỎ - XÃ ĐANG CÓ DỊCH
 //======================================================
@@ -2017,12 +1992,23 @@ function clearMapOverlays(){
 function renderGeoJSON(){
 
     if(
+    currentLayer === "DTLCP" ||
+    currentLayer === "CGC" ||
+    currentLayer === "VDNC" ||
+    currentLayer === "DAI"
+){
 
-        !map ||
+    const label =
+        createDiseaseLabel(feature);
 
-        !geojsonData
+    if(label){
 
-    ){
+        label.addTo(labelLayer);
+
+    }
+
+    addDiseaseMarker(feature);
+}{
 
         return;
 
