@@ -22,8 +22,8 @@ body{
     background:#f4f6f9;
 
     overflow:hidden;
-
 }
+
 
 /*====================================================
 HEADER
@@ -47,27 +47,34 @@ HEADER
 
     box-shadow:0 2px 6px rgba(0,0,0,.15);
 
-    z-index:999;
+    position:relative;
+
+    z-index:1000;
 
 }
+
 
 .logo{
 
-    font-size:20px;
+    font-size:19px;
 
-    font-weight:bold;
+    font-weight:700;
+
+    white-space:nowrap;
 
 }
+
 
 .toolbar{
 
     display:flex;
 
-    gap:10px;
+    gap:8px;
 
     align-items:center;
 
 }
+
 
 .toolbar select,
 .toolbar input{
@@ -82,15 +89,32 @@ HEADER
 
     outline:none;
 
-    font-size:14px;
+    font-size:13px;
+
+    background:#fff;
 
 }
+
+
+.toolbar select{
+
+    min-width:175px;
+
+}
+
+
+.toolbar input{
+
+    width:175px;
+
+}
+
 
 .toolbar button{
 
     height:36px;
 
-    padding:0 16px;
+    padding:0 13px;
 
     border:none;
 
@@ -102,17 +126,37 @@ HEADER
 
     color:#1976D2;
 
-    font-weight:bold;
+    font-weight:700;
+
+    font-size:13px;
 
     transition:.2s;
 
 }
+
 
 .toolbar button:hover{
 
     background:#E3F2FD;
 
 }
+
+
+.toolbar button:active{
+
+    transform:translateY(1px);
+
+}
+
+
+.toolbar button:disabled{
+
+    opacity:.6;
+
+    cursor:not-allowed;
+
+}
+
 
 /*====================================================
 LAYOUT
@@ -126,223 +170,52 @@ LAYOUT
 
     display:grid;
 
-    grid-template-columns:300px 1fr 300px;
+    grid-template-columns:235px minmax(0,1fr) 285px;
+
+}
+
 
 /*====================================================
-SIDEBAR - TỔNG QUAN TOÀN TỈNH
+SIDEBAR
 ====================================================*/
 
 .sidebar{
 
     background:#ffffff;
 
-    border-right:1px solid #d9dee5;
+    border-right:1px solid #ddd;
 
     overflow-y:auto;
 
-    padding:0;
-
-    color:#263238;
+    padding:12px;
 
 }
 
 
 /*====================================================
-HEADER TỔNG QUAN
+TỔNG QUAN
 ====================================================*/
 
 .overview-header{
 
-    height:68px;
+    padding:4px 2px 12px;
 
-    display:flex;
+    text-align:center;
 
-    align-items:center;
+    border-bottom:1px solid #e5e7eb;
 
-    justify-content:space-between;
-
-    padding:0 15px;
-
-    border-bottom:1px solid #e1e5ea;
-
-    background:#ffffff;
+    margin-bottom:12px;
 
 }
 
-.overview-header h2{
 
-    margin:0;
-
-    color:#1565C0;
+.overview-title{
 
     font-size:18px;
 
-    font-weight:700;
+    font-weight:800;
 
-    letter-spacing:.2px;
-
-}
-
-.overview-subtitle{
-
-    display:block;
-
-    margin-top:3px;
-
-    color:#78909C;
-
-    font-size:11px;
-
-}
-
-#btnOverviewRefresh{
-
-    width:32px;
-
-    height:32px;
-
-    border:1px solid #d7dde3;
-
-    background:#ffffff;
-
-    color:#1976D2;
-
-    border-radius:4px;
-
-    cursor:pointer;
-
-    font-size:19px;
-
-    line-height:30px;
-
-}
-
-#btnOverviewRefresh:hover{
-
-    background:#E3F2FD;
-
-}
-
-
-/*====================================================
-THÔNG TIN BÁO CÁO
-====================================================*/
-
-.report-info{
-
-    margin:12px;
-
-    padding:10px 12px;
-
-    background:#f7f9fb;
-
-    border:1px solid #e1e6eb;
-
-    border-radius:4px;
-
-}
-
-.report-info div{
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    gap:10px;
-
-    padding:4px 0;
-
-}
-
-.report-info div + div{
-
-    border-top:1px solid #e5e9ed;
-
-    margin-top:4px;
-
-    padding-top:7px;
-
-}
-
-.report-info span{
-
-    color:#78909C;
-
-    font-size:11px;
-
-}
-
-.report-info strong{
-
-    color:#37474F;
-
-    font-size:12px;
-
-    font-weight:600;
-
-    text-align:right;
-
-}
-
-
-/*====================================================
-SECTION
-====================================================*/
-
-.overview-section{
-
-    margin:0 12px 14px;
-
-    border:1px solid #dfe4e8;
-
-    background:#fff;
-
-}
-
-
-/*====================================================
-TIÊU ĐỀ SECTION
-====================================================*/
-
-.section-title{
-
-    height:38px;
-
-    display:flex;
-
-    align-items:center;
-
-    padding:0 10px;
-
-    background:#f4f6f8;
-
-    border-bottom:1px solid #dfe4e8;
-
-}
-
-.section-title > span{
-
-    width:4px;
-
-    height:17px;
-
-    background:#1976D2;
-
-    margin-right:8px;
-
-}
-
-.section-title h3{
-
-    margin:0;
-
-    color:#37474F;
-
-    font-size:12px;
-
-    font-weight:700;
+    color:#1565C0;
 
     letter-spacing:.3px;
 
@@ -350,343 +223,230 @@ TIÊU ĐỀ SECTION
 
 
 /*====================================================
-DÒNG BỆNH
+DASHBOARD CARD
 ====================================================*/
 
-.disease-item{
+.dashboard-card{
 
-    padding:11px 10px;
+    background:#fff;
 
-    border-bottom:1px solid #edf0f2;
+    border-radius:8px;
+
+    padding:10px 11px 8px;
+
+    margin-bottom:10px;
+
+    border-left:4px solid #1976D2;
+
+    box-shadow:
+        0 1px 5px rgba(0,0,0,.07);
+
+    transition:.18s;
 
 }
 
-.disease-item:last-child{
 
-    border-bottom:none;
+.dashboard-card:hover{
+
+    transform:translateY(-1px);
+
+    box-shadow:
+        0 4px 10px rgba(0,0,0,.10);
 
 }
 
 
 /*====================================================
-TÊN BỆNH
+CARD TITLE
 ====================================================*/
 
-.disease-name{
+.dashboard-card h3{
 
     display:flex;
 
     align-items:center;
-
-    gap:8px;
-
-    margin-bottom:9px;
-
-}
-
-.disease-name strong{
-
-    display:block;
-
-    color:#37474F;
-
-    font-size:12px;
-
-    font-weight:600;
-
-}
-
-.disease-name small{
-
-    display:block;
-
-    margin-top:2px;
-
-    color:#90A4AE;
-
-    font-size:10px;
-
-    text-transform:uppercase;
-
-}
-
-
-/*====================================================
-CHỈ BÁO BỆNH
-====================================================*/
-
-.disease-indicator{
-
-    width:9px;
-
-    height:9px;
-
-    border-radius:50%;
-
-    flex-shrink:0;
-
-}
-
-.disease-indicator.dtlcp{
-
-    background:#d32f2f;
-
-}
-
-.disease-indicator.cgc{
-
-    background:#f57c00;
-
-}
-
-.disease-indicator.vdnc{
-
-    background:#7b1fa2;
-
-}
-
-
-/*====================================================
-SỐ LIỆU BỆNH
-====================================================*/
-
-.disease-stats{
-
-    display:grid;
-
-    grid-template-columns:repeat(3,1fr);
 
     gap:4px;
 
-}
+    margin-bottom:6px;
 
-.disease-stats > div{
+    font-size:13px;
 
-    padding:6px 3px;
+    line-height:1.35;
 
-    text-align:center;
-
-    background:#f8fafb;
-
-    border:1px solid #edf0f2;
-
-}
-
-.disease-stats span{
-
-    display:block;
-
-    color:#78909C;
-
-    font-size:9px;
-
-    line-height:1.2;
-
-    margin-bottom:3px;
-
-}
-
-.disease-stats b{
-
-    display:block;
-
-    color:#263238;
-
-    font-size:15px;
-
-    font-weight:700;
-
-}
-
-.disease-stats b.alert{
-
-    color:#d32f2f;
+    font-weight:750;
 
 }
 
 
 /*====================================================
-PHÒNG CHỐNG DỊCH
+CARD ROW
 ====================================================*/
 
-.operation-grid{
-
-    display:flex;
-
-    flex-direction:column;
-
-}
-
-.operation-item{
-
-    padding:10px;
-
-    border-bottom:1px solid #edf0f2;
-
-}
-
-.operation-item:last-child{
-
-    border-bottom:none;
-
-}
-
-.operation-label{
+.dashboard-card .row{
 
     display:flex;
 
     align-items:center;
 
-    gap:7px;
+    min-height:26px;
 
-    margin-bottom:7px;
+    padding:4px 0;
 
-}
+    border-bottom:1px dashed #edf0f2;
 
-.operation-label > span:last-child{
-
-    color:#455A64;
-
-    font-size:11px;
-
-    font-weight:600;
-
-}
-
-.operation-icon{
-
-    width:21px;
-
-    height:21px;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    border:1px solid #b8c4cc;
-
-    border-radius:3px;
-
-    color:#607D8B;
-
-    background:#f7f9fa;
-
-    font-size:10px;
-
-    font-weight:700;
-
-}
-
-
-/*====================================================
-SỐ LIỆU HOẠT ĐỘNG
-====================================================*/
-
-.operation-value{
-
-    display:flex;
+    font-size:12px;
 
     gap:5px;
 
 }
 
-.operation-value > div{
 
-    flex:1;
+.dashboard-card .row:last-child{
 
-    padding:6px;
-
-    background:#f8fafb;
-
-    border:1px solid #edf0f2;
-
-    text-align:center;
+    border-bottom:none;
 
 }
 
-.operation-value small{
 
-    display:block;
+.dashboard-card .row span:first-child{
 
-    color:#90A4AE;
+    color:#555;
 
-    font-size:9px;
-
-    margin-bottom:2px;
+    line-height:1.25;
 
 }
 
-.operation-value b{
 
-    display:block;
+.dashboard-card b{
+
+    margin-left:auto;
 
     color:#263238;
 
     font-size:14px;
 
+    font-weight:750;
+
+    white-space:nowrap;
+
 }
 
 
-/*====================================================
-GHI CHÚ
-====================================================*/
-
-.overview-note{
-
-    margin:0 12px 15px;
-
-    padding:9px 10px;
-
-    background:#f8fafb;
-
-    border-left:3px solid #90A4AE;
+.dashboard-card small{
 
     color:#78909C;
 
-    font-size:10px;
+    font-size:9px;
 
-    line-height:1.45;
+    margin-left:-3px;
 
-}
-
-.overview-note strong{
-
-    color:#546E7A;
+    white-space:nowrap;
 
 }
 
 
 /*====================================================
-RESPONSIVE SIDEBAR
+GIÁ TRỊ ĐANG CÓ DỊCH
 ====================================================*/
 
-@media (max-width:1200px){
+.dashboard-card b.danger-value{
 
-    .container{
-
-        grid-template-columns:280px 1fr 280px;
-
-    }
+    color:#D32F2F;
 
 }
 
-@media (max-width:900px){
 
-    .container{
+/*====================================================
+MÀU DTLCP
+====================================================*/
 
-        grid-template-columns:260px 1fr;
+.disease-dtlcp{
 
-    }
-
-    .info-panel{
-
-        display:none;
-
-    }
+    border-left-color:#E53935;
 
 }
+
+
+.disease-dtlcp h3{
+
+    color:#C62828;
+
+}
+
+
+/*====================================================
+MÀU CGC
+====================================================*/
+
+.disease-cgc{
+
+    border-left-color:#FB8C00;
+
+}
+
+
+.disease-cgc h3{
+
+    color:#EF6C00;
+
+}
+
+
+/*====================================================
+MÀU VDNC
+====================================================*/
+
+.disease-vdnc{
+
+    border-left-color:#8E24AA;
+
+}
+
+
+.disease-vdnc h3{
+
+    color:#7B1FA2;
+
+}
+
+
+/*====================================================
+MÀU DẠI
+====================================================*/
+
+.disease-dai{
+
+    border-left-color:#43A047;
+
+}
+
+
+.disease-dai h3{
+
+    color:#2E7D32;
+
+}
+
+
+/*====================================================
+NHÓM NGHIỆP VỤ
+====================================================*/
+
+.operation-card{
+
+    border-left-color:#1976D2;
+
+}
+
+
+.operation-card h3{
+
+    color:#1565C0;
+
+}
+
+
 /*====================================================
 MAIN CONTENT
 ====================================================*/
@@ -699,7 +459,10 @@ MAIN CONTENT
 
     height:100%;
 
+    min-width:0;
+
 }
+
 
 #map{
 
@@ -708,6 +471,8 @@ MAIN CONTENT
     height:100%;
 
 }
+
+
 /*====================================================
 INFO PANEL
 ====================================================*/
@@ -720,9 +485,14 @@ INFO PANEL
 
     overflow-y:auto;
 
-    padding:15px;
+    padding:13px;
 
 }
+
+
+/*====================================================
+PANEL PLACEHOLDER
+====================================================*/
 
 .panel-placeholder{
 
@@ -740,23 +510,41 @@ INFO PANEL
 
     color:#888;
 
+    padding:20px;
+
 }
+
 
 .panel-placeholder .icon{
 
-    font-size:60px;
+    font-size:52px;
 
-    margin-bottom:15px;
+    margin-bottom:12px;
+
+    opacity:.75;
 
 }
+
 
 .panel-placeholder h2{
 
     color:#1976D2;
 
-    margin-bottom:10px;
+    margin-bottom:8px;
+
+    font-size:18px;
 
 }
+
+
+.panel-placeholder p{
+
+    font-size:13px;
+
+    line-height:1.5;
+
+}
+
 
 /*====================================================
 INFO CARD
@@ -766,29 +554,39 @@ INFO CARD
 
     background:#fff;
 
-    border-radius:10px;
+    border-radius:8px;
 
-    padding:12px;
+    padding:11px 12px;
 
-    margin-bottom:15px;
+    margin-bottom:11px;
 
-    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    box-shadow:
+        0 2px 7px rgba(0,0,0,.08);
 
 }
 
-.info-card h3{
+
+.info-card h3,
+.info-card h4{
 
     color:#1565C0;
 
-    margin-bottom:10px;
+    margin-bottom:9px;
 
-    font-size:17px;
+    font-size:14px;
+
+    line-height:1.35;
 
     border-bottom:1px solid #eee;
 
-    padding-bottom:8px;
+    padding-bottom:7px;
 
 }
+
+
+/*====================================================
+INFO ROW
+====================================================*/
 
 .info-row{
 
@@ -798,13 +596,16 @@ INFO CARD
 
     align-items:center;
 
+    gap:10px;
+
     padding:6px 0;
 
     border-bottom:1px dashed #eee;
 
-    font-size:14px;
+    font-size:12px;
 
 }
+
 
 .info-row:last-child{
 
@@ -812,19 +613,45 @@ INFO CARD
 
 }
 
+
 .info-row span:first-child{
 
     color:#555;
 
 }
 
+
 .info-row span:last-child{
 
-    font-weight:bold;
+    font-weight:700;
 
     color:#222;
 
+    text-align:right;
+
 }
+
+
+/*====================================================
+PANEL TITLE
+====================================================*/
+
+.panel-title{
+
+    margin:2px 2px 12px;
+
+    padding-bottom:10px;
+
+    border-bottom:2px solid #1976D2;
+
+    color:#1565C0;
+
+    font-size:18px;
+
+    line-height:1.3;
+
+}
+
 
 /*====================================================
 POPUP
@@ -836,15 +663,17 @@ POPUP
 
 }
 
+
 .popup-card h3{
 
     margin-bottom:8px;
 
     color:#1976D2;
 
-    font-size:16px;
+    font-size:15px;
 
 }
+
 
 .popup-card hr{
 
@@ -856,73 +685,125 @@ POPUP
 
 }
 
+
 .popup-card p{
 
     margin:6px 0;
 
-    font-size:13px;
+    font-size:12px;
 
     line-height:1.5;
 
 }
+
 
 /*====================================================
 LEGEND
 ====================================================*/
 
 .legend{
+
     background:rgba(255,255,255,.96);
-    padding:12px 14px;
-    border-radius:12px;
-    box-shadow:0 8px 24px rgba(0,0,0,.18);
-    min-width:220px;
+
+    padding:10px 12px;
+
+    border-radius:10px;
+
+    box-shadow:
+        0 6px 18px rgba(0,0,0,.16);
+
+    min-width:205px;
+
 }
+
 
 .legend h4{
-    margin:0 0 10px;
+
+    margin:0 0 8px;
+
     text-align:center;
-    font-size:15px;
+
+    font-size:14px;
+
     font-weight:700;
+
 }
+
 
 .legend div{
+
     display:flex;
+
     align-items:center;
-    margin:6px 0;
-    font-size:13px;
+
+    margin:5px 0;
+
+    font-size:12px;
+
 }
+
 
 .legend i{
-    width:16px;
-    height:16px;
+
+    width:15px;
+
+    height:15px;
+
     border-radius:3px;
-    margin-right:8px;
+
+    margin-right:7px;
+
     border:1px solid rgba(0,0,0,.15);
+
     flex-shrink:0;
+
 }
+
 
 .legend hr{
+
     border:none;
+
     border-top:1px solid #e5e7eb;
-    margin:10px 0;
+
+    margin:8px 0;
+
 }
+
 
 .legend-dot-row{
+
     display:flex;
+
     align-items:flex-start;
+
 }
 
+
 .legend-red-dot{
-    width:10px;
-    height:10px;
+
+    width:9px;
+
+    height:9px;
+
     background:#ff0000;
+
     border:1.5px solid #fff;
+
     border-radius:50%;
-    margin-right:10px;
-    margin-top:4px;
-    box-shadow:0 0 3px rgba(0,0,0,.35);
+
+    margin-right:9px;
+
+    margin-top:3px;
+
+    box-shadow:
+        0 0 3px rgba(0,0,0,.35);
+
     flex-shrink:0;
+
 }
+
+
 /*====================================================
 LABEL TÊN XÃ
 ====================================================*/
@@ -935,10 +816,17 @@ LABEL TÊN XÃ
 
 }
 
+
 .map-label div{
+
     font-size:10px;
-    font-family: Time New Roman, sans-serif;
+
+    font-family:
+        "Times New Roman",
+        serif;
+
     font-weight:600;
+
     color:#222;
 
     white-space:nowrap;
@@ -950,13 +838,24 @@ LABEL TÊN XÃ
         -1px 1px 2px #fff;
 
     pointer-events:none;
+
 }
+
+
+/*====================================================
+KSGM COUNT
+====================================================*/
+
 .ksgm-count{
+
     display:inline-flex;
+
     align-items:center;
+
     justify-content:center;
 
     width:20px;
+
     height:20px;
 
     margin-top:3px;
@@ -964,24 +863,31 @@ LABEL TÊN XÃ
     border-radius:50%;
 
     background:#d32f2f;
+
     color:#fff;
 
-    font-size:12px;
+    font-size:11px;
+
     font-weight:700;
 
     border:2px solid #fff;
 
-    box-shadow:0 0 3px rgba(0,0,0,.3);
+    box-shadow:
+        0 0 3px rgba(0,0,0,.3);
+
 }
+
+
 /*====================================================
 SCROLLBAR
 ====================================================*/
 
 ::-webkit-scrollbar{
 
-    width:8px;
+    width:7px;
 
 }
+
 
 ::-webkit-scrollbar-thumb{
 
@@ -991,12 +897,17 @@ SCROLLBAR
 
 }
 
+
 ::-webkit-scrollbar-thumb:hover{
 
     background:#78909C;
 
 }
-/* Làm mờ nền bản đồ */
+
+
+/*====================================================
+LÀM MỜ NỀN BẢN ĐỒ
+====================================================*/
 
 .leaflet-tile{
 
@@ -1006,9 +917,16 @@ SCROLLBAR
         contrast(90%);
 
 }
+
+
+/*====================================================
+FULLSCREEN BUTTON
+====================================================*/
+
 .fullscreen-btn{
 
     width:34px;
+
     height:34px;
 
     background:#ffffff;
@@ -1023,9 +941,11 @@ SCROLLBAR
 
     border-radius:4px;
 
-    box-shadow:0 1px 4px rgba(0,0,0,.35);
+    box-shadow:
+        0 1px 4px rgba(0,0,0,.35);
 
 }
+
 
 .fullscreen-btn:hover{
 
@@ -1033,38 +953,58 @@ SCROLLBAR
 
 }
 
+
 .fullscreen-btn:active{
 
     background:#e5e7eb;
 
 }
+
+
+/*====================================================
+LEAFLET CONTROL
+====================================================*/
+
 .leaflet-control a{
 
     width:30px;
+
     height:30px;
 
     display:flex;
+
     justify-content:center;
+
     align-items:center;
 
     text-decoration:none;
+
 }
+
 
 .leaflet-control a svg{
 
     width:18px;
+
     height:18px;
 
 }
-/* ===== Thanh công cụ GIS ===== */
+
+
+/*====================================================
+ZOOM
+====================================================*/
 
 .leaflet-control-zoom a{
 
     width:34px;
+
     height:34px;
 
     display:flex;
+
     align-items:center;
+
     justify-content:center;
 
     font-size:18px;
@@ -1073,16 +1013,146 @@ SCROLLBAR
 
 }
 
+
 .leaflet-control-zoom a:hover{
 
     background:#f3f4f6;
 
 }
 
+
 .leaflet-control-zoom svg{
 
     width:18px;
+
     height:18px;
 
 }
 
+
+/*====================================================
+RESPONSIVE
+====================================================*/
+
+@media (max-width:1100px){
+
+    .container{
+
+        grid-template-columns:215px minmax(0,1fr) 260px;
+
+    }
+
+
+    .logo{
+
+        font-size:16px;
+
+    }
+
+
+    .toolbar{
+
+        gap:5px;
+
+    }
+
+
+    .toolbar select{
+
+        min-width:145px;
+
+    }
+
+
+    .toolbar input{
+
+        width:135px;
+
+    }
+
+
+    .toolbar button{
+
+        padding:0 9px;
+
+    }
+
+}
+
+
+@media (max-width:850px){
+
+    .header{
+
+        height:auto;
+
+        min-height:60px;
+
+        padding:8px 10px;
+
+        flex-wrap:wrap;
+
+        gap:7px;
+
+    }
+
+
+    .logo{
+
+        width:100%;
+
+        font-size:15px;
+
+    }
+
+
+    .toolbar{
+
+        width:100%;
+
+        flex-wrap:wrap;
+
+    }
+
+
+    .container{
+
+        height:calc(100vh - 105px);
+
+        grid-template-columns:190px minmax(0,1fr);
+
+    }
+
+
+    .info-panel{
+
+        display:none;
+
+    }
+
+}
+
+
+@media (max-width:600px){
+
+    .container{
+
+        grid-template-columns:1fr;
+
+    }
+
+
+    .sidebar{
+
+        display:none;
+
+    }
+
+
+    .main-content{
+
+        height:100%;
+
+    }
+
+}
