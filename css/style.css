@@ -702,108 +702,33 @@ LEGEND
 ====================================================*/
 
 .legend{
-
-    background:rgba(255,255,255,.96);
-
-    padding:10px 12px;
-
-    border-radius:10px;
-
-    box-shadow:
-        0 6px 18px rgba(0,0,0,.16);
-
-    min-width:205px;
-
+    background:rgba(255,255,255,.94);
+    padding:8px 10px;
+    border-radius:8px;
+    box-shadow:0 4px 14px rgba(0,0,0,.15);
+    min-width:185px;
+    font-size:11px;
 }
-
 
 .legend h4{
-
-    margin:0 0 8px;
-
-    text-align:center;
-
-    font-size:14px;
-
-    font-weight:700;
-
+    margin:0 0 7px;
+    text-align:left;
+    font-size:13px;
 }
-
 
 .legend div{
-
     display:flex;
-
     align-items:center;
-
-    margin:5px 0;
-
-    font-size:12px;
-
+    margin:4px 0;
+    line-height:1.2;
 }
-
 
 .legend i{
-
-    width:15px;
-
-    height:15px;
-
-    border-radius:3px;
-
+    width:13px;
+    height:13px;
     margin-right:7px;
-
-    border:1px solid rgba(0,0,0,.15);
-
-    flex-shrink:0;
-
+    border-radius:2px;
 }
-
-
-.legend hr{
-
-    border:none;
-
-    border-top:1px solid #e5e7eb;
-
-    margin:8px 0;
-
-}
-
-
-.legend-dot-row{
-
-    display:flex;
-
-    align-items:flex-start;
-
-}
-
-
-.legend-red-dot{
-
-    width:9px;
-
-    height:9px;
-
-    background:#ff0000;
-
-    border:1.5px solid #fff;
-
-    border-radius:50%;
-
-    margin-right:9px;
-
-    margin-top:3px;
-
-    box-shadow:
-        0 0 3px rgba(0,0,0,.35);
-
-    flex-shrink:0;
-
-}
-
-
 /*====================================================
 LABEL TÊN XÃ
 ====================================================*/
