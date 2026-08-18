@@ -1107,6 +1107,10 @@ function getDamageValue(row){
 // - Khoảng tự tính theo số liệu thực tế trong Sheet
 //======================================================
 
+//======================================================
+// TÍNH KHOẢNG THIỆT HẠI - JENKS NATURAL BREAKS
+//======================================================
+
 function calculateDamageRanges(){
 
     const diseaseLayers = [
@@ -1116,11 +1120,8 @@ function calculateDamageRanges(){
         "DAI"
     ];
 
-
     if(
-        !diseaseLayers.includes(
-            currentLayer
-        )
+        !diseaseLayers.includes(currentLayer)
     ){
 
         return [];
@@ -1128,17 +1129,23 @@ function calculateDamageRanges(){
     }
 
 
-    // Lấy toàn bộ số liệu > 0
     const values =
         getMapRows()
+
             .map(function(row){
 
                 return getDamageValue(row);
 
             })
+
             .filter(function(value){
 
                 return value > 0;
+
+            })
+            .sort(function(a,b){
+
+                return a - b;
 
             });
 
@@ -1150,65 +1157,281 @@ function calculateDamageRanges(){
     }
 
 
-    // Giá trị lớn nhất thực tế
-    const maxValue =
-        Math.max(...values);
+    //==================================================
+    // Chỉ có 1 giá trị
+    //==================================================
+
+    if(values.length === 1){
+
+        return [
+            {
+                min: 1,
+                max: values[0]
+            }
+        ];
+
+    }
 
 
     //==================================================
-    // Chia đều thành tối đa 5 khoảng
+    // Số nhóm tối đa = 5
+    // Không vượt quá số giá trị khác nhau
     //==================================================
 
-    const interval =
-        Math.ceil(
-            maxValue / 5
+    const uniqueValues =
+        [...new Set(values)];
+
+
+    const k =
+        Math.min(
+            5,
+            uniqueValues.length,
+            values.length
         );
 
+
+    if(k <= 1){
+
+        return [
+            {
+                min: 1,
+                max: values[values.length - 1]
+            }
+        ];
+
+    }
+
+
+    //==================================================
+    // MA TRẬN JENKS
+    //==================================================
+
+    const n =
+        values.length;
+
+
+    const lowerClassLimits =
+        Array.from(
+            { length: n + 1 },
+            function(){
+
+                return Array(k + 1).fill(0);
+
+            }
+        );
+
+
+    const varianceCombinations =
+        Array.from(
+            { length: n + 1 },
+            function(){
+
+                return Array(k + 1)
+                    .fill(Infinity);
+
+            }
+        );
+
+
+    for(
+        let i = 1;
+        i <= k;
+        i++
+    ){
+
+        lowerClassLimits[1][i] = 1;
+
+        varianceCombinations[1][i] = 0;
+
+    }
+
+
+    for(
+        let l = 2;
+        l <= n;
+        l++
+    ){
+
+        let sum = 0;
+
+        let sumSquares = 0;
+
+        let weight = 0;
+
+
+        for(
+            let m = 1;
+            m <= l;
+            m++
+        ){
+
+            const lower =
+                l - m + 1;
+
+
+            const value =
+                values[lower - 1];
+
+
+            weight += 1;
+
+            sum += value;
+
+            sumSquares +=
+                value * value;
+
+
+            const variance =
+                sumSquares -
+                (sum * sum) / weight;
+
+
+            if(lower === 1){
+
+                for(
+                    let j = 2;
+                    j <= k;
+                    j++
+                ){
+
+                    varianceCombinations[l][j] =
+                        variance;
+
+                    lowerClassLimits[l][j] =
+                        1;
+
+                }
+
+            }
+            else{
+
+                for(
+                    let j = 2;
+                    j <= k;
+                    j++
+                ){
+
+                    const candidate =
+                        variance +
+                        varianceCombinations[
+                            lower - 1
+                        ][j - 1];
+
+
+                    if(
+                        candidate <
+                        varianceCombinations[l][j]
+                    ){
+
+                        varianceCombinations[l][j] =
+                            candidate;
+
+                        lowerClassLimits[l][j] =
+                            lower;
+
+                    }
+
+                }
+
+            }
+
+        }
+
+        varianceCombinations[l][1] =
+            sumSquares -
+            (sum * sum) / weight;
+
+    }
+
+
+    //==================================================
+    // TRUY NGƯỢC RANH GIỚI
+    //==================================================
+
+    const breaks =
+        Array(k + 1).fill(0);
+
+
+    breaks[k] =
+        values[n - 1];
+
+
+    let count =
+        n;
+
+
+    for(
+        let j = k;
+        j >= 2;
+        j--
+    ){
+
+        const lower =
+            lowerClassLimits[count][j];
+
+
+        breaks[j - 1] =
+            values[lower - 1];
+
+
+        count =
+            lower - 1;
+
+    }
+
+
+    breaks[0] =
+        values[0];
+
+
+    //==================================================
+    // TẠO CÁC KHOẢNG
+    //==================================================
 
     const ranges = [];
 
 
     for(
         let i = 0;
-        i < 5;
+        i < k;
         i++
     ){
 
-        const min =
-            i * interval + 1;
+        let min;
+
+        let max;
 
 
-        let max =
-            (i + 1) * interval;
+        if(i === 0){
 
+            min = 1;
 
-        // Khoảng cuối không vượt quá max thực tế
-        if(
-            max > maxValue
-        ){
+        }
+        else{
 
-            max = maxValue;
+            min =
+                breaks[i] + 1;
 
         }
 
 
-        // Không tạo khoảng rỗng
-        if(
-            min > max
-        ){
+        max =
+            breaks[i + 1];
 
-            break;
+
+        // Không nhận khoảng rỗng
+
+        if(min <= max){
+
+            ranges.push({
+
+                min: min,
+
+                max: max
+
+            });
 
         }
-
-
-        ranges.push({
-
-            min: min,
-
-            max: max
-
-        });
 
     }
 
@@ -1217,7 +1440,7 @@ function calculateDamageRanges(){
 
 }
 //======================================================
-// LẤY MÀU THEO GIÁ TRỊ
+// LẤY MÀU THEO MỨC THIỆT HẠI
 //======================================================
 
 function getDamageColor(
@@ -1226,11 +1449,7 @@ function getDamageColor(
 ){
 
     if(
-
-        value <= 0 ||
-
-        ranges.length === 0
-
+        value <= 0
     ){
 
         return "#F3F4F6";
@@ -1238,17 +1457,20 @@ function getDamageColor(
     }
 
 
-    let index = -1;
+    if(
+        !ranges ||
+        ranges.length === 0
+    ){
+
+        return "#FFCDD2";
+
+    }
 
 
     for(
-
         let i = 0;
-
         i < ranges.length;
-
         i++
-
     ){
 
         const range =
@@ -1256,35 +1478,27 @@ function getDamageColor(
 
 
         if(
-
             value >= range.min &&
-
             value <= range.max
-
         ){
 
-            index = i;
-
-            break;
+            return DAMAGE_COLORS[
+                Math.min(
+                    i,
+                    DAMAGE_COLORS.length - 1
+                )
+            ];
 
         }
 
     }
 
 
-    if(index < 0){
-
-        index =
-            ranges.length - 1;
-
-    }
-
+    // Giá trị lớn nhất
+    // dùng màu đậm nhất
 
     return DAMAGE_COLORS[
-        Math.min(
-            index,
-            DAMAGE_COLORS.length - 1
-        )
+        DAMAGE_COLORS.length - 1
     ];
 
 }
