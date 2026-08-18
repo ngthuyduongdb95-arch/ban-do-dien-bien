@@ -1767,46 +1767,66 @@ function getFeatureCenter(
 
 
 //======================================================
-// XÃ CÓ DỊCH LŨY KẾ
+// XÃ CÓ SỐ LIỆU DỊCH BỆNH
 //======================================================
 
-function featureHasDisease(
-    feature
-){
+function featureHasDisease(feature){
 
     const row =
-        getFeatureRow(
-            feature
-        );
+        getFeatureRow(feature);
 
-
-    const config =
-        LAYER_CONFIG[
-            currentLayer
-        ];
-
-
-    if(
-
-        !row ||
-
-        !config
-
-    ){
+    if(!row){
 
         return false;
 
     }
 
+    const config =
+        LAYER_CONFIG[currentLayer];
 
-    return hasDiseaseHistory(
-        row,
-        config
+    if(!config){
+
+        return false;
+
+    }
+
+    // Trạng thái có dữ liệu
+    const status =
+        String(
+            row[config.status] || ""
+        ).trim();
+
+    // Số ổ dịch
+    const outbreak =
+        mapNumber(
+            row[config.outbreak]
+        );
+
+    // Số con thiệt hại/mắc
+    const value =
+        mapNumber(
+            row[config.value]
+        );
+
+    // VDNC có thêm số chết
+    const death =
+        mapNumber(
+            row[config.death]
+        );
+
+    return (
+
+        status !== "" ||
+
+        outbreak > 0 ||
+
+        value > 0 ||
+
+        death > 0
+
     );
 
 }
-
-
 //======================================================
 // TẠO NHÃN TÊN XÃ
 //======================================================
