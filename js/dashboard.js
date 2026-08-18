@@ -1,39 +1,40 @@
+```javascript
 //======================================================
 // DASHBOARD.JS
-// WEBGIS ĐIỆN BIÊN
+// WEBGIS QUẢN LÝ DỊCH BỆNH ĐỘNG VẬT ĐIỆN BIÊN
 //======================================================
 //
 // TỔNG QUAN:
 //
-// 1. DTLCP
-//    - Xã có dịch (lũy kế)
-//    - Xã đang có dịch
-//    - Tiêu hủy
-//    - Khối lượng
+// DTLCP
+// - Xã có dịch (lũy kế)
+// - Xã đang có dịch
+// - Tiêu hủy
+// - Khối lượng
 //
-// 2. CGC
-//    - Xã có dịch (lũy kế)
-//    - Xã đang có dịch
-//    - Tiêu hủy
-//    - Khối lượng
+// CGC
+// - Xã có dịch (lũy kế)
+// - Xã đang có dịch
+// - Tiêu hủy
+// - Khối lượng
 //
-// 3. VDNC
-//    - Xã có dịch (lũy kế)
-//    - Xã đang có dịch
-//    - Mắc
-//    - Chết
+// VDNC
+// - Xã có dịch (lũy kế)
+// - Xã đang có dịch
+// - Mắc
+// - Chết
 //
-// 4. PHUN KHỬ TRÙNG
-//    - Xã triển khai
-//    - Số hộ
-//    - Vòng
+// PHUN KHỬ TRÙNG
+// - Xã triển khai
+// - Số hộ
+// - Vòng
 //
-// 5. KSGM
-//    - Xã triển khai
-//    - Số cơ sở
+// KSGM
+// - Xã triển khai
+// - Số cơ sở
 //
-// 6. THUỐC THÚ Y
-//    - Số cơ sở
+// THUỐC THÚ Y
+// - Số cơ sở
 //
 //======================================================
 
@@ -44,13 +45,13 @@
 
 const dashboard = {
 
-    update:function(){
+    update: function () {
 
-        //================================================
+        //==================================================
         // KIỂM TRA DỮ LIỆU
-        //================================================
+        //==================================================
 
-        if(typeof sheetData === "undefined"){
+        if (typeof sheetData === "undefined") {
 
             console.warn(
                 "Dashboard: sheetData chưa tồn tại."
@@ -64,52 +65,52 @@ const dashboard = {
         const rows = Object.values(sheetData);
 
 
-        //================================================
+        //==================================================
         // KHỞI TẠO THỐNG KÊ
-        //================================================
+        //==================================================
 
         const stat = {
 
             // DTLCP
-            dtlcpXaLuyKe:0,
-            dtlcpXaDangDich:0,
-            dtlcpTieuHuy:0,
-            dtlcpKhoiLuong:0,
+            dtlcpXaLuyKe: 0,
+            dtlcpXaDangDich: 0,
+            dtlcpTieuHuy: 0,
+            dtlcpKhoiLuong: 0,
 
             // CGC
-            cgcXaLuyKe:0,
-            cgcXaDangDich:0,
-            cgcTieuHuy:0,
-            cgcKhoiLuong:0,
+            cgcXaLuyKe: 0,
+            cgcXaDangDich: 0,
+            cgcTieuHuy: 0,
+            cgcKhoiLuong: 0,
 
             // VDNC
-            vdncXaLuyKe:0,
-            vdncXaDangDich:0,
-            vdncMac:0,
-            vdncChet:0,
+            vdncXaLuyKe: 0,
+            vdncXaDangDich: 0,
+            vdncMac: 0,
+            vdncChet: 0,
 
             // PHUN
-            phunXa:0,
-            phunHo:0,
-            phunVong:0,
+            phunXa: 0,
+            phunHo: 0,
+            phunVong: 0,
 
             // KSGM
-            ksgmXa:0,
-            ksgmCoSo:0,
+            ksgmXa: 0,
+            ksgmCoSo: 0,
 
             // THUỐC THÚ Y
-            csbbtty:0
+            csbbtty: 0
 
         };
 
 
-        //================================================
-        // DUYỆT TOÀN BỘ XÃ/PHƯỜNG
-        //================================================
+        //==================================================
+        // DUYỆT DỮ LIỆU TỪNG XÃ/PHƯỜNG
+        //==================================================
 
         rows.forEach(row => {
 
-            if(!row) return;
+            if (!row) return;
 
 
             //================================================
@@ -117,16 +118,16 @@ const dashboard = {
             //================================================
 
             const dtlcpTrangThai =
-                String(
-                    row["DTLCP_Trạng thái"] || ""
-                ).trim();
+                normalizeStatus(
+                    row["DTLCP_Trạng thái"]
+                );
 
-            const dtlcpO =
+            const dtlcpODich =
                 toNumber(
                     row["DTLCP_Ổ dịch"]
                 );
 
-            const dtlcpChet =
+            const dtlcpTieuHuy =
                 toNumber(
                     row["DTLCP_Chết"]
                 );
@@ -140,15 +141,19 @@ const dashboard = {
             /*
              * Xã có dịch lũy kế:
              *
-             * Có thông tin ổ dịch hoặc có số liệu
-             * dịch bệnh thì được tính vào lũy kế.
+             * Chỉ tính khi thực sự có dấu hiệu dữ liệu
+             * dịch bệnh.
+             *
+             * Không tính các xã chỉ có trạng thái:
+             * "Không có dịch".
              */
 
-            if(
-                dtlcpO > 0 ||
-                dtlcpChet > 0 ||
-                dtlcpTrangThai !== ""
-            ){
+            if (
+                dtlcpODich > 0 ||
+                dtlcpTieuHuy > 0 ||
+                dtlcpTrangThai === "đang có dịch" ||
+                dtlcpTrangThai === "đã hết dịch"
+            ) {
 
                 stat.dtlcpXaLuyKe++;
 
@@ -156,14 +161,14 @@ const dashboard = {
 
 
             /*
-             * Xã đang có dịch:
+             * Xã đang có dịch
              *
-             * Bám đúng logic mà map.js đang sử dụng.
+             * Bám cùng logic với map.js.
              */
 
-            if(
-                dtlcpTrangThai === "Đang có dịch"
-            ){
+            if (
+                dtlcpTrangThai === "đang có dịch"
+            ) {
 
                 stat.dtlcpXaDangDich++;
 
@@ -171,7 +176,7 @@ const dashboard = {
 
 
             stat.dtlcpTieuHuy +=
-                dtlcpChet;
+                dtlcpTieuHuy;
 
             stat.dtlcpKhoiLuong +=
                 dtlcpKhoiLuong;
@@ -182,16 +187,16 @@ const dashboard = {
             //================================================
 
             const cgcTrangThai =
-                String(
-                    row["CGC_Trạng thái"] || ""
-                ).trim();
+                normalizeStatus(
+                    row["CGC_Trạng thái"]
+                );
 
-            const cgcO =
+            const cgcODich =
                 toNumber(
                     row["CGC_Ổ dịch"]
                 );
 
-            const cgcChet =
+            const cgcTieuHuy =
                 toNumber(
                     row["CGC_Chết"]
                 );
@@ -206,11 +211,12 @@ const dashboard = {
              * Xã có dịch lũy kế
              */
 
-            if(
-                cgcO > 0 ||
-                cgcChet > 0 ||
-                cgcTrangThai !== ""
-            ){
+            if (
+                cgcODich > 0 ||
+                cgcTieuHuy > 0 ||
+                cgcTrangThai === "đang có dịch" ||
+                cgcTrangThai === "đã hết dịch"
+            ) {
 
                 stat.cgcXaLuyKe++;
 
@@ -221,9 +227,9 @@ const dashboard = {
              * Xã đang có dịch
              */
 
-            if(
-                cgcTrangThai === "Đang có dịch"
-            ){
+            if (
+                cgcTrangThai === "đang có dịch"
+            ) {
 
                 stat.cgcXaDangDich++;
 
@@ -231,7 +237,7 @@ const dashboard = {
 
 
             stat.cgcTieuHuy +=
-                cgcChet;
+                cgcTieuHuy;
 
             stat.cgcKhoiLuong +=
                 cgcKhoiLuong;
@@ -242,11 +248,11 @@ const dashboard = {
             //================================================
 
             const vdncTrangThai =
-                String(
-                    row["VDNC_Trạng thái"] || ""
-                ).trim();
+                normalizeStatus(
+                    row["VDNC_Trạng thái"]
+                );
 
-            const vdncO =
+            const vdncODich =
                 toNumber(
                     row["VDNC_Ổ dịch"]
                 );
@@ -266,12 +272,13 @@ const dashboard = {
              * Xã có dịch lũy kế
              */
 
-            if(
-                vdncO > 0 ||
+            if (
+                vdncODich > 0 ||
                 vdncMac > 0 ||
                 vdncChet > 0 ||
-                vdncTrangThai !== ""
-            ){
+                vdncTrangThai === "đang có dịch" ||
+                vdncTrangThai === "đã hết dịch"
+            ) {
 
                 stat.vdncXaLuyKe++;
 
@@ -282,9 +289,9 @@ const dashboard = {
              * Xã đang có dịch
              */
 
-            if(
-                vdncTrangThai === "Đang có dịch"
-            ){
+            if (
+                vdncTrangThai === "đang có dịch"
+            ) {
 
                 stat.vdncXaDangDich++;
 
@@ -321,15 +328,15 @@ const dashboard = {
             /*
              * Xã triển khai:
              *
-             * Có vòng triển khai hoặc có số hộ
-             * hoặc có thông tin tiến độ.
+             * Có vòng, có số hộ hoặc có thông tin
+             * tiến độ.
              */
 
-            if(
+            if (
                 phunVong > 0 ||
                 phunHo > 0 ||
                 phunTienDo !== ""
-            ){
+            ) {
 
                 stat.phunXa++;
 
@@ -341,13 +348,12 @@ const dashboard = {
 
 
             /*
-             * Vòng:
-             *
-             * Tổng quan cần thể hiện vòng cao nhất
-             * đã triển khai trên toàn tỉnh.
+             * Vòng cao nhất đã triển khai.
              */
 
-            if(phunVong > stat.phunVong){
+            if (
+                phunVong > stat.phunVong
+            ) {
 
                 stat.phunVong =
                     phunVong;
@@ -360,9 +366,9 @@ const dashboard = {
             //================================================
 
             const ksgmTrangThai =
-                String(
-                    row["KSGM_Trạng thái"] || ""
-                ).trim();
+                normalizeStatus(
+                    row["KSGM_Trạng thái"]
+                );
 
             const ksgmCoSo =
                 toNumber(
@@ -370,13 +376,9 @@ const dashboard = {
                 );
 
 
-            /*
-             * Xã triển khai KSGM
-             */
-
-            if(
-                ksgmTrangThai === "Đã triển khai"
-            ){
+            if (
+                ksgmTrangThai === "đã triển khai"
+            ) {
 
                 stat.ksgmXa++;
 
@@ -399,9 +401,14 @@ const dashboard = {
         });
 
 
-        //================================================
+        //==================================================
+        // ĐƯA DỮ LIỆU RA GIAO DIỆN
+        //==================================================
+
+
+        //==================================================
         // DTLCP
-        //================================================
+        //==================================================
 
         setText(
             "dbDTLCPXaLuyKe",
@@ -432,9 +439,9 @@ const dashboard = {
         );
 
 
-        //================================================
+        //==================================================
         // CGC
-        //================================================
+        //==================================================
 
         setText(
             "dbCGCXaLuyKe",
@@ -465,9 +472,9 @@ const dashboard = {
         );
 
 
-        //================================================
+        //==================================================
         // VDNC
-        //================================================
+        //==================================================
 
         setText(
             "dbVDNCXaLuyKe",
@@ -498,9 +505,9 @@ const dashboard = {
         );
 
 
-        //================================================
+        //==================================================
         // PHUN KHỬ TRÙNG
-        //================================================
+        //==================================================
 
         setText(
             "dbPhunXa",
@@ -524,9 +531,9 @@ const dashboard = {
         );
 
 
-        //================================================
+        //==================================================
         // KIỂM SOÁT GIẾT MỔ
-        //================================================
+        //==================================================
 
         setText(
             "dbKSGMXa",
@@ -543,9 +550,9 @@ const dashboard = {
         );
 
 
-        //================================================
+        //==================================================
         // CƠ SỞ THUỐC THÚ Y
-        //================================================
+        //==================================================
 
         setText(
             "dbCSBBTTY",
@@ -555,8 +562,12 @@ const dashboard = {
         );
 
 
+        //==================================================
+        // DEBUG
+        //==================================================
+
         console.log(
-            "Dashboard:",
+            "WEBGIS DASHBOARD:",
             stat
         );
 
@@ -566,12 +577,34 @@ const dashboard = {
 
 
 //======================================================
+// CHUẨN HÓA TRẠNG THÁI
+//======================================================
+
+function normalizeStatus(value){
+
+    if (
+        value === null ||
+        value === undefined
+    ){
+
+        return "";
+
+    }
+
+    return String(value)
+        .trim()
+        .toLowerCase();
+
+}
+
+
+//======================================================
 // CHUYỂN GIÁ TRỊ SANG NUMBER
 //======================================================
 
 function toNumber(value){
 
-    if(
+    if (
         value === null ||
         value === undefined ||
         value === ""
@@ -582,7 +615,9 @@ function toNumber(value){
     }
 
 
-    if(typeof value === "number"){
+    if (
+        typeof value === "number"
+    ){
 
         return isNaN(value)
             ? 0
@@ -606,9 +641,8 @@ function toNumber(value){
     /*
      * Loại bỏ đơn vị:
      *
-     * "1.234 con"
-     * "1.234 kg"
-     *
+     * 1.234 con
+     * 1.234 kg
      */
 
     str =
@@ -619,13 +653,14 @@ function toNumber(value){
 
 
     /*
-     * Dữ liệu Việt Nam:
+     * Trường hợp:
      *
-     * 1.234 = 1234
-     * 12,5 = 12.5
+     * 1.234,56
+     *
+     * → 1234.56
      */
 
-    if(
+    if (
         str.includes(".") &&
         str.includes(",")
     ){
@@ -643,14 +678,18 @@ function toNumber(value){
             );
 
     }
-    else if(
+
+    /*
+     * Trường hợp:
+     *
+     * 1.234
+     *
+     * → 1234
+     */
+
+    else if (
         str.includes(".")
     ){
-
-        /*
-         * Dấu chấm được hiểu là
-         * phân cách hàng nghìn.
-         */
 
         str =
             str.replace(
@@ -659,19 +698,24 @@ function toNumber(value){
             );
 
     }
-    else if(
+
+    /*
+     * Trường hợp:
+     *
+     * 1234,5
+     *
+     * → 1234.5
+     */
+
+    else if (
         str.includes(",")
     ){
-
-        /*
-         * Một dấu phẩy có thể là
-         * số thập phân.
-         */
 
         const parts =
             str.split(",");
 
-        if(
+
+        if (
             parts.length === 2 &&
             parts[1].length <= 2
         ){
@@ -716,7 +760,7 @@ function formatNumber(value){
         Number(value);
 
 
-    if(
+    if (
         isNaN(number)
     ){
 
@@ -750,3 +794,4 @@ function setText(id,value){
     }
 
 }
+```
