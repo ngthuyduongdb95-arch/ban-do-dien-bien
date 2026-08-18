@@ -262,24 +262,15 @@ async function initMap(){
     // NỀN BẢN ĐỒ
     //==================================================
 
-    L.tileLayer(
-
-        "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-
-        {
-
-            attribution:
-                "&copy; OpenStreetMap & CARTO",
-
-            subdomains:
-                "abcd",
-
-            maxZoom:
-                20
-
-        }
-
-    ).addTo(map);
+   L.tileLayer(
+    "https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png",
+    {
+        subdomains: "abcd",
+        maxZoom: 20,
+        pane: "overlayPane",
+        opacity: 0.55
+    }
+).addTo(map);
 
 
     //==================================================
@@ -1464,31 +1455,24 @@ function styleDisease(row){
     const value =
         getDamageValue(row);
 
-
     const ranges =
         calculateDamageRanges();
 
-
     if(value <= 0){
 
-        return {
+    return {
 
-            fillColor:
-                "#F3F4F6",
+        fillColor: "#F5F6F7",
 
-            weight:
-                1,
+        weight: 0.7,
 
-            color:
-                "#9CA3AF",
+        color: "#CFD8DC",
 
-            fillOpacity:
-                .55
+        fillOpacity: 0.30
 
-        };
+    };
 
-    }
-
+}
 
     return {
 
@@ -1498,14 +1482,13 @@ function styleDisease(row){
                 ranges
             ),
 
-        weight:
-            1,
+        weight: 1.4,
 
-        color:
-            "#8B1A1A",
+        color: "#8E0000",
 
-        fillOpacity:
-            .75
+        opacity: 1,
+
+        fillOpacity: 0.88
 
     };
 
