@@ -3188,25 +3188,282 @@ async function reloadData(){
         await loadSheet();
 
 
-        //==================================================
-        // CẬP NHẬT DASHBOARD
-        //==================================================
+        //======================================================
+// DASHBOARD.JS
+//======================================================
 
-        if(
+const dashboard = {
 
-            typeof dashboard !==
-            "undefined" &&
+    update: function () {
 
-            typeof dashboard.update ===
-            "function"
-
-        ){
-
-            dashboard.update();
-
+        if (typeof sheetData === "undefined") {
+            return;
         }
 
+        const rows = Object.values(sheetData);
 
+        const stat = {
+
+            // DTLCP
+            dtlcpXa: 0,
+            dtlcpCon: 0,
+            dtlcpTrongLuong: 0,
+
+            // CGC
+            cgcXa: 0,
+            cgcCon: 0,
+            cgcTrongLuong: 0,
+
+            // VDNC
+            vdncXa: 0,
+            vdncMac: 0,
+            vdncChet: 0,
+
+            // PHUN
+            phunXa: 0,
+            phunHo: 0,
+            phunVong: 0,
+
+            // KSGM
+            ksgmXa: 0,
+            ksgmCoSo: 0,
+
+            // THUỐC THÚ Y
+            csbbtty: 0,
+
+            // DẠI
+            daiXa: 0,
+            daiChet: 0,
+            daiTieuHuy: 0
+        };
+
+
+        rows.forEach(function (row) {
+
+            //==================================================
+            // DTLCP
+            //==================================================
+
+            const dtlcpCon =
+                Number(row["DTLCP_Chết"] || 0);
+
+            if (dtlcpCon > 0) {
+                stat.dtlcpXa++;
+                stat.dtlcpCon += dtlcpCon;
+            }
+
+            stat.dtlcpTrongLuong +=
+                Number(
+                    row["DTLCP_Trọng lượng"] || 0
+                );
+
+
+            //==================================================
+            // CGC
+            //==================================================
+
+            const cgcCon =
+                Number(row["CGC_Chết"] || 0);
+
+            if (cgcCon > 0) {
+                stat.cgcXa++;
+                stat.cgcCon += cgcCon;
+            }
+
+            stat.cgcTrongLuong +=
+                Number(
+                    row["CGC_Trọng lượng"] || 0
+                );
+
+
+            //==================================================
+            // VDNC
+            //==================================================
+
+            const vdncMac =
+                Number(row["VDNC_Mắc"] || 0);
+
+            const vdncChet =
+                Number(row["VDNC_Chết"] || 0);
+
+            if (
+                vdncMac > 0 ||
+                vdncChet > 0
+            ) {
+                stat.vdncXa++;
+            }
+
+            stat.vdncMac += vdncMac;
+            stat.vdncChet += vdncChet;
+
+
+            //==================================================
+            // PHUN KHỬ TRÙNG
+            //==================================================
+
+            const phunHo =
+                Number(row["PHUN_Số hộ"] || 0);
+
+            if (phunHo > 0) {
+                stat.phunXa++;
+            }
+
+            stat.phunHo += phunHo;
+
+            stat.phunVong +=
+                Number(
+                    row["PHUN_Vòng"] || 0
+                );
+
+
+            //==================================================
+            // KSGM
+            //==================================================
+
+            const ksgmCoSo =
+                Number(
+                    row["KSGM_Cơ sở"] || 0
+                );
+
+            if (ksgmCoSo > 0) {
+                stat.ksgmXa++;
+            }
+
+            stat.ksgmCoSo += ksgmCoSo;
+
+
+            //==================================================
+            // CƠ SỞ THUỐC THÚ Y
+            //==================================================
+
+            stat.csbbtty +=
+                Number(
+                    row["CSBBTTY_Cơ sở"] || 0
+                );
+
+
+            //==================================================
+            // DẠI
+            //==================================================
+
+            const daiChet =
+                Number(
+                    row["DAI_Chết"] || 0
+                );
+
+            const daiTieuHuy =
+                Number(
+                    row["DAI_Tiêu hủy"] || 0
+                );
+
+            if (
+                daiChet > 0 ||
+                daiTieuHuy > 0
+            ) {
+                stat.daiXa++;
+            }
+
+            stat.daiChet += daiChet;
+            stat.daiTieuHuy += daiTieuHuy;
+
+        });
+
+
+        //==================================================
+        // HIỂN THỊ DASHBOARD
+        //==================================================
+
+        setDashboardText(
+            "dbDTLCPXa",
+            stat.dtlcpXa
+        );
+
+        setDashboardText(
+            "dbDTLCPCon",
+            formatNumber(stat.dtlcpCon)
+        );
+
+
+        setDashboardText(
+            "dbCGCXa",
+            stat.cgcXa
+        );
+
+        setDashboardText(
+            "dbCGCCon",
+            formatNumber(stat.cgcCon)
+        );
+
+
+        setDashboardText(
+            "dbVDNCXa",
+            stat.vdncXa
+        );
+
+        setDashboardText(
+            "dbVDNCMac",
+            formatNumber(stat.vdncMac)
+        );
+
+
+        setDashboardText(
+            "dbPhunXa",
+            stat.phunXa
+        );
+
+        setDashboardText(
+            "dbPhunHo",
+            formatNumber(stat.phunHo)
+        );
+
+
+        setDashboardText(
+            "dbKSGM",
+            formatNumber(stat.ksgmCoSo)
+        );
+
+
+        setDashboardText(
+            "dbCSBBTTY",
+            formatNumber(stat.csbbtty)
+        );
+
+
+        // DẠI
+        setDashboardText(
+            "dbDAIXa",
+            stat.daiXa
+        );
+
+        setDashboardText(
+            "dbDAIChet",
+            formatNumber(stat.daiChet)
+        );
+
+        setDashboardText(
+            "dbDAITieuHuy",
+            formatNumber(stat.daiTieuHuy)
+        );
+
+    }
+
+};
+
+
+//======================================================
+// GÁN TEXT
+//======================================================
+
+function setDashboardText(id, value) {
+
+    const element =
+        document.getElementById(id);
+
+    if (element) {
+        element.textContent = value;
+    }
+
+}
         //==================================================
         // CẬP NHẬT BẢN ĐỒ
         //==================================================
