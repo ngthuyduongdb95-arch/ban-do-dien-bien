@@ -1363,10 +1363,41 @@ function getFeatureCenter(feature){
 
 
 //======================================================
-// TÊN XÃ
+// TẠO NHÃN TÊN XÃ/PHƯỜNG
+// CÓ SỐ LIỆU THÌ HIỆN TÊN
 //======================================================
 
 function createDiseaseLabel(feature){
+
+    const row =
+        getFeatureRow(feature);
+
+    if(!row){
+
+        return null;
+
+    }
+
+
+    //==============================================
+    // Chỉ dùng cho các lớp bệnh
+    //==============================================
+
+    if(
+        currentLayer !== "DTLCP" &&
+        currentLayer !== "CGC" &&
+        currentLayer !== "VDNC" &&
+        currentLayer !== "DAI"
+    ){
+
+        return null;
+
+    }
+
+
+    //==============================================
+    // Kiểm tra có số liệu hay không
+    //==============================================
 
     if(
         !featureHasData(feature)
@@ -1377,52 +1408,81 @@ function createDiseaseLabel(feature){
     }
 
 
+    //==============================================
+    // LẤY TÊN
+    //==============================================
+
     const name =
         getName(feature);
 
 
     if(!name){
+
+        console.warn(
+            "Không tìm thấy tên xã cho ID:",
+            feature.properties
+                ? feature.properties.ID
+                : "không có ID"
+        );
+
         return null;
+
     }
 
+
+    //==============================================
+    // TÂM XÃ
+    //==============================================
 
     const center =
         getFeatureCenter(feature);
 
 
     if(!center){
+
         return null;
+
     }
 
 
+    //==============================================
+    // MARKER TÊN XÃ
+    //==============================================
+
     return L.marker(
+
         center,
+
         {
 
-            icon: L.divIcon({
+            icon:
+                L.divIcon({
 
-                className:
-                    "map-label",
+                    className:
+                        "map-label",
 
-                html:
-                    `<div>${name}</div>`,
+                    html:
+                        `<div>${name}</div>`,
 
-                iconSize:
-                    null,
+                    iconSize:
+                        null,
 
-                iconAnchor:
-                    [0,0]
+                    iconAnchor:
+                        [0, 0]
 
-            }),
+                }),
 
-            interactive: false
+            interactive:
+                false,
+
+            keyboard:
+                false
 
         }
+
     );
 
 }
-
-
 //======================================================
 // CHẤM ĐỎ
 //======================================================
