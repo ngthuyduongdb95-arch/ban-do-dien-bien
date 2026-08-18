@@ -1730,19 +1730,406 @@ function renderGeoJSON(){
                         ){
 
                             // Tên xã có số liệu
-                            const label =
-                                createDiseaseLabel(
-                                    feature
-                                );
+                            //======================================================
+// TẠO NHÃN XÃ - TỰ ĐỘNG TRÁNH CHỒNG
+//======================================================
+
+const LABEL_CANDIDATE_OFFSETS = [
+
+    [0, -14],
+
+    [16, 0],
+
+    [-16, 0],
+
+    [0, 14],
+
+    [18, -12],
+
+    [-18, -12],
+
+    [18, 12],
+
+    [-18, 12],
+
+    [30, 0],
+
+    [-30, 0],
+
+    [0, -26],
+
+    [0, 26]
+
+];
 
 
-                            if(label){
+//------------------------------------------------------
+// LẤY CÁC XÃ CÓ NHÃN
+//------------------------------------------------------
 
-                                label.addTo(
-                                    labelLayer
-                                );
+function getDiseaseLabelFeatures(){
 
-                            }
+    if(!geojsonData){
+
+        return [];
+
+    }
+
+    const result = [];
+
+    geojsonData.features.forEach(
+        feature => {
+
+            if(
+                !featureHasData(feature)
+            ){
+
+                return;
+
+            }
+
+            const row =
+                getFeatureRow(feature);
+
+            const name =
+                getName(feature);
+
+            const center =
+                getFeatureCenter(feature);
+
+            if(
+                !row ||
+                !name ||
+                !center
+            ){
+
+                return;
+
+            }
+
+            const config =
+                LAYER_CONFIG[currentLayer];
+
+            const active =
+                config &&
+                isDiseaseActive(
+                    row,
+                    config.status
+                );
+
+            const value =
+                getDamageValue(row);
+
+            result.push({
+
+                feature: feature,
+
+                name: name,
+
+                center: center,
+
+                active: active,
+
+                value: value
+
+            });
+
+        }
+    );
+
+    /*
+     * Ưu tiên:
+     * 1. Xã đang có dịch
+     * 2. Xã có thiệt hại lớn
+     */
+
+    result.sort(
+        (a,b) => {
+
+            if(
+                a.active !== b.active
+            ){
+
+                return a.active
+                    ? -1
+                    : 1;
+
+            }
+
+            return b.value - a.value;
+
+        }
+    );
+
+    return result;
+
+}
+
+
+//------------------------------------------------------
+// ƯỚC TÍNH KÍCH THƯỚC NHÃN
+//------------------------------------------------------
+
+function estimateLabelBox(
+    point,
+    name
+){
+
+    const width =
+        Math.max(
+            28,
+            name.length * 5.4
+        );
+
+    const height = 14;
+
+    return {
+
+        left:
+            point.x -
+            width / 2,
+
+        right:
+            point.x +
+            width / 2,
+
+        top:
+            point.y -
+            height / 2,
+
+        bottom:
+            point.y +
+            height / 2
+
+    };
+
+}
+
+
+//------------------------------------------------------
+// KIỂM TRA CHỒNG NHÃN
+//------------------------------------------------------
+
+function labelBoxOverlap(
+    a,
+    b,
+    padding = 3
+){
+
+    return !(
+        a.right + padding < b.left ||
+        a.left - padding > b.right ||
+        a.bottom + padding < b.top ||
+        a.top - padding > b.bottom
+    );
+
+}
+
+
+//------------------------------------------------------
+// TẠO TOÀN BỘ NHÃN
+//------------------------------------------------------
+
+function buildDiseaseLabels(){
+
+    if(!map){
+
+        return;
+
+    }
+
+    if(!labelLayer){
+
+        labelLayer =
+            L.layerGroup()
+                .addTo(map);
+
+    }
+
+
+    labelLayer.clearLayers();
+
+
+    const features =
+        getDiseaseLabelFeatures();
+
+
+    const occupied = [];
+
+
+    features.forEach(
+        item => {
+
+            const basePoint =
+                map.latLngToLayerPoint(
+                    item.center
+                );
+
+
+            let chosenPoint = null;
+
+            let chosenBox = null;
+
+
+            //------------------------------------------
+            // TÌM VỊ TRÍ KHÔNG CHỒNG
+            //------------------------------------------
+
+            for(
+                const offset
+                of LABEL_CANDIDATE_OFFSETS
+            ){
+
+                const point = {
+
+                    x:
+                        basePoint.x +
+                        offset[0],
+
+                    y:
+                        basePoint.y +
+                        offset[1]
+
+                };
+
+
+                const box =
+                    estimateLabelBox(
+                        point,
+                        item.name
+                    );
+
+
+                let collision = false;
+
+
+                for(
+                    const oldBox
+                    of occupied
+                ){
+
+                    if(
+                        labelBoxOverlap(
+                            box,
+                            oldBox
+                        )
+                    ){
+
+                        collision = true;
+
+                        break;
+
+                    }
+
+                }
+
+
+                if(!collision){
+
+                    chosenPoint =
+                        point;
+
+                    chosenBox =
+                        box;
+
+                    break;
+
+                }
+
+            }
+
+
+            //------------------------------------------
+            // Nếu tất cả đều bị chồng
+            //------------------------------------------
+
+            if(!chosenPoint){
+
+                chosenPoint = {
+
+                    x:
+                        basePoint.x,
+
+                    y:
+                        basePoint.y + 18
+
+                };
+
+
+                chosenBox =
+                    estimateLabelBox(
+                        chosenPoint,
+                        item.name
+                    );
+
+            }
+
+
+            occupied.push(
+                chosenBox
+            );
+
+
+            //------------------------------------------
+            // CHUYỂN PIXEL → LATLNG
+            //------------------------------------------
+
+            const latlng =
+                map.layerPointToLatLng(
+                    chosenPoint
+                );
+
+
+            //------------------------------------------
+            // TẠO LABEL
+            //------------------------------------------
+
+            const marker =
+                L.marker(
+                    latlng,
+                    {
+
+                        icon:
+                            L.divIcon({
+
+                                className:
+                                    "map-label",
+
+                                html: `
+                                    <div
+                                        class="${
+                                            item.active
+                                            ? "map-label-active"
+                                            : ""
+                                        }"
+                                    >
+                                        ${item.name}
+                                    </div>
+                                `,
+
+                                iconSize:
+                                    [0,0],
+
+                                iconAnchor:
+                                    [0,0]
+
+                            }),
+
+                        interactive:
+                            false
+
+                    }
+                );
+
+
+            marker.addTo(
+                labelLayer
+            );
+
+        }
+    );
+
+}
 
 
                             // Chấm đỏ xã đang có dịch
@@ -1761,19 +2148,20 @@ function renderGeoJSON(){
 
     // Căn bản đồ
     const bounds =
-        geojsonLayer.getBounds();
+    geojsonLayer.getBounds();
 
+if(bounds.isValid()){
 
-    if(bounds.isValid()){
+    map.fitBounds(
+        bounds,
+        {
+            padding: [20,20]
+        }
+    );
 
-        map.fitBounds(
-            bounds,
-            {
-                padding: [20,20]
-            }
-        );
+}
 
-    }
+buildDiseaseLabels();
 
 }
 
