@@ -1100,27 +1100,27 @@ function getDamageValue(row){
 // TÍNH CÁC KHOẢNG MÀU TỰ ĐỘNG
 //======================================================
 
+//======================================================
+// TÍNH 5 KHOẢNG THIỆT HẠI TỰ ĐỘNG
+// - Luôn bắt đầu từ 1
+// - Không đưa 0 vào thang thiệt hại
+// - Khoảng tự tính theo số liệu thực tế trong Sheet
+//======================================================
+
 function calculateDamageRanges(){
 
     const diseaseLayers = [
-
         "DTLCP",
-
         "CGC",
-
         "VDNC",
-
         "DAI"
-
     ];
 
 
     if(
-
         !diseaseLayers.includes(
             currentLayer
         )
-
     ){
 
         return [];
@@ -1128,34 +1128,19 @@ function calculateDamageRanges(){
     }
 
 
+    // Lấy toàn bộ số liệu > 0
     const values =
         getMapRows()
+            .map(function(row){
 
-            .map(
-                function(row){
+                return getDamageValue(row);
 
-                    return getDamageValue(
-                        row
-                    );
+            })
+            .filter(function(value){
 
-                }
-            )
+                return value > 0;
 
-            .filter(
-                function(value){
-
-                    return value > 0;
-
-                }
-            )
-
-            .sort(
-                function(a,b){
-
-                    return a - b;
-
-                }
-            );
+            });
 
 
     if(values.length === 0){
@@ -1165,213 +1150,72 @@ function calculateDamageRanges(){
     }
 
 
-    if(values.length === 1){
-
-        return [
-
-            {
-
-                min: values[0],
-
-                max: values[0]
-
-            }
-
-        ];
-
-    }
+    // Giá trị lớn nhất thực tế
+    const maxValue =
+        Math.max(...values);
 
 
-    function percentile(
-        array,
-        p
-    ){
+    //==================================================
+    // Chia đều thành tối đa 5 khoảng
+    //==================================================
 
-        const index =
-            (array.length - 1) * p;
-
-
-        const lower =
-            Math.floor(index);
-
-
-        const upper =
-            Math.ceil(index);
-
-
-        if(
-            lower === upper
-        ){
-
-            return array[lower];
-
-        }
-
-
-        return (
-
-            array[lower] +
-
-            (
-
-                array[upper] -
-                array[lower]
-
-            ) *
-
-            (
-
-                index -
-                lower
-
-            )
-
+    const interval =
+        Math.ceil(
+            maxValue / 5
         );
-
-    }
-
-
-    const q1 =
-        Math.round(
-            percentile(
-                values,
-                0.20
-            )
-        );
-
-
-    const q2 =
-        Math.round(
-            percentile(
-                values,
-                0.40
-            )
-        );
-
-
-    const q3 =
-        Math.round(
-            percentile(
-                values,
-                0.60
-            )
-        );
-
-
-    const q4 =
-        Math.round(
-            percentile(
-                values,
-                0.80
-            )
-        );
-
-
-    const candidates = [
-
-        {
-
-            min:
-                values[0],
-
-            max:
-                q1
-
-        },
-
-        {
-
-            min:
-                q1 + 1,
-
-            max:
-                q2
-
-        },
-
-        {
-
-            min:
-                q2 + 1,
-
-            max:
-                q3
-
-        },
-
-        {
-
-            min:
-                q3 + 1,
-
-            max:
-                q4
-
-        },
-
-        {
-
-            min:
-                q4 + 1,
-
-            max:
-                values[
-                    values.length - 1
-                ]
-
-        }
-
-    ];
 
 
     const ranges = [];
 
 
-    candidates.forEach(
-        function(range){
+    for(
+        let i = 0;
+        i < 5;
+        i++
+    ){
 
-            if(
-                range.min <=
-                range.max
-            ){
-
-                const duplicate =
-                    ranges.some(
-                        function(oldRange){
-
-                            return (
-
-                                oldRange.min ===
-                                range.min &&
-
-                                oldRange.max ===
-                                range.max
-
-                            );
-
-                        }
-                    );
+        const min =
+            i * interval + 1;
 
 
-                if(!duplicate){
+        let max =
+            (i + 1) * interval;
 
-                    ranges.push(
-                        range
-                    );
 
-                }
+        // Khoảng cuối không vượt quá max thực tế
+        if(
+            max > maxValue
+        ){
 
-            }
+            max = maxValue;
 
         }
-    );
+
+
+        // Không tạo khoảng rỗng
+        if(
+            min > max
+        ){
+
+            break;
+
+        }
+
+
+        ranges.push({
+
+            min: min,
+
+            max: max
+
+        });
+
+    }
 
 
     return ranges;
 
 }
-
-
 //======================================================
 // LẤY MÀU THEO GIÁ TRỊ
 //======================================================
