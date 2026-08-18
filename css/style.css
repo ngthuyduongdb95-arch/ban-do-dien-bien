@@ -1156,3 +1156,44 @@ RESPONSIVE
     }
 
 }
+/*====================================================
+CHẤM ĐỎ XÃ ĐANG CÓ DỊCH
+====================================================*/
+
+.disease-pulse{
+
+    animation:
+        diseasePulse 1.5s ease-in-out infinite;
+
+    transform-origin:center;
+
+}
+
+
+@keyframes diseasePulse{
+
+    0%{
+
+        opacity:1;
+
+        transform:scale(1);
+
+    }
+
+    50%{
+
+        opacity:.35;
+
+        transform:scale(1.45);
+
+    }
+
+    100%{
+
+        opacity:1;
+
+        transform:scale(1);
+
+    }
+
+}
