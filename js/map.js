@@ -3,22 +3,25 @@
 // WEBGIS QUẢN LÝ DỊCH BỆNH ĐỘNG VẬT ĐIỆN BIÊN
 //======================================================
 //
-// NHIỆM VỤ:
-// - Khởi tạo bản đồ
-// - Load GeoJSON
-// - Liên kết GeoJSON với Google Sheets qua ID
-// - Hiển thị các lớp dữ liệu
-// - Tô màu xã/phường
-// - Nhãn tên xã/phường
-// - Chấm đỏ xã đang có dịch
-// - Popup
-// - Tìm kiếm xã
-// - Chú giải
-// - Công cụ bản đồ
+// QUY ƯỚC:
 //
-// LƯU Ý:
-// map.js KHÔNG tự chạy DOMContentLoaded.
-// app.js là nơi khởi tạo ứng dụng.
+// DTLCP -> DTLCP_Chết
+// CGC   -> CGC_Chết
+// VDNC  -> VDNC_Mắc
+// DAI   -> DAI_Chết
+//
+// Màu bản đồ:
+// - 0 dữ liệu -> Xã không có dịch
+// - Số > 0 -> tự động chia tối đa 5 khoảng
+//
+// Xã đang có dịch:
+// - Tên xã hiển thị
+// - Chấm đỏ nhỏ
+//
+// Click xã:
+// - Chỉ hiển thị thông tin ở PANEL bên phải
+// - Không mở popup
+//
 //======================================================
 
 
@@ -32,17 +35,21 @@ let geojsonLayer = null;
 
 let geojsonData = null;
 
-let currentLayer = "DTLCP";
+let labelLayer = null;
+
+let diseaseMarkerLayer = null;
 
 let legendControl = null;
 
 let printer = null;
 
+let currentLayer = "DTLCP";
+
 let mapReady = false;
 
 
 //======================================================
-// CẤU HÌNH LỚP DỮ LIỆU
+// CẤU HÌNH LỚP
 //======================================================
 
 const LAYER_CONFIG = {
@@ -205,6 +212,31 @@ const LAYER_CONFIG = {
 
 
 //======================================================
+// CẤU HÌNH MÀU MỨC THIỆT HẠI
+//======================================================
+//
+// Không quy định khoảng cố định.
+// Chỉ quy định 5 màu.
+//
+// Khoảng số liệu được tính tự động từ Sheet.
+//======================================================
+
+const DAMAGE_COLORS = [
+
+    "#FFCDD2",
+
+    "#EF9A9A",
+
+    "#E57373",
+
+    "#E53935",
+
+    "#8B0000"
+
+];
+
+
+//======================================================
 // KHỞI TẠO BẢN ĐỒ
 //======================================================
 
@@ -217,13 +249,16 @@ async function initMap(){
     }
 
 
-    map = L.map("map", {
+    map = L.map(
+        "map",
+        {
 
-        zoomControl: true,
+            zoomControl: true,
 
-        attributionControl: true
+            attributionControl: true
 
-    });
+        }
+    );
 
 
     //==================================================
@@ -231,15 +266,18 @@ async function initMap(){
     //==================================================
 
     L.tileLayer(
+
         "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+
         {
 
             maxZoom: 19,
 
             attribution:
-                '&copy; OpenStreetMap contributors'
+                "&copy; OpenStreetMap contributors"
 
         }
+
     ).addTo(map);
 
 
@@ -248,8 +286,11 @@ async function initMap(){
     //==================================================
 
     map.setView(
+
         [21.3860, 103.0160],
+
         9
+
     );
 
 
@@ -276,17 +317,20 @@ async function loadGeoJSON(){
         }
 
 
-        const response =
-            await fetch(
-                "data/dienbien_xa.geojson"
-            );
+        const response = await fetch(
+
+            "data/dienbien_xa.geojson"
+
+        );
 
 
         if(!response.ok){
 
             throw new Error(
+
                 "Không tải được GeoJSON: " +
                 response.status
+
             );
 
         }
@@ -297,8 +341,12 @@ async function loadGeoJSON(){
 
 
         if(
+
             !geojsonData ||
-            geojsonData.type !== "FeatureCollection"
+
+            geojsonData.type !==
+            "FeatureCollection"
+
         ){
 
             throw new Error(
@@ -329,12 +377,18 @@ async function loadGeoJSON(){
 
 
 //======================================================
-// LẤY DỮ LIỆU XÃ
+// LẤY DÒNG DỮ LIỆU TỪ SHEET
 //======================================================
 
 function getFeatureRow(feature){
 
-    if(!feature || !feature.properties){
+    if(
+
+        !feature ||
+
+        !feature.properties
+
+    ){
 
         return null;
 
@@ -348,7 +402,10 @@ function getFeatureRow(feature){
 
 
     if(
-        typeof sheetData === "undefined"
+
+        typeof sheetData ===
+        "undefined"
+
     ){
 
         return null;
@@ -368,8 +425,11 @@ function getFeatureRow(feature){
 function getName(feature){
 
     if(
+
         !feature ||
+
         !feature.properties
+
     ){
 
         return "";
@@ -378,13 +438,21 @@ function getName(feature){
 
 
     return (
+
         feature.properties["Tên xã"] ||
+
         feature.properties.TEN_XA ||
+
         feature.properties.TENXA ||
+
         feature.properties.NAME ||
+
         feature.properties.Name ||
+
         feature.properties.name ||
+
         ""
+
     );
 
 }
@@ -397,8 +465,11 @@ function getName(feature){
 function mapNormalizeStatus(value){
 
     if(
+
         value === null ||
+
         value === undefined
+
     ){
 
         return "";
@@ -407,22 +478,28 @@ function mapNormalizeStatus(value){
 
 
     return String(value)
+
         .trim()
+
         .toLowerCase();
 
 }
 
 
 //======================================================
-// CHUYỂN SỐ
+// CHUYỂN GIÁ TRỊ THÀNH SỐ
 //======================================================
 
 function mapNumber(value){
 
     if(
+
         value === null ||
+
         value === undefined ||
+
         value === ""
+
     ){
 
         return 0;
@@ -431,7 +508,9 @@ function mapNumber(value){
 
 
     if(
+
         typeof value === "number"
+
     ){
 
         return isNaN(value)
@@ -442,8 +521,7 @@ function mapNumber(value){
 
 
     let str =
-        String(value)
-            .trim();
+        String(value).trim();
 
 
     if(!str){
@@ -453,6 +531,8 @@ function mapNumber(value){
     }
 
 
+    // Giữ số, dấu âm, dấu chấm, dấu phẩy
+
     str =
         str.replace(
             /[^\d,.-]/g,
@@ -460,9 +540,14 @@ function mapNumber(value){
         );
 
 
+    // Ví dụ: 1.234,56
+
     if(
+
         str.includes(".") &&
+
         str.includes(",")
+
     ){
 
         str =
@@ -478,19 +563,41 @@ function mapNumber(value){
             );
 
     }
+
+    // Ví dụ: 1.234
+
     else if(
+
         str.includes(".")
+
     ){
 
-        str =
-            str.replace(
-                /\./g,
-                ""
-            );
+        const parts =
+            str.split(".");
+
+
+        if(
+
+            parts.length > 2
+
+        ){
+
+            str =
+                str.replace(
+                    /\./g,
+                    ""
+                );
+
+        }
 
     }
+
+    // Ví dụ: 1,234
+
     else if(
+
         str.includes(",")
+
     ){
 
         const parts =
@@ -498,8 +605,23 @@ function mapNumber(value){
 
 
         if(
-            parts.length === 2 &&
+
+            parts.length > 2
+
+        ){
+
+            str =
+                str.replace(
+                    /,/g,
+                    ""
+                );
+
+        }
+        else if(
+
+            parts[1] &&
             parts[1].length <= 2
+
         ){
 
             str =
@@ -543,7 +665,9 @@ function mapFormatNumber(value){
 
 
     if(
+
         isNaN(number)
+
     ){
 
         return "0";
@@ -576,7 +700,11 @@ function mapFormatDate(value){
 
 
     if(
-        isNaN(date.getTime())
+
+        isNaN(
+            date.getTime()
+        )
+
     ){
 
         return value;
@@ -592,6 +720,43 @@ function mapFormatDate(value){
 
 
 //======================================================
+// LẤY TẤT CẢ DÒNG SHEET
+//======================================================
+
+function getMapRows(){
+
+    if(
+
+        typeof getRows ===
+        "function"
+
+    ){
+
+        return getRows();
+
+    }
+
+
+    if(
+
+        typeof sheetData !==
+        "undefined"
+
+    ){
+
+        return Object.values(
+            sheetData
+        );
+
+    }
+
+
+    return [];
+
+}
+
+
+//======================================================
 // XÁC ĐỊNH XÃ ĐANG CÓ DỊCH
 //======================================================
 
@@ -600,17 +765,29 @@ function isDiseaseActive(
     statusField
 ){
 
-    if(!row || !statusField){
+    if(
+
+        !row ||
+
+        !statusField
+
+    ){
 
         return false;
 
     }
 
 
-    return (
+    const status =
         mapNormalizeStatus(
             row[statusField]
-        ) === "đang có dịch"
+        );
+
+
+    return (
+
+        status === "đang có dịch"
+
     );
 
 }
@@ -625,7 +802,13 @@ function hasDiseaseHistory(
     config
 ){
 
-    if(!row || !config){
+    if(
+
+        !row ||
+
+        !config
+
+    ){
 
         return false;
 
@@ -656,63 +839,459 @@ function hasDiseaseHistory(
         );
 
 
-    /*
-     * Không tính trạng thái
-     * "Không có dịch".
-     */
-
     if(
-        status === "" ||
-        status === "không có dịch"
+
+        status === "đang có dịch" ||
+
+        status === "đã hết dịch"
+
     ){
 
-        return (
-            outbreak > 0 ||
-            value > 0 ||
-            death > 0
-        );
+        return true;
 
     }
 
 
     return (
+
         outbreak > 0 ||
+
         value > 0 ||
-        death > 0 ||
-        status === "đang có dịch" ||
-        status === "đã hết dịch"
+
+        death > 0
+
     );
 
 }
 
 
 //======================================================
-// STYLE XÃ
+// LẤY GIÁ TRỊ THIỆT HẠI
 //======================================================
 
-function getFeatureStyle(feature){
-
-    const row =
-        getFeatureRow(feature);
-
-
-    const config =
-        LAYER_CONFIG[currentLayer];
-
-
-    // Không có dữ liệu
+function getDamageValue(row){
 
     if(!row){
 
+        return 0;
+
+    }
+
+
+    // DTLCP
+
+    if(
+
+        currentLayer ===
+        "DTLCP"
+
+    ){
+
+        return mapNumber(
+            row["DTLCP_Chết"]
+        );
+
+    }
+
+
+    // CGC
+
+    if(
+
+        currentLayer ===
+        "CGC"
+
+    ){
+
+        return mapNumber(
+            row["CGC_Chết"]
+        );
+
+    }
+
+
+    // VDNC
+
+    if(
+
+        currentLayer ===
+        "VDNC"
+
+    ){
+
+        return mapNumber(
+            row["VDNC_Mắc"]
+        );
+
+    }
+
+
+    // Dại
+
+    if(
+
+        currentLayer ===
+        "DAI"
+
+    ){
+
+        return mapNumber(
+            row["DAI_Chết"]
+        );
+
+    }
+
+
+    return 0;
+
+}
+
+
+//======================================================
+// TỰ ĐỘNG TÍNH CÁC KHOẢNG THIỆT HẠI
+//======================================================
+//
+// Dùng dữ liệu thực tế trong Sheet.
+// Không có ngưỡng cố định.
+//
+// Các giá trị 0 được loại khỏi phép chia khoảng.
+// 0 được thể hiện riêng là "Xã không có dịch".
+//
+//======================================================
+
+function calculateDamageRanges(){
+
+    if(
+
+        currentLayer !==
+        "DTLCP" &&
+
+        currentLayer !==
+        "CGC" &&
+
+        currentLayer !==
+        "VDNC" &&
+
+        currentLayer !==
+        "DAI"
+
+    ){
+
+        return [];
+
+    }
+
+
+    const rows =
+        getMapRows();
+
+
+    const values =
+        rows
+
+            .map(
+                row =>
+                    getDamageValue(row)
+            )
+
+            .filter(
+                value =>
+                    value > 0
+            )
+
+            .sort(
+                (a,b) =>
+                    a - b
+            );
+
+
+    if(
+
+        values.length === 0
+
+    ){
+
+        return [];
+
+    }
+
+
+    //==================================================
+    // Chỉ có một giá trị khác 0
+    //==================================================
+
+    if(
+
+        values.length === 1
+
+    ){
+
+        return [
+
+            {
+
+                min: values[0],
+
+                max: values[0]
+
+            }
+
+        ];
+
+    }
+
+
+    //==================================================
+    // Lấy phân vị
+    //==================================================
+
+    function percentile(
+        array,
+        p
+    ){
+
+        const index =
+            (array.length - 1) *
+            p;
+
+
+        const lower =
+            Math.floor(index);
+
+
+        const upper =
+            Math.ceil(index);
+
+
+        if(
+
+            lower === upper
+
+        ){
+
+            return array[lower];
+
+        }
+
+
+        return (
+
+            array[lower] +
+
+            (
+
+                array[upper] -
+                array[lower]
+
+            ) *
+
+            (
+
+                index -
+                lower
+
+            )
+
+        );
+
+    }
+
+
+    //==================================================
+    // 4 mốc để tạo tối đa 5 khoảng
+    //==================================================
+
+    const q1 =
+        Math.round(
+            percentile(
+                values,
+                0.20
+            )
+        );
+
+
+    const q2 =
+        Math.round(
+            percentile(
+                values,
+                0.40
+            )
+        );
+
+
+    const q3 =
+        Math.round(
+            percentile(
+                values,
+                0.60
+            )
+        );
+
+
+    const q4 =
+        Math.round(
+            percentile(
+                values,
+                0.80
+            )
+        );
+
+
+    const rawRanges = [
+
+        {
+            min: values[0],
+            max: q1
+        },
+
+        {
+            min: q1 + 1,
+            max: q2
+        },
+
+        {
+            min: q2 + 1,
+            max: q3
+        },
+
+        {
+            min: q3 + 1,
+            max: q4
+        },
+
+        {
+            min: q4 + 1,
+            max:
+                values[
+                    values.length - 1
+                ]
+        }
+
+    ];
+
+
+    //==================================================
+    // Loại các khoảng không hợp lệ
+    //==================================================
+
+    const ranges = [];
+
+
+    rawRanges.forEach(
+        range => {
+
+            if(
+
+                range.min <=
+                range.max
+
+            ){
+
+                ranges.push(
+                    range
+                );
+
+            }
+
+        }
+    );
+
+
+    return ranges;
+
+}
+
+
+//======================================================
+// TÌM MỨC MÀU CỦA GIÁ TRỊ
+//======================================================
+
+function getDamageClass(
+    value,
+    ranges
+){
+
+    if(
+
+        value <= 0 ||
+
+        ranges.length === 0
+
+    ){
+
+        return -1;
+
+    }
+
+
+    for(
+
+        let i = 0;
+
+        i < ranges.length;
+
+        i++
+
+    ){
+
+        const range =
+            ranges[i];
+
+
+        if(
+
+            value >= range.min &&
+
+            value <= range.max
+
+        ){
+
+            return i;
+
+        }
+
+    }
+
+
+    // Trường hợp do làm tròn
+    // giá trị lớn nhất nằm ngoài mốc
+
+    return ranges.length - 1;
+
+}
+
+
+//======================================================
+// STYLE MỨC ĐỘ THIỆT HẠI
+//======================================================
+
+function getDamageStyle(row){
+
+    const value =
+        getDamageValue(row);
+
+
+    const ranges =
+        calculateDamageRanges();
+
+
+    //==================================================
+    // KHÔNG CÓ THIỆT HẠI
+    //==================================================
+
+    if(
+
+        value <= 0
+
+    ){
+
         return {
 
-            fillColor: "#ECEFF1",
+            fillColor: "#F3F4F6",
 
             weight: 1,
 
-            opacity: 1,
-
-            color: "#90A4AE",
+            color: "#9CA3AF",
 
             fillOpacity: .55
 
@@ -721,333 +1300,35 @@ function getFeatureStyle(feature){
     }
 
 
-    //==================================================
-    // DTLCP
-    //==================================================
-
-    if(currentLayer === "DTLCP"){
-
-        return styleDiseaseLayer(
-            row,
-            config
+    const index =
+        getDamageClass(
+            value,
+            ranges
         );
 
-    }
 
-
-    //==================================================
-    // CGC
-    //==================================================
-
-    if(currentLayer === "CGC"){
-
-        return styleDiseaseLayer(
-            row,
-            config
-        );
-
-    }
-
-
-    //==================================================
-    // VDNC
-    //==================================================
-
-    if(currentLayer === "VDNC"){
-
-        return styleVDNC(
-            row,
-            config
-        );
-
-    }
-
-
-    //==================================================
-    // DẠI
-    //==================================================
-
-    if(currentLayer === "DAI"){
-
-        return styleDiseaseLayer(
-            row,
-            config
-        );
-
-    }
-
-
-    //==================================================
-    // PHUN
-    //==================================================
-
-    if(currentLayer === "PHUN"){
-
-        return stylePhun(
-            row
-        );
-
-    }
-
-
-    //==================================================
-    // KSGM
-    //==================================================
-
-    if(currentLayer === "KSGM"){
-
-        return styleKSGM(
-            row
-        );
-
-    }
-
-
-    //==================================================
-    // CSBBTTY
-    //==================================================
-
-    if(currentLayer === "CSBBTTY"){
-
-        return styleDrugStore(
-            row
-        );
-
-    }
+    const color =
+        DAMAGE_COLORS[
+            Math.min(
+                index,
+                DAMAGE_COLORS.length - 1
+            )
+        ];
 
 
     return {
 
-        fillColor: "#ECEFF1",
+        fillColor:
+            color,
 
-        weight: 1,
+        weight:
+            1,
 
-        opacity: 1,
+        color:
+            "#8B1A1A",
 
-        color: "#90A4AE",
-
-        fillOpacity: .55
-
-    };
-
-}
-
-
-//======================================================
-// STYLE BỆNH
-//======================================================
-
-function styleDiseaseLayer(
-    row,
-    config
-){
-
-    const status =
-        mapNormalizeStatus(
-            row[config.status]
-        );
-
-
-    const outbreak =
-        mapNumber(
-            row[config.outbreak]
-        );
-
-
-    const value =
-        mapNumber(
-            row[config.value]
-        );
-
-
-    const death =
-        mapNumber(
-            row[config.death]
-        );
-
-
-    // Đang có dịch
-
-    if(
-        status === "đang có dịch"
-    ){
-
-        return {
-
-            fillColor: "#E53935",
-
-            weight: 1.5,
-
-            opacity: 1,
-
-            color: "#8E0000",
-
-            fillOpacity: .78
-
-        };
-
-    }
-
-
-    // Đã hết dịch / có dữ liệu lũy kế
-
-    if(
-        hasDiseaseHistory(
-            row,
-            config
-        )
-    ){
-
-        return {
-
-            fillColor: "#FFCDD2",
-
-            weight: 1,
-
-            opacity: 1,
-
-            color: "#B71C1C",
-
-            fillOpacity: .60
-
-        };
-
-    }
-
-
-    // Có số liệu chết nhưng không xác định trạng thái
-
-    if(
-        value > 0 ||
-        death > 0 ||
-        outbreak > 0
-    ){
-
-        return {
-
-            fillColor: "#FFCDD2",
-
-            weight: 1,
-
-            opacity: 1,
-
-            color: "#B71C1C",
-
-            fillOpacity: .60
-
-        };
-
-    }
-
-
-    // Không có dịch
-
-    return {
-
-        fillColor: "#ECEFF1",
-
-        weight: 1,
-
-        opacity: 1,
-
-        color: "#90A4AE",
-
-        fillOpacity: .45
-
-    };
-
-}
-
-
-//======================================================
-// STYLE VDNC
-//======================================================
-
-function styleVDNC(
-    row,
-    config
-){
-
-    const status =
-        mapNormalizeStatus(
-            row[config.status]
-        );
-
-
-    const outbreak =
-        mapNumber(
-            row[config.outbreak]
-        );
-
-
-    const mac =
-        mapNumber(
-            row[config.value]
-        );
-
-
-    const chet =
-        mapNumber(
-            row[config.death]
-        );
-
-
-    if(
-        status === "đang có dịch"
-    ){
-
-        return {
-
-            fillColor: "#8E24AA",
-
-            weight: 1.5,
-
-            opacity: 1,
-
-            color: "#4A148C",
-
-            fillOpacity: .78
-
-        };
-
-    }
-
-
-    if(
-        outbreak > 0 ||
-        mac > 0 ||
-        chet > 0 ||
-        status === "đã hết dịch"
-    ){
-
-        return {
-
-            fillColor: "#E1BEE7",
-
-            weight: 1,
-
-            opacity: 1,
-
-            color: "#7B1FA2",
-
-            fillOpacity: .60
-
-        };
-
-    }
-
-
-    return {
-
-        fillColor: "#ECEFF1",
-
-        weight: 1,
-
-        opacity: 1,
-
-        color: "#90A4AE",
-
-        fillOpacity: .45
+        fillOpacity:
+            .75
 
     };
 
@@ -1072,27 +1353,21 @@ function stylePhun(row){
         );
 
 
-    const progress =
-        String(
-            row["PHUN_Tiến độ"] || ""
-        )
-        .trim()
-        .toLowerCase();
-
-
     if(
+
         round >= 4
+
     ){
 
         return {
 
-            fillColor: "#00695C",
+            fillColor:"#00695C",
 
-            weight: 1,
+            weight:1,
 
-            color: "#004D40",
+            color:"#004D40",
 
-            fillOpacity: .75
+            fillOpacity:.75
 
         };
 
@@ -1100,18 +1375,20 @@ function stylePhun(row){
 
 
     if(
+
         round === 3
+
     ){
 
         return {
 
-            fillColor: "#00897B",
+            fillColor:"#00897B",
 
-            weight: 1,
+            weight:1,
 
-            color: "#00695C",
+            color:"#00695C",
 
-            fillOpacity: .70
+            fillOpacity:.70
 
         };
 
@@ -1119,18 +1396,20 @@ function stylePhun(row){
 
 
     if(
+
         round === 2
+
     ){
 
         return {
 
-            fillColor: "#26A69A",
+            fillColor:"#26A69A",
 
-            weight: 1,
+            weight:1,
 
-            color: "#00796B",
+            color:"#00796B",
 
-            fillOpacity: .65
+            fillOpacity:.65
 
         };
 
@@ -1138,18 +1417,20 @@ function stylePhun(row){
 
 
     if(
+
         round === 1
+
     ){
 
         return {
 
-            fillColor: "#80CBC4",
+            fillColor:"#80CBC4",
 
-            weight: 1,
+            weight:1,
 
-            color: "#00897B",
+            color:"#00897B",
 
-            fillOpacity: .65
+            fillOpacity:.65
 
         };
 
@@ -1157,19 +1438,20 @@ function stylePhun(row){
 
 
     if(
-        households > 0 ||
-        progress !== ""
+
+        households > 0
+
     ){
 
         return {
 
-            fillColor: "#B2DFDB",
+            fillColor:"#B2DFDB",
 
-            weight: 1,
+            weight:1,
 
-            color: "#00897B",
+            color:"#00897B",
 
-            fillOpacity: .60
+            fillOpacity:.60
 
         };
 
@@ -1178,13 +1460,13 @@ function stylePhun(row){
 
     return {
 
-        fillColor: "#ECEFF1",
+        fillColor:"#F3F4F6",
 
-        weight: 1,
+        weight:1,
 
-        color: "#90A4AE",
+        color:"#9CA3AF",
 
-        fillOpacity: .45
+        fillOpacity:.45
 
     };
 
@@ -1210,18 +1492,21 @@ function styleKSGM(row){
 
 
     if(
-        status === "đã triển khai"
+
+        status ===
+        "đã triển khai"
+
     ){
 
         return {
 
-            fillColor: "#8D6E63",
+            fillColor:"#8D6E63",
 
-            weight: 1,
+            weight:1,
 
-            color: "#5D4037",
+            color:"#5D4037",
 
-            fillOpacity: .72
+            fillOpacity:.72
 
         };
 
@@ -1229,18 +1514,20 @@ function styleKSGM(row){
 
 
     if(
+
         count > 0
+
     ){
 
         return {
 
-            fillColor: "#D7CCC8",
+            fillColor:"#D7CCC8",
 
-            weight: 1,
+            weight:1,
 
-            color: "#795548",
+            color:"#795548",
 
-            fillOpacity: .60
+            fillOpacity:.60
 
         };
 
@@ -1249,13 +1536,13 @@ function styleKSGM(row){
 
     return {
 
-        fillColor: "#ECEFF1",
+        fillColor:"#F3F4F6",
 
-        weight: 1,
+        weight:1,
 
-        color: "#90A4AE",
+        color:"#9CA3AF",
 
-        fillOpacity: .45
+        fillOpacity:.45
 
     };
 
@@ -1263,7 +1550,7 @@ function styleKSGM(row){
 
 
 //======================================================
-// STYLE CƠ SỞ THUỐC THÚ Y
+// STYLE THUỐC THÚ Y
 //======================================================
 
 function styleDrugStore(row){
@@ -1275,18 +1562,20 @@ function styleDrugStore(row){
 
 
     if(
+
         count > 0
+
     ){
 
         return {
 
-            fillColor: "#43A047",
+            fillColor:"#43A047",
 
-            weight: 1,
+            weight:1,
 
-            color: "#1B5E20",
+            color:"#1B5E20",
 
-            fillOpacity: .70
+            fillOpacity:.70
 
         };
 
@@ -1295,13 +1584,13 @@ function styleDrugStore(row){
 
     return {
 
-        fillColor: "#ECEFF1",
+        fillColor:"#F3F4F6",
 
-        weight: 1,
+        weight:1,
 
-        color: "#90A4AE",
+        color:"#9CA3AF",
 
-        fillOpacity: .45
+        fillOpacity:.45
 
     };
 
@@ -1309,94 +1598,54 @@ function styleDrugStore(row){
 
 
 //======================================================
-// TẠO POPUP
+// STYLE XÃ
 //======================================================
 
-function createPopup(
-    feature,
-    row
-){
+function getFeatureStyle(feature){
+
+    const row =
+        getFeatureRow(feature);
+
 
     if(!row){
 
-        return `
-            <div class="popup-card">
-                <h3>${getName(feature)}</h3>
-                <p>Không có dữ liệu.</p>
-            </div>
-        `;
+        return {
 
-    }
+            fillColor:"#F3F4F6",
 
+            weight:1,
 
-    const name =
-        row["Tên xã"] ||
-        getName(feature);
+            color:"#9CA3AF",
 
+            fillOpacity:.45
 
-    //==================================================
-    // DTLCP
-    //==================================================
-
-    if(currentLayer === "DTLCP"){
-
-        return createDiseasePopup(
-            name,
-            row,
-            "🐷",
-            "DỊCH TẢ LỢN CHÂU PHI",
-            "#E53935",
-            "DTLCP"
-        );
+        };
 
     }
 
 
     //==================================================
-    // CGC
+    // BỆNH
     //==================================================
 
-    if(currentLayer === "CGC"){
+    if(
 
-        return createDiseasePopup(
-            name,
-            row,
-            "🐔",
-            "CÚM GIA CẦM",
-            "#FB8C00",
-            "CGC"
-        );
+        currentLayer ===
+        "DTLCP" ||
 
-    }
+        currentLayer ===
+        "CGC" ||
 
+        currentLayer ===
+        "VDNC" ||
 
-    //==================================================
-    // VDNC
-    //==================================================
+        currentLayer ===
+        "DAI"
 
-    if(currentLayer === "VDNC"){
+    ){
 
-        return createVDNCPopup(
-            name,
+        return getDamageStyle(
             row
-        );
-
-    }
-
-
-    //==================================================
-    // DẠI
-    //==================================================
-
-    if(currentLayer === "DAI"){
-
-        return createDiseasePopup(
-            name,
-            row,
-            "🐕",
-            "BỆNH DẠI",
-            "#43A047",
-            "DAI"
         );
 
     }
@@ -1406,50 +1655,16 @@ function createPopup(
     // PHUN
     //==================================================
 
-    if(currentLayer === "PHUN"){
+    if(
 
-        return `
-            <div class="popup-card">
+        currentLayer ===
+        "PHUN"
 
-                <h3>
-                    🧴 ${name}
-                </h3>
+    ){
 
-                <hr>
-
-                <p>
-                    <b>Tiến độ:</b>
-                    ${row["PHUN_Tiến độ"] || "--"}
-                </p>
-
-                <p>
-                    <b>Vòng:</b>
-                    ${row["PHUN_Vòng"] || "--"}
-                </p>
-
-                <p>
-                    <b>Số hộ:</b>
-                    ${mapFormatNumber(
-                        row["PHUN_Số hộ"]
-                    )}
-                </p>
-
-                <p>
-                    <b>Diện tích:</b>
-                    ${mapFormatNumber(
-                        row["PHUN_Diện tích"]
-                    )} m²
-                </p>
-
-                <p>
-                    <b>Ngày:</b>
-                    ${mapFormatDate(
-                        row["PHUN_Ngày"]
-                    )}
-                </p>
-
-            </div>
-        `;
+        return stylePhun(
+            row
+        );
 
     }
 
@@ -1458,31 +1673,16 @@ function createPopup(
     // KSGM
     //==================================================
 
-    if(currentLayer === "KSGM"){
+    if(
 
-        return `
-            <div class="popup-card">
+        currentLayer ===
+        "KSGM"
 
-                <h3>
-                    🏭 ${name}
-                </h3>
+    ){
 
-                <hr>
-
-                <p>
-                    <b>Trạng thái:</b>
-                    ${row["KSGM_Trạng thái"] || "--"}
-                </p>
-
-                <p>
-                    <b>Số cơ sở:</b>
-                    ${mapFormatNumber(
-                        row["KSGM_Cơ sở"]
-                    )}
-                </p>
-
-            </div>
-        `;
+        return styleKSGM(
+            row
+        );
 
     }
 
@@ -1491,279 +1691,150 @@ function createPopup(
     // THUỐC THÚ Y
     //==================================================
 
-    if(currentLayer === "CSBBTTY"){
+    if(
 
-        return `
-            <div class="popup-card">
+        currentLayer ===
+        "CSBBTTY"
 
-                <h3>
-                    💊 ${name}
-                </h3>
+    ){
 
-                <hr>
-
-                <p>
-                    <b>Số cơ sở:</b>
-                    ${mapFormatNumber(
-                        row["CSBBTTY_Cơ sở"]
-                    )}
-                </p>
-
-            </div>
-        `;
+        return styleDrugStore(
+            row
+        );
 
     }
 
 
-    return `
-        <div class="popup-card">
+    return {
 
-            <h3>${name}</h3>
+        fillColor:"#F3F4F6",
 
-        </div>
-    `;
+        weight:1,
+
+        color:"#9CA3AF",
+
+        fillOpacity:.45
+
+    };
 
 }
 
 
 //======================================================
-// POPUP BỆNH
+// LẤY TÂM XÃ
 //======================================================
 
-function createDiseasePopup(
-    name,
-    row,
-    icon,
-    title,
-    color,
-    prefix
+function getFeatureCenter(
+    feature
 ){
 
-    const status =
-        row[`${prefix}_Trạng thái`] ||
-        "--";
+    try{
+
+        const layer =
+            L.geoJSON(
+                feature
+            );
 
 
-    const outbreak =
-        mapNumber(
-            row[`${prefix}_Ổ dịch`]
+        const bounds =
+            layer.getBounds();
+
+
+        if(
+
+            bounds.isValid()
+
+        ){
+
+            return bounds.getCenter();
+
+        }
+
+    }
+    catch(err){
+
+        console.warn(
+            "Không xác định được tâm xã:",
+            err
+        );
+
+    }
+
+
+    return null;
+
+}
+
+
+//======================================================
+// XÃ CÓ DỊCH LŨY KẾ
+//======================================================
+
+function featureHasDisease(
+    feature
+){
+
+    const row =
+        getFeatureRow(
+            feature
         );
 
 
-    const value =
-        mapNumber(
-            row[`${prefix}_Chết`]
-        );
+    const config =
+        LAYER_CONFIG[
+            currentLayer
+        ];
 
 
-    const weight =
-        row[`${prefix}_Trọng lượng`] !==
-        undefined
-            ? mapNumber(
-                row[`${prefix}_Trọng lượng`]
-            )
-            : null;
+    if(
 
+        !row ||
 
-    const date =
-        row[`${prefix}_Ngày cuối`] ||
-        null;
+        !config
 
+    ){
 
-    const days =
-        row[`${prefix}_Số ngày`] ||
-        null;
-
-
-    let html = `
-
-        <div class="popup-card">
-
-            <h3 style="color:${color}">
-
-                ${icon} ${name}
-
-            </h3>
-
-            <hr>
-
-            <p>
-                <b>Trạng thái:</b>
-                ${status}
-            </p>
-
-            <p>
-                <b>Ổ dịch:</b>
-                ${outbreak}
-            </p>
-
-    `;
-
-
-    if(prefix === "DAI"){
-
-        html += `
-
-            <p>
-                <b>Số chết, tiêu hủy:</b>
-                ${mapFormatNumber(value)} con
-            </p>
-
-        `;
-
-    }
-    else{
-
-        html += `
-
-            <p>
-                <b>Tiêu hủy:</b>
-                ${mapFormatNumber(value)} con
-            </p>
-
-        `;
+        return false;
 
     }
 
 
-    if(weight !== null){
-
-        html += `
-
-            <p>
-                <b>Khối lượng:</b>
-                ${mapFormatNumber(weight)} kg
-            </p>
-
-        `;
-
-    }
-
-
-    if(date){
-
-        html += `
-
-            <p>
-                <b>Ngày cuối:</b>
-                ${mapFormatDate(date)}
-            </p>
-
-        `;
-
-    }
-
-
-    if(days !== null){
-
-        html += `
-
-            <p>
-                <b>Số ngày:</b>
-                ${days}
-            </p>
-
-        `;
-
-    }
-
-
-    html += `
-
-        </div>
-
-    `;
-
-
-    return html;
+    return hasDiseaseHistory(
+        row,
+        config
+    );
 
 }
 
 
 //======================================================
-// POPUP VDNC
+// TẠO NHÃN TÊN XÃ
+//======================================================
+//
+// Chỉ hiện tên xã/phường có dịch.
 //======================================================
 
-function createVDNCPopup(
-    name,
-    row
+function createDiseaseLabel(
+    feature
 ){
 
-    return `
+    if(
 
-        <div class="popup-card">
+        !featureHasDisease(
+            feature
+        )
 
-            <h3 style="color:#8E24AA">
+    ){
 
-                🐄 ${name}
+        return null;
 
-            </h3>
+    }
 
-            <hr>
-
-            <p>
-                <b>Trạng thái:</b>
-                ${row["VDNC_Trạng thái"] || "--"}
-            </p>
-
-            <p>
-                <b>Ổ dịch:</b>
-                ${mapFormatNumber(
-                    row["VDNC_Ổ dịch"]
-                )}
-            </p>
-
-            <p>
-                <b>Mắc:</b>
-                ${mapFormatNumber(
-                    row["VDNC_Mắc"]
-                )} con
-            </p>
-
-            <p>
-                <b>Chết:</b>
-                ${mapFormatNumber(
-                    row["VDNC_Chết"]
-                )} con
-            </p>
-
-            <p>
-                <b>Khối lượng:</b>
-                ${mapFormatNumber(
-                    row["VDNC_Trọng lượng"]
-                )} kg
-            </p>
-
-            <p>
-                <b>Ngày cuối:</b>
-                ${mapFormatDate(
-                    row["VDNC_Ngày cuối"]
-                )}
-            </p>
-
-            <p>
-                <b>Số ngày:</b>
-                ${row["VDNC_Số ngày"] || "--"}
-            </p>
-
-        </div>
-
-    `;
-
-}
-
-
-//======================================================
-// HIỂN THỊ NHÃN XÃ
-//======================================================
-
-function createLabel(
-    feature,
-    layer
-){
 
     const name =
-        getName(feature);
+        getName(
+            feature
+        );
 
 
     if(!name){
@@ -1773,71 +1844,48 @@ function createLabel(
     }
 
 
-    //==================================================
-    // KSGM
-    //==================================================
-
-    if(
-        layer === "KSGM"
-    ){
-
-        const row =
-            getFeatureRow(feature);
+    const center =
+        getFeatureCenter(
+            feature
+        );
 
 
-        const count =
-            row
-                ? mapNumber(
-                    row["KSGM_Cơ sở"]
-                )
-                : 0;
+    if(!center){
 
-
-        return L.divIcon({
-
-            className:
-                "map-label",
-
-            html: `
-
-                <div>
-
-                    ${name}
-
-                    ${
-                        count > 0
-                        ? `<br>
-                           <span class="ksgm-count">
-                               ${count}
-                           </span>`
-                        : ""
-                    }
-
-                </div>
-
-            `,
-
-            iconSize: null
-
-        });
+        return null;
 
     }
 
 
-    return L.divIcon({
+    return L.marker(
 
-        className:
-            "map-label",
+        center,
 
-        html: `
-            <div>
-                ${name}
-            </div>
-        `,
+        {
 
-        iconSize: null
+            icon:
+                L.divIcon({
 
-    });
+                    className:
+                        "map-label",
+
+                    html:
+                        `<div>${name}</div>`,
+
+                    iconSize:
+                        null,
+
+                    iconAnchor:
+                        [0,0]
+
+                }),
+
+            interactive:
+                false
+
+        }
+
+    );
 
 }
 
@@ -1847,22 +1895,29 @@ function createLabel(
 //======================================================
 
 function addDiseaseMarker(
-    feature,
-    layerGroup
+    feature
 ){
 
     const row =
-        getFeatureRow(feature);
+        getFeatureRow(
+            feature
+        );
 
 
     const config =
-        LAYER_CONFIG[currentLayer];
+        LAYER_CONFIG[
+            currentLayer
+        ];
 
 
     if(
+
         !row ||
+
         !config ||
+
         !config.status
+
     ){
 
         return;
@@ -1870,11 +1925,15 @@ function addDiseaseMarker(
     }
 
 
+    // Chỉ xã đang có dịch
+
     if(
+
         !isDiseaseActive(
             row,
             config.status
         )
+
     ){
 
         return;
@@ -1882,32 +1941,13 @@ function addDiseaseMarker(
     }
 
 
-    if(
-        !feature.geometry
-    ){
-
-        return;
-
-    }
+    const center =
+        getFeatureCenter(
+            feature
+        );
 
 
-    let center;
-
-
-    try{
-
-        const temp =
-            L.geoJSON(
-                feature
-            );
-
-
-        center =
-            temp.getBounds()
-                .getCenter();
-
-    }
-    catch(err){
+    if(!center){
 
         return;
 
@@ -1915,47 +1955,84 @@ function addDiseaseMarker(
 
 
     L.circleMarker(
+
         center,
+
         {
 
-            radius:5,
+            radius: 3,
 
-            color:"#ffffff",
+            color: "#FFFFFF",
 
-            weight:1.5,
+            weight: 1,
 
-            fillColor:"#ff0000",
+            fillColor: "#FF0000",
 
-            fillOpacity:1,
+            fillOpacity: 1,
 
-            interactive:false
+            interactive: false
 
         }
-    )
-    .addTo(layerGroup);
+
+    ).addTo(
+        diseaseMarkerLayer
+    );
 
 }
 
 
 //======================================================
-// HIỂN THỊ GEOJSON
+// XÓA CÁC LAYER PHỤ
+//======================================================
+
+function clearMapOverlays(){
+
+    if(labelLayer){
+
+        map.removeLayer(
+            labelLayer
+        );
+
+        labelLayer = null;
+
+    }
+
+
+    if(diseaseMarkerLayer){
+
+        map.removeLayer(
+            diseaseMarkerLayer
+        );
+
+        diseaseMarkerLayer = null;
+
+    }
+
+}
+
+
+//======================================================
+// RENDER GEOJSON
 //======================================================
 
 function renderGeoJSON(){
 
-    if(!map){
+    if(
+
+        !map ||
+
+        !geojsonData
+
+    ){
 
         return;
 
     }
 
 
-    if(!geojsonData){
-
-        return;
-
-    }
-
+    //==================================================
+    // XÓA BẢN ĐỒ CŨ
+    //==================================================
 
     if(geojsonLayer){
 
@@ -1968,13 +2045,36 @@ function renderGeoJSON(){
     }
 
 
-    const diseaseMarkers =
-        L.layerGroup();
+    clearMapOverlays();
 
+
+    //==================================================
+    // TẠO LAYER NHÃN
+    //==================================================
+
+    labelLayer =
+        L.layerGroup()
+            .addTo(map);
+
+
+    //==================================================
+    // TẠO LAYER CHẤM ĐỎ
+    //==================================================
+
+    diseaseMarkerLayer =
+        L.layerGroup()
+            .addTo(map);
+
+
+    //==================================================
+    // TẠO GEOJSON
+    //==================================================
 
     geojsonLayer =
         L.geoJSON(
+
             geojsonData,
+
             {
 
                 style:
@@ -1987,38 +2087,19 @@ function renderGeoJSON(){
                         layer
                     ){
 
-                        const row =
-                            getFeatureRow(
-                                feature
-                            );
-
-
-                        //================================================
-                        // POPUP
-                        //================================================
-
-                        layer.bindPopup(
-                            createPopup(
-                                feature,
-                                row
-                            ),
-                            {
-                                maxWidth:320
-                            }
-                        );
-
-
-                        //================================================
-                        // CLICK
-                        //================================================
+                        //==========================================
+                        // CLICK XÃ
+                        //==========================================
 
                         layer.on(
                             "click",
                             function(){
 
                                 if(
+
                                     typeof showPanel ===
                                     "function"
+
                                 ){
 
                                     showPanel(
@@ -2031,9 +2112,9 @@ function renderGeoJSON(){
                         );
 
 
-                        //================================================
+                        //==========================================
                         // HOVER
-                        //================================================
+                        //==========================================
 
                         layer.on(
                             "mouseover",
@@ -2041,9 +2122,12 @@ function renderGeoJSON(){
 
                                 this.setStyle({
 
-                                    weight:2,
+                                    weight: 2,
 
-                                    color:"#1976D2"
+                                    color: "#1976D2",
+
+                                    fillOpacity:
+                                        .85
 
                                 });
 
@@ -2055,49 +2139,61 @@ function renderGeoJSON(){
                             "mouseout",
                             function(){
 
-                                geojsonLayer.resetStyle(
-                                    this
-                                );
+                                if(
+                                    geojsonLayer
+                                ){
+
+                                    geojsonLayer.resetStyle(
+                                        this
+                                    );
+
+                                }
 
                             }
                         );
 
 
-                        //================================================
-                        // NHÃN
-                        //================================================
-
-                        const label =
-                            createLabel(
-                                feature,
-                                currentLayer
-                            );
-
-
-                        if(label){
-
-                            label
-                                .addTo(
-                                    map
-                                );
-
-                        }
-
-
-                        //================================================
-                        // CHẤM ĐỎ
-                        //================================================
+                        //==========================================
+                        // TÊN XÃ
+                        //==========================================
 
                         if(
-                            currentLayer === "DTLCP" ||
-                            currentLayer === "CGC" ||
-                            currentLayer === "VDNC" ||
-                            currentLayer === "DAI"
+
+                            currentLayer ===
+                            "DTLCP" ||
+
+                            currentLayer ===
+                            "CGC" ||
+
+                            currentLayer ===
+                            "VDNC" ||
+
+                            currentLayer ===
+                            "DAI"
+
                         ){
 
+                            const label =
+                                createDiseaseLabel(
+                                    feature
+                                );
+
+
+                            if(label){
+
+                                label.addTo(
+                                    labelLayer
+                                );
+
+                            }
+
+
+                            //======================================
+                            // CHẤM ĐỎ
+                            //======================================
+
                             addDiseaseMarker(
-                                feature,
-                                diseaseMarkers
+                                feature
                             );
 
                         }
@@ -2105,17 +2201,8 @@ function renderGeoJSON(){
                     }
 
             }
-        )
-        .addTo(map);
 
-
-    //==================================================
-    // ĐƯA CHẤM ĐỎ LÊN BẢN ĐỒ
-    //==================================================
-
-    diseaseMarkers.addTo(
-        map
-    );
+        ).addTo(map);
 
 
     //==================================================
@@ -2123,50 +2210,27 @@ function renderGeoJSON(){
     //==================================================
 
     if(
-        geojsonLayer.getBounds().isValid()
+
+        geojsonLayer
+            .getBounds()
+            .isValid()
+
     ){
 
         map.fitBounds(
+
             geojsonLayer.getBounds(),
+
             {
 
-                padding:[
-                    20,
-                    20
-                ]
+                padding:
+                    [20,20]
 
             }
+
         );
 
     }
-
-}
-
-
-//======================================================
-// XÓA NHÃN CŨ
-//======================================================
-
-function clearMapLabels(){
-
-    document
-        .querySelectorAll(
-            ".map-label"
-        )
-        .forEach(
-            el => {
-
-                if(
-                    el._leaflet_id
-                ){
-
-                    // Không dùng
-                    // vì divIcon không lưu
-                    // trực tiếp marker.
-                }
-
-            }
-        );
 
 }
 
@@ -2191,47 +2255,10 @@ function refreshMap(){
     }
 
 
-    //==================================================
-    // Xóa layer cũ
-    //==================================================
-
-    if(geojsonLayer){
-
-        map.removeLayer(
-            geojsonLayer
-        );
-
-        geojsonLayer = null;
-
-    }
-
-
-    //==================================================
-    // Render lại
-    //==================================================
-
     renderGeoJSON();
 
 
-    //==================================================
-    // Legend
-    //==================================================
-
     updateLegend();
-
-
-    //==================================================
-    // Dashboard
-    //==================================================
-
-    if(
-        typeof dashboard !== "undefined" &&
-        typeof dashboard.update === "function"
-    ){
-
-        dashboard.update();
-
-    }
 
 }
 
@@ -2240,10 +2267,14 @@ function refreshMap(){
 // ĐỔI LỚP
 //======================================================
 
-function setLayer(layer){
+function setLayer(
+    layer
+){
 
     if(
+
         !LAYER_CONFIG[layer]
+
     ){
 
         console.warn(
@@ -2260,6 +2291,20 @@ function setLayer(layer){
         layer;
 
 
+    // Xóa panel cũ
+
+    if(
+
+        typeof clearPanel ===
+        "function"
+
+    ){
+
+        clearPanel();
+
+    }
+
+
     refreshMap();
 
 }
@@ -2274,8 +2319,11 @@ function searchFeature(
 ){
 
     if(
+
         !geojsonData ||
+
         !map
+
     ){
 
         return;
@@ -2303,8 +2351,10 @@ function searchFeature(
 
 
     for(
+
         const feature
         of geojsonData.features
+
     ){
 
         const row =
@@ -2316,15 +2366,19 @@ function searchFeature(
         const name =
             row
                 ? row["Tên xã"]
-                : getName(feature);
+                : getName(
+                    feature
+                );
 
 
         if(
+
             String(
                 name || ""
             )
             .toLowerCase()
             .includes(text)
+
         ){
 
             found =
@@ -2358,33 +2412,36 @@ function searchFeature(
     if(layer){
 
         map.fitBounds(
+
             layer.getBounds(),
+
             {
 
-                padding:[
-                    30,
-                    30
-                ],
+                padding:
+                    [30,30],
 
-                maxZoom:13
+                maxZoom:
+                    13
 
             }
+
         );
 
+    }
 
-        layer.openPopup();
 
+    // Chỉ hiện panel bên phải
 
-        if(
-            typeof showPanel ===
-            "function"
-        ){
+    if(
 
-            showPanel(
-                found
-            );
+        typeof showPanel ===
+        "function"
 
-        }
+    ){
+
+        showPanel(
+            found
+        );
 
     }
 
@@ -2392,7 +2449,7 @@ function searchFeature(
 
 
 //======================================================
-// TÌM LAYER CỦA FEATURE
+// TÌM LAYER THEO FEATURE
 //======================================================
 
 function findLayerForFeature(
@@ -2411,11 +2468,14 @@ function findLayerForFeature(
 
 
     geojsonLayer.eachLayer(
+
         function(layer){
 
             if(
+
                 layer.feature ===
                 feature
+
             ){
 
                 result =
@@ -2424,6 +2484,7 @@ function findLayerForFeature(
             }
 
         }
+
     );
 
 
@@ -2433,13 +2494,15 @@ function findLayerForFeature(
 
 
 //======================================================
-// LEGEND
+// TẠO CHÚ GIẢI
 //======================================================
 
 function updateLegend(){
 
     if(
+
         legendControl
+
     ){
 
         map.removeControl(
@@ -2454,7 +2517,10 @@ function updateLegend(){
 
     legendControl =
         L.control({
-            position:"bottomright"
+
+            position:
+                "bottomright"
+
         });
 
 
@@ -2463,67 +2529,60 @@ function updateLegend(){
 
             const div =
                 L.DomUtil.create(
+
                     "div",
+
                     "legend"
+
                 );
 
 
-            const title =
-                LAYER_CONFIG[currentLayer]
-                    ? LAYER_CONFIG[currentLayer].name
-                    : "Chú giải";
-
-
-            let html = `
-
-                <h4>
-                    ${title}
-                </h4>
-
-            `;
-
-
-            //================================================
-            // DỊCH BỆNH
-            //================================================
+            //==================================================
+            // CÁC LỚP BỆNH
+            //==================================================
 
             if(
-                currentLayer === "DTLCP" ||
-                currentLayer === "CGC" ||
-                currentLayer === "DAI"
+
+                currentLayer ===
+                "DTLCP" ||
+
+                currentLayer ===
+                "CGC" ||
+
+                currentLayer ===
+                "VDNC" ||
+
+                currentLayer ===
+                "DAI"
+
             ){
 
-                html += `
+                const ranges =
+                    calculateDamageRanges();
 
-                    <div>
-                        <i style="
-                            background:#E53935;
-                        "></i>
 
-                        Đang có dịch
-                    </div>
+                const config =
+                    LAYER_CONFIG[
+                        currentLayer
+                    ];
 
-                    <div>
-                        <i style="
-                            background:#FFCDD2;
-                        "></i>
 
-                        Có dịch lũy kế
-                    </div>
+                let html = `
 
-                    <div>
-                        <i style="
-                            background:#ECEFF1;
-                        "></i>
-
-                        Không có dịch
-                    </div>
-
-                    <hr>
+                    <h4>
+                        ${config.name}
+                    </h4>
 
                     <div class="legend-dot-row">
 
-                        <span class="legend-red-dot"></span>
+                        <span
+                            class="legend-red-dot"
+                            style="
+                                width:7px;
+                                height:7px;
+                                margin-top:4px;
+                            "
+                        ></span>
 
                         <span>
                             Xã đang có dịch
@@ -2531,77 +2590,156 @@ function updateLegend(){
 
                     </div>
 
-                `;
-
-            }
-
-
-            //================================================
-            // VDNC
-            //================================================
-
-            else if(
-                currentLayer === "VDNC"
-            ){
-
-                html += `
-
-                    <div>
-                        <i style="
-                            background:#8E24AA;
-                        "></i>
-
-                        Đang có dịch
-                    </div>
-
-                    <div>
-                        <i style="
-                            background:#E1BEE7;
-                        "></i>
-
-                        Có dịch lũy kế
-                    </div>
-
-                    <div>
-                        <i style="
-                            background:#ECEFF1;
-                        "></i>
-
-                        Không có dịch
-                    </div>
-
-                    <hr>
-
                     <div class="legend-dot-row">
 
-                        <span class="legend-red-dot"></span>
+                        <span
+                            style="
+                                width:7px;
+                                height:7px;
+                                border:1px solid #777;
+                                border-radius:50%;
+                                background:#F3F4F6;
+                                margin-right:10px;
+                                margin-top:4px;
+                            "
+                        ></span>
 
                         <span>
-                            Xã đang có dịch
+                            Xã không có dịch
                         </span>
 
                     </div>
 
                 `;
 
+
+                //==================================================
+                // MỨC THIỆT HẠI
+                //==================================================
+
+                if(
+                    ranges.length > 0
+                ){
+
+                    html += `
+
+                        <hr>
+
+                        <div style="
+                            font-weight:700;
+                            margin-bottom:7px;
+                        ">
+                            Mức độ thiệt hại
+                        </div>
+
+                    `;
+
+
+                    ranges.forEach(
+
+                        function(
+                            range,
+                            index
+                        ){
+
+                            const color =
+                                DAMAGE_COLORS[
+                                    Math.min(
+                                        index,
+                                        DAMAGE_COLORS.length - 1
+                                    )
+                                ];
+
+
+                            let label;
+
+
+                            if(
+
+                                range.min ===
+                                range.max
+
+                            ){
+
+                                label =
+                                    `${mapFormatNumber(
+                                        range.min
+                                    )} con`;
+
+                            }
+                            else{
+
+                                label =
+                                    `${mapFormatNumber(
+                                        range.min
+                                    )}–${mapFormatNumber(
+                                        range.max
+                                    )} con`;
+
+                            }
+
+
+                            html += `
+
+                                <div>
+
+                                    <i style="
+                                        background:${color};
+                                    "></i>
+
+                                    ${label}
+
+                                </div>
+
+                            `;
+
+                        }
+
+                    );
+
+                }
+                else{
+
+                    html += `
+
+                        <hr>
+
+                        <div>
+                            Chưa có số liệu thiệt hại
+                        </div>
+
+                    `;
+
+                }
+
+
+                div.innerHTML =
+                    html;
+
             }
 
 
-            //================================================
+            //==================================================
             // PHUN
-            //================================================
+            //==================================================
 
             else if(
-                currentLayer === "PHUN"
+
+                currentLayer ===
+                "PHUN"
+
             ){
 
-                html += `
+                div.innerHTML = `
+
+                    <h4>
+                        Phun khử trùng
+                    </h4>
 
                     <div>
                         <i style="
                             background:#80CBC4;
                         "></i>
-
                         Vòng 1
                     </div>
 
@@ -2609,7 +2747,6 @@ function updateLegend(){
                         <i style="
                             background:#26A69A;
                         "></i>
-
                         Vòng 2
                     </div>
 
@@ -2617,7 +2754,6 @@ function updateLegend(){
                         <i style="
                             background:#00897B;
                         "></i>
-
                         Vòng 3
                     </div>
 
@@ -2625,16 +2761,7 @@ function updateLegend(){
                         <i style="
                             background:#00695C;
                         "></i>
-
                         Vòng 4 trở lên
-                    </div>
-
-                    <div>
-                        <i style="
-                            background:#ECEFF1;
-                        "></i>
-
-                        Chưa triển khai
                     </div>
 
                 `;
@@ -2642,21 +2769,27 @@ function updateLegend(){
             }
 
 
-            //================================================
+            //==================================================
             // KSGM
-            //================================================
+            //==================================================
 
             else if(
-                currentLayer === "KSGM"
+
+                currentLayer ===
+                "KSGM"
+
             ){
 
-                html += `
+                div.innerHTML = `
+
+                    <h4>
+                        Kiểm soát giết mổ
+                    </h4>
 
                     <div>
                         <i style="
                             background:#8D6E63;
                         "></i>
-
                         Đã triển khai
                     </div>
 
@@ -2664,15 +2797,13 @@ function updateLegend(){
                         <i style="
                             background:#D7CCC8;
                         "></i>
-
                         Có cơ sở
                     </div>
 
                     <div>
                         <i style="
-                            background:#ECEFF1;
+                            background:#F3F4F6;
                         "></i>
-
                         Chưa triển khai
                     </div>
 
@@ -2681,39 +2812,40 @@ function updateLegend(){
             }
 
 
-            //================================================
+            //==================================================
             // THUỐC THÚ Y
-            //================================================
+            //==================================================
 
             else if(
-                currentLayer === "CSBBTTY"
+
+                currentLayer ===
+                "CSBBTTY"
+
             ){
 
-                html += `
+                div.innerHTML = `
+
+                    <h4>
+                        Cơ sở thuốc thú y
+                    </h4>
 
                     <div>
                         <i style="
                             background:#43A047;
                         "></i>
-
                         Có cơ sở
                     </div>
 
                     <div>
                         <i style="
-                            background:#ECEFF1;
+                            background:#F3F4F6;
                         "></i>
-
                         Không có cơ sở
                     </div>
 
                 `;
 
             }
-
-
-            div.innerHTML =
-                html;
 
 
             L.DomEvent.disableClickPropagation(
@@ -2734,14 +2866,12 @@ function updateLegend(){
 
 
 //======================================================
-// MAP TOOLS
+// THÊM CÔNG CỤ BẢN ĐỒ
 //======================================================
 
 function addMapTools(){
 
-    if(
-        !map
-    ){
+    if(!map){
 
         return;
 
@@ -2753,16 +2883,24 @@ function addMapTools(){
     //==================================================
 
     if(
+
         L.Control &&
+
         L.Control.Fullscreen
+
     ){
 
         try{
 
             map.addControl(
+
                 new L.Control.Fullscreen({
-                    position:"topleft"
+
+                    position:
+                        "topleft"
+
                 })
+
             );
 
         }
@@ -2783,8 +2921,10 @@ function addMapTools(){
     //==================================================
 
     if(
+
         typeof L.easyPrint ===
         "function"
+
     ){
 
         try{
@@ -2798,14 +2938,14 @@ function addMapTools(){
                     position:
                         "topleft",
 
-                    sizeModes:[
-                        "Current"
-                    ],
+                    sizeModes:
+                        ["Current"],
 
                     filename:
                         "WEBGIS_DienBien",
 
-                    exportOnly:true
+                    exportOnly:
+                        true
 
                 })
                 .addTo(map);
@@ -2826,7 +2966,7 @@ function addMapTools(){
 
 
 //======================================================
-// RELOAD DATA
+// LÀM MỚI DỮ LIỆU
 //======================================================
 
 async function reloadData(){
@@ -2838,20 +2978,25 @@ async function reloadData(){
         );
 
 
-        //================================================
+        //==================================================
         // LOAD GOOGLE SHEETS
-        //================================================
+        //==================================================
 
         await loadSheet();
 
 
-        //================================================
-        // DASHBOARD
-        //================================================
+        //==================================================
+        // CẬP NHẬT DASHBOARD
+        //==================================================
 
         if(
-            typeof dashboard !== "undefined" &&
-            typeof dashboard.update === "function"
+
+            typeof dashboard !==
+            "undefined" &&
+
+            typeof dashboard.update ===
+            "function"
+
         ){
 
             dashboard.update();
@@ -2859,20 +3004,22 @@ async function reloadData(){
         }
 
 
-        //================================================
-        // BẢN ĐỒ
-        //================================================
+        //==================================================
+        // CẬP NHẬT BẢN ĐỒ
+        //==================================================
 
         refreshMap();
 
 
-        //================================================
-        // PANEL
-        //================================================
+        //==================================================
+        // XÓA PANEL
+        //==================================================
 
         if(
+
             typeof clearPanel ===
             "function"
+
         ){
 
             clearPanel();
@@ -2888,7 +3035,7 @@ async function reloadData(){
     catch(err){
 
         console.error(
-            "WEBGIS: Lỗi cập nhật:",
+            "WEBGIS: Lỗi cập nhật dữ liệu:",
             err
         );
 
@@ -2903,9 +3050,7 @@ async function reloadData(){
 
 function exportCurrentMap(){
 
-    if(
-        !printer
-    ){
+    if(!printer){
 
         console.warn(
             "Công cụ tải bản đồ chưa sẵn sàng."
@@ -2933,9 +3078,12 @@ function exportCurrentMap(){
 
     try{
 
-        printer.print(
+        printer.printMap(
+
             "CurrentSize",
+
             filename
+
         );
 
     }
