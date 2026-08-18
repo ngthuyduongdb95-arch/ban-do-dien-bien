@@ -124,12 +124,15 @@ const DAMAGE_COLORS = [
 async function initMap(){
 
     if(map){
+
         return map;
+
     }
 
     map = L.map("map", {
 
         zoomControl: true,
+
         attributionControl: true
 
     });
@@ -151,12 +154,33 @@ async function initMap(){
     );
 
 
+    //==================================================
+    // KHI ZOOM → VẼ LẠI NHÃN
+    //==================================================
+
+    map.on(
+        "zoomend",
+        function(){
+
+            if(
+                typeof buildDiseaseLabels ===
+                "function"
+            ){
+
+                buildDiseaseLabels();
+
+            }
+
+        }
+    );
+
+
     mapReady = true;
 
     return map;
+
 }
-
-
+   
 //======================================================
 // LOAD GEOJSON
 //======================================================
