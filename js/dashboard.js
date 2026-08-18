@@ -4,8 +4,6 @@
 // WEBGIS QUẢN LÝ DỊCH BỆNH ĐỘNG VẬT ĐIỆN BIÊN
 //======================================================
 //
-// TỔNG QUAN:
-//
 // DTLCP
 // - Xã có dịch (lũy kế)
 // - Xã đang có dịch
@@ -23,6 +21,11 @@
 // - Xã đang có dịch
 // - Mắc
 // - Chết
+//
+// DẠI
+// - Xã có dịch (lũy kế)
+// - Xã đang có dịch
+// - Số chết, tiêu hủy
 //
 // PHUN KHỬ TRÙNG
 // - Xã triển khai
@@ -71,34 +74,66 @@ const dashboard = {
 
         const stat = {
 
+            //================================================
             // DTLCP
+            //================================================
+
             dtlcpXaLuyKe: 0,
             dtlcpXaDangDich: 0,
             dtlcpTieuHuy: 0,
             dtlcpKhoiLuong: 0,
 
+
+            //================================================
             // CGC
+            //================================================
+
             cgcXaLuyKe: 0,
             cgcXaDangDich: 0,
             cgcTieuHuy: 0,
             cgcKhoiLuong: 0,
 
+
+            //================================================
             // VDNC
+            //================================================
+
             vdncXaLuyKe: 0,
             vdncXaDangDich: 0,
             vdncMac: 0,
             vdncChet: 0,
 
-            // PHUN
+
+            //================================================
+            // DẠI
+            //================================================
+
+            daiXaLuyKe: 0,
+            daiXaDangDich: 0,
+            daiChet: 0,
+
+
+            //================================================
+            // PHUN KHỬ TRÙNG
+            //================================================
+
             phunXa: 0,
             phunHo: 0,
             phunVong: 0,
 
-            // KSGM
+
+            //================================================
+            // KIỂM SOÁT GIẾT MỔ
+            //================================================
+
             ksgmXa: 0,
             ksgmCoSo: 0,
 
-            // THUỐC THÚ Y
+
+            //================================================
+            // CƠ SỞ THUỐC THÚ Y
+            //================================================
+
             csbbtty: 0
 
         };
@@ -114,7 +149,7 @@ const dashboard = {
 
 
             //================================================
-            // DTLCP
+            // 1. DỊCH TẢ LỢN CHÂU PHI - DTLCP
             //================================================
 
             const dtlcpTrangThai =
@@ -138,15 +173,7 @@ const dashboard = {
                 );
 
 
-            /*
-             * Xã có dịch lũy kế:
-             *
-             * Chỉ tính khi thực sự có dấu hiệu dữ liệu
-             * dịch bệnh.
-             *
-             * Không tính các xã chỉ có trạng thái:
-             * "Không có dịch".
-             */
+            // Xã có dịch lũy kế
 
             if (
                 dtlcpODich > 0 ||
@@ -160,11 +187,7 @@ const dashboard = {
             }
 
 
-            /*
-             * Xã đang có dịch
-             *
-             * Bám cùng logic với map.js.
-             */
+            // Xã đang có dịch
 
             if (
                 dtlcpTrangThai === "đang có dịch"
@@ -175,15 +198,20 @@ const dashboard = {
             }
 
 
+            // Tổng số tiêu hủy
+
             stat.dtlcpTieuHuy +=
                 dtlcpTieuHuy;
+
+
+            // Tổng khối lượng
 
             stat.dtlcpKhoiLuong +=
                 dtlcpKhoiLuong;
 
 
             //================================================
-            // CGC
+            // 2. CÚM GIA CẦM - CGC
             //================================================
 
             const cgcTrangThai =
@@ -207,9 +235,7 @@ const dashboard = {
                 );
 
 
-            /*
-             * Xã có dịch lũy kế
-             */
+            // Xã có dịch lũy kế
 
             if (
                 cgcODich > 0 ||
@@ -223,9 +249,7 @@ const dashboard = {
             }
 
 
-            /*
-             * Xã đang có dịch
-             */
+            // Xã đang có dịch
 
             if (
                 cgcTrangThai === "đang có dịch"
@@ -236,15 +260,20 @@ const dashboard = {
             }
 
 
+            // Tổng số tiêu hủy
+
             stat.cgcTieuHuy +=
                 cgcTieuHuy;
+
+
+            // Tổng khối lượng
 
             stat.cgcKhoiLuong +=
                 cgcKhoiLuong;
 
 
             //================================================
-            // VDNC
+            // 3. VIÊM DA NỔI CỤC - VDNC
             //================================================
 
             const vdncTrangThai =
@@ -268,9 +297,7 @@ const dashboard = {
                 );
 
 
-            /*
-             * Xã có dịch lũy kế
-             */
+            // Xã có dịch lũy kế
 
             if (
                 vdncODich > 0 ||
@@ -285,9 +312,7 @@ const dashboard = {
             }
 
 
-            /*
-             * Xã đang có dịch
-             */
+            // Xã đang có dịch
 
             if (
                 vdncTrangThai === "đang có dịch"
@@ -298,15 +323,76 @@ const dashboard = {
             }
 
 
+            // Tổng số mắc
+
             stat.vdncMac +=
                 vdncMac;
+
+
+            // Tổng số chết
 
             stat.vdncChet +=
                 vdncChet;
 
 
             //================================================
-            // PHUN KHỬ TRÙNG
+            // 4. BỆNH DẠI
+            //================================================
+
+            const daiTrangThai =
+                normalizeStatus(
+                    row["DAI_Trạng thái"]
+                );
+
+            const daiODich =
+                toNumber(
+                    row["DAI_Ổ dịch"]
+                );
+
+            const daiChet =
+                toNumber(
+                    row["DAI_Chết"]
+                );
+
+
+            // Xã có dịch lũy kế
+
+            if (
+                daiODich > 0 ||
+                daiChet > 0 ||
+                daiTrangThai === "đang có dịch" ||
+                daiTrangThai === "đã hết dịch"
+            ) {
+
+                stat.daiXaLuyKe++;
+
+            }
+
+
+            // Xã đang có dịch
+
+            if (
+                daiTrangThai === "đang có dịch"
+            ) {
+
+                stat.daiXaDangDich++;
+
+            }
+
+
+            /*
+             * Hiển thị trên Dashboard là:
+             * "Số chết, tiêu hủy"
+             *
+             * Dữ liệu hiện tại sử dụng trường DAI_Chết.
+             */
+
+            stat.daiChet +=
+                daiChet;
+
+
+            //================================================
+            // 5. PHUN KHỬ TRÙNG
             //================================================
 
             const phunVong =
@@ -328,8 +414,9 @@ const dashboard = {
             /*
              * Xã triển khai:
              *
-             * Có vòng, có số hộ hoặc có thông tin
-             * tiến độ.
+             * Có vòng triển khai
+             * hoặc có số hộ
+             * hoặc có thông tin tiến độ.
              */
 
             if (
@@ -343,12 +430,15 @@ const dashboard = {
             }
 
 
+            // Tổng số hộ
+
             stat.phunHo +=
                 phunHo;
 
 
             /*
-             * Vòng cao nhất đã triển khai.
+             * Lấy vòng cao nhất đã triển khai
+             * trên toàn tỉnh.
              */
 
             if (
@@ -362,7 +452,7 @@ const dashboard = {
 
 
             //================================================
-            // KIỂM SOÁT GIẾT MỔ
+            // 6. KIỂM SOÁT GIẾT MỔ - KSGM
             //================================================
 
             const ksgmTrangThai =
@@ -376,6 +466,8 @@ const dashboard = {
                 );
 
 
+            // Xã triển khai KSGM
+
             if (
                 ksgmTrangThai === "đã triển khai"
             ) {
@@ -385,12 +477,14 @@ const dashboard = {
             }
 
 
+            // Tổng số cơ sở
+
             stat.ksgmCoSo +=
                 ksgmCoSo;
 
 
             //================================================
-            // CƠ SỞ BUÔN BÁN THUỐC THÚ Y
+            // 7. CƠ SỞ BUÔN BÁN THUỐC THÚ Y
             //================================================
 
             stat.csbbtty +=
@@ -501,6 +595,32 @@ const dashboard = {
             "dbVDNCChet",
             formatNumber(
                 stat.vdncChet
+            )
+        );
+
+
+        //==================================================
+        // DẠI
+        //==================================================
+
+        setText(
+            "dbDAIXaLuyKe",
+            formatNumber(
+                stat.daiXaLuyKe
+            )
+        );
+
+        setText(
+            "dbDAIXaDangDich",
+            formatNumber(
+                stat.daiXaDangDich
+            )
+        );
+
+        setText(
+            "dbDAIChet",
+            formatNumber(
+                stat.daiChet
             )
         );
 
@@ -631,7 +751,7 @@ function toNumber(value){
             .trim();
 
 
-    if(!str){
+    if (!str){
 
         return 0;
 
@@ -653,10 +773,7 @@ function toNumber(value){
 
 
     /*
-     * Trường hợp:
-     *
      * 1.234,56
-     *
      * → 1234.56
      */
 
@@ -679,11 +796,9 @@ function toNumber(value){
 
     }
 
+
     /*
-     * Trường hợp:
-     *
      * 1.234
-     *
      * → 1234
      */
 
@@ -699,11 +814,9 @@ function toNumber(value){
 
     }
 
+
     /*
-     * Trường hợp:
-     *
      * 1234,5
-     *
      * → 1234.5
      */
 
@@ -786,7 +899,7 @@ function setText(id,value){
         document.getElementById(id);
 
 
-    if(el){
+    if (el){
 
         el.textContent =
             value;
