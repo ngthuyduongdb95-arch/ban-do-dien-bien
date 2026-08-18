@@ -818,11 +818,11 @@ LABEL TÊN XÃ
 
     display:inline-block;
 
-    padding:1px 3px;
+    padding:0;
 
-    background:rgba(255,255,255,.72);
+    background:transparent;
 
-    border-radius:3px;
+    border:none;
 
     font-family:
         "Times New Roman",
@@ -841,10 +841,10 @@ LABEL TÊN XÃ
     transform:translate(-50%,-50%);
 
     text-shadow:
-        1px 1px 1px #fff,
-        -1px -1px 1px #fff,
-        1px -1px 1px #fff,
-        -1px 1px 1px #fff;
+        1px 1px 2px #fff,
+        -1px -1px 2px #fff,
+        1px -1px 2px #fff,
+        -1px 1px 2px #fff;
 
 }
 
