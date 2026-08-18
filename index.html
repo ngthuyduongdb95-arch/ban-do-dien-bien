@@ -95,247 +95,246 @@ LAYOUT
 SIDEBAR
 ========================================= -->
 
+<<!-- =========================================
+     SIDEBAR - TỔNG QUAN
+========================================= -->
+
 <aside class="sidebar">
 
+    <!-- ==============================
+         TIÊU ĐỀ
+    =============================== -->
+
     <div class="overview-header">
-        <div>
-            <h2>TỔNG QUAN</h2>
-            <span class="overview-subtitle">
-                Tình hình dịch bệnh động vật
-            </span>
+
+        <div class="overview-title">
+            TỔNG QUAN
         </div>
 
-        <button id="btnOverviewRefresh" title="Cập nhật dữ liệu">
-            ↻
-        </button>
-    </div>
-
-
-    <!-- =========================
-         THÔNG TIN CHUNG
-    ========================== -->
-
-    <div class="report-info">
-
-        <div>
-            <span>Địa bàn</span>
-            <strong>Toàn tỉnh Điện Biên</strong>
-        </div>
-
-        <div>
-            <span>Cập nhật</span>
-            <strong id="dbLastUpdate">--/--/----</strong>
+        <div class="overview-subtitle">
+            Tình hình dịch bệnh và công tác thú y
         </div>
 
     </div>
 
 
-    <!-- =========================
-         TỔNG QUAN DỊCH BỆNH
-    ========================== -->
+    <!-- ==============================
+         I. DTLCP
+    =============================== -->
 
-    <section class="overview-section">
+    <div class="dashboard-card disease-dtlcp">
 
-        <div class="section-title">
-            <span></span>
-            <h3>TÌNH HÌNH DỊCH BỆNH</h3>
+        <h3>
+            🐷 Dịch tả lợn Châu Phi
+        </h3>
+
+        <div class="row">
+            <span>Xã có dịch (lũy kế)</span>
+            <b id="dbDTLCPXaLuyKe">0</b>
         </div>
 
-
-        <!-- DTLCP -->
-
-        <div class="disease-item">
-
-            <div class="disease-name">
-                <span class="disease-indicator dtlcp"></span>
-
-                <div>
-                    <strong>Dịch tả lợn Châu Phi</strong>
-                    <small>DTLCP</small>
-                </div>
-            </div>
-
-            <div class="disease-stats">
-
-                <div>
-                    <span>Xã có dịch</span>
-                    <b id="dbDTLCPXa">0</b>
-                </div>
-
-                <div>
-                    <span>Số con mắc</span>
-                    <b id="dbDTLCPMac">0</b>
-                </div>
-
-                <div>
-                    <span>Tiêu hủy</span>
-                    <b id="dbDTLCPCon">0</b>
-                </div>
-
-            </div>
-
+        <div class="row">
+            <span>Xã đang có dịch</span>
+            <b id="dbDTLCPXaDangDich"
+               class="danger-value">
+                0
+            </b>
         </div>
 
-
-        <!-- CÚM GIA CẦM -->
-
-        <div class="disease-item">
-
-            <div class="disease-name">
-                <span class="disease-indicator cgc"></span>
-
-                <div>
-                    <strong>Cúm gia cầm</strong>
-                    <small>CGC</small>
-                </div>
-            </div>
-
-            <div class="disease-stats">
-
-                <div>
-                    <span>Xã có dịch</span>
-                    <b id="dbCGCXa">0</b>
-                </div>
-
-                <div>
-                    <span>Số con mắc</span>
-                    <b id="dbCGCMac">0</b>
-                </div>
-
-                <div>
-                    <span>Tiêu hủy</span>
-                    <b id="dbCGCCon">0</b>
-                </div>
-
-            </div>
-
+        <div class="row">
+            <span>Tiêu hủy</span>
+            <b id="dbDTLCPCon">0</b>
         </div>
 
-
-        <!-- VIÊM DA NỔI CỤC -->
-
-        <div class="disease-item">
-
-            <div class="disease-name">
-                <span class="disease-indicator vdnc"></span>
-
-                <div>
-                    <strong>Viêm da nổi cục</strong>
-                    <small>VDNC</small>
-                </div>
-            </div>
-
-            <div class="disease-stats">
-
-                <div>
-                    <span>Xã có dịch</span>
-                    <b id="dbVDNCXa">0</b>
-                </div>
-
-                <div>
-                    <span>Số mắc</span>
-                    <b id="dbVDNCMac">0</b>
-                </div>
-
-            </div>
-
+        <div class="row">
+            <span>Khối lượng</span>
+            <b id="dbDTLCPKhoiLuong">0</b>
+            <small>kg</small>
         </div>
 
-    </section>
+    </div>
 
 
-    <!-- =========================
-         CÔNG TÁC PHÒNG, CHỐNG DỊCH
-    ========================== -->
+    <!-- ==============================
+         II. CGC
+    =============================== -->
 
-    <section class="overview-section">
+    <div class="dashboard-card disease-cgc">
 
-        <div class="section-title">
-            <span></span>
-            <h3>PHÒNG, CHỐNG DỊCH</h3>
+        <h3>
+            🐔 Cúm gia cầm
+        </h3>
+
+        <div class="row">
+            <span>Xã có dịch (lũy kế)</span>
+            <b id="dbCGCXaLuyKe">0</b>
         </div>
 
-
-        <div class="operation-grid">
-
-            <div class="operation-item">
-
-                <div class="operation-label">
-                    <span class="operation-icon">K</span>
-                    <span>Khử trùng</span>
-                </div>
-
-                <div class="operation-value">
-
-                    <div>
-                        <small>Xã triển khai</small>
-                        <b id="dbPhunXa">0</b>
-                    </div>
-
-                    <div>
-                        <small>Số hộ</small>
-                        <b id="dbPhunHo">0</b>
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="operation-item">
-
-                <div class="operation-label">
-                    <span class="operation-icon">G</span>
-                    <span>Kiểm soát giết mổ</span>
-                </div>
-
-                <div class="operation-value">
-
-                    <div>
-                        <small>Cơ sở</small>
-                        <b id="dbKSGM">0</b>
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="operation-item">
-
-                <div class="operation-label">
-                    <span class="operation-icon">T</span>
-                    <span>Cơ sở thuốc thú y</span>
-                </div>
-
-                <div class="operation-value">
-
-                    <div>
-                        <small>Cơ sở</small>
-                        <b id="dbCSBBTTY">0</b>
-                    </div>
-
-                </div>
-
-            </div>
-
+        <div class="row">
+            <span>Xã đang có dịch</span>
+            <b id="dbCGCXaDangDich"
+               class="danger-value">
+                0
+            </b>
         </div>
 
-    </section>
+        <div class="row">
+            <span>Tiêu hủy</span>
+            <b id="dbCGCCon">0</b>
+        </div>
+
+        <div class="row">
+            <span>Khối lượng</span>
+            <b id="dbCGCKhoiLuong">0</b>
+            <small>kg</small>
+        </div>
+
+    </div>
 
 
-    <!-- =========================
-         GHI CHÚ
-    ========================== -->
+    <!-- ==============================
+         III. VDNC
+    =============================== -->
 
-    <div class="overview-note">
+    <div class="dashboard-card disease-vdnc">
 
-        <strong>Thông tin:</strong>
+        <h3>
+            🐄 Viêm da nổi cục
+        </h3>
 
-        <span>
-            Số liệu được tổng hợp từ dữ liệu quản lý dịch bệnh
-            trên địa bàn tỉnh.
-        </span>
+        <div class="row">
+            <span>Xã có dịch (lũy kế)</span>
+            <b id="dbVDNCXaLuyKe">0</b>
+        </div>
+
+        <div class="row">
+            <span>Xã đang có dịch</span>
+            <b id="dbVDNCXaDangDich"
+               class="danger-value">
+                0
+            </b>
+        </div>
+
+        <div class="row">
+            <span>Số mắc</span>
+            <b id="dbVDNCMac">0</b>
+        </div>
+
+        <div class="row">
+            <span>Số chết</span>
+            <b id="dbVDNCChet">0</b>
+        </div>
+
+    </div>
+
+
+    <!-- ==============================
+         IV. DẠI
+    =============================== -->
+
+    <div class="dashboard-card disease-dai">
+
+        <h3>
+            🐕 Bệnh Dại
+        </h3>
+
+        <div class="row">
+            <span>Xã có dịch (lũy kế)</span>
+            <b id="dbDAIXaLuyKe">0</b>
+        </div>
+
+        <div class="row">
+            <span>Xã đang có dịch</span>
+            <b id="dbDAIXaDangDich"
+               class="danger-value">
+                0
+            </b>
+        </div>
+
+        <div class="row">
+            <span>Số chết, tiêu hủy</span>
+            <b id="dbDAIChet">0</b>
+        </div>
+
+    </div>
+
+
+    <!-- ==============================
+         PHÂN CÁCH
+    =============================== -->
+
+    <div class="section-divider">
+
+        <span>CÔNG TÁC PHÒNG, CHỐNG DỊCH</span>
+
+    </div>
+
+
+    <!-- ==============================
+         V. PHUN KHỬ TRÙNG
+    =============================== -->
+
+    <div class="dashboard-card operation-card">
+
+        <h3>
+            🧴 Phun khử trùng
+        </h3>
+
+        <div class="row">
+            <span>Xã triển khai</span>
+            <b id="dbPhunXa">0</b>
+        </div>
+
+        <div class="row">
+            <span>Số hộ</span>
+            <b id="dbPhunHo">0</b>
+        </div>
+
+        <div class="row">
+            <span>Vòng</span>
+            <b id="dbPhunVong">0</b>
+        </div>
+
+    </div>
+
+
+    <!-- ==============================
+         VI. KSGM
+    =============================== -->
+
+    <div class="dashboard-card operation-card">
+
+        <h3>
+            🏭 Kiểm soát giết mổ
+        </h3>
+
+        <div class="row">
+            <span>Xã triển khai</span>
+            <b id="dbKSGMXa">0</b>
+        </div>
+
+        <div class="row">
+            <span>Số cơ sở</span>
+            <b id="dbKSGM">0</b>
+        </div>
+
+    </div>
+
+
+    <!-- ==============================
+         VII. THUỐC THÚ Y
+    =============================== -->
+
+    <div class="dashboard-card operation-card">
+
+        <h3>
+            💊 Cơ sở thuốc thú y
+        </h3>
+
+        <div class="row">
+            <span>Số cơ sở</span>
+            <b id="dbCSBBTTY">0</b>
+        </div>
 
     </div>
 
