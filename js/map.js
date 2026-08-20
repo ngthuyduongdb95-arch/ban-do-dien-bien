@@ -587,83 +587,345 @@ function labelVisibleAtZoom() {
     return false;
 }
 
+// ======================================================
+// HIỂN THỊ TÊN XÃ CÓ SỐ LIỆU
+// Không phụ thuộc lớp đang chọn
+// ======================================================
+
 function renderLabels() {
-    if (!labelLayer) {
-        labelLayer = L.layerGroup().addTo(map);
+
+    if (
+        !map ||
+        !geojsonData
+    ) {
+        return;
     }
+
+
+    // Tạo layer nhãn nếu chưa có
+
+    if (!labelLayer) {
+
+        labelLayer =
+            L.layerGroup()
+                .addTo(map);
+
+    }
+
+
+    // Xóa nhãn cũ
 
     labelLayer.clearLayers();
 
-    if (!labelVisibleAtZoom() || !geojsonData) return;
+
+    // ----------------------------------------------
+    // Zoom nhỏ: không hiện tên để tránh rối
+    // ----------------------------------------------
+
+    if (
+        map.getZoom() < 9
+    ) {
+
+        return;
+
+    }
+
 
     const candidates = [];
 
-    geojsonData.features.forEach(feature => {
-        if (!hasData(feature)) return;
 
-        const name = getName(feature);
-        if (!name) return;
+    // ----------------------------------------------
+    // DUYỆT 45 XÃ/PHƯỜNG
+    // ----------------------------------------------
 
-        const center = featureCenter(feature);
-        if (!center) return;
+    geojsonData.features.forEach(
+        function (feature) {
 
-        const offset = labelOffsets[name] || [0, 0];
-        const latlng = L.latLng(
-            center.lat + offset[0],
-            center.lng + offset[1]
-        );
+            const row =
+                getRow(feature);
 
-        const point = map.latLngToLayerPoint(latlng);
-        const width = Math.max(46, name.length * 6.2);
-        const height = 18;
 
-        candidates.push({
-            feature,
-            name,
-            latlng,
-            x: point.x,
-            y: point.y,
-            width,
-            height
-        });
-    });
+            // ------------------------------------------
+            // Chỉ cần có dữ liệu Google Sheets
+            // là được hiện tên
+            // ------------------------------------------
 
-    // Ưu tiên tên dài/quan trọng và tránh chồng lấn bằng greedy collision check.
-    candidates.sort((a, b) => b.name.length - a.name.length);
+            if (!row) {
 
-    const placed = [];
+                return;
 
-    candidates.forEach(c => {
-        const box = {
-            left: c.x - c.width / 2,
-            right: c.x + c.width / 2,
-            top: c.y - c.height / 2,
-            bottom: c.y + c.height / 2
-        };
+            }
 
-        const collision = placed.some(p =>
-            !(box.right < p.left ||
-              box.left > p.right ||
-              box.bottom < p.top ||
-              box.top > p.bottom)
-        );
 
-        if (collision) return;
+            const name =
+                getName(feature);
 
-        placed.push(box);
 
-        const marker = L.marker(c.latlng, {
-            interactive: false,
-            icon: L.divIcon({
-                className: "map-label-wrap",
-                html: `<span class="map-label">${escapeHtml(c.name)}</span>`,
-                iconSize: [c.width, c.height],
-                iconAnchor: [c.width / 2, c.height / 2]
-            })
-        });
+            if (!name) {
 
-        labelLayer.addLayer(marker);
-    });
+                return;
+
+            }
+
+
+            const center =
+                featureCenter(feature);
+
+
+            if (!center) {
+
+                return;
+
+            }
+
+
+            candidates.push({
+
+                name:
+                    name,
+
+                center:
+                    center
+
+            });
+
+        }
+    );
+
+
+    // ----------------------------------------------
+    // SẮP XẾP
+    // ----------------------------------------------
+
+    candidates.sort(
+        function (a, b) {
+
+            return (
+                a.name.length -
+                b.name.length
+            );
+
+        }
+    );
+
+
+    const occupied = [];
+
+
+    // ----------------------------------------------
+    // CÁC VỊ TRÍ THỬ
+    // ----------------------------------------------
+
+    const offsets = [
+
+        [0, 0],
+
+        [18, 0],
+
+        [-18, 0],
+
+        [0, -18],
+
+        [0, 18],
+
+        [22, -15],
+
+        [-22, -15],
+
+        [22, 15],
+
+        [-22, 15],
+
+        [32, 0],
+
+        [-32, 0]
+
+    ];
+
+
+    // ----------------------------------------------
+    // TẠO NHÃN
+    // ----------------------------------------------
+
+    candidates.forEach(
+        function (item) {
+
+            const base =
+                map.latLngToLayerPoint(
+                    item.center
+                );
+
+
+            let selected =
+                null;
+
+
+            for (
+                let i = 0;
+                i < offsets.length;
+                i++
+            ) {
+
+                const point = {
+
+                    x:
+                        base.x +
+                        offsets[i][0],
+
+                    y:
+                        base.y +
+                        offsets[i][1]
+
+                };
+
+
+                const width =
+                    Math.max(
+                        44,
+                        item.name.length * 5.5
+                    );
+
+
+                const height =
+                    17;
+
+
+                const box = {
+
+                    left:
+                        point.x -
+                        width / 2,
+
+                    right:
+                        point.x +
+                        width / 2,
+
+                    top:
+                        point.y -
+                        height / 2,
+
+                    bottom:
+                        point.y +
+                        height / 2
+
+                };
+
+
+                let collision =
+                    false;
+
+
+                for (
+                    let j = 0;
+                    j < occupied.length;
+                    j++
+                ) {
+
+                    const other =
+                        occupied[j];
+
+
+                    if (
+                        !(
+                            box.right <
+                                other.left ||
+
+                            box.left >
+                                other.right ||
+
+                            box.bottom <
+                                other.top ||
+
+                            box.top >
+                                other.bottom
+                        )
+                    ) {
+
+                        collision =
+                            true;
+
+                        break;
+
+                    }
+
+                }
+
+
+                if (!collision) {
+
+                    selected = {
+
+                        point:
+                            point,
+
+                        box:
+                            box
+
+                    };
+
+                    break;
+
+                }
+
+            }
+
+
+            if (!selected) {
+
+                return;
+
+            }
+
+
+            occupied.push(
+                selected.box
+            );
+
+
+            const latlng =
+                map.layerPointToLatLng(
+                    selected.point
+                );
+
+
+            L.marker(
+                latlng,
+                {
+
+                    interactive:
+                        false,
+
+                    icon:
+                        L.divIcon({
+
+                            className:
+                                "map-label-wrap",
+
+                            html:
+                                `
+                                <span class="map-label">
+                                    ${escapeHtml(
+                                        item.name
+                                    )}
+                                </span>
+                                `,
+
+                            iconSize:
+                                [0, 0],
+
+                            iconAnchor:
+                                [0, 0]
+
+                        })
+
+                }
+            ).addTo(
+                labelLayer
+            );
+
+        }
+    );
+
 }
 
 function escapeHtml(value) {
