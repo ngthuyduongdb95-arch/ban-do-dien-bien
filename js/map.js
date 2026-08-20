@@ -163,295 +163,83 @@ function refreshMapTitle() {
 // ------------------------------------------------------
 
 function getRows() {
-
-    // Ưu tiên dữ liệu Google Sheets đã tải
-    try {
-
-        if (
-            typeof sheetData !== "undefined" &&
-            sheetData &&
-            typeof sheetData === "object"
-        ) {
-
-            const rows = Object.values(sheetData);
-
-            if (rows.length) {
-                return rows;
-            }
-        }
-
-    } catch (error) {
-
-        console.warn(
-            "MAP getRows sheetData:",
-            error
-        );
-
+    if (typeof window.getRows === "function") {
+        try {
+            const rows = window.getRows();
+            if (Array.isArray(rows)) return rows;
+        } catch (_) {}
     }
 
-
-    // Dự phòng
-    if (
-        typeof window.getRows === "function"
-    ) {
-
-        try {
-
-            const rows =
-                window.getRows();
-
-            if (Array.isArray(rows)) {
-                return rows;
-            }
-
-        } catch (error) {
-
-            console.warn(
-                "MAP getRows():",
-                error
-            );
-
-        }
+    if (typeof window.sheetData !== "undefined" && window.sheetData) {
+        return Object.values(window.sheetData);
     }
 
     return [];
 }
 
-
-// ======================================================
-// CHUẨN HÓA TÊN XÃ
-// ======================================================
-
-function normalizeMapName(value) {
-
-    return String(value ?? "")
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .replace(/đ/g, "d")
-        .replace(/\s+/g, " ")
-        .trim();
-
-}
-
-
-// ======================================================
-// LẤY ROW GOOGLE SHEETS CHO FEATURE
-// Ưu tiên ID, nếu không khớp thì ghép theo tên xã
-// ======================================================
-
 function getRow(feature) {
+    if (!feature || !feature.properties) return null;
 
-    if (
-        !feature ||
-        !feature.properties
-    ) {
+    const id = Number(feature.properties.ID);
+    if (!Number.isFinite(id)) return null;
 
-        return null;
-
+    if (typeof window.sheetData !== "undefined" && window.sheetData) {
+        return window.sheetData[id] || null;
     }
 
-
-    // ----------------------------------------------
-    // 1. Ghép theo ID
-    // ----------------------------------------------
-
-    const rawId =
-        feature.properties.ID ??
-        feature.properties.id ??
-        feature.properties.Id;
-
-
-    const id =
-        Number(rawId);
-
-
-    try {
-
-        if (
-            Number.isFinite(id) &&
-            typeof sheetData !== "undefined" &&
-            sheetData &&
-            sheetData[id]
-        ) {
-
-            return sheetData[id];
-
-        }
-
-    } catch (_) {}
-
-
-    // ----------------------------------------------
-    // 2. Không khớp ID → ghép theo tên xã
-    // ----------------------------------------------
-
-    const geoName =
-        feature.properties["Tên xã"] ||
-        feature.properties["TEN_XA"] ||
-        feature.properties["TENXA"] ||
-        feature.properties["NAME"] ||
-        feature.properties["Name"] ||
-        feature.properties["name"] ||
-        "";
-
-
-    const normalizedGeoName =
-        normalizeMapName(
-            geoName
-        );
-
-
-    if (!normalizedGeoName) {
-
-        return null;
-
-    }
-
-
-    const rows =
-        getRows();
-
-
-    return rows.find(
-        function (row) {
-
-            const sheetName =
-                row["Tên xã"] ||
-                row["TEN_XA"] ||
-                row["TENXA"] ||
-                row["NAME"] ||
-                row["Name"] ||
-                row["name"] ||
-                "";
-
-
-            return (
-                normalizeMapName(
-                    sheetName
-                ) ===
-                normalizedGeoName
-            );
-
-        }
-    ) || null;
-
+    const rows = getRows();
+    return rows.find(r => Number(r["ID"]) === id) || null;
 }
-
-
-// ======================================================
-// CHUYỂN SỐ
-// ======================================================
 
 function num(value) {
+    if (value === null || value === undefined || value === "") return 0;
+    if (typeof value === "number") return Number.isFinite(value) ? value : 0;
 
-    if (
-        value === null ||
-        value === undefined ||
-        value === ""
-    ) {
-        return 0;
+    let s = String(value).trim().replace(/[^\d,.-]/g, "");
+    if (!s) return 0;
+
+    if (s.includes(".") && s.includes(",")) {
+        s = s.replace(/\./g, "").replace(",", ".");
+    } else if (s.includes(",")) {
+        const p = s.split(",");
+        s = p.length === 2 && p[1].length <= 2
+            ? p[0] + "." + p[1]
+            : s.replace(/,/g, "");
+    } else if ((s.match(/\./g) || []).length > 1) {
+        s = s.replace(/\./g, "");
     }
 
-
-    if (
-        typeof value === "number"
-    ) {
-
-        return Number.isFinite(value)
-            ? value
-            : 0;
-
-    }
-
-
-    let s =
-        String(value)
-            .trim()
-            .replace(/[^\d,.-]/g, "");
-
-
-    if (!s) {
-        return 0;
-    }
-
-
-    if (
-        s.includes(".") &&
-        s.includes(",")
-    ) {
-
-        s =
-            s.replace(/\./g, "")
-             .replace(",", ".");
-
-    }
-    else if (
-        s.includes(",")
-    ) {
-
-        const p =
-            s.split(",");
-
-        s =
-            p.length === 2 &&
-            p[1].length <= 2
-
-                ? p[0] + "." + p[1]
-
-                : s.replace(/,/g, "");
-
-    }
-    else if (
-        (s.match(/\./g) || []).length > 1
-    ) {
-
-        s =
-            s.replace(/\./g, "");
-
-    }
-
-
-    const n =
-        Number(s);
-
-
-    return Number.isFinite(n)
-        ? n
-        : 0;
-
+    const n = Number(s);
+    return Number.isFinite(n) ? n : 0;
 }
-
-
-// ======================================================
-// FORMAT
-// ======================================================
 
 function fmt(value) {
-
-    return num(value)
-        .toLocaleString(
-            "vi-VN",
-            {
-                maximumFractionDigits: 2
-            }
-        );
-
+    return num(value).toLocaleString("vi-VN", {
+        maximumFractionDigits: 2
+    });
 }
 
-
-// ======================================================
-// CHUẨN HÓA
-// ======================================================
-
 function norm(value) {
+    return String(value ?? "").trim().toLowerCase();
+}
 
+function getName(feature) {
+    const row = getRow(feature);
+
+    if (row && row["Tên xã"]) {
+        return String(row["Tên xã"]).trim();
+    }
+
+    const p = feature?.properties || {};
     return String(
-        value ?? ""
-    )
-    .trim()
-    .toLowerCase();
-
+        p["Tên xã"] ||
+        p["TEN_XA"] ||
+        p["TENXA"] ||
+        p["NAME"] ||
+        p["Name"] ||
+        p["name"] ||
+        ""
+    ).trim();
 }
 
 function isActive(row, config) {
@@ -799,331 +587,115 @@ function labelVisibleAtZoom() {
     return false;
 }
 
-// ======================================================
-// HIỂN THỊ TÊN XÃ CÓ SỐ LIỆU
-// Không phụ thuộc lớp đang chọn
-// ======================================================
-
-// ======================================================
-// HIỂN THỊ TÊN XÃ CÓ DỮ LIỆU
-// ======================================================
-
 function renderLabels() {
 
-    if (
-        !map ||
-        !geojsonData
-    ) {
-
-        return;
-
-    }
-
+    if (!map || !geojsonData) return;
 
     if (!labelLayer) {
-
-        labelLayer =
-            L.layerGroup()
-                .addTo(map);
-
+        labelLayer = L.layerGroup().addTo(map);
     }
-
 
     labelLayer.clearLayers();
 
-
-    // Zoom nhỏ không hiện nhãn
-    if (
-        map.getZoom() < 8
-    ) {
-
-        return;
-
-    }
-
+    // Hiển thị tên xã từ zoom 8.
+    if (map.getZoom() < 8) return;
 
     const candidates = [];
 
+    geojsonData.features.forEach(function(feature) {
 
-    // ----------------------------------------------
-    // DUYỆT TOÀN BỘ XÃ
-    // ----------------------------------------------
+        const row = getRow(feature);
 
-    geojsonData.features.forEach(
-        function (feature) {
+        if (!row) return;
 
-            const row =
-                getRow(feature);
+        const name = getName(feature);
 
+        if (!name) return;
 
-            // Có dữ liệu Google Sheets mới hiện tên
-            if (!row) {
+        const center = featureCenter(feature);
 
-                return;
+        if (!center) return;
 
-            }
-
-
-            const name =
-                getName(feature);
-
-
-            if (!name) {
-
-                return;
-
-            }
-
-
-            const center =
-                featureCenter(feature);
-
-
-            if (!center) {
-
-                return;
-
-            }
-
-
-            candidates.push({
-
-                name:
-                    name,
-
-                center:
-                    center
-
-            });
-
-        }
-    );
-
-
-    // Tên ngắn ưu tiên trước
-    candidates.sort(
-        function (a, b) {
-
-            return (
-                a.name.length -
-                b.name.length
-            );
-
-        }
-    );
-
+        candidates.push({
+            name,
+            center
+        });
+    });
 
     const occupied = [];
 
-
     const offsets = [
-
         [0, 0],
-
-        [16, 0],
-
-        [-16, 0],
-
-        [0, -16],
-
-        [0, 16],
-
-        [20, -14],
-
-        [-20, -14],
-
-        [20, 14],
-
-        [-20, 14],
-
-        [30, 0],
-
-        [-30, 0]
-
+        [18, 0],
+        [-18, 0],
+        [0, -18],
+        [0, 18],
+        [22, -15],
+        [-22, -15],
+        [22, 15],
+        [-22, 15]
     ];
 
+    candidates
+        .sort((a, b) => a.name.length - b.name.length)
+        .forEach(function(item) {
 
-    candidates.forEach(
-        function (item) {
-
-            const base =
-                map.latLngToLayerPoint(
-                    item.center
-                );
-
+            const base = map.latLngToLayerPoint(item.center);
 
             const width =
-                Math.max(
-                    48,
-                    item.name.length * 5.2
-                );
+                Math.max(48, item.name.length * 5.3);
 
+            const height = 17;
 
-            const height =
-                17;
+            let selected = null;
 
-
-            let selected =
-                null;
-
-
-            // ------------------------------------------
-            // TÌM VỊ TRÍ KHÔNG CHỒNG
-            // ------------------------------------------
-
-            for (
-                let i = 0;
-                i < offsets.length;
-                i++
-            ) {
+            for (const offset of offsets) {
 
                 const point = {
-
-                    x:
-                        base.x +
-                        offsets[i][0],
-
-                    y:
-                        base.y +
-                        offsets[i][1]
-
+                    x: base.x + offset[0],
+                    y: base.y + offset[1]
                 };
-
 
                 const box = {
-
-                    left:
-                        point.x -
-                        width / 2,
-
-                    right:
-                        point.x +
-                        width / 2,
-
-                    top:
-                        point.y -
-                        height / 2,
-
-                    bottom:
-                        point.y +
-                        height / 2
-
+                    left: point.x - width / 2,
+                    right: point.x + width / 2,
+                    top: point.y - height / 2,
+                    bottom: point.y + height / 2
                 };
 
-
-                let collision =
-                    false;
-
-
-                for (
-                    let j = 0;
-                    j < occupied.length;
-                    j++
-                ) {
-
-                    const other =
-                        occupied[j];
-
-
-                    if (
-                        !(
-                            box.right + 3 <
-                                other.left ||
-
-                            box.left - 3 >
-                                other.right ||
-
-                            box.bottom + 3 <
-                                other.top ||
-
-                            box.top - 3 >
-                                other.bottom
-                        )
-                    ) {
-
-                        collision =
-                            true;
-
-                        break;
-
-                    }
-
-                }
-
+                const collision = occupied.some(function(other) {
+                    return !(
+                        box.right + 3 < other.left ||
+                        box.left - 3 > other.right ||
+                        box.bottom + 3 < other.top ||
+                        box.top - 3 > other.bottom
+                    );
+                });
 
                 if (!collision) {
-
-                    selected = {
-
-                        point:
-                            point,
-
-                        box:
-                            box
-
-                    };
-
+                    selected = { point, box };
                     break;
-
                 }
-
             }
 
+            if (!selected) return;
 
-            if (!selected) {
-
-                return;
-
-            }
-
-
-            occupied.push(
-                selected.box
-            );
-
+            occupied.push(selected.box);
 
             const latlng =
-                map.layerPointToLatLng(
-                    selected.point
-                );
+                map.layerPointToLatLng(selected.point);
 
-
-            L.marker(
-                latlng,
-                {
-
-                    interactive:
-                        false,
-
-                    icon:
-                        L.divIcon({
-
-                            className:
-                                "map-label-wrap",
-
-                            html:
-                                `<span class="map-label">${
-                                    escapeHtml(
-                                        item.name
-                                    )
-                                }</span>`,
-
-                            iconSize:
-                                [0, 0],
-
-                            iconAnchor:
-                                [0, 0]
-
-                        })
-
-                }
-            ).addTo(
-                labelLayer
-            );
-
-        }
-    );
-
+            L.marker(latlng, {
+                interactive: false,
+                icon: L.divIcon({
+                    className: "map-label-wrap",
+                    html:
+                        `<span class="map-label">${escapeHtml(item.name)}</span>`,
+                    iconSize: [0, 0],
+                    iconAnchor: [0, 0]
+                })
+            }).addTo(labelLayer);
+        });
 }
 
 function escapeHtml(value) {
@@ -1496,39 +1068,26 @@ async function loadGeoJSON() {
     renderGeoJSON();
 
     const bounds =
-    L.geoJSON(data).getBounds();
+        L.geoJSON(data).getBounds();
 
+    if (bounds.isValid()) {
 
-if (
-    bounds.isValid()
-) {
-
-    setTimeout(
-        function () {
+        setTimeout(function() {
 
             map.invalidateSize();
-
 
             map.fitBounds(
                 bounds,
                 {
-                    padding:
-                        [30, 30],
-
-                    maxZoom:
-                        11
+                    padding: [30, 30],
+                    maxZoom: 11
                 }
             );
 
-
-            // Vẽ lại nhãn sau khi bản đồ đã fit
             renderLabels();
 
-        },
-        100
-    );
-
-}
+        }, 100);
+    }
 }
 
 // ------------------------------------------------------
