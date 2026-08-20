@@ -1,14 +1,15 @@
 //======================================================
 // DASHBOARD.JS
-// WebGIS quản lý thú y tỉnh Điện Biên
+// WEBGIS QUẢN LÝ THÚ Y TỈNH ĐIỆN BIÊN
 //======================================================
 
 (function () {
 
     "use strict";
 
+
     //==================================================
-    // FORMAT SỐ
+    // CHUYỂN SỐ
     //==================================================
 
     function toNumber(value) {
@@ -38,16 +39,22 @@
             return 0;
         }
 
+
+        // 1.234.567,89
         if (
             text.includes(".") &&
             text.includes(",")
         ) {
 
-            text = text
-                .replace(/\./g, "")
-                .replace(",", ".");
+            text =
+                text.replace(/\./g, "");
+
+            text =
+                text.replace(",", ".");
 
         }
+
+        // 1,5
         else if (
             text.includes(",")
         ) {
@@ -74,6 +81,8 @@
             }
 
         }
+
+        // 1.234.567
         else if (
             (text.match(/\./g) || []).length > 1
         ) {
@@ -83,78 +92,84 @@
 
         }
 
-        const result =
+
+        const n =
             Number(text);
 
-        return Number.isFinite(result)
-            ? result
+
+        return Number.isFinite(n)
+            ? n
             : 0;
 
     }
 
 
+    //==================================================
+    // FORMAT SỐ
+    //==================================================
+
     function formatNumber(value) {
 
         return toNumber(value)
-            .toLocaleString("vi-VN");
+            .toLocaleString(
+                "vi-VN",
+                {
+                    maximumFractionDigits: 2
+                }
+            );
 
     }
 
 
     //==================================================
-    // LẤY DỮ LIỆU
+    // CHUẨN HÓA TRẠNG THÁI
     //==================================================
 
-    function getRows() {
+    function normalize(value) {
 
-        // 1. Ưu tiên sheetData
-        if (
-            typeof window.sheetData !== "undefined" &&
-            window.sheetData &&
-            typeof window.sheetData === "object"
-        ) {
+        return String(
+            value ?? ""
+        )
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, " ");
 
-            const rows =
-                Object.values(
-                    window.sheetData
+    }
+
+
+    //==================================================
+    // LẤY DỮ LIỆU GOOGLE SHEETS
+    //
+    // QUAN TRỌNG:
+    // dùng trực tiếp sheetData
+    // KHÔNG dùng window.sheetData
+    //==================================================
+
+    function getDashboardRows() {
+
+        try {
+
+            if (
+                typeof sheetData !==
+                "undefined" &&
+                sheetData &&
+                typeof sheetData ===
+                "object"
+            ) {
+
+                return Object.values(
+                    sheetData
                 );
-
-            if (rows.length) {
-
-                return rows;
 
             }
 
         }
+        catch (error) {
 
-
-        // 2. Dự phòng getRows()
-        if (
-            typeof window.getRows === "function"
-        ) {
-
-            try {
-
-                const rows =
-                    window.getRows();
-
-                if (
-                    Array.isArray(rows)
-                ) {
-
-                    return rows;
-
-                }
-
-            }
-            catch (error) {
-
-                console.error(
-                    "DASHBOARD getRows:",
-                    error
-                );
-
-            }
+            console.error(
+                "DASHBOARD: Không đọc được sheetData",
+                error
+            );
 
         }
 
@@ -165,7 +180,7 @@
 
 
     //==================================================
-    // GÁN GIÁ TRỊ
+    // GÁN TEXT
     //==================================================
 
     function setText(
@@ -175,6 +190,7 @@
 
         const element =
             document.getElementById(id);
+
 
         if (element) {
 
@@ -187,32 +203,22 @@
 
 
     //==================================================
-    // TRẠNG THÁI
+    // XÃ ĐANG CÓ DỊCH
     //==================================================
-
-    function normalize(value) {
-
-        return String(
-            value ?? ""
-        )
-        .trim()
-        .toLowerCase();
-
-    }
-
 
     function isActive(value) {
 
         const status =
             normalize(value);
 
+
         return (
 
             status ===
-                "đang có dịch" ||
+            "đang có dịch" ||
 
             status ===
-                "đang xảy ra dịch"
+            "đang xảy ra dịch"
 
         );
 
@@ -220,7 +226,7 @@
 
 
     //==================================================
-    // CÓ DỊCH LŨY KẾ
+    // XÃ CÓ DỊCH LŨY KẾ
     //==================================================
 
     function hasHistory(
@@ -237,20 +243,24 @@
 
         }
 
+
         const status =
             normalize(
                 row[statusField]
             );
+
 
         const outbreak =
             toNumber(
                 row[outbreakField]
             );
 
+
         const value =
             toNumber(
                 row[valueField]
             );
+
 
         const death =
             deathField
@@ -276,13 +286,13 @@
 
 
     //==================================================
-    // UPDATE
+    // UPDATE DASHBOARD
     //==================================================
 
     function updateDashboard() {
 
         const rows =
-            getRows();
+            getDashboardRows();
 
 
         console.log(
@@ -291,10 +301,13 @@
         );
 
 
-        // Chưa có Sheet → thử lại sau
         if (
             rows.length === 0
         ) {
+
+            console.warn(
+                "DASHBOARD: sheetData chưa có dữ liệu."
+            );
 
             return false;
 
@@ -302,7 +315,7 @@
 
 
         //================================================
-        // TỔNG
+        // BIẾN TỔNG
         //================================================
 
         let dtlcpLuyKe = 0;
@@ -310,31 +323,25 @@
         let dtlcpCon = 0;
         let dtlcpKg = 0;
 
-
         let cgcLuyKe = 0;
         let cgcDang = 0;
         let cgcCon = 0;
         let cgcKg = 0;
-
 
         let vdncLuyKe = 0;
         let vdncDang = 0;
         let vdncMac = 0;
         let vdncChet = 0;
 
-
         let daiLuyKe = 0;
         let daiDang = 0;
         let daiChet = 0;
         let daiTieuHuy = 0;
 
-
         let tvskttdXa = 0;
-
 
         let ksgmXa = 0;
         let ksgmCoSo = 0;
-
 
         let thuocThuYCoSo = 0;
 
@@ -345,6 +352,11 @@
 
         rows.forEach(
             function (row) {
+
+                if (!row) {
+                    return;
+                }
+
 
                 //========================================
                 // DTLCP
@@ -366,7 +378,9 @@
 
                 if (
                     isActive(
-                        row["DTLCP_Trạng thái"]
+                        row[
+                            "DTLCP_Trạng thái"
+                        ]
                     )
                 ) {
 
@@ -377,13 +391,17 @@
 
                 dtlcpCon +=
                     toNumber(
-                        row["DTLCP_Chết"]
+                        row[
+                            "DTLCP_Chết"
+                        ]
                     );
 
 
                 dtlcpKg +=
                     toNumber(
-                        row["DTLCP_Trọng lượng"]
+                        row[
+                            "DTLCP_Trọng lượng"
+                        ]
                     );
 
 
@@ -407,7 +425,9 @@
 
                 if (
                     isActive(
-                        row["CGC_Trạng thái"]
+                        row[
+                            "CGC_Trạng thái"
+                        ]
                     )
                 ) {
 
@@ -418,13 +438,17 @@
 
                 cgcCon +=
                     toNumber(
-                        row["CGC_Chết"]
+                        row[
+                            "CGC_Chết"
+                        ]
                     );
 
 
                 cgcKg +=
                     toNumber(
-                        row["CGC_Trọng lượng"]
+                        row[
+                            "CGC_Trọng lượng"
+                        ]
                     );
 
 
@@ -449,7 +473,9 @@
 
                 if (
                     isActive(
-                        row["VDNC_Trạng thái"]
+                        row[
+                            "VDNC_Trạng thái"
+                        ]
                     )
                 ) {
 
@@ -460,13 +486,17 @@
 
                 vdncMac +=
                     toNumber(
-                        row["VDNC_Mắc"]
+                        row[
+                            "VDNC_Mắc"
+                        ]
                     );
 
 
                 vdncChet +=
                     toNumber(
-                        row["VDNC_Chết"]
+                        row[
+                            "VDNC_Chết"
+                        ]
                     );
 
 
@@ -491,7 +521,9 @@
 
                 if (
                     isActive(
-                        row["DAI_Trạng thái"]
+                        row[
+                            "DAI_Trạng thái"
+                        ]
                     )
                 ) {
 
@@ -502,35 +534,47 @@
 
                 daiChet +=
                     toNumber(
-                        row["DAI_Chết"]
+                        row[
+                            "DAI_Chết"
+                        ]
                     );
 
 
                 daiTieuHuy +=
                     toNumber(
-                        row["DAI_Tiêu hủy"]
+                        row[
+                            "DAI_Tiêu hủy"
+                        ]
                     );
 
 
                 //========================================
                 // TVSKTTĐ
                 //
-                // Chỉ số xã đã triển khai
+                // CHỈ ĐẾM XÃ ĐÃ TRIỂN KHAI
                 //========================================
 
                 const phunTienDo =
                     normalize(
-                        row["PHUN_Tiến độ"]
+                        row[
+                            "PHUN_Tiến độ"
+                        ]
                     );
+
 
                 const phunHo =
                     toNumber(
-                        row["PHUN_Số hộ"]
+                        row[
+                            "PHUN_Số hộ"
+                        ]
                     );
+
 
                 const phunVong =
                     toNumber(
-                        row["PHUN_Vòng"]
+                        row[
+                            "PHUN_Vòng"
+                        ]
                     );
 
 
@@ -555,12 +599,17 @@
 
                 const ksgmCoSoRow =
                     toNumber(
-                        row["KSGM_Cơ sở"]
+                        row[
+                            "KSGM_Cơ sở"
+                        ]
                     );
+
 
                 const ksgmTrangThai =
                     normalize(
-                        row["KSGM_Trạng thái"]
+                        row[
+                            "KSGM_Trạng thái"
+                        ]
                     );
 
 
@@ -707,7 +756,6 @@
             )
         );
 
-        // Hỗ trợ cả 2 tên ID
         setText(
             "dbDAIDang",
             formatNumber(
@@ -781,7 +829,7 @@
 
 
         console.log(
-            "DASHBOARD: đã nhận và hiển thị dữ liệu."
+            "DASHBOARD: đã cập nhật dữ liệu."
         );
 
 
@@ -807,10 +855,7 @@
 
 
     //==================================================
-    // TỰ KIỂM TRA DỮ LIỆU
-    //
-    // Nếu Google Sheets tải chậm,
-    // dashboard tự kiểm tra lại mỗi 500ms.
+    // CHỜ GOOGLE SHEETS TẢI XONG
     //==================================================
 
     let attempts = 0;
@@ -818,24 +863,24 @@
     const maxAttempts = 20;
 
 
-    const waitForData =
+    const timer =
         setInterval(
             function () {
 
                 attempts++;
 
 
-                const success =
+                const ok =
                     updateDashboard();
 
 
                 if (
-                    success ||
+                    ok ||
                     attempts >= maxAttempts
                 ) {
 
                     clearInterval(
-                        waitForData
+                        timer
                     );
 
                 }
@@ -843,6 +888,5 @@
             },
             500
         );
-
 
 })();
