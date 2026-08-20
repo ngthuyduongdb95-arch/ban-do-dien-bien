@@ -641,3 +641,31 @@ button,input,select{
         max-width:190px;
     }
 }
+
+/* Nền bản đồ giảm tương phản; lớp dữ liệu Điện Biên được ưu tiên thị giác */
+.leaflet-tile{
+    filter: grayscale(32%) saturate(78%) brightness(1.06) contrast(.92);
+}
+
+.leaflet-control-attribution{
+    font-size:9px!important;
+    background:rgba(255,255,255,.78)!important;
+}
+
+.leaflet-control-container .leaflet-top,
+.leaflet-control-container .leaflet-bottom{
+    z-index:1200;
+}
+
+/* Nhãn xã rõ nhưng không chiếm bản đồ */
+.map-label{
+    font-size:10px;
+    line-height:16px;
+    letter-spacing:.05px;
+    border:1px solid rgba(255,255,255,.55);
+}
+
+/* Khi rê chuột, viền chọn rõ nhưng không làm đổi hệ màu chuyên đề quá mạnh */
+.leaflet-interactive{
+    transition:fill-opacity .12s ease, stroke-width .12s ease;
+}
