@@ -105,7 +105,6 @@ function initMap() {
     }).addTo(map);
 
     addBaseLayers();
-    addMapTitle();
     addProvinceEmphasis();
     bindControls();
 
