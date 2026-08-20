@@ -400,24 +400,42 @@ select{
     border:1px solid #AAB5BD;
 }
 
+/* ======================================================
+   TÊN XÃ - KHÔNG NỀN
+   ====================================================== */
+
 .map-label-wrap{
-    background:transparent;
-    border:0;
+    background:transparent !important;
+    border:0 !important;
 }
 
 .map-label{
     display:inline-block;
-    max-width:140px;
-    padding:1px 4px;
-    border-radius:4px;
-    background:rgba(255,255,255,.72);
-    color:#26323d;
+
+    padding:0 !important;
+
+    background:transparent !important;
+
+    border:0 !important;
+
+    box-shadow:none !important;
+
+    color:#263238;
+
     font-size:10px;
-    line-height:16px;
+
+    line-height:14px;
+
     font-weight:700;
+
     white-space:nowrap;
-    box-shadow:0 1px 3px rgba(0,0,0,.10);
-    text-shadow:0 1px 1px rgba(255,255,255,.8);
+
+    text-shadow:
+        -1px -1px 0 #fff,
+         1px -1px 0 #fff,
+        -1px  1px 0 #fff,
+         1px  1px 0 #fff,
+         0    0    2px rgba(255,255,255,.85);
 }
 
 .map-export-title{
