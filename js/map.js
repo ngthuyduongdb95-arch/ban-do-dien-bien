@@ -163,83 +163,295 @@ function refreshMapTitle() {
 // ------------------------------------------------------
 
 function getRows() {
-    if (typeof window.getRows === "function") {
-        try {
-            const rows = window.getRows();
-            if (Array.isArray(rows)) return rows;
-        } catch (_) {}
+
+    // Ưu tiên dữ liệu Google Sheets đã tải
+    try {
+
+        if (
+            typeof sheetData !== "undefined" &&
+            sheetData &&
+            typeof sheetData === "object"
+        ) {
+
+            const rows = Object.values(sheetData);
+
+            if (rows.length) {
+                return rows;
+            }
+        }
+
+    } catch (error) {
+
+        console.warn(
+            "MAP getRows sheetData:",
+            error
+        );
+
     }
 
-    if (typeof window.sheetData !== "undefined" && window.sheetData) {
-        return Object.values(window.sheetData);
+
+    // Dự phòng
+    if (
+        typeof window.getRows === "function"
+    ) {
+
+        try {
+
+            const rows =
+                window.getRows();
+
+            if (Array.isArray(rows)) {
+                return rows;
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "MAP getRows():",
+                error
+            );
+
+        }
     }
 
     return [];
 }
 
+
+// ======================================================
+// CHUẨN HÓA TÊN XÃ
+// ======================================================
+
+function normalizeMapName(value) {
+
+    return String(value ?? "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/đ/g, "d")
+        .replace(/\s+/g, " ")
+        .trim();
+
+}
+
+
+// ======================================================
+// LẤY ROW GOOGLE SHEETS CHO FEATURE
+// Ưu tiên ID, nếu không khớp thì ghép theo tên xã
+// ======================================================
+
 function getRow(feature) {
-    if (!feature || !feature.properties) return null;
 
-    const id = Number(feature.properties.ID);
-    if (!Number.isFinite(id)) return null;
+    if (
+        !feature ||
+        !feature.properties
+    ) {
 
-    if (typeof window.sheetData !== "undefined" && window.sheetData) {
-        return window.sheetData[id] || null;
+        return null;
+
     }
 
-    const rows = getRows();
-    return rows.find(r => Number(r["ID"]) === id) || null;
+
+    // ----------------------------------------------
+    // 1. Ghép theo ID
+    // ----------------------------------------------
+
+    const rawId =
+        feature.properties.ID ??
+        feature.properties.id ??
+        feature.properties.Id;
+
+
+    const id =
+        Number(rawId);
+
+
+    try {
+
+        if (
+            Number.isFinite(id) &&
+            typeof sheetData !== "undefined" &&
+            sheetData &&
+            sheetData[id]
+        ) {
+
+            return sheetData[id];
+
+        }
+
+    } catch (_) {}
+
+
+    // ----------------------------------------------
+    // 2. Không khớp ID → ghép theo tên xã
+    // ----------------------------------------------
+
+    const geoName =
+        feature.properties["Tên xã"] ||
+        feature.properties["TEN_XA"] ||
+        feature.properties["TENXA"] ||
+        feature.properties["NAME"] ||
+        feature.properties["Name"] ||
+        feature.properties["name"] ||
+        "";
+
+
+    const normalizedGeoName =
+        normalizeMapName(
+            geoName
+        );
+
+
+    if (!normalizedGeoName) {
+
+        return null;
+
+    }
+
+
+    const rows =
+        getRows();
+
+
+    return rows.find(
+        function (row) {
+
+            const sheetName =
+                row["Tên xã"] ||
+                row["TEN_XA"] ||
+                row["TENXA"] ||
+                row["NAME"] ||
+                row["Name"] ||
+                row["name"] ||
+                "";
+
+
+            return (
+                normalizeMapName(
+                    sheetName
+                ) ===
+                normalizedGeoName
+            );
+
+        }
+    ) || null;
+
 }
+
+
+// ======================================================
+// CHUYỂN SỐ
+// ======================================================
 
 function num(value) {
-    if (value === null || value === undefined || value === "") return 0;
-    if (typeof value === "number") return Number.isFinite(value) ? value : 0;
 
-    let s = String(value).trim().replace(/[^\d,.-]/g, "");
-    if (!s) return 0;
-
-    if (s.includes(".") && s.includes(",")) {
-        s = s.replace(/\./g, "").replace(",", ".");
-    } else if (s.includes(",")) {
-        const p = s.split(",");
-        s = p.length === 2 && p[1].length <= 2
-            ? p[0] + "." + p[1]
-            : s.replace(/,/g, "");
-    } else if ((s.match(/\./g) || []).length > 1) {
-        s = s.replace(/\./g, "");
+    if (
+        value === null ||
+        value === undefined ||
+        value === ""
+    ) {
+        return 0;
     }
 
-    const n = Number(s);
-    return Number.isFinite(n) ? n : 0;
+
+    if (
+        typeof value === "number"
+    ) {
+
+        return Number.isFinite(value)
+            ? value
+            : 0;
+
+    }
+
+
+    let s =
+        String(value)
+            .trim()
+            .replace(/[^\d,.-]/g, "");
+
+
+    if (!s) {
+        return 0;
+    }
+
+
+    if (
+        s.includes(".") &&
+        s.includes(",")
+    ) {
+
+        s =
+            s.replace(/\./g, "")
+             .replace(",", ".");
+
+    }
+    else if (
+        s.includes(",")
+    ) {
+
+        const p =
+            s.split(",");
+
+        s =
+            p.length === 2 &&
+            p[1].length <= 2
+
+                ? p[0] + "." + p[1]
+
+                : s.replace(/,/g, "");
+
+    }
+    else if (
+        (s.match(/\./g) || []).length > 1
+    ) {
+
+        s =
+            s.replace(/\./g, "");
+
+    }
+
+
+    const n =
+        Number(s);
+
+
+    return Number.isFinite(n)
+        ? n
+        : 0;
+
 }
+
+
+// ======================================================
+// FORMAT
+// ======================================================
 
 function fmt(value) {
-    return num(value).toLocaleString("vi-VN", {
-        maximumFractionDigits: 2
-    });
+
+    return num(value)
+        .toLocaleString(
+            "vi-VN",
+            {
+                maximumFractionDigits: 2
+            }
+        );
+
 }
+
+
+// ======================================================
+// CHUẨN HÓA
+// ======================================================
 
 function norm(value) {
-    return String(value ?? "").trim().toLowerCase();
-}
 
-function getName(feature) {
-    const row = getRow(feature);
-
-    if (row && row["Tên xã"]) {
-        return String(row["Tên xã"]).trim();
-    }
-
-    const p = feature?.properties || {};
     return String(
-        p["Tên xã"] ||
-        p["TEN_XA"] ||
-        p["TENXA"] ||
-        p["NAME"] ||
-        p["Name"] ||
-        p["name"] ||
-        ""
-    ).trim();
+        value ?? ""
+    )
+    .trim()
+    .toLowerCase();
+
 }
 
 function isActive(row, config) {
@@ -592,17 +804,21 @@ function labelVisibleAtZoom() {
 // Không phụ thuộc lớp đang chọn
 // ======================================================
 
+// ======================================================
+// HIỂN THỊ TÊN XÃ CÓ DỮ LIỆU
+// ======================================================
+
 function renderLabels() {
 
     if (
         !map ||
         !geojsonData
     ) {
+
         return;
+
     }
 
-
-    // Tạo layer nhãn nếu chưa có
 
     if (!labelLayer) {
 
@@ -613,17 +829,12 @@ function renderLabels() {
     }
 
 
-    // Xóa nhãn cũ
-
     labelLayer.clearLayers();
 
 
-    // ----------------------------------------------
-    // Zoom nhỏ: không hiện tên để tránh rối
-    // ----------------------------------------------
-
+    // Zoom nhỏ không hiện nhãn
     if (
-        map.getZoom() < 9
+        map.getZoom() < 8
     ) {
 
         return;
@@ -635,7 +846,7 @@ function renderLabels() {
 
 
     // ----------------------------------------------
-    // DUYỆT 45 XÃ/PHƯỜNG
+    // DUYỆT TOÀN BỘ XÃ
     // ----------------------------------------------
 
     geojsonData.features.forEach(
@@ -645,11 +856,7 @@ function renderLabels() {
                 getRow(feature);
 
 
-            // ------------------------------------------
-            // Chỉ cần có dữ liệu Google Sheets
-            // là được hiện tên
-            // ------------------------------------------
-
+            // Có dữ liệu Google Sheets mới hiện tên
             if (!row) {
 
                 return;
@@ -693,10 +900,7 @@ function renderLabels() {
     );
 
 
-    // ----------------------------------------------
-    // SẮP XẾP
-    // ----------------------------------------------
-
+    // Tên ngắn ưu tiên trước
     candidates.sort(
         function (a, b) {
 
@@ -712,40 +916,32 @@ function renderLabels() {
     const occupied = [];
 
 
-    // ----------------------------------------------
-    // CÁC VỊ TRÍ THỬ
-    // ----------------------------------------------
-
     const offsets = [
 
         [0, 0],
 
-        [18, 0],
+        [16, 0],
 
-        [-18, 0],
+        [-16, 0],
 
-        [0, -18],
+        [0, -16],
 
-        [0, 18],
+        [0, 16],
 
-        [22, -15],
+        [20, -14],
 
-        [-22, -15],
+        [-20, -14],
 
-        [22, 15],
+        [20, 14],
 
-        [-22, 15],
+        [-20, 14],
 
-        [32, 0],
+        [30, 0],
 
-        [-32, 0]
+        [-30, 0]
 
     ];
 
-
-    // ----------------------------------------------
-    // TẠO NHÃN
-    // ----------------------------------------------
 
     candidates.forEach(
         function (item) {
@@ -756,9 +952,24 @@ function renderLabels() {
                 );
 
 
+            const width =
+                Math.max(
+                    48,
+                    item.name.length * 5.2
+                );
+
+
+            const height =
+                17;
+
+
             let selected =
                 null;
 
+
+            // ------------------------------------------
+            // TÌM VỊ TRÍ KHÔNG CHỒNG
+            // ------------------------------------------
 
             for (
                 let i = 0;
@@ -777,17 +988,6 @@ function renderLabels() {
                         offsets[i][1]
 
                 };
-
-
-                const width =
-                    Math.max(
-                        44,
-                        item.name.length * 5.5
-                    );
-
-
-                const height =
-                    17;
 
 
                 const box = {
@@ -827,16 +1027,16 @@ function renderLabels() {
 
                     if (
                         !(
-                            box.right <
+                            box.right + 3 <
                                 other.left ||
 
-                            box.left >
+                            box.left - 3 >
                                 other.right ||
 
-                            box.bottom <
+                            box.bottom + 3 <
                                 other.top ||
 
-                            box.top >
+                            box.top - 3 >
                                 other.bottom
                         )
                     ) {
@@ -902,13 +1102,11 @@ function renderLabels() {
                                 "map-label-wrap",
 
                             html:
-                                `
-                                <span class="map-label">
-                                    ${escapeHtml(
+                                `<span class="map-label">${
+                                    escapeHtml(
                                         item.name
-                                    )}
-                                </span>
-                                `,
+                                    )
+                                }</span>`,
 
                             iconSize:
                                 [0, 0],
@@ -1297,12 +1495,40 @@ async function loadGeoJSON() {
     geojsonData = data;
     renderGeoJSON();
 
-    const bounds = L.geoJSON(data).getBounds();
-    if (bounds.isValid()) {
-        map.fitBounds(bounds, {
-            padding: [35, 35]
-        });
-    }
+    const bounds =
+    L.geoJSON(data).getBounds();
+
+
+if (
+    bounds.isValid()
+) {
+
+    setTimeout(
+        function () {
+
+            map.invalidateSize();
+
+
+            map.fitBounds(
+                bounds,
+                {
+                    padding:
+                        [30, 30],
+
+                    maxZoom:
+                        11
+                }
+            );
+
+
+            // Vẽ lại nhãn sau khi bản đồ đã fit
+            renderLabels();
+
+        },
+        100
+    );
+
+}
 }
 
 // ------------------------------------------------------
