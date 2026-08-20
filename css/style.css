@@ -1,217 +1,1416 @@
 /* ======================================================
-   FIX CUỐI: 7 KPI KHÔNG DỒN / KHÔNG CHỒNG
+   WEBGIS QUẢN LÝ THÚ Y TỈNH ĐIỆN BIÊN
+   STYLE.CSS - BẢN SẠCH
    ====================================================== */
 
-/* Sidebar độc lập và luôn cho phép cuộn */
-.webgis > .sidebar{
-    min-height:0 !important;
-    height:100% !important;
-    overflow-y:auto !important;
-    overflow-x:hidden !important;
+:root{
+    --green:#1B5E20;
+    --green-dark:#124218;
+    --text:#1f2933;
+    --muted:#65727e;
+    --line:#d9e1e7;
+    --panel:#ffffff;
+    --sidebar:#f5f7f9;
 
-    padding:10px !important;
-
-    display:block !important;
-}
-
-/* Container 7 KPI */
-.sidebar-kpi{
-    width:100% !important;
-
-    display:flex !important;
-    flex-direction:column !important;
-
-    gap:10px !important;
-
-    padding:0 3px 15px 0 !important;
-
-    min-height:max-content !important;
-}
-
-/* MỖI KPI MỘT CHIỀU CAO CỐ ĐỊNH */
-.sidebar-kpi .summary-card{
-    position:relative !important;
-
-    flex:0 0 96px !important;
-
-    width:100% !important;
-
-    height:96px !important;
-    min-height:96px !important;
-    max-height:96px !important;
-
-    margin:0 !important;
-
-    padding:9px 11px !important;
-
-    display:flex !important;
-    flex-direction:column !important;
-    justify-content:center !important;
-
-    overflow:hidden !important;
-
-    border-radius:10px !important;
-}
-
-/* Tiêu đề KPI */
-.sidebar-kpi .summary-head{
-    display:flex !important;
-    align-items:center !important;
-
-    min-height:15px !important;
-    height:15px !important;
-
-    margin:0 !important;
-
-    font-size:11px !important;
-    line-height:15px !important;
-
-    white-space:nowrap !important;
-    overflow:hidden !important;
-    text-overflow:ellipsis !important;
-}
-
-/* Số lớn */
-.sidebar-kpi .summary-main{
-    display:flex !important;
-    align-items:baseline !important;
-
-    min-height:26px !important;
-    height:26px !important;
-
-    margin:5px 0 4px !important;
-}
-
-/* Giá trị chính */
-.sidebar-kpi .summary-main span{
-    font-size:22px !important;
-    line-height:26px !important;
-    font-weight:900 !important;
-}
-
-/* Chữ bên cạnh số */
-.sidebar-kpi .summary-main small{
-    font-size:10px !important;
-    line-height:14px !important;
-}
-
-/* Các chỉ tiêu phụ */
-.sidebar-kpi .summary-grid{
-    display:flex !important;
-    flex-direction:column !important;
-
-    gap:2px !important;
-
-    min-height:30px !important;
-    height:30px !important;
-
-    margin:0 !important;
-
-    font-size:10px !important;
-    line-height:13px !important;
-}
-
-/* Không cho chữ phụ tự phá layout */
-.sidebar-kpi .summary-grid span{
-    display:block !important;
-
-    height:13px !important;
-    min-height:13px !important;
-
-    line-height:13px !important;
-
-    white-space:nowrap !important;
-    overflow:hidden !important;
-    text-overflow:ellipsis !important;
-}
-
-/* Số trong chỉ tiêu phụ */
-.sidebar-kpi .summary-grid b{
-    font-size:10px !important;
-    font-weight:800 !important;
-}
-
-/* KPI dài */
-.sidebar-kpi .card-phun .summary-head b,
-.sidebar-kpi .card-drug .summary-head b{
-    font-size:9.5px !important;
-    white-space:nowrap !important;
-}
-
-/* Thanh cuộn */
-.webgis > .sidebar::-webkit-scrollbar{
-    width:6px !important;
-}
-
-.webgis > .sidebar::-webkit-scrollbar-track{
-    background:transparent !important;
-}
-
-.webgis > .sidebar::-webkit-scrollbar-thumb{
-    background:#aebbc5 !important;
-    border-radius:8px !important;
-}
-
-.webgis > .sidebar{
-    scrollbar-width:thin !important;
-    scrollbar-color:#aebbc5 transparent !important;
+    --dtlcp:#D32F2F;
+    --cgc:#2E7D32;
+    --vdnc:#1565C0;
+    --dai:#6A1B9A;
+    --phun:#00838F;
+    --ksgm:#6D4C41;
+    --drug:#0277BD;
 }
 
 
 /* ======================================================
-   KHÔNG CHO MEDIA QUERY CŨ ÉP KPI LẠI
+   RESET
+   ====================================================== */
+
+*{
+    box-sizing:border-box;
+}
+
+html,
+body{
+    width:100%;
+    height:100%;
+    margin:0;
+    padding:0;
+
+    font-family:
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+    color:var(--text);
+    background:#eef2f4;
+}
+
+button,
+select,
+input{
+    font-family:inherit;
+}
+
+
+/* ======================================================
+   HEADER
+   ====================================================== */
+
+.header{
+
+    height:70px;
+    min-height:70px;
+
+    display:grid;
+
+    grid-template-columns:
+        minmax(240px,1fr)
+        minmax(400px,1.5fr)
+        minmax(350px,1fr);
+
+    align-items:center;
+
+    gap:16px;
+
+    padding:
+        8px 18px;
+
+    background:var(--green);
+
+    color:#fff;
+
+    border-bottom:
+        1px solid
+        rgba(255,255,255,.12);
+
+    box-shadow:
+        0 3px 12px
+        rgba(0,0,0,.15);
+
+    position:relative;
+
+    z-index:2000;
+}
+
+
+/* Tên cơ quan */
+
+.agency-line1{
+
+    color:#fff;
+
+    font-size:12.5px;
+
+    line-height:1.2;
+
+    font-weight:900;
+
+    letter-spacing:.1px;
+
+    white-space:nowrap;
+
+    -webkit-font-smoothing:antialiased;
+}
+
+.agency-line2{
+
+    margin-top:3px;
+
+    color:#E8F5E9;
+
+    font-size:10.5px;
+
+    line-height:1.2;
+
+    font-weight:800;
+
+    white-space:nowrap;
+
+    -webkit-font-smoothing:antialiased;
+}
+
+
+/* Tiêu đề */
+
+.header h1{
+
+    margin:0;
+
+    text-align:center;
+
+    color:#fff;
+
+    font-size:19px;
+
+    line-height:1.2;
+
+    font-weight:900;
+
+    letter-spacing:.2px;
+
+    white-space:nowrap;
+
+    -webkit-font-smoothing:antialiased;
+}
+
+
+/* Khu điều khiển lớp */
+
+.header-controls{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:flex-end;
+
+    gap:6px;
+
+    min-width:0;
+}
+
+
+.header-layer{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:7px;
+
+    min-width:0;
+}
+
+
+.header-layer-label{
+
+    color:#E8F5E9;
+
+    font-size:9px;
+
+    font-weight:800;
+
+    letter-spacing:.5px;
+
+    white-space:nowrap;
+}
+
+
+.header-layer select{
+
+    width:195px;
+
+    height:34px;
+
+    padding:
+        0 9px;
+
+    border:
+        1px solid
+        rgba(255,255,255,.25);
+
+    border-radius:8px;
+
+    background:#fff;
+
+    color:#24313c;
+
+    font-size:10.5px;
+
+    font-weight:700;
+
+    outline:none;
+}
+
+
+.header-icon-btn{
+
+    width:34px;
+
+    height:34px;
+
+    flex:0 0 34px;
+
+    border:0;
+
+    border-radius:8px;
+
+    background:#fff;
+
+    color:#23415a;
+
+    cursor:pointer;
+
+    box-shadow:
+        0 2px 7px
+        rgba(0,0,0,.12);
+}
+
+
+.header-icon-btn:hover{
+
+    background:#eef5f0;
+
+}
+
+
+/* ======================================================
+   3 CỘT CHÍNH
+   ====================================================== */
+
+.webgis{
+
+    display:grid;
+
+    grid-template-columns:
+        250px
+        minmax(0,1fr)
+        290px;
+
+    width:100%;
+
+    height:
+        calc(100vh - 70px);
+
+    min-height:0;
+
+}
+
+
+/* ======================================================
+   SIDEBAR KPI
+   ====================================================== */
+
+.sidebar{
+
+    min-width:0;
+
+    height:100%;
+
+    padding:9px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #f7f9fa 0%,
+            #f1f4f6 100%
+        );
+
+    border-right:
+        1px solid
+        var(--line);
+
+    overflow-y:auto;
+
+    overflow-x:hidden;
+
+    scrollbar-width:thin;
+
+    scrollbar-color:
+        #aebbc5
+        transparent;
+}
+
+
+/* Scrollbar Chrome */
+
+.sidebar::-webkit-scrollbar{
+    width:6px;
+}
+
+.sidebar::-webkit-scrollbar-track{
+    background:transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb{
+
+    background:#aebbc5;
+
+    border-radius:8px;
+}
+
+
+/* Không dùng các card sidebar cũ */
+
+.sidebar > .side-card,
+.sidebar > .side-button,
+.sidebar > .sidebar-overview{
+    display:none !important;
+}
+
+
+/* KPI */
+
+.sidebar-kpi{
+
+    width:100%;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:8px;
+
+    padding:
+        2px
+        2px
+        14px
+        0;
+}
+
+
+/* Tất cả KPI bằng nhau */
+
+.sidebar-kpi .summary-card{
+
+    width:100%;
+
+    height:92px;
+
+    min-height:92px;
+
+    max-height:92px;
+
+    flex:
+        0 0 92px;
+
+    margin:0;
+
+    padding:
+        8px
+        10px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    border:
+        1px solid
+        var(--line);
+
+    border-radius:10px;
+
+    background:#fff;
+
+    overflow:hidden;
+
+    box-shadow:
+        0 2px 8px
+        rgba(20,35,50,.06);
+}
+
+
+/* Màu đầu KPI */
+
+.card-dtlcp{
+    border-top:
+        3px solid
+        var(--dtlcp);
+}
+
+.card-cgc{
+    border-top:
+        3px solid
+        var(--cgc);
+}
+
+.card-vdnc{
+    border-top:
+        3px solid
+        var(--vdnc);
+}
+
+.card-dai{
+    border-top:
+        3px solid
+        var(--dai);
+}
+
+.card-phun{
+    border-top:
+        3px solid
+        var(--phun);
+}
+
+.card-ksgm{
+    border-top:
+        3px solid
+        var(--ksgm);
+}
+
+.card-drug{
+    border-top:
+        3px solid
+        var(--drug);
+}
+
+
+/* Tên KPI */
+
+.sidebar-kpi .summary-head{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:6px;
+
+    height:16px;
+
+    min-height:16px;
+
+    margin:0;
+
+    color:#26343f;
+
+    font-size:11px;
+
+    line-height:16px;
+
+    font-weight:800;
+
+    white-space:nowrap;
+
+    overflow:hidden;
+
+    text-overflow:ellipsis;
+}
+
+
+.sidebar-kpi .summary-head i{
+
+    flex:0 0 auto;
+
+    font-size:10px;
+}
+
+
+/* Số lớn */
+
+.sidebar-kpi .summary-main{
+
+    display:flex;
+
+    align-items:baseline;
+
+    gap:6px;
+
+    height:26px;
+
+    min-height:26px;
+
+    margin:
+        4px
+        0
+        3px;
+}
+
+
+.sidebar-kpi .summary-main span{
+
+    color:#101820;
+
+    font-size:22px;
+
+    line-height:26px;
+
+    font-weight:900;
+
+    -webkit-font-smoothing:antialiased;
+}
+
+
+.sidebar-kpi .summary-main small{
+
+    color:#596775;
+
+    font-size:10px;
+
+    line-height:14px;
+
+    font-weight:600;
+}
+
+
+/* Chỉ tiêu phụ */
+
+.sidebar-kpi .summary-grid{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:2px;
+
+    height:29px;
+
+    min-height:29px;
+
+    margin:0;
+
+    color:#4E5D6A;
+
+    font-size:10px;
+
+    line-height:13px;
+
+    font-weight:500;
+}
+
+
+.sidebar-kpi .summary-grid span{
+
+    display:block;
+
+    height:13px;
+
+    min-height:13px;
+
+    line-height:13px;
+
+    white-space:nowrap;
+
+    overflow:hidden;
+
+    text-overflow:ellipsis;
+}
+
+
+.sidebar-kpi .summary-grid b{
+
+    color:#1D2A35;
+
+    font-size:10px;
+
+    font-weight:800;
+}
+
+
+/* Tiêu đề dài */
+
+.sidebar-kpi .card-phun .summary-head b,
+.sidebar-kpi .card-drug .summary-head b{
+
+    font-size:9.5px;
+
+    white-space:nowrap;
+}
+
+
+/* ======================================================
+   BẢN ĐỒ
+   ====================================================== */
+
+.main-map{
+
+    position:relative;
+
+    min-width:0;
+
+    min-height:0;
+
+    overflow:hidden;
+
+    background:#edf1f3;
+}
+
+
+#map{
+
+    width:100%;
+
+    height:100%;
+
+    min-height:0;
+}
+
+
+/* Nền bản đồ giảm tương phản */
+
+.leaflet-tile{
+
+    filter:
+        grayscale(14%)
+        brightness(103%)
+        contrast(92%);
+}
+
+
+/* ======================================================
+   CÁC NÚT BẢN ĐỒ
+   ====================================================== */
+
+.map-toolbar{
+
+    position:absolute;
+
+    top:10px;
+
+    right:10px;
+
+    left:auto;
+
+    z-index:1200;
+
+    pointer-events:none;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:flex-end;
+}
+
+
+.map-toolbar .map-title-live{
+
+    display:none !important;
+}
+
+
+.map-actions{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:4px;
+
+    padding:4px;
+
+    border:
+        1px solid
+        rgba(34,55,72,.10);
+
+    border-radius:10px;
+
+    background:
+        rgba(255,255,255,.96);
+
+    box-shadow:
+        0 4px 14px
+        rgba(20,35,50,.14);
+
+    pointer-events:auto;
+}
+
+
+.map-action{
+
+    width:34px;
+
+    height:32px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border:0;
+
+    border-radius:7px;
+
+    background:#fff;
+
+    color:#425466;
+
+    cursor:pointer;
+}
+
+
+.map-action:hover{
+
+    background:#eef5fa;
+
+}
+
+
+.map-action.active{
+
+    background:#1769e0;
+
+    color:#fff;
+
+}
+
+
+/* Zoom */
+
+.leaflet-top.leaflet-left{
+
+    top:10px;
+
+    left:10px;
+}
+
+
+.leaflet-control-zoom{
+
+    margin:0 !important;
+
+    border:0 !important;
+
+    border-radius:9px !important;
+
+    overflow:hidden;
+
+    box-shadow:
+        0 4px 14px
+        rgba(20,35,50,.16) !important;
+}
+
+
+.leaflet-control-zoom a{
+
+    width:34px !important;
+
+    height:34px !important;
+
+    line-height:34px !important;
+
+    background:#fff !important;
+
+    color:#334155 !important;
+
+    border:0 !important;
+}
+
+
+/* Tỷ lệ */
+
+.leaflet-bottom.leaflet-left{
+
+    left:10px;
+
+    bottom:10px;
+}
+
+
+.leaflet-control-scale{
+
+    margin:0 !important;
+}
+
+
+/* Legend */
+
+.leaflet-bottom.leaflet-right{
+
+    right:10px;
+
+    bottom:10px;
+}
+
+
+/* ======================================================
+   LEGEND
+   ====================================================== */
+
+.legend{
+
+    width:220px;
+
+    max-width:220px;
+
+    padding:11px 12px;
+
+    background:
+        rgba(255,255,255,.97);
+
+    border:
+        1px solid
+        #cfd8df;
+
+    border-radius:10px;
+
+    box-shadow:
+        0 7px 20px
+        rgba(20,35,50,.16);
+
+    color:#263238;
+
+    font-size:11px;
+
+    line-height:1.35;
+}
+
+
+.legend-title{
+
+    font-size:12px;
+
+    font-weight:800;
+
+}
+
+
+.legend-method{
+
+    margin-bottom:6px;
+
+    color:#788592;
+
+    font-size:8.5px;
+
+}
+
+
+.legend-row{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:7px;
+
+    min-height:19px;
+}
+
+
+.legend-row i{
+
+    width:18px;
+
+    height:13px;
+
+    flex:0 0 18px;
+
+    border:
+        1px solid
+        rgba(0,0,0,.18);
+
+    border-radius:3px;
+}
+
+
+.legend-no-data{
+
+    width:18px;
+
+    height:13px;
+
+    flex:0 0 18px;
+
+    border-radius:3px;
+
+    background:#D7E0E5;
+
+    border:
+        1px solid
+        #71808A;
+}
+
+
+.legend-red-dot{
+
+    width:9px;
+
+    height:9px;
+
+    flex:0 0 9px;
+
+    border-radius:50%;
+
+    background:#D50000;
+
+    border:
+        2px solid
+        #fff;
+
+    box-shadow:
+        0 0 0 1px
+        #D50000;
+}
+
+
+.legend-divider{
+
+    height:1px;
+
+    margin:7px 0;
+
+    background:#dde3e7;
+}
+
+
+/* ======================================================
+   TÊN XÃ
+   KHÔNG CÓ NỀN
+   ====================================================== */
+
+.map-label-wrap{
+
+    background:transparent !important;
+
+    border:0 !important;
+}
+
+
+.map-label{
+
+    display:inline-block;
+
+    padding:0 !important;
+
+    background:transparent !important;
+
+    border:0 !important;
+
+    box-shadow:none !important;
+
+    color:#263238;
+
+    font-size:10px;
+
+    line-height:14px;
+
+    font-weight:700;
+
+    white-space:nowrap;
+
+    text-shadow:
+        -1px -1px 0 #fff,
+         1px -1px 0 #fff,
+        -1px  1px 0 #fff,
+         1px  1px 0 #fff,
+         0 0 2px
+         rgba(255,255,255,.85);
+}
+
+
+/* ======================================================
+   PANEL PHẢI
+   ====================================================== */
+
+.panel{
+
+    min-width:0;
+
+    background:#fff;
+
+    border-left:
+        1px solid
+        #d7e0e6;
+
+    overflow:auto;
+}
+
+
+.panel-head{
+
+    padding:
+        13px
+        15px
+        11px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #fff 0%,
+            #f9fbfc 100%
+        );
+
+    border-bottom:
+        1px solid
+        var(--line);
+}
+
+
+.panel-kicker{
+
+    display:block;
+
+    margin-bottom:4px;
+
+    color:#71808d;
+
+    font-size:8px;
+
+    font-weight:800;
+
+    letter-spacing:.6px;
+}
+
+
+.panel h2{
+
+    margin:0;
+
+    color:#17212b;
+
+    font-size:17px;
+
+    font-weight:800;
+}
+
+
+#info-panel{
+
+    padding:14px;
+}
+
+
+.empty-panel{
+
+    margin:
+        28px 14px;
+
+    min-height:150px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    justify-content:center;
+
+    padding:28px 18px;
+
+    border:
+        1px dashed
+        #d3dde4;
+
+    border-radius:12px;
+
+    background:#f9fbfc;
+
+    text-align:center;
+
+    color:#7a8792;
+}
+
+
+.empty-panel i{
+
+    margin-bottom:10px;
+
+    color:#9aaab7;
+
+    font-size:24px;
+}
+
+
+.empty-panel p{
+
+    max-width:210px;
+
+    margin:0;
+
+    line-height:1.55;
+}
+
+
+/* Bảng thông tin */
+
+.info-table{
+
+    margin-top:12px;
+
+    overflow:hidden;
+
+    border:
+        1px solid
+        #e0e6eb;
+
+    border-radius:10px;
+}
+
+
+.info-row{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    gap:12px;
+
+    padding:
+        9px 10px;
+
+    border-bottom:
+        1px solid
+        #e7ebef;
+
+    font-size:10.5px;
+}
+
+
+.info-row:last-child{
+
+    border-bottom:0;
+
+}
+
+
+.info-row span{
+
+    color:#6d7985;
+
+}
+
+
+.info-row b{
+
+    color:#24313c;
+
+    text-align:right;
+}
+
+
+/* ======================================================
+   BẢN ĐỒ TOÀN MÀN HÌNH
+   ====================================================== */
+
+.main-map:fullscreen{
+
+    width:100vw;
+
+    height:100vh;
+}
+
+
+.main-map:fullscreen #map{
+
+    height:100vh;
+}
+
+
+/* ======================================================
+   XUẤT ẢNH
+   ====================================================== */
+
+.export-hide{
+
+    display:none !important;
+
+}
+
+
+/* ======================================================
+   GIỮ 3 CỘT KHI MỞ DEVTOOLS
+   Chỉ chuyển dọc dưới 700px
+   ====================================================== */
+
+@media(max-width:1050px){
+
+    .header{
+
+        height:auto;
+
+        min-height:82px;
+
+        grid-template-columns:
+            1fr
+            auto;
+
+        grid-template-areas:
+            "agency controls"
+            "title title";
+    }
+
+
+    .agency{
+        grid-area:agency;
+    }
+
+
+    .header h1{
+
+        grid-area:title;
+
+        text-align:left;
+
+        white-space:normal;
+
+        font-size:18px;
+    }
+
+
+    .header-controls{
+
+        grid-area:controls;
+    }
+
+
+    .webgis{
+
+        height:
+            calc(100vh - 82px);
+
+        grid-template-columns:
+            225px
+            minmax(0,1fr)
+            275px;
+    }
+
+}
+
+
+/* ======================================================
+   MÀN HÌNH NHỎ
+   ====================================================== */
+
+@media(max-width:700px){
+
+    .webgis{
+
+        grid-template-columns:1fr;
+
+        height:auto;
+    }
+
+
+    .sidebar{
+
+        order:1;
+
+        max-height:430px;
+
+        height:auto;
+    }
+
+
+    .main-map{
+
+        order:2;
+
+        height:600px;
+
+        min-height:600px;
+    }
+
+
+    .panel{
+
+        order:3;
+    }
+
+
+    .sidebar-kpi{
+
+        display:grid;
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0,1fr)
+            );
+
+        gap:8px;
+    }
+
+
+    .sidebar-kpi .summary-card{
+
+        height:92px;
+
+        min-height:92px;
+
+        max-height:92px;
+
+        flex:0 0 92px;
+    }
+
+}
+
+
+/* ======================================================
+   ĐIỆN THOẠI
+   ====================================================== */
+
+@media(max-width:650px){
+
+    .header{
+
+        grid-template-columns:1fr;
+
+        grid-template-areas:
+            "agency"
+            "title"
+            "controls";
+    }
+
+
+    .header-controls{
+
+        justify-content:flex-start;
+
+        flex-wrap:wrap;
+    }
+
+
+    .header-layer{
+
+        min-width:220px;
+
+        flex:1;
+    }
+
+
+    .header-layer select{
+
+        width:auto;
+
+        flex:1;
+    }
+
+
+    .sidebar-kpi{
+
+        grid-template-columns:1fr;
+    }
+
+}
+
+
+/* ======================================================
+   KPI: BẮT BUỘC KHÔNG DỒN
    ====================================================== */
 
 @media(min-width:701px){
 
     .webgis > .sidebar{
+
         display:block !important;
+
         height:100% !important;
+
+        min-height:0 !important;
+
+        overflow-y:auto !important;
+
+        overflow-x:hidden !important;
     }
 
+
     .sidebar-kpi{
+
         display:flex !important;
+
         flex-direction:column !important;
-    }
 
-    .sidebar-kpi .summary-card{
-        flex:0 0 96px !important;
-        height:96px !important;
-        min-height:96px !important;
-        max-height:96px !important;
-    }
-
-}
-
-
-/* Màn hình thật sự nhỏ mới chuyển 2 cột */
-@media(max-width:700px){
-
-    .webgis > .sidebar{
-        height:auto !important;
-        max-height:430px !important;
-    }
-
-    .sidebar-kpi{
-        display:grid !important;
-        grid-template-columns:repeat(2,minmax(0,1fr)) !important;
         gap:8px !important;
     }
 
+
     .sidebar-kpi .summary-card{
-        height:96px !important;
-        min-height:96px !important;
-        max-height:96px !important;
-    }
 
-}
+        flex:
+            0 0 92px !important;
 
+        height:
+            92px !important;
 
-/* Điện thoại */
-@media(max-width:500px){
+        min-height:
+            92px !important;
 
-    .sidebar-kpi{
-        grid-template-columns:1fr !important;
+        max-height:
+            92px !important;
     }
 
 }
