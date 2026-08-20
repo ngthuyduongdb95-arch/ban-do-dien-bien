@@ -642,30 +642,38 @@ button,input,select{
     }
 }
 
-/* Nền bản đồ giảm tương phản; lớp dữ liệu Điện Biên được ưu tiên thị giác */
-.leaflet-tile{
-    filter: grayscale(32%) saturate(78%) brightness(1.06) contrast(.92);
+/* =====================================================
+   LEGEND - GIỮ CÁCH TRÌNH BÀY GỌN NHƯ BẢN CŨ
+   ===================================================== */
+.legend h4{
+    margin:0 0 9px;
+    padding-bottom:8px;
+    border-bottom:1px solid #E5E7EB;
+    text-align:left;
+    font-size:13px;
+    font-weight:800;
+    color:#263238;
 }
 
-.leaflet-control-attribution{
-    font-size:9px!important;
-    background:rgba(255,255,255,.78)!important;
+.legend-dot-row{
+    display:flex;
+    align-items:center;
+    min-height:20px;
+    gap:8px;
+    margin:3px 0;
 }
 
-.leaflet-control-container .leaflet-top,
-.leaflet-control-container .leaflet-bottom{
-    z-index:1200;
+.legend-section-title{
+    margin:7px 0 6px;
+    font-weight:800;
+    color:#334155;
 }
 
-/* Nhãn xã rõ nhưng không chiếm bản đồ */
-.map-label{
-    font-size:10px;
-    line-height:16px;
-    letter-spacing:.05px;
-    border:1px solid rgba(255,255,255,.55);
+.legend-empty{
+    color:#7B8794;
+    font-style:italic;
 }
 
-/* Khi rê chuột, viền chọn rõ nhưng không làm đổi hệ màu chuyên đề quá mạnh */
-.leaflet-interactive{
-    transition:fill-opacity .12s ease, stroke-width .12s ease;
+.legend-method{
+    display:none;
 }
