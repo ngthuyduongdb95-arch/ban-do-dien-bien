@@ -282,96 +282,137 @@ function hasData(feature) {
 function jenks(values, classCount) {
     const data = values
         .filter(v => Number.isFinite(v) && v > 0)
+        .map(v => Math.max(1, Math.round(v)))
         .sort((a, b) => a - b);
 
     const unique = [...new Set(data)];
     if (!unique.length) return [];
     if (unique.length === 1) {
-        return [{ min: unique[0], max: unique[0] }];
+        return [{ min: 1, max: unique[0] }];
     }
 
     const k = Math.min(classCount, unique.length);
     const n = data.length;
 
-    const lower = Array.from(
-        { length: n + 1 },
-        () => new Array(k + 1).fill(0)
-    );
+    const lower = Array.from({ length: n + 1 }, () => Array(k + 1).fill(0));
+    const variance = Array.from({ length: n + 1 }, () => Array(k + 1).fill(Infinity));
 
-    const variance = Array.from(
-        { length: n + 1 },
-        () => new Array(k + 1).fill(Infinity)
-    );
+    variance[0][0] = 0;
 
-    for (let i = 1; i <= k; i++) {
-        lower[1][i] = 1;
-        variance[1][i] = 0;
+    for (let i = 1; i <= n; i++) {
+        variance[i][1] = 0;
+        lower[i][1] = 1;
     }
 
     for (let l = 2; l <= n; l++) {
         let sum = 0;
         let sumSq = 0;
-        let w = 0;
+        let weight = 0;
 
         for (let m = 1; m <= l; m++) {
             const idx = l - m + 1;
             const val = data[idx - 1];
 
-            w++;
+            weight += 1;
             sum += val;
             sumSq += val * val;
 
-            const v = sumSq - (sum * sum) / w;
+            const varianceClass = sumSq - (sum * sum) / weight;
 
-            if (idx !== 1) {
-                for (let j = 2; j <= k; j++) {
-                    const candidate = v + variance[idx - 1][j - 1];
-                    if (candidate <= variance[l][j]) {
-                        lower[l][j] = idx;
-                        variance[l][j] = candidate;
-                    }
+            if (idx === 1) {
+                variance[l][1] = varianceClass;
+                lower[l][1] = 1;
+                continue;
+            }
+
+            for (let j = 2; j <= k; j++) {
+                if (idx - 1 < j - 1) continue;
+
+                const previous = variance[idx - 1][j - 1];
+                if (!Number.isFinite(previous)) continue;
+
+                const candidate = previous + varianceClass;
+
+                if (candidate < variance[l][j]) {
+                    variance[l][j] = candidate;
+                    lower[l][j] = idx;
                 }
             }
         }
-
-        lower[l][1] = 1;
-        variance[l][1] = sumSq - (sum * sum) / w;
     }
 
-    const breaks = new Array(k + 1);
-    breaks[k] = data[n - 1];
+    if (!Number.isFinite(variance[n][k])) {
+        return equalIntegerRanges(data, k);
+    }
 
-    let idx = n;
+    const classStarts = Array(k + 1).fill(0);
+    classStarts[k] = 1;
+
+    let count = n;
+
     for (let j = k; j >= 2; j--) {
-        const id = lower[idx][j] - 2;
-        breaks[j - 1] = data[id];
-        idx = lower[idx][j] - 1;
+        const start = lower[count][j];
+        if (!start) return equalIntegerRanges(data, k);
+        classStarts[j - 1] = start;
+        count = start - 1;
     }
 
     const ranges = [];
 
+    for (let i = 1; i <= k; i++) {
+        const startIndex = i === 1 ? 0 : classStarts[i] - 1;
+        const endIndex = i === k ? n - 1 : classStarts[i + 1] - 2;
+
+        if (startIndex < 0 || endIndex < startIndex || endIndex >= n) continue;
+
+        const min = i === 1 ? 1 : data[startIndex];
+        const max = data[endIndex];
+
+        if (min <= max) ranges.push({ min, max });
+    }
+
+    if (!ranges.length) return equalIntegerRanges(data, k);
+
+    ranges[0].min = 1;
+
+    for (let i = 1; i < ranges.length; i++) {
+        ranges[i].min = ranges[i - 1].max + 1;
+    }
+
+    ranges[ranges.length - 1].max = data[n - 1];
+
+    return ranges;
+}
+
+function equalIntegerRanges(data, k) {
+    if (!data.length) return [];
+    if (k <= 1) return [{ min: 1, max: data[data.length - 1] }];
+
+    const ranges = [];
     for (let i = 0; i < k; i++) {
-        const min = i === 0 ? data[0] : breaks[i] + 1;
-        const max = breaks[i + 1];
+        const start = Math.floor(i * data.length / k);
+        const end = Math.max(start, Math.floor((i + 1) * data.length / k) - 1);
 
-        if (min <= max) {
-            ranges.push({ min, max });
-        }
+        const min = i === 0 ? 1 : data[start];
+        const max = data[Math.min(end, data.length - 1)];
+
+        if (min <= max) ranges.push({ min, max });
     }
 
-    // Bảo đảm giá trị lớn nhất luôn thuộc lớp cuối.
-    if (ranges.length) {
-        ranges[ranges.length - 1].max = data[data.length - 1];
+    for (let i = 1; i < ranges.length; i++) {
+        ranges[i].min = ranges[i - 1].max + 1;
     }
 
+    ranges[ranges.length - 1].max = data[data.length - 1];
     return ranges;
 }
 
 function calculateDamageRanges() {
     const cfg = layerConfig[currentLayer];
 
-    if (!["DTLCP", "CGC", "VDNC", "DAI"].includes(currentLayer)) {
-        return [];
+    if (!['DTLCP', 'CGC', 'VDNC', 'DAI'].includes(currentLayer)) {
+        damageRanges = [];
+        return damageRanges;
     }
 
     const values = getRows()
@@ -386,9 +427,7 @@ function getDamageClass(value, ranges) {
     if (value <= 0 || !ranges.length) return -1;
 
     for (let i = 0; i < ranges.length; i++) {
-        if (value >= ranges[i].min && value <= ranges[i].max) {
-            return i;
-        }
+        if (value >= ranges[i].min && value <= ranges[i].max) return i;
     }
 
     return ranges.length - 1;
@@ -809,108 +848,101 @@ function updateLegend() {
         legendControl = null;
     }
 
-    legendControl = L.control({ position: "bottomright" });
+    legendControl = L.control({ position: 'bottomright' });
 
     legendControl.onAdd = function () {
-        const div = L.DomUtil.create("div", "legend");
+        const div = L.DomUtil.create('div', 'legend');
         const cfg = layerConfig[currentLayer];
 
-        if (["DTLCP", "CGC", "VDNC", "DAI"].includes(currentLayer)) {
+        // Bệnh: giữ cách chú giải cũ, chỉ thay khoảng màu bằng Jenks động.
+        if (['DTLCP', 'CGC', 'VDNC', 'DAI'].includes(currentLayer)) {
             const ranges = damageRanges;
 
             let html = `
-                <div class="legend-title">${escapeHtml(cfg.name)}</div>
-                <div class="legend-method">
-                    Phân cấp dữ liệu động bằng phương pháp Natural Breaks (Jenks)
-                </div>
+                <h4>${escapeHtml(cfg.name)}</h4>
 
-                <div class="legend-subtitle">Mức độ thiệt hại</div>
-            `;
-
-            ranges.forEach((range, i) => {
-                const color = cfg.colors[Math.min(i, cfg.colors.length - 1)];
-                const label = range.min === range.max
-                    ? `${fmt(range.min)} con`
-                    : `${fmt(range.min)}–${fmt(range.max)} con`;
-
-                html += `
-                    <div class="legend-row">
-                        <i style="background:${color}"></i>
-                        <span>${label}</span>
-                    </div>
-                `;
-            });
-
-            html += `
-                <div class="legend-divider"></div>
-                <div class="legend-row">
+                <div class="legend-dot-row">
                     <span class="legend-red-dot"></span>
                     <span>Xã đang có dịch</span>
                 </div>
-                <div class="legend-row">
+
+                <div class="legend-dot-row">
                     <span class="legend-no-data"></span>
-                    <span>0 – không có dịch</span>
+                    <span>0 xã không có dịch</span>
                 </div>
             `;
+
+            if (ranges.length) {
+                html += `<hr><div class="legend-section-title">Mức độ thiệt hại</div>`;
+
+                ranges.forEach((range, index) => {
+                    const color = cfg.colors[Math.min(index, cfg.colors.length - 1)];
+                    const label = range.min === range.max
+                        ? `${fmt(range.min)} con`
+                        : `${fmt(range.min)}–${fmt(range.max)} con`;
+
+                    html += `
+                        <div class="legend-row">
+                            <i style="background:${color}"></i>
+                            <span>${label}</span>
+                        </div>
+                    `;
+                });
+            } else {
+                html += `<hr><div class="legend-empty">Chưa có số liệu thiệt hại</div>`;
+            }
 
             div.innerHTML = html;
+            L.DomEvent.disableClickPropagation(div);
             return div;
         }
 
-        if (currentLayer === "PHUN") {
+        // Phun: giữ cách chú giải cũ, theo vòng.
+        if (currentLayer === 'PHUN') {
             div.innerHTML = `
-                <div class="legend-title">Phun khử trùng</div>
-                <div class="legend-subtitle">Số vòng</div>
-                ${cfg.colors.map((color, i) => `
-                    <div class="legend-row">
-                        <i style="background:${color}"></i>
-                        <span>Vòng ${i + 1}</span>
-                    </div>
-                `).join("")}
-                <div class="legend-divider"></div>
-                <div class="legend-row">
-                    <span class="legend-no-data"></span>
-                    <span>Chưa triển khai</span>
-                </div>
+                <h4>Phun khử trùng</h4>
+                <div class="legend-row"><i style="background:${cfg.colors[0]}"></i><span>Vòng 1</span></div>
+                <div class="legend-row"><i style="background:${cfg.colors[1]}"></i><span>Vòng 2</span></div>
+                <div class="legend-row"><i style="background:${cfg.colors[2]}"></i><span>Vòng 3</span></div>
+                <div class="legend-row"><i style="background:${cfg.colors[3]}"></i><span>Vòng 4</span></div>
+                <div class="legend-row"><i style="background:${cfg.colors[4]}"></i><span>Vòng 5 trở lên</span></div>
+                <hr>
+                <div class="legend-row"><span class="legend-no-data"></span><span>Chưa triển khai</span></div>
             `;
+            L.DomEvent.disableClickPropagation(div);
             return div;
         }
 
-        if (currentLayer === "KSGM") {
+        // KSGM và CSBBTTY: giữ cách chú giải cũ theo số cơ sở.
+        if (currentLayer === 'KSGM') {
             div.innerHTML = `
-                <div class="legend-title">Kiểm soát giết mổ</div>
-                <div class="legend-subtitle">Số cơ sở</div>
-                ${cfg.colors.map((color, i) => `
-                    <div class="legend-row">
-                        <i style="background:${color}"></i>
-                        <span>${i + 1} cơ sở</span>
-                    </div>
-                `).join("")}
-                <div class="legend-divider"></div>
-                <div class="legend-row">
-                    <span class="legend-no-data"></span>
-                    <span>Chưa triển khai / 0 cơ sở</span>
-                </div>
+                <h4>Kiểm soát giết mổ</h4>
+                <div class="legend-row"><i style="background:${cfg.colors[0]}"></i><span>1 cơ sở</span></div>
+                <div class="legend-row"><i style="background:${cfg.colors[1]}"></i><span>2 cơ sở</span></div>
+                <div class="legend-row"><i style="background:${cfg.colors[2]}"></i><span>3 cơ sở</span></div>
+                <div class="legend-row"><i style="background:${cfg.colors[3]}"></i><span>4 cơ sở</span></div>
+                <div class="legend-row"><i style="background:${cfg.colors[4]}"></i><span>5 cơ sở</span></div>
+                <div class="legend-row"><i style="background:${cfg.colors[5]}"></i><span>6 cơ sở trở lên</span></div>
+                <hr>
+                <div class="legend-row"><span class="legend-no-data"></span><span>0 cơ sở / chưa triển khai</span></div>
             `;
+            L.DomEvent.disableClickPropagation(div);
             return div;
         }
 
         div.innerHTML = `
-            <div class="legend-title">Cơ sở buôn bán thuốc thú y</div>
-            <div class="legend-subtitle">Số cơ sở</div>
-            ${cfg.colors.map((color, i) => `
-                <div class="legend-row">
-                    <i style="background:${color}"></i>
-                    <span>${i + 1} cơ sở</span>
-                </div>
-            `).join("")}
-            <div class="legend-divider"></div>
-            <div class="legend-row">
-                <span class="legend-no-data"></span>
-                <span>0 cơ sở</span>
-            </div>
+            <h4>Cơ sở thuốc thú y</h4>
+            <div class="legend-row"><i style="background:${cfg.colors[0]}"></i><span>1 cơ sở</span></div>
+            <div class="legend-row"><i style="background:${cfg.colors[1]}"></i><span>2 cơ sở</span></div>
+            <div class="legend-row"><i style="background:${cfg.colors[2]}"></i><span>3 cơ sở</span></div>
+            <div class="legend-row"><i style="background:${cfg.colors[3]}"></i><span>4 cơ sở</span></div>
+            <div class="legend-row"><i style="background:${cfg.colors[4]}"></i><span>5 cơ sở</span></div>
+            <div class="legend-row"><i style="background:${cfg.colors[5]}"></i><span>6 cơ sở trở lên</span></div>
+            <hr>
+            <div class="legend-row"><span class="legend-no-data"></span><span>0 cơ sở</span></div>
         `;
 
+        L.DomEvent.disableClickPropagation(div);
         return div;
     };
 
