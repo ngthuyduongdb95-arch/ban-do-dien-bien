@@ -1,221 +1,859 @@
-// ======================================================
+//======================================================
 // DASHBOARD.JS
-// Tổng quan theo đúng trường dữ liệu thực tế
-// ======================================================
+// WebGIS quản lý thú y tỉnh Điện Biên
+//======================================================
 
 (function () {
+
     "use strict";
 
+
+    //==================================================
+    // CHUYỂN SỐ
+    //==================================================
+
     function numberValue(value) {
-        if (value === null || value === undefined || value === "") return 0;
-        if (typeof value === "number") return Number.isFinite(value) ? value : 0;
 
-        let s = String(value).trim().replace(/[^\d,.-]/g, "");
-        if (!s) return 0;
+        if (
+            value === null ||
+            value === undefined ||
+            value === ""
+        ) {
 
-        if (s.includes(".") && s.includes(",")) {
-            s = s.replace(/\./g, "").replace(",", ".");
-        } else if (s.includes(",")) {
-            const parts = s.split(",");
-            s = parts.length === 2 && parts[1].length <= 2
-                ? parts[0] + "." + parts[1]
-                : s.replace(/,/g, "");
-        } else if ((s.match(/\./g) || []).length > 1) {
-            s = s.replace(/\./g, "");
+            return 0;
+
         }
 
-        const n = Number(s);
-        return Number.isFinite(n) ? n : 0;
+
+        if (
+            typeof value === "number"
+        ) {
+
+            return Number.isFinite(value)
+                ? value
+                : 0;
+
+        }
+
+
+        let s =
+            String(value)
+                .trim()
+                .replace(/[^\d,.-]/g, "");
+
+
+        if (!s) {
+
+            return 0;
+
+        }
+
+
+        // Ví dụ: 1.234,56
+        if (
+            s.includes(".") &&
+            s.includes(",")
+        ) {
+
+            s =
+                s.replace(/\./g, "");
+
+            s =
+                s.replace(",", ".");
+
+        }
+
+        // Ví dụ: 1,5 hoặc 1,234
+        else if (
+            s.includes(",")
+        ) {
+
+            const parts =
+                s.split(",");
+
+
+            if (
+                parts.length === 2 &&
+                parts[1].length <= 2
+            ) {
+
+                s =
+                    parts[0] +
+                    "." +
+                    parts[1];
+
+            }
+            else {
+
+                s =
+                    s.replace(/,/g, "");
+
+            }
+
+        }
+
+        // Ví dụ 1.234.567
+        else if (
+            (s.match(/\./g) || []).length > 1
+        ) {
+
+            s =
+                s.replace(/\./g, "");
+
+        }
+
+
+        const n =
+            Number(s);
+
+
+        return Number.isFinite(n)
+            ? n
+            : 0;
+
     }
 
-    function fmt(value) {
-        return numberValue(value).toLocaleString("vi-VN", {
-            maximumFractionDigits: 2
-        });
+
+    //==================================================
+    // FORMAT
+    //==================================================
+
+    function formatNumber(value) {
+
+        return numberValue(value)
+            .toLocaleString(
+                "vi-VN",
+                {
+                    maximumFractionDigits: 2
+                }
+            );
+
     }
 
-    function norm(value) {
-        return String(value ?? "").trim().toLowerCase();
+
+    //==================================================
+    // CHUẨN HÓA TRẠNG THÁI
+    //==================================================
+
+    function normalizeStatus(value) {
+
+        return String(
+            value ?? ""
+        )
+        .trim()
+        .toLowerCase();
+
     }
 
-    function isActive(row, field) {
-        return norm(row[field]) === "đang có dịch";
-    }
 
-    function hasHistory(row, statusField, outbreakField, valueField, deathField) {
-        if (!row) return false;
+    //==================================================
+    // XÃ ĐANG CÓ DỊCH
+    //==================================================
 
-        const status = norm(row[statusField]);
-        const outbreak = numberValue(row[outbreakField]);
-        const value = numberValue(row[valueField]);
-        const death = numberValue(row[deathField]);
+    function isActive(
+        row,
+        field
+    ) {
 
         return (
-            status === "đang có dịch" ||
-            status === "đã hết dịch" ||
-            outbreak > 0 ||
-            value > 0 ||
-            death > 0
+            normalizeStatus(
+                row[field]
+            ) ===
+            "đang có dịch"
         );
+
     }
 
-    function getRows() {
-        if (typeof window.getRows === "function") {
-            try {
-                const rows = window.getRows();
-                if (Array.isArray(rows)) return rows;
-            } catch (_) {}
+
+    //==================================================
+    // XÃ CÓ DỊCH LŨY KẾ
+    //
+    // Có một trong các điều kiện:
+    // - đang có dịch
+    // - đã hết dịch
+    // - có ổ dịch
+    // - có số con
+    //==================================================
+
+    function hasDiseaseHistory(
+        row,
+        statusField,
+        outbreakField,
+        valueField,
+        deathField
+    ) {
+
+        if (!row) {
+
+            return false;
+
         }
 
-        if (typeof window.sheetData !== "undefined" && window.sheetData) {
-            return Object.values(window.sheetData);
+
+        const status =
+            normalizeStatus(
+                row[statusField]
+            );
+
+
+        const outbreak =
+            numberValue(
+                row[outbreakField]
+            );
+
+
+        const value =
+            numberValue(
+                row[valueField]
+            );
+
+
+        const death =
+            numberValue(
+                row[deathField]
+            );
+
+
+        return (
+
+            status === "đang có dịch" ||
+
+            status === "đã hết dịch" ||
+
+            outbreak > 0 ||
+
+            value > 0 ||
+
+            death > 0
+
+        );
+
+    }
+
+
+    //==================================================
+    // LẤY DỮ LIỆU
+    //==================================================
+
+    function getDashboardRows() {
+
+        if (
+            typeof window.getRows ===
+            "function"
+        ) {
+
+            try {
+
+                const rows =
+                    window.getRows();
+
+
+                if (
+                    Array.isArray(rows)
+                ) {
+
+                    return rows;
+
+                }
+
+            }
+            catch (error) {
+
+                console.warn(
+                    "Dashboard getRows:",
+                    error
+                );
+
+            }
+
         }
+
+
+        if (
+            typeof window.sheetData !==
+            "undefined" &&
+            window.sheetData
+        ) {
+
+            return Object.values(
+                window.sheetData
+            );
+
+        }
+
 
         return [];
+
     }
 
-    function setText(id, value) {
-        const el = document.getElementById(id);
-        if (el) el.textContent = value;
+
+    //==================================================
+    // GÁN TEXT
+    //==================================================
+
+    function setText(
+        id,
+        value
+    ) {
+
+        const element =
+            document.getElementById(id);
+
+
+        if (element) {
+
+            element.textContent =
+                value;
+
+        }
+
     }
+
+
+    //==================================================
+    // DASHBOARD
+    //==================================================
 
     const dashboard = {
-        update() {
-            const rows = getRows();
-            if (!rows.length) return;
+
+        update: function () {
+
+            const rows =
+                getDashboardRows();
+
+
+            if (
+                !Array.isArray(rows) ||
+                rows.length === 0
+            ) {
+
+                return;
+
+            }
+
+
+            //================================================
+            // BIẾN TỔNG HỢP
+            //================================================
 
             const stat = {
-                dtlcpXa: 0, dtlcpDang: 0, dtlcpCon: 0, dtlcpKg: 0,
-                cgcXa: 0, cgcDang: 0, cgcCon: 0, cgcKg: 0,
-                vdncXa: 0, vdncDang: 0, vdncMac: 0, vdncChet: 0,
-                daiXa: 0, daiDang: 0, daiChet: 0, daiTieuHuy: 0,
-                phunXa: 0, phunHo: 0, phunVong: 0,
-                ksgmXa: 0, ksgmCoSo: 0,
+
+                // DTLCP
+                dtlcpXaLuyKe: 0,
+                dtlcpDangDich: 0,
+                dtlcpCon: 0,
+                dtlcpKg: 0,
+
+                // CGC
+                cgcXaLuyKe: 0,
+                cgcDangDich: 0,
+                cgcCon: 0,
+                cgcKg: 0,
+
+                // VDNC
+                vdncXaLuyKe: 0,
+                vdncDangDich: 0,
+                vdncMac: 0,
+                vdncChet: 0,
+
+                // DẠI
+                daiXaLuyKe: 0,
+                daiDangDich: 0,
+                daiChet: 0,
+                daiTieuHuy: 0,
+
+                // VSKTTĐ / PHUN
+                phunXa: 0,
+
+                // KSGM
+                ksgmXa: 0,
+                ksgmCoSo: 0,
+
+                // THUỐC THÚ Y
                 csbbtty: 0
+
             };
 
-            rows.forEach(row => {
-                // ---------------- DTLCP ----------------
-                if (hasHistory(
-                    row,
-                    "DTLCP_Trạng thái",
-                    "DTLCP_Ổ dịch",
-                    "DTLCP_Chết"
-                )) stat.dtlcpXa++;
 
-                if (isActive(row, "DTLCP_Trạng thái")) stat.dtlcpDang++;
-                stat.dtlcpCon += numberValue(row["DTLCP_Chết"]);
-                stat.dtlcpKg += numberValue(row["DTLCP_Trọng lượng"]);
+            //================================================
+            // DUYỆT TỪNG XÃ
+            //================================================
 
-                // ---------------- CGC ----------------
-                if (hasHistory(
-                    row,
-                    "CGC_Trạng thái",
-                    "CGC_Ổ dịch",
-                    "CGC_Chết"
-                )) stat.cgcXa++;
+            rows.forEach(
+                function (row) {
 
-                if (isActive(row, "CGC_Trạng thái")) stat.cgcDang++;
-                stat.cgcCon += numberValue(row["CGC_Chết"]);
-                stat.cgcKg += numberValue(row["CGC_Trọng lượng"]);
 
-                // ---------------- VDNC ----------------
-                if (hasHistory(
-                    row,
-                    "VDNC_Trạng thái",
-                    "VDNC_Ổ dịch",
-                    "VDNC_Mắc",
-                    "VDNC_Chết"
-                )) stat.vdncXa++;
+                    //========================================
+                    // DTLCP
+                    //========================================
 
-                if (isActive(row, "VDNC_Trạng thái")) stat.vdncDang++;
-                stat.vdncMac += numberValue(row["VDNC_Mắc"]);
-                stat.vdncChet += numberValue(row["VDNC_Chết"]);
+                    if (
+                        hasDiseaseHistory(
+                            row,
+                            "DTLCP_Trạng thái",
+                            "DTLCP_Ổ dịch",
+                            "DTLCP_Chết"
+                        )
+                    ) {
 
-                // ---------------- DẠI ----------------
-                if (hasHistory(
-                    row,
-                    "DAI_Trạng thái",
-                    "DAI_Ổ dịch",
-                    "DAI_Chết",
-                    "DAI_Tiêu hủy"
-                )) stat.daiXa++;
+                        stat.dtlcpXaLuyKe++;
 
-                if (isActive(row, "DAI_Trạng thái")) stat.daiDang++;
-                stat.daiChet += numberValue(row["DAI_Chết"]);
-                stat.daiTieuHuy += numberValue(row["DAI_Tiêu hủy"]);
+                    }
 
-                // ---------------- PHUN ----------------
-                const phunHo = numberValue(row["PHUN_Số hộ"]);
-                const phunVong = numberValue(row["PHUN_Vòng"]);
-                if (phunHo > 0 || phunVong > 0 || norm(row["PHUN_Tiến độ"]) !== "") {
-                    stat.phunXa++;
+
+                    if (
+                        isActive(
+                            row,
+                            "DTLCP_Trạng thái"
+                        )
+                    ) {
+
+                        stat.dtlcpDangDich++;
+
+                    }
+
+
+                    stat.dtlcpCon +=
+                        numberValue(
+                            row["DTLCP_Chết"]
+                        );
+
+
+                    stat.dtlcpKg +=
+                        numberValue(
+                            row["DTLCP_Trọng lượng"]
+                        );
+
+
+                    //========================================
+                    // CÚM GIA CẦM
+                    //========================================
+
+                    if (
+                        hasDiseaseHistory(
+                            row,
+                            "CGC_Trạng thái",
+                            "CGC_Ổ dịch",
+                            "CGC_Chết"
+                        )
+                    ) {
+
+                        stat.cgcXaLuyKe++;
+
+                    }
+
+
+                    if (
+                        isActive(
+                            row,
+                            "CGC_Trạng thái"
+                        )
+                    ) {
+
+                        stat.cgcDangDich++;
+
+                    }
+
+
+                    stat.cgcCon +=
+                        numberValue(
+                            row["CGC_Chết"]
+                        );
+
+
+                    stat.cgcKg +=
+                        numberValue(
+                            row["CGC_Trọng lượng"]
+                        );
+
+
+                    //========================================
+                    // VIÊM DA NỔI CỤC
+                    //========================================
+
+                    if (
+                        hasDiseaseHistory(
+                            row,
+                            "VDNC_Trạng thái",
+                            "VDNC_Ổ dịch",
+                            "VDNC_Mắc",
+                            "VDNC_Chết"
+                        )
+                    ) {
+
+                        stat.vdncXaLuyKe++;
+
+                    }
+
+
+                    if (
+                        isActive(
+                            row,
+                            "VDNC_Trạng thái"
+                        )
+                    ) {
+
+                        stat.vdncDangDich++;
+
+                    }
+
+
+                    stat.vdncMac +=
+                        numberValue(
+                            row["VDNC_Mắc"]
+                        );
+
+
+                    stat.vdncChet +=
+                        numberValue(
+                            row["VDNC_Chết"]
+                        );
+
+
+                    //========================================
+                    // DẠI
+                    //========================================
+
+                    if (
+                        hasDiseaseHistory(
+                            row,
+                            "DAI_Trạng thái",
+                            "DAI_Ổ dịch",
+                            "DAI_Chết",
+                            "DAI_Tiêu hủy"
+                        )
+                    ) {
+
+                        stat.daiXaLuyKe++;
+
+                    }
+
+
+                    if (
+                        isActive(
+                            row,
+                            "DAI_Trạng thái"
+                        )
+                    ) {
+
+                        stat.daiDangDich++;
+
+                    }
+
+
+                    stat.daiChet +=
+                        numberValue(
+                            row["DAI_Chết"]
+                        );
+
+
+                    stat.daiTieuHuy +=
+                        numberValue(
+                            row["DAI_Tiêu hủy"]
+                        );
+
+
+                    //========================================
+                    // VỆ SINH, KHỬ TRÙNG, TIÊU ĐỘC
+                    //
+                    // CHỈ LẤY:
+                    // XÃ ĐÃ TRIỂN KHAI
+                    //========================================
+
+                    const phunTienDo =
+                        normalizeStatus(
+                            row["PHUN_Tiến độ"]
+                        );
+
+
+                    const phunHo =
+                        numberValue(
+                            row["PHUN_Số hộ"]
+                        );
+
+
+                    const phunVong =
+                        numberValue(
+                            row["PHUN_Vòng"]
+                        );
+
+
+                    if (
+
+                        phunHo > 0 ||
+
+                        phunVong > 0 ||
+
+                        phunTienDo !== ""
+
+                    ) {
+
+                        stat.phunXa++;
+
+                    }
+
+
+                    //========================================
+                    // KIỂM SOÁT GIẾT MỔ
+                    //========================================
+
+                    const ksgmCoSo =
+                        numberValue(
+                            row["KSGM_Cơ sở"]
+                        );
+
+
+                    if (
+                        normalizeStatus(
+                            row["KSGM_Trạng thái"]
+                        ) ===
+                        "đã triển khai"
+                    ) {
+
+                        stat.ksgmXa++;
+
+                    }
+                    else if (
+                        ksgmCoSo > 0
+                    ) {
+
+                        stat.ksgmXa++;
+
+                    }
+
+
+                    stat.ksgmCoSo +=
+                        ksgmCoSo;
+
+
+                    //========================================
+                    // CƠ SỞ BUÔN BÁN THUỐC THÚ Y
+                    //========================================
+
+                    stat.csbbtty +=
+                        numberValue(
+                            row["CSBBTTY_Cơ sở"]
+                        );
+
                 }
-                stat.phunHo += phunHo;
-                stat.phunVong += phunVong;
-
-                // ---------------- KSGM ----------------
-                const ksgmCoSo = numberValue(row["KSGM_Cơ sở"]);
-                if (norm(row["KSGM_Trạng thái"]) === "đã triển khai") {
-                    stat.ksgmXa++;
-                } else if (ksgmCoSo > 0) {
-                    stat.ksgmXa++;
-                }
-                stat.ksgmCoSo += ksgmCoSo;
-
-                // ---------------- Cơ sở buôn bán thuốc thú y ----------------
-                stat.csbbtty += numberValue(row["CSBBTTY_Cơ sở"]);
-            });
-
-            setText("dbDTLCPXa", fmt(stat.dtlcpXa));
-            setText("dbDTLCPDang", fmt(stat.dtlcpDang));
-            setText("dbDTLCPCon", fmt(stat.dtlcpCon));
-            setText("dbDTLCPKg", fmt(stat.dtlcpKg));
-
-            setText("dbCGCXa", fmt(stat.cgcXa));
-            setText("dbCGCDang", fmt(stat.cgcDang));
-            setText("dbCGCCon", fmt(stat.cgcCon));
-            setText("dbCGCKg", fmt(stat.cgcKg));
-
-            setText("dbVDNCXa", fmt(stat.vdncXa));
-            setText("dbVDNCDang", fmt(stat.vdncDang));
-            setText("dbVDNCMac", fmt(stat.vdncMac));
-            setText("dbVDNChet", fmt(stat.vdncChet));
-
-            setText("dbDAIXa", fmt(stat.daiXa));
-            setText("dbDAIDang", fmt(stat.daiDang));
-            setText("dbDAIChet", fmt(stat.daiChet));
-            setText("dbDAITieuHuy", fmt(stat.daiTieuHuy));
-
-            setText("dbPhunXa", fmt(stat.phunXa));
-            setText("dbPhunHo", fmt(stat.phunHo));
-            setText("dbPhunVong", fmt(stat.phunVong));
-
-            setText("dbKSGMXa", fmt(stat.ksgmXa));
-            setText("dbKSGMCoSo", fmt(stat.ksgmCoSo));
-
-            setText("dbCSBBTTY", fmt(stat.csbbtty));
-
-            // Tổng quan nhỏ ở sidebar
-            setText("sideOverviewXa", rows.length);
-            setText(
-                "sideOverviewDang",
-                stat.dtlcpDang + stat.cgcDang + stat.vdncDang + stat.daiDang
             );
+
+
+            //================================================
+            // DTLCP
+            //
+            // Dòng lớn:
+            // Xã đang có dịch
+            //
+            // Dòng phụ:
+            // Xã có dịch (lũy kế)
+            //================================================
+
             setText(
-                "sideOverviewCon",
-                stat.dtlcpCon + stat.cgcCon + stat.vdncMac + stat.daiChet
+                "dbDTLCPXa",
+                formatNumber(
+                    stat.dtlcpDangDich
+                )
             );
+
+
             setText(
-                "sideOverviewKg",
-                stat.dtlcpKg + stat.cgcKg
+                "dbDTLCPDang",
+                formatNumber(
+                    stat.dtlcpXaLuyKe
+                )
             );
+
+
+            setText(
+                "dbDTLCPCon",
+                formatNumber(
+                    stat.dtlcpCon
+                )
+            );
+
+
+            setText(
+                "dbDTLCPKg",
+                formatNumber(
+                    stat.dtlcpKg
+                )
+            );
+
+
+            //================================================
+            // CGC
+            //================================================
+
+            setText(
+                "dbCGCXa",
+                formatNumber(
+                    stat.cgcDangDich
+                )
+            );
+
+
+            setText(
+                "dbCGCDang",
+                formatNumber(
+                    stat.cgcXaLuyKe
+                )
+            );
+
+
+            setText(
+                "dbCGCCon",
+                formatNumber(
+                    stat.cgcCon
+                )
+            );
+
+
+            setText(
+                "dbCGCKg",
+                formatNumber(
+                    stat.cgcKg
+                )
+            );
+
+
+            //================================================
+            // VDNC
+            //================================================
+
+            setText(
+                "dbVDNCXa",
+                formatNumber(
+                    stat.vdncDangDich
+                )
+            );
+
+
+            setText(
+                "dbVDNCDang",
+                formatNumber(
+                    stat.vdncXaLuyKe
+                )
+            );
+
+
+            setText(
+                "dbVDNCMac",
+                formatNumber(
+                    stat.vdncMac
+                )
+            );
+
+
+            setText(
+                "dbVDNChet",
+                formatNumber(
+                    stat.vdncChet
+                )
+            );
+
+
+            //================================================
+            // DẠI
+            //================================================
+
+            setText(
+                "dbDAIXa",
+                formatNumber(
+                    stat.daiDangDich
+                )
+            );
+
+
+            setText(
+                "dbDAIDang",
+                formatNumber(
+                    stat.daiXaLuyKe
+                )
+            );
+
+
+            setText(
+                "dbDAIChet",
+                formatNumber(
+                    stat.daiChet
+                )
+            );
+
+
+            setText(
+                "dbDAITieuHuy",
+                formatNumber(
+                    stat.daiTieuHuy
+                )
+            );
+
+
+            //================================================
+            // VSKTTĐ
+            //
+            // Chỉ hiển thị:
+            // Xã đã triển khai
+            //================================================
+
+            setText(
+                "dbPhunXa",
+                formatNumber(
+                    stat.phunXa
+                )
+            );
+
+
+            //================================================
+            // KSGM
+            //================================================
+
+            setText(
+                "dbKSGMXa",
+                formatNumber(
+                    stat.ksgmXa
+                )
+            );
+
+
+            setText(
+                "dbKSGMCoSo",
+                formatNumber(
+                    stat.ksgmCoSo
+                )
+            );
+
+
+            //================================================
+            // THUỐC THÚ Y
+            //================================================
+
+            setText(
+                "dbCSBBTTY",
+                formatNumber(
+                    stat.csbbtty
+                )
+            );
+
         }
+
     };
 
-    window.dashboard = dashboard;
 
-    window.updateDashboard = function () {
-        dashboard.update();
-    };
+    //==================================================
+    // GÁN RA WINDOW
+    //==================================================
+
+    window.dashboard =
+        dashboard;
+
+
+    window.updateDashboard =
+        function () {
+
+            dashboard.update();
+
+        };
+
+
 })();
