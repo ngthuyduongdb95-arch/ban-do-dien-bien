@@ -150,7 +150,8 @@ function initMap() {
         [21.386, 103.016],
         9
     );
-
+map.createPane("markerPane");
+map.getPane("markerPane").style.zIndex = 700;
     L.control.zoom({
         position: "topleft"
     }).addTo(map);
@@ -2188,34 +2189,25 @@ function renderDiseaseMarkers() {
 
 
             L.circleMarker(
-                center,
-                {
+    center,
+    {
+        radius: 5.5,
 
-                    radius:
-                        4.5,
+        color: "#FFFFFF",
 
-                    color:
-                        "#FFFFFF",
+        weight: 2,
 
-                    weight:
-                        2.5,
+        fillColor: "#D50000",
 
-                    fillColor:
-                        "#E00000",
+        fillOpacity: 1,
 
-                    fillOpacity:
-                        1,
+        opacity: 1,
 
-                    opacity:
-                        1,
+        interactive: false,
 
-                    interactive:
-                        false
-
-                }
-            ).addTo(
-                diseaseMarkerLayer
-            );
+        pane: "markerPane"
+    }
+).addTo(diseaseMarkerLayer);
 
         }
     );
