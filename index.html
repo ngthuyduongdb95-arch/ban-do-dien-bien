@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HỆ THỐNG WEBGIS QUẢN LÝ THÚ Y TỈNH ĐIỆN BIÊN</title>
+    <title>HỆ THỐNG WEBGIS QUẢN LÝ THÚ Y TỈNH ĐIỆN BIÊN TỈNH ĐIỆN BIÊN</title>
 
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
@@ -23,78 +23,12 @@
         <div class="agency-line2">CHI CỤC NÔNG NGHIỆP</div>
     </div>
 
-    <h1>HỆ THỐNG WEBGIS QUẢN LÝ THÚ Y TỈNH ĐIỆN BIÊN </h1>
-</header>
+    <h1>HỆ THỐNG WEBGIS QUẢN LÝ THÚ Y TỈNH ĐIỆN BIÊN</h1>
 
-<section class="dashboard">
-    <div class="summary-card card-dtlcp">
-        <div class="summary-head"><i class="fa-solid fa-virus"></i><b>DTLCP</b></div>
-        <div class="summary-main"><span id="dbDTLCPXa">0</span><small>xã lũy kế</small></div>
-        <div class="summary-grid">
-            <span>Đang dịch <b id="dbDTLCPDang">0</b></span>
-            <span>Tiêu hủy <b id="dbDTLCPCon">0</b> con</span>
-            <span>Khối lượng <b id="dbDTLCPKg">0</b> kg</span>
-        </div>
-    </div>
-
-    <div class="summary-card card-cgc">
-        <div class="summary-head"><i class="fa-solid fa-drumstick-bite"></i><b>CGC</b></div>
-        <div class="summary-main"><span id="dbCGCXa">0</span><small>xã lũy kế</small></div>
-        <div class="summary-grid">
-            <span>Đang dịch <b id="dbCGCDang">0</b></span>
-            <span>Tiêu hủy <b id="dbCGCCon">0</b> con</span>
-            <span>Khối lượng <b id="dbCGCKg">0</b> kg</span>
-        </div>
-    </div>
-
-    <div class="summary-card card-vdnc">
-        <div class="summary-head"><i class="fa-solid fa-cow"></i><b>VDNC</b></div>
-        <div class="summary-main"><span id="dbVDNCXa">0</span><small>xã lũy kế</small></div>
-        <div class="summary-grid">
-            <span>Đang dịch <b id="dbVDNCDang">0</b></span>
-            <span>Mắc <b id="dbVDNCMac">0</b> con</span>
-            <span>Chết <b id="dbVDNChet">0</b> con</span>
-        </div>
-    </div>
-
-    <div class="summary-card card-dai">
-        <div class="summary-head"><i class="fa-solid fa-dog"></i><b>DẠI</b></div>
-        <div class="summary-main"><span id="dbDAIXa">0</span><small>xã lũy kế</small></div>
-        <div class="summary-grid">
-            <span>Đang dịch <b id="dbDAIDang">0</b></span>
-            <span>Chết <b id="dbDAIChet">0</b></span>
-            <span>Tiêu hủy <b id="dbDAITieuHuy">0</b></span>
-        </div>
-    </div>
-
-    <div class="summary-card card-phun">
-        <div class="summary-head"><i class="fa-solid fa-spray-can-sparkles"></i><b>PHUN KHỬ TRÙNG</b></div>
-        <div class="summary-main"><span id="dbPhunXa">0</span><small>xã triển khai</small></div>
-        <div class="summary-grid">
-            <span>Số hộ <b id="dbPhunHo">0</b></span>
-            <span>Số vòng <b id="dbPhunVong">0</b></span>
-        </div>
-    </div>
-
-    <div class="summary-card card-ksgm">
-        <div class="summary-head"><i class="fa-solid fa-warehouse"></i><b>KSGM</b></div>
-        <div class="summary-main"><span id="dbKSGMXa">0</span><small>xã triển khai</small></div>
-        <div class="summary-grid">
-            <span>Số cơ sở <b id="dbKSGMCoSo">0</b></span>
-        </div>
-    </div>
-
-    <div class="summary-card card-drug">
-        <div class="summary-head"><i class="fa-solid fa-pills"></i><b>THUỐC THÚ Y</b></div>
-        <div class="summary-main"><span id="dbCSBBTTY">0</span><small>cơ sở</small></div>
-    </div>
-</section>
-
-<div class="webgis">
-    <aside class="sidebar">
-        <div class="side-card">
-            <div class="side-title">Lớp dữ liệu</div>
-            <select id="layerSelect">
+    <div class="header-controls">
+        <div class="header-layer">
+            <span class="header-layer-label">LỚP DỮ LIỆU</span>
+            <select id="layerSelect" aria-label="Chọn lớp dữ liệu">
                 <option value="DTLCP">Dịch tả lợn Châu Phi</option>
                 <option value="CGC">Cúm gia cầm</option>
                 <option value="VDNC">Viêm da nổi cục</option>
@@ -104,29 +38,97 @@
                 <option value="CSBBTTY">Cơ sở buôn bán thuốc thú y</option>
             </select>
         </div>
+        <button id="btnRefresh" class="header-icon-btn" title="Cập nhật dữ liệu" aria-label="Cập nhật dữ liệu">
+            <i class="fa-solid fa-rotate"></i>
+        </button>
+        <button id="btnLocate" class="header-icon-btn" title="Vị trí của tôi" aria-label="Vị trí của tôi">
+            <i class="fa-solid fa-location-crosshairs"></i>
+        </button>
+    </div>
+</header><!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HỆ THỐNG WEBGIS QUẢN LÝ THÚ Y TỈNH ĐIỆN BIÊN TỈNH ĐIỆN BIÊN</title>
 
-        <div class="side-card">
-            <div class="side-title">Tìm xã/phường</div>
-            <div class="search-row">
-                <input id="txtSearch" type="text" placeholder="Nhập tên xã/phường...">
-                <button id="btnSearch" title="Tìm"><i class="fa-solid fa-magnifying-glass"></i></button>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+    <!-- Dùng để xuất ảnh bản đồ, giữ Legend + tiêu đề + tỷ lệ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+
+
+
+
+
+<div class="webgis">
+    <aside class="sidebar"><div class="sidebar-kpi">
+        <div class="summary-card card-dtlcp">
+            <div class="summary-head"><i class="fa-solid fa-virus"></i><b>DTLCP</b></div>
+            <div class="summary-main"><span id="dbDTLCPXa">0</span><small>xã đang có dịch</small></div>
+            <div class="summary-grid">
+                <span>Xã có dịch (lũy kế) <b id="dbDTLCPDang">0</b></span>
+                <span>Tiêu hủy <b id="dbDTLCPCon">0</b> con</span>
+                <span>Khối lượng <b id="dbDTLCPKg">0</b> kg</span>
             </div>
         </div>
 
-        <div class="side-card side-note">
-            <div class="side-title">Phân cấp dữ liệu</div>
-            <p><b>Natural Breaks (Jenks)</b></p>
-            <p>Khoảng màu tự động tính từ số liệu thực tế trong Google Sheets.</p>
-            <p>Giá trị <b>0</b> được tách riêng; mức thiệt hại bắt đầu từ <b>1</b>.</p>
+        <div class="summary-card card-cgc">
+            <div class="summary-head"><i class="fa-solid fa-drumstick-bite"></i><b>CGC</b></div>
+            <div class="summary-main"><span id="dbCGCXa">0</span><small>xã đang có dịch</small></div>
+            <div class="summary-grid">
+                <span>Xã có dịch (lũy kế) <b id="dbCGCDang">0</b></span>
+                <span>Tiêu hủy <b id="dbCGCCon">0</b> con</span>
+                <span>Khối lượng <b id="dbCGCKg">0</b> kg</span>
+            </div>
         </div>
 
-        <button id="btnRefresh" class="side-button">
-            <i class="fa-solid fa-rotate"></i> Cập nhật dữ liệu
-        </button>
-        <button id="btnLocate" class="side-button secondary">
-            <i class="fa-solid fa-location-crosshairs"></i> Vị trí của tôi
-        </button>
-    </aside>
+        <div class="summary-card card-vdnc">
+            <div class="summary-head"><i class="fa-solid fa-cow"></i><b>VDNC</b></div>
+            <div class="summary-main"><span id="dbVDNCXa">0</span><small>xã đang có dịch</small></div>
+            <div class="summary-grid">
+                <span>Xã có dịch (lũy kế) <b id="dbVDNCDang">0</b></span>
+                <span>Mắc <b id="dbVDNCMac">0</b> con</span>
+                <span>Chết <b id="dbVDNChet">0</b> con</span>
+            </div>
+        </div>
+
+        <div class="summary-card card-dai">
+            <div class="summary-head"><i class="fa-solid fa-dog"></i><b>DẠI</b></div>
+            <div class="summary-main"><span id="dbDAIXa">0</span><small>xã đang có dịch</small></div>
+            <div class="summary-grid">
+                <span>Xã có dịch (lũy kế) <b id="dbDAIDang">0</b></span>
+                <span>Chết <b id="dbDAIChet">0</b></span>
+                <span>Tiêu hủy <b id="dbDAITieuHuy">0</b></span>
+            </div>
+        </div>
+
+        <div class="summary-card card-phun">
+            <div class="summary-head"><i class="fa-solid fa-spray-can-sparkles"></i><b>Thực hiện tháng Tổng VSKTTĐ</b></div>
+            <div class="summary-main"><span id="dbPhunXa">0</span><small>xã</small></div><div class="summary-grid"><span>Xã đã triển khai <b id="dbPhunXa">0</b></span></div></div>
+
+        <div class="summary-card card-ksgm">
+            <div class="summary-head"><i class="fa-solid fa-warehouse"></i><b>KSGM</b></div>
+            <div class="summary-main"><span id="dbKSGMXa">0</span><small>xã triển khai</small></div>
+            <div class="summary-grid">
+                <span>Số cơ sở <b id="dbKSGMCoSo">0</b></span>
+            </div>
+        </div>
+
+        <div class="summary-card card-drug">
+            <div class="summary-head"><i class="fa-solid fa-pills"></i><b>Cơ sở buôn bán thuốc thú y</b></div>
+            <div class="summary-main"><span id="dbCSBBTTY">0</span><small>cơ sở</small></div>
+        </div>
+</div></aside>
 
     <main class="main-map">
         <div class="map-toolbar">
