@@ -4,58 +4,248 @@
 
 console.log("WEBGIS APP: Khởi tạo...");
 
-document.addEventListener("DOMContentLoaded", async () => {
-    try {
-        // 1. Khởi tạo bản đồ nền trước
-        initMap();
+document.addEventListener(
+    "DOMContentLoaded",
+    async function () {
 
-        // 2. Load dữ liệu Google Sheets
-        if (typeof loadSheet === "function") {
-            await loadSheet();
+        // ==================================================
+        // 1. KHỞI TẠO BẢN ĐỒ
+        // ==================================================
+
+        try {
+
+            if (
+                typeof initMap ===
+                "function"
+            ) {
+
+                initMap();
+
+            }
+
+        }
+        catch (error) {
+
+            console.error(
+                "Lỗi khởi tạo bản đồ:",
+                error
+            );
+
         }
 
-        // 3. Load GeoJSON và vẽ lớp dữ liệu
-        await loadGeoJSON();
 
-        // 4. Dashboard
-        if (typeof dashboard !== "undefined" && typeof dashboard.update === "function") {
-            dashboard.update();
+        // ==================================================
+        // 2. TẢI GOOGLE SHEETS
+        //    TẢI XONG LÀ CẬP NHẬT KPI NGAY
+        // ==================================================
+
+        try {
+
+            if (
+                typeof loadSheet ===
+                "function"
+            ) {
+
+                await loadSheet();
+
+                console.log(
+                    "Google Sheets:",
+                    Object.keys(
+                        window.sheetData || {}
+                    ).length,
+                    "xã/phường"
+                );
+
+            }
+
+
+            // KPI cập nhật độc lập với GeoJSON
+
+            if (
+                typeof dashboard !==
+                "undefined" &&
+                typeof dashboard.update ===
+                "function"
+            ) {
+
+                dashboard.update();
+
+            }
+
+        }
+        catch (error) {
+
+            console.error(
+                "Lỗi tải Google Sheets:",
+                error
+            );
+
         }
 
-        // 5. Sự kiện đổi lớp
-        const layerSelect = document.getElementById("layerSelect");
+
+        // ==================================================
+        // 3. TẢI GEOJSON
+        //    Nếu GeoJSON lỗi cũng KHÔNG làm mất KPI
+        // ==================================================
+
+        try {
+
+            if (
+                typeof loadGeoJSON ===
+                "function"
+            ) {
+
+                await loadGeoJSON();
+
+            }
+
+        }
+        catch (error) {
+
+            console.error(
+                "Lỗi tải GeoJSON:",
+                error
+            );
+
+        }
+
+
+        // ==================================================
+        // 4. ĐỔI LỚP DỮ LIỆU
+        // ==================================================
+
+        const layerSelect =
+            document.getElementById(
+                "layerSelect"
+            );
+
+
         if (layerSelect) {
-            layerSelect.addEventListener("change", function () {
-                setLayer(this.value);
-            });
-        }
 
-        // 6. Tìm xã/phường
-        const btnSearch = document.getElementById("btnSearch");
-        const txtSearch = document.getElementById("txtSearch");
+            layerSelect.addEventListener(
+                "change",
+                function () {
 
-        if (btnSearch && txtSearch) {
-            btnSearch.addEventListener("click", () => {
-                searchFeature(txtSearch.value);
-            });
+                    if (
+                        typeof setLayer ===
+                        "function"
+                    ) {
 
-            txtSearch.addEventListener("keydown", e => {
-                if (e.key === "Enter") {
-                    searchFeature(e.target.value);
+                        setLayer(
+                            this.value
+                        );
+
+                    }
+
                 }
-            });
+            );
+
         }
 
-        // 7. Cập nhật dữ liệu
-        const btnRefresh = document.getElementById("btnRefresh");
+
+        // ==================================================
+        // 5. CẬP NHẬT DỮ LIỆU
+        // ==================================================
+
+        const btnRefresh =
+            document.getElementById(
+                "btnRefresh"
+            );
+
+
         if (btnRefresh) {
-            btnRefresh.addEventListener("click", async () => {
-                await reloadData();
-            });
+
+            btnRefresh.addEventListener(
+                "click",
+                async function () {
+
+                    try {
+
+                        if (
+                            typeof loadSheet ===
+                            "function"
+                        ) {
+
+                            await loadSheet();
+
+                        }
+
+
+                        // Cập nhật KPI ngay
+
+                        if (
+                            typeof dashboard !==
+                            "undefined" &&
+                            typeof dashboard.update ===
+                            "function"
+                        ) {
+
+                            dashboard.update();
+
+                        }
+
+
+                        // Sau đó vẽ lại bản đồ
+
+                        if (
+                            typeof refreshMap ===
+                            "function"
+                        ) {
+
+                            refreshMap();
+
+                        }
+
+                    }
+                    catch (error) {
+
+                        console.error(
+                            "Lỗi cập nhật dữ liệu:",
+                            error
+                        );
+
+                    }
+
+                }
+            );
+
         }
 
-        console.log("WEBGIS APP: Khởi tạo hoàn tất.");
-    } catch (err) {
-        console.error("WEBGIS APP: Lỗi khởi tạo:", err);
+
+        // ==================================================
+        // 6. VỊ TRÍ
+        // ==================================================
+
+        const btnLocate =
+            document.getElementById(
+                "btnLocate"
+            );
+
+
+        if (btnLocate) {
+
+            btnLocate.addEventListener(
+                "click",
+                function () {
+
+                    if (
+                        typeof locateUser ===
+                        "function"
+                    ) {
+
+                        locateUser();
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        console.log(
+            "WEBGIS APP: Khởi tạo hoàn tất."
+        );
+
     }
-});
+);
