@@ -1238,26 +1238,13 @@ async function reloadData() {
 }
 
 // ------------------------------------------------------
-// Start
+// API khởi tạo - app.js gọi các hàm này theo đúng thứ tự:
+// loadSheet -> loadGeoJSON -> dashboard.update
 // ------------------------------------------------------
 
-document.addEventListener("DOMContentLoaded", async () => {
-    try {
-        initMap();
-
-        await loadGeoJSON();
-
-        if (typeof window.loadSheet === "function") {
-            await window.loadSheet();
-            refreshMap();
-        }
-
-        if (typeof window.updateDashboard === "function") {
-            window.updateDashboard();
-        }
-
-        console.log("WEBGIS: Khởi tạo hoàn tất.");
-    } catch (err) {
-        console.error("WEBGIS: Lỗi khởi tạo:", err);
-    }
-});
+window.initMap = initMap;
+window.loadGeoJSON = loadGeoJSON;
+window.setLayer = setLayer;
+window.reloadData = reloadData;
+window.searchFeature = searchFeature;
+window.exportCurrentMap = exportMapImage;
