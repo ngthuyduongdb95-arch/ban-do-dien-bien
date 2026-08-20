@@ -1,680 +1,178 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
-
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HỆ THỐNG WEBGIS QUẢN LÝ DỊCH BỆNH ĐỘNG VẬT TỈNH ĐIỆN BIÊN</title>
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>
-        WEBGIS QUẢN LÝ DỊCH BỆNH ĐỘNG VẬT ĐIỆN BIÊN
-    </title>
-
-
-    <!-- =========================================
-         LEAFLET
-    ========================================== -->
-
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet"
           href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
+    <!-- Dùng để xuất ảnh bản đồ, giữ Legend + tiêu đề + tỷ lệ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-    <!-- =========================================
-         LEAFLET FULLSCREEN
-    ========================================== -->
-
-    <link rel="stylesheet"
-          href="https://unpkg.com/leaflet.fullscreen@2.4.0/Control.FullScreen.css">
-
-
-    <!-- =========================================
-         LEAFLET EASYPRINT
-    ========================================== -->
-
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/leaflet-easyprint@2.1.9/dist/bundle.css">
-
-
-    <!-- =========================================
-         CSS WEBGIS
-    ========================================== -->
-
-    <link rel="stylesheet"
-          href="css/style.css">
-
+    <link rel="stylesheet" href="css/style.css">
 </head>
 
-
 <body>
-
-
-<!-- =================================================
-     HEADER
-================================================== -->
-
 <header class="header">
-
-
-    <!-- =========================================
-         LOGO
-    ========================================== -->
-
-    <div class="logo">
-
-        🐷 WEBGIS DỊCH BỆNH ĐỘNG VẬT ĐIỆN BIÊN
-
+    <div class="agency">
+        <div class="agency-line1">SỞ NÔNG NGHIỆP VÀ MÔI TRƯỜNG TỈNH ĐIỆN BIÊN</div>
+        <div class="agency-line2">CHI CỤC NÔNG NGHIỆP</div>
     </div>
 
-
-    <!-- =========================================
-         TOOLBAR
-    ========================================== -->
-
-    <div class="toolbar">
-
-
-        <!-- LỚP DỮ LIỆU -->
-
-        <select id="layerSelect">
-
-            <option value="DTLCP">
-                Dịch tả lợn Châu Phi
-            </option>
-
-            <option value="CGC">
-                Cúm gia cầm
-            </option>
-
-            <option value="VDNC">
-                Viêm da nổi cục
-            </option>
-
-            <option value="DAI">
-                Bệnh Dại
-            </option>
-
-            <option value="PHUN">
-                Phun khử trùng
-            </option>
-
-            <option value="KSGM">
-                Kiểm soát giết mổ
-            </option>
-
-            <option value="CSBBTTY">
-                Cơ sở thuốc thú y
-            </option>
-
-        </select>
-
-
-        <!-- TÌM XÃ -->
-
-        <input
-            type="text"
-            id="txtSearch"
-            placeholder="Nhập tên xã...">
-
-
-        <button id="btnSearch">
-
-            🔍 Tìm
-
-        </button>
-
-
-        <!-- LÀM MỚI -->
-
-        <button id="btnRefresh">
-
-            🔄 Làm mới
-
-        </button>
-
-
-        <!-- TẢI BẢN ĐỒ -->
-
-        <button id="btnExportMap">
-
-            🗺️ Tải bản đồ
-
-        </button>
-
-    </div>
-
+    <h1>HỆ THỐNG WEBGIS QUẢN LÝ DỊCH BỆNH ĐỘNG VẬT</h1>
 </header>
 
+<section class="dashboard">
+    <div class="summary-card card-dtlcp">
+        <div class="summary-head"><i class="fa-solid fa-virus"></i><b>DTLCP</b></div>
+        <div class="summary-main"><span id="dbDTLCPXa">0</span><small>xã lũy kế</small></div>
+        <div class="summary-grid">
+            <span>Đang dịch <b id="dbDTLCPDang">0</b></span>
+            <span>Tiêu hủy <b id="dbDTLCPCon">0</b> con</span>
+            <span>Khối lượng <b id="dbDTLCPKg">0</b> kg</span>
+        </div>
+    </div>
 
+    <div class="summary-card card-cgc">
+        <div class="summary-head"><i class="fa-solid fa-drumstick-bite"></i><b>CGC</b></div>
+        <div class="summary-main"><span id="dbCGCXa">0</span><small>xã lũy kế</small></div>
+        <div class="summary-grid">
+            <span>Đang dịch <b id="dbCGCDang">0</b></span>
+            <span>Tiêu hủy <b id="dbCGCCon">0</b> con</span>
+            <span>Khối lượng <b id="dbCGCKg">0</b> kg</span>
+        </div>
+    </div>
 
-<!-- =================================================
-     LAYOUT
-================================================== -->
+    <div class="summary-card card-vdnc">
+        <div class="summary-head"><i class="fa-solid fa-cow"></i><b>VDNC</b></div>
+        <div class="summary-main"><span id="dbVDNCXa">0</span><small>xã lũy kế</small></div>
+        <div class="summary-grid">
+            <span>Đang dịch <b id="dbVDNCDang">0</b></span>
+            <span>Mắc <b id="dbVDNCMac">0</b> con</span>
+            <span>Chết <b id="dbVDNChet">0</b> con</span>
+        </div>
+    </div>
 
-<div class="container">
+    <div class="summary-card card-dai">
+        <div class="summary-head"><i class="fa-solid fa-dog"></i><b>DẠI</b></div>
+        <div class="summary-main"><span id="dbDAIXa">0</span><small>xã lũy kế</small></div>
+        <div class="summary-grid">
+            <span>Đang dịch <b id="dbDAIDang">0</b></span>
+            <span>Chết <b id="dbDAIChet">0</b></span>
+            <span>Tiêu hủy <b id="dbDAITieuHuy">0</b></span>
+        </div>
+    </div>
 
+    <div class="summary-card card-phun">
+        <div class="summary-head"><i class="fa-solid fa-spray-can-sparkles"></i><b>PHUN KHỬ TRÙNG</b></div>
+        <div class="summary-main"><span id="dbPhunXa">0</span><small>xã triển khai</small></div>
+        <div class="summary-grid">
+            <span>Số hộ <b id="dbPhunHo">0</b></span>
+            <span>Số vòng <b id="dbPhunVong">0</b></span>
+        </div>
+    </div>
 
-    <!-- =================================================
-         SIDEBAR - TỔNG QUAN
-    ================================================== -->
+    <div class="summary-card card-ksgm">
+        <div class="summary-head"><i class="fa-solid fa-warehouse"></i><b>KSGM</b></div>
+        <div class="summary-main"><span id="dbKSGMXa">0</span><small>xã triển khai</small></div>
+        <div class="summary-grid">
+            <span>Số cơ sở <b id="dbKSGMCoSo">0</b></span>
+        </div>
+    </div>
 
+    <div class="summary-card card-drug">
+        <div class="summary-head"><i class="fa-solid fa-pills"></i><b>THUỐC THÚ Y</b></div>
+        <div class="summary-main"><span id="dbCSBBTTY">0</span><small>cơ sở</small></div>
+    </div>
+</section>
+
+<div class="webgis">
     <aside class="sidebar">
-
-
-        <!-- =========================================
-             TIÊU ĐỀ
-        ========================================== -->
-
-        <div class="overview-header">
-
-            <div class="overview-title">
-
-                TỔNG QUAN
-
-            </div>
-
+        <div class="side-card">
+            <div class="side-title">Lớp dữ liệu</div>
+            <select id="layerSelect">
+                <option value="DTLCP">Dịch tả lợn Châu Phi</option>
+                <option value="CGC">Cúm gia cầm</option>
+                <option value="VDNC">Viêm da nổi cục</option>
+                <option value="DAI">Bệnh Dại</option>
+                <option value="PHUN">Phun khử trùng</option>
+                <option value="KSGM">Kiểm soát giết mổ</option>
+                <option value="CSBBTTY">Cơ sở buôn bán thuốc thú y</option>
+            </select>
         </div>
 
-
-
-        <!-- =========================================
-             DTLCP
-        ========================================== -->
-
-        <div class="dashboard-card disease-dtlcp">
-
-            <h3>
-
-                🐷 Dịch tả lợn Châu Phi
-
-            </h3>
-
-
-            <div class="row">
-
-                <span>
-                    Xã có dịch (lũy kế)
-                </span>
-
-                <b id="dbDTLCPXaLuyKe">
-                    0
-                </b>
-
+        <div class="side-card">
+            <div class="side-title">Tìm xã/phường</div>
+            <div class="search-row">
+                <input id="txtSearch" type="text" placeholder="Nhập tên xã/phường...">
+                <button id="btnSearch" title="Tìm"><i class="fa-solid fa-magnifying-glass"></i></button>
             </div>
-
-
-            <div class="row">
-
-                <span>
-                    Xã đang có dịch
-                </span>
-
-                <b id="dbDTLCPXaDangDich"
-                   class="danger-value">
-
-                    0
-
-                </b>
-
-            </div>
-
-
-            <div class="row">
-
-                <span>
-                    Tiêu hủy
-                </span>
-
-                <b id="dbDTLCPCon">
-                    0
-                </b>
-
-            </div>
-
-
-            <div class="row">
-
-                <span>
-                    Khối lượng
-                </span>
-
-                <b id="dbDTLCPKhoiLuong">
-                    0
-                </b>
-
-                <small>
-                    kg
-                </small>
-
-            </div>
-
         </div>
 
-
-
-        <!-- =========================================
-             CGC
-        ========================================== -->
-
-        <div class="dashboard-card disease-cgc">
-
-            <h3>
-
-                🐔 Cúm gia cầm
-
-            </h3>
-
-
-            <div class="row">
-
-                <span>
-                    Xã có dịch (lũy kế)
-                </span>
-
-                <b id="dbCGCXaLuyKe">
-                    0
-                </b>
-
-            </div>
-
-
-            <div class="row">
-
-                <span>
-                    Xã đang có dịch
-                </span>
-
-                <b id="dbCGCXaDangDich"
-                   class="danger-value">
-
-                    0
-
-                </b>
-
-            </div>
-
-
-            <div class="row">
-
-                <span>
-                    Tiêu hủy
-                </span>
-
-                <b id="dbCGCCon">
-                    0
-                </b>
-
-            </div>
-
-
-            <div class="row">
-
-                <span>
-                    Khối lượng
-                </span>
-
-                <b id="dbCGCKhoiLuong">
-                    0
-                </b>
-
-                <small>
-                    kg
-                </small>
-
-            </div>
-
+        <div class="side-card side-note">
+            <div class="side-title">Phân cấp dữ liệu</div>
+            <p><b>Natural Breaks (Jenks)</b></p>
+            <p>Khoảng màu tự động tính từ số liệu thực tế trong Google Sheets.</p>
+            <p>Giá trị <b>0</b> được tách riêng; mức thiệt hại bắt đầu từ <b>1</b>.</p>
         </div>
 
-
-
-        <!-- =========================================
-             VDNC
-        ========================================== -->
-
-        <div class="dashboard-card disease-vdnc">
-
-            <h3>
-
-                🐄 Viêm da nổi cục
-
-            </h3>
-
-
-            <div class="row">
-
-                <span>
-                    Xã có dịch (lũy kế)
-                </span>
-
-                <b id="dbVDNCXaLuyKe">
-                    0
-                </b>
-
-            </div>
-
-
-            <div class="row">
-
-                <span>
-                    Xã đang có dịch
-                </span>
-
-                <b id="dbVDNCXaDangDich"
-                   class="danger-value">
-
-                    0
-
-                </b>
-
-            </div>
-
-
-            <div class="row">
-
-                <span>
-                    Số mắc
-                </span>
-
-                <b id="dbVDNCMac">
-                    0
-                </b>
-
-            </div>
-
-
-            <div class="row">
-
-                <span>
-                    Số chết
-                </span>
-
-                <b id="dbVDNCChet">
-                    0
-                </b>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- =========================================
-             DẠI
-        ========================================== -->
-
-        <div class="dashboard-card disease-dai">
-
-            <h3>
-
-                🐕 Bệnh Dại
-
-            </h3>
-
-
-            <div class="row">
-
-                <span>
-                    Xã có dịch (lũy kế)
-                </span>
-
-                <b id="dbDAIXaLuyKe">
-                    0
-                </b>
-
-            </div>
-
-
-            <div class="row">
-
-                <span>
-                    Xã đang có dịch
-                </span>
-
-                <b id="dbDAIXaDangDich"
-                   class="danger-value">
-
-                    0
-
-                </b>
-
-            </div>
-
-
-            <div class="row">
-
-                <span>
-                    Số chết, tiêu hủy
-                </span>
-
-                <b id="dbDAIChet">
-                    0
-                </b>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- =========================================
-             PHUN KHỬ TRÙNG
-        ========================================== -->
-
-        <div class="dashboard-card operation-card">
-
-            <h3>
-
-                🧴 Phun khử trùng
-
-            </h3>
-
-
-            <div class="row">
-
-                <span>
-                    Xã triển khai
-                </span>
-
-                <b id="dbPhunXa">
-                    0
-                </b>
-
-            </div>
-
-
-            <div class="row">
-
-                <span>
-                    Số hộ
-                </span>
-
-                <b id="dbPhunHo">
-                    0
-                </b>
-
-            </div>
-
-
-            <div class="row">
-
-                <span>
-                    Vòng
-                </span>
-
-                <b id="dbPhunVong">
-                    0
-                </b>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- =========================================
-             KSGM
-        ========================================== -->
-
-        <div class="dashboard-card operation-card">
-
-            <h3>
-
-                🏭 Kiểm soát giết mổ
-
-            </h3>
-
-
-            <div class="row">
-
-                <span>
-                    Xã triển khai
-                </span>
-
-                <b id="dbKSGMXa">
-                    0
-                </b>
-
-            </div>
-
-
-            <div class="row">
-
-                <span>
-                    Số cơ sở
-                </span>
-
-                <b id="dbKSGM">
-                    0
-                </b>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- =========================================
-             CƠ SỞ THUỐC THÚ Y
-        ========================================== -->
-
-        <div class="dashboard-card operation-card">
-
-            <h3>
-
-                💊 Cơ sở thuốc thú y
-
-            </h3>
-
-
-            <div class="row">
-
-                <span>
-                    Số cơ sở
-                </span>
-
-                <b id="dbCSBBTTY">
-                    0
-                </b>
-
-            </div>
-
-        </div>
-
+        <button id="btnRefresh" class="side-button">
+            <i class="fa-solid fa-rotate"></i> Cập nhật dữ liệu
+        </button>
+        <button id="btnLocate" class="side-button secondary">
+            <i class="fa-solid fa-location-crosshairs"></i> Vị trí của tôi
+        </button>
     </aside>
 
+    <main class="main-map">
+        <div class="map-toolbar">
+            <div class="map-title-live">
+                <strong id="mapTitle">Dịch tả lợn Châu Phi</strong>
+                <span id="mapMethod">Dynamic Jenks Natural Breaks Classification</span>
+            </div>
 
-
-    <!-- =================================================
-         KHU VỰC BẢN ĐỒ
-    ================================================== -->
-
-    <main class="main-content">
+            <div class="map-actions">
+                <button id="btnStreet" class="map-action active" title="Bản đồ đường phố">
+                    <i class="fa-solid fa-road"></i>
+                </button>
+                <button id="btnSatellite" class="map-action" title="Bản đồ vệ tinh">
+                    <i class="fa-solid fa-satellite"></i>
+                </button>
+                <button id="btnFullscreen" class="map-action" title="Toàn màn hình">
+                    <i class="fa-solid fa-expand"></i>
+                </button>
+                <button id="btnExport" class="map-action" title="Tải ảnh bản đồ">
+                    <i class="fa-solid fa-download"></i>
+                </button>
+            </div>
+        </div>
 
         <div id="map"></div>
-
     </main>
 
-
-
-    <!-- =================================================
-         PANEL THÔNG TIN XÃ
-    ================================================== -->
-
-    <aside id="info-panel"
-           class="info-panel">
-
-
-        <div class="panel-placeholder">
-
-
-            <div class="icon">
-
-                🗺️
-
+    <aside class="panel">
+        <div class="panel-head">
+            <div>
+                <span class="panel-kicker">THÔNG TIN XÃ / PHƯỜNG</span>
+                <h2 id="panel-title">Chưa chọn xã/phường</h2>
             </div>
-
-
-            <h2>
-
-                THÔNG TIN XÃ
-
-            </h2>
-
-
-            <p>
-
-                Nhấp vào một xã trên bản đồ
-                để xem chi tiết.
-
-            </p>
-
         </div>
-
+        <div id="info-panel">
+            <div class="empty-panel">
+                <i class="fa-solid fa-arrow-pointer"></i>
+                <p>Nhấn vào một xã/phường trên bản đồ để xem thông tin chi tiết.</p>
+            </div>
+        </div>
     </aside>
-
 </div>
 
-
-
-<!-- =================================================
-     JAVASCRIPT
-================================================== -->
-
-
-<!-- LEAFLET -->
-
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-
-<!-- FULLSCREEN -->
-
-<script src="https://unpkg.com/leaflet.fullscreen@2.4.0/Control.FullScreen.js"></script>
-
-
-<!-- EASYPRINT -->
-
-<script src="https://cdn.jsdelivr.net/npm/leaflet-easyprint@2.1.9/dist/bundle.js"></script>
-
-
-
-<!-- =================================================
-     WEBGIS JAVASCRIPT
-================================================== -->
-
-<script src="js/utils.js"></script>
-
 <script src="js/sheets.js"></script>
-
 <script src="js/dashboard.js"></script>
-
-<script src="js/panel.js"></script>
-
 <script src="js/map.js"></script>
-
-<script src="js/app.js"></script>
-
-
 </body>
-
 </html>
