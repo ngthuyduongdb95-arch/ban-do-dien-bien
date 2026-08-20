@@ -163,7 +163,7 @@
                 }
                 stat.ksgmCoSo += ksgmCoSo;
 
-                // ---------------- THUỐC THÚ Y ----------------
+                // ---------------- Cơ sở buôn bán thuốc thú y ----------------
                 stat.csbbtty += numberValue(row["CSBBTTY_Cơ sở"]);
             });
 
@@ -195,6 +195,21 @@
             setText("dbKSGMCoSo", fmt(stat.ksgmCoSo));
 
             setText("dbCSBBTTY", fmt(stat.csbbtty));
+
+            // Tổng quan nhỏ ở sidebar
+            setText("sideOverviewXa", rows.length);
+            setText(
+                "sideOverviewDang",
+                stat.dtlcpDang + stat.cgcDang + stat.vdncDang + stat.daiDang
+            );
+            setText(
+                "sideOverviewCon",
+                stat.dtlcpCon + stat.cgcCon + stat.vdncMac + stat.daiChet
+            );
+            setText(
+                "sideOverviewKg",
+                stat.dtlcpKg + stat.cgcKg
+            );
         }
     };
 
