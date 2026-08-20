@@ -2652,3 +2652,65 @@ button,input,select{
 .card-phun{border-top:3px solid #007C83 !important;}
 .card-ksgm{border-top:3px solid #6D4C41 !important;}
 .card-drug{border-top:3px solid #0277BD !important;}
+
+
+/* ======================================================
+   MAP CONTRAST + LEGEND
+   ====================================================== */
+
+.leaflet-tile{
+    filter:
+        grayscale(14%)
+        brightness(103%)
+        contrast(92%);
+}
+
+.legend{
+    width:220px;
+    max-width:220px;
+    padding:11px 12px;
+    background:rgba(255,255,255,.97);
+    border:1px solid #cfd8df;
+    border-radius:10px;
+    box-shadow:0 7px 20px rgba(20,35,50,.16);
+    color:#263238;
+    font-size:11px;
+}
+
+.legend-title{
+    margin-bottom:4px;
+    font-size:12px;
+    font-weight:800;
+    color:#17212b;
+}
+
+.legend-row i{
+    width:18px;
+    height:14px;
+    flex:0 0 18px;
+    border:1px solid rgba(0,0,0,.20);
+    border-radius:3px;
+}
+
+.legend-no-data{
+    width:18px;
+    height:14px;
+    flex:0 0 18px;
+    background:#D7E0E5;
+    border:1px solid #71808A;
+    border-radius:3px;
+}
+
+.legend-red-dot{
+    width:9px;
+    height:9px;
+    flex:0 0 9px;
+    border-radius:50%;
+    background:#D50000;
+    border:2px solid #FFFFFF;
+    box-shadow:0 0 0 1px #D50000;
+}
+
+.sidebar-kpi .summary-grid span{
+    white-space:normal;
+}
