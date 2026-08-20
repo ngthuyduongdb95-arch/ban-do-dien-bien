@@ -1,1094 +1,643 @@
-/*====================================================
-RESET
-====================================================*/
+/* ======================================================
+   WEBGIS ĐIỆN BIÊN - STYLE
+   ====================================================== */
+
+:root{
+    --ink:#17212b;
+    --muted:#6b7785;
+    --line:#dce3e8;
+    --panel:#ffffff;
+    --page:#f3f6f8;
+    --blue:#155eef;
+    --shadow:0 8px 24px rgba(20,35,50,.10);
+}
 
 *{
-    margin:0;
-    padding:0;
     box-sizing:border-box;
 }
 
-html,
-body{
-
+html,body{
+    margin:0;
+    padding:0;
     width:100%;
-    height:100%;
+    min-height:100%;
+    font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
+    color:var(--ink);
+    background:var(--page);
+}
 
-    font-family:
-        "Segoe UI",
-        Arial,
-        sans-serif;
+button,input,select{
+    font:inherit;
+}
 
-    background:#f4f6f9;
+.header{
+    min-height:78px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:24px;
+    padding:14px 24px;
+    background:#fff;
+    border-bottom:1px solid var(--line);
+}
 
+.agency-line1{
+    font-size:12px;
+    font-weight:800;
+    letter-spacing:.25px;
+}
+
+.agency-line2{
+    margin-top:3px;
+    font-size:11px;
+    color:#637083;
+    font-weight:700;
+}
+
+.header h1{
+    margin:0;
+    font-size:20px;
+    letter-spacing:.3px;
+    text-align:right;
+}
+
+/* ================= DASHBOARD ================= */
+
+.dashboard{
+    display:grid;
+    grid-template-columns:repeat(7,minmax(0,1fr));
+    gap:10px;
+    padding:12px 16px;
+    background:#f8fafb;
+    border-bottom:1px solid var(--line);
+}
+
+.summary-card{
+    min-width:0;
+    padding:12px 13px;
+    border:1px solid var(--line);
+    border-radius:12px;
+    background:#fff;
+    box-shadow:0 3px 12px rgba(20,35,50,.05);
+}
+
+.summary-head{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    font-size:12px;
+    color:#44515e;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.summary-head i{
+    font-size:13px;
+}
+
+.summary-main{
+    display:flex;
+    align-items:baseline;
+    gap:7px;
+    margin:6px 0 7px;
+}
+
+.summary-main span{
+    font-size:25px;
+    line-height:1;
+    font-weight:800;
+}
+
+.summary-main small{
+    font-size:10px;
+    color:var(--muted);
+}
+
+.summary-grid{
+    display:grid;
+    gap:3px;
+    font-size:10px;
+    color:#6b7785;
+}
+
+.summary-grid span{
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.summary-grid b{
+    color:#25313d;
+}
+
+.card-dtlcp{border-top:3px solid #E6392E}
+.card-cgc{border-top:3px solid #388E3C}
+.card-vdnc{border-top:3px solid #2F7DF6}
+.card-dai{border-top:3px solid #6A35D1}
+.card-phun{border-top:3px solid #19A7B3}
+.card-ksgm{border-top:3px solid #795548}
+.card-drug{border-top:3px solid #0288B8}
+
+/* ================= WEBGIS ================= */
+
+.webgis{
+    display:grid;
+    grid-template-columns:220px minmax(0,1fr) 310px;
+    gap:0;
+    height:calc(100vh - 174px);
+    min-height:650px;
+}
+
+.sidebar{
+    padding:12px;
+    background:#f7f9fa;
+    border-right:1px solid var(--line);
+    overflow:auto;
+}
+
+.side-card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:11px;
+    padding:11px;
+    margin-bottom:10px;
+}
+
+.side-title{
+    margin-bottom:7px;
+    font-size:11px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.35px;
+    color:#4c5b68;
+}
+
+.side-card select,
+.search-row input{
+    width:100%;
+    height:37px;
+    border:1px solid #cfd8df;
+    border-radius:8px;
+    padding:0 9px;
+    background:#fff;
+    color:#1d2a35;
+    outline:none;
+}
+
+.search-row{
+    display:flex;
+    gap:6px;
+}
+
+.search-row input{
+    min-width:0;
+}
+
+.search-row button{
+    width:38px;
+    flex:0 0 38px;
+    border:0;
+    border-radius:8px;
+    background:#155eef;
+    color:#fff;
+    cursor:pointer;
+}
+
+.side-note{
+    font-size:11px;
+    line-height:1.5;
+    color:#667481;
+}
+
+.side-note p{
+    margin:4px 0;
+}
+
+.side-button{
+    width:100%;
+    height:38px;
+    margin-bottom:8px;
+    border:0;
+    border-radius:9px;
+    background:#155eef;
+    color:#fff;
+    font-weight:700;
+    cursor:pointer;
+}
+
+.side-button.secondary{
+    background:#fff;
+    color:#334155;
+    border:1px solid #cfd8df;
+}
+
+.main-map{
+    position:relative;
+    min-width:0;
+    background:#e9eef1;
     overflow:hidden;
 }
 
-
-/*====================================================
-HEADER
-====================================================*/
-
-.header{
-
-    height:60px;
-
-    background:#1976D2;
-
-    color:#fff;
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    padding:0 20px;
-
-    box-shadow:0 2px 6px rgba(0,0,0,.15);
-
-    position:relative;
-
+.map-toolbar{
+    position:absolute;
     z-index:1000;
-
-}
-
-
-.logo{
-
-    font-size:19px;
-
-    font-weight:700;
-
-    white-space:nowrap;
-
-}
-
-
-.toolbar{
-
+    left:12px;
+    right:12px;
+    top:12px;
     display:flex;
-
-    gap:8px;
-
-    align-items:center;
-
-}
-
-
-.toolbar select,
-.toolbar input{
-
-    height:36px;
-
-    border:none;
-
-    border-radius:6px;
-
-    padding:0 10px;
-
-    outline:none;
-
-    font-size:13px;
-
-    background:#fff;
-
-}
-
-
-.toolbar select{
-
-    min-width:175px;
-
-}
-
-
-.toolbar input{
-
-    width:175px;
-
-}
-
-
-.toolbar button{
-
-    height:36px;
-
-    padding:0 13px;
-
-    border:none;
-
-    border-radius:6px;
-
-    cursor:pointer;
-
-    background:#fff;
-
-    color:#1976D2;
-
-    font-weight:700;
-
-    font-size:13px;
-
-    transition:.2s;
-
-}
-
-
-.toolbar button:hover{
-
-    background:#E3F2FD;
-
-}
-
-
-.toolbar button:active{
-
-    transform:translateY(1px);
-
-}
-
-
-.toolbar button:disabled{
-
-    opacity:.6;
-
-    cursor:not-allowed;
-
-}
-
-
-/*====================================================
-LAYOUT
-====================================================*/
-
-.container{
-
-    width:100%;
-
-    height:calc(100vh - 60px);
-
-    display:grid;
-
-    grid-template-columns:235px minmax(0,1fr) 285px;
-
-}
-
-
-/*====================================================
-SIDEBAR
-====================================================*/
-
-.sidebar{
-
-    background:#ffffff;
-
-    border-right:1px solid #ddd;
-
-    overflow-y:auto;
-
-    padding:12px;
-
-}
-
-
-/*====================================================
-TỔNG QUAN
-====================================================*/
-
-.overview-header{
-
-    padding:4px 2px 12px;
-
-    text-align:center;
-
-    border-bottom:1px solid #e5e7eb;
-
-    margin-bottom:12px;
-
-}
-
-
-.overview-title{
-
-    font-size:18px;
-
-    font-weight:800;
-
-    color:#1565C0;
-
-    letter-spacing:.3px;
-
-}
-
-
-/*====================================================
-DASHBOARD CARD
-====================================================*/
-
-.dashboard-card{
-
-    background:#fff;
-
-    border-radius:8px;
-
-    padding:10px 11px 8px;
-
-    margin-bottom:10px;
-
-    border-left:4px solid #1976D2;
-
-    box-shadow:
-        0 1px 5px rgba(0,0,0,.07);
-
-    transition:.18s;
-
-}
-
-
-.dashboard-card:hover{
-
-    transform:translateY(-1px);
-
-    box-shadow:
-        0 4px 10px rgba(0,0,0,.10);
-
-}
-
-
-/*====================================================
-CARD TITLE
-====================================================*/
-
-.dashboard-card h3{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:4px;
-
-    margin-bottom:6px;
-
-    font-size:13px;
-
-    line-height:1.35;
-
-    font-weight:750;
-
-}
-
-
-/*====================================================
-CARD ROW
-====================================================*/
-
-.dashboard-card .row{
-
-    display:flex;
-
-    align-items:center;
-
-    min-height:26px;
-
-    padding:4px 0;
-
-    border-bottom:1px dashed #edf0f2;
-
-    font-size:12px;
-
-    gap:5px;
-
-}
-
-
-.dashboard-card .row:last-child{
-
-    border-bottom:none;
-
-}
-
-
-.dashboard-card .row span:first-child{
-
-    color:#555;
-
-    line-height:1.25;
-
-}
-
-
-.dashboard-card b{
-
-    margin-left:auto;
-
-    color:#263238;
-
-    font-size:14px;
-
-    font-weight:750;
-
-    white-space:nowrap;
-
-}
-
-
-.dashboard-card small{
-
-    color:#78909C;
-
-    font-size:9px;
-
-    margin-left:-3px;
-
-    white-space:nowrap;
-
-}
-
-
-/*====================================================
-GIÁ TRỊ ĐANG CÓ DỊCH
-====================================================*/
-
-.dashboard-card b.danger-value{
-
-    color:#D32F2F;
-
-}
-
-
-/*====================================================
-MÀU DTLCP
-====================================================*/
-
-.disease-dtlcp{
-
-    border-left-color:#E53935;
-
-}
-
-
-.disease-dtlcp h3{
-
-    color:#C62828;
-
-}
-
-
-/*====================================================
-MÀU CGC
-====================================================*/
-
-.disease-cgc{
-
-    border-left-color:#FB8C00;
-
-}
-
-
-.disease-cgc h3{
-
-    color:#EF6C00;
-
-}
-
-
-/*====================================================
-MÀU VDNC
-====================================================*/
-
-.disease-vdnc{
-
-    border-left-color:#8E24AA;
-
-}
-
-
-.disease-vdnc h3{
-
-    color:#7B1FA2;
-
-}
-
-
-/*====================================================
-MÀU DẠI
-====================================================*/
-
-.disease-dai{
-
-    border-left-color:#43A047;
-
-}
-
-
-.disease-dai h3{
-
-    color:#2E7D32;
-
-}
-
-
-/*====================================================
-NHÓM NGHIỆP VỤ
-====================================================*/
-
-.operation-card{
-
-    border-left-color:#1976D2;
-
-}
-
-
-.operation-card h3{
-
-    color:#1565C0;
-
-}
-
-
-/*====================================================
-MAIN CONTENT
-====================================================*/
-
-.main-content{
-
-    position:relative;
-
-    width:100%;
-
-    height:100%;
-
-    min-width:0;
-
-}
-
-
-#map{
-
-    width:100%;
-
-    height:100%;
-
-}
-
-
-/*====================================================
-INFO PANEL
-====================================================*/
-
-.info-panel{
-
-    background:#ffffff;
-
-    border-left:1px solid #ddd;
-
-    overflow-y:auto;
-
-    padding:13px;
-
-}
-
-
-/*====================================================
-PANEL PLACEHOLDER
-====================================================*/
-
-.panel-placeholder{
-
-    height:100%;
-
-    display:flex;
-
-    flex-direction:column;
-
-    justify-content:center;
-
-    align-items:center;
-
-    text-align:center;
-
-    color:#888;
-
-    padding:20px;
-
-}
-
-
-.panel-placeholder .icon{
-
-    font-size:52px;
-
-    margin-bottom:12px;
-
-    opacity:.75;
-
-}
-
-
-.panel-placeholder h2{
-
-    color:#1976D2;
-
-    margin-bottom:8px;
-
-    font-size:18px;
-
-}
-
-
-.panel-placeholder p{
-
-    font-size:13px;
-
-    line-height:1.5;
-
-}
-
-
-/*====================================================
-INFO CARD
-====================================================*/
-
-.info-card{
-
-    background:#fff;
-
-    border-radius:8px;
-
-    padding:11px 12px;
-
-    margin-bottom:11px;
-
-    box-shadow:
-        0 2px 7px rgba(0,0,0,.08);
-
-}
-
-
-.info-card h3,
-.info-card h4{
-
-    color:#1565C0;
-
-    margin-bottom:9px;
-
-    font-size:14px;
-
-    line-height:1.35;
-
-    border-bottom:1px solid #eee;
-
-    padding-bottom:7px;
-
-}
-
-
-/*====================================================
-INFO ROW
-====================================================*/
-
-.info-row{
-
-    display:flex;
-
     justify-content:space-between;
-
     align-items:center;
-
     gap:10px;
-
-    padding:6px 0;
-
-    border-bottom:1px dashed #eee;
-
-    font-size:12px;
-
-}
-
-
-.info-row:last-child{
-
-    border-bottom:none;
-
-}
-
-
-.info-row span:first-child{
-
-    color:#555;
-
-}
-
-
-.info-row span:last-child{
-
-    font-weight:700;
-
-    color:#222;
-
-    text-align:right;
-
-}
-
-
-/*====================================================
-PANEL TITLE
-====================================================*/
-
-.panel-title{
-
-    margin:2px 2px 12px;
-
-    padding-bottom:10px;
-
-    border-bottom:2px solid #1976D2;
-
-    color:#1565C0;
-
-    font-size:18px;
-
-    line-height:1.3;
-
-}
-
-
-/*====================================================
-POPUP
-====================================================*/
-
-.popup-card{
-
-    min-width:220px;
-
-}
-
-
-.popup-card h3{
-
-    margin-bottom:8px;
-
-    color:#1976D2;
-
-    font-size:15px;
-
-}
-
-
-.popup-card hr{
-
-    margin:8px 0;
-
-    border:none;
-
-    border-top:1px solid #ddd;
-
-}
-
-
-.popup-card p{
-
-    margin:6px 0;
-
-    font-size:12px;
-
-    line-height:1.5;
-
-}
-
-
-/*====================================================
-LEGEND
-====================================================*/
-
-.legend{
-    background:rgba(255,255,255,.94);
-    padding:8px 10px;
-    border-radius:8px;
-    box-shadow:0 4px 14px rgba(0,0,0,.15);
-    min-width:185px;
-    font-size:11px;
-}
-
-.legend h4{
-    margin:0 0 7px;
-    text-align:left;
-    font-size:13px;
-}
-
-.legend div{
-    display:flex;
-    align-items:center;
-    margin:4px 0;
-    line-height:1.2;
-}
-
-.legend i{
-    width:13px;
-    height:13px;
-    margin-right:7px;
-    border-radius:2px;
-}
-/*====================================================
-LABEL TÊN XÃ
-====================================================*/
-
-.map-label{
-    background:transparent;
-    border:none;
     pointer-events:none;
 }
 
-.map-label div{
-
-    display:inline-block;
-
-    padding:0;
-
-    background:transparent;
-
-    border:none;
-
-    font-family:
-        "Times New Roman",
-        serif;
-
-    font-size:9px;
-
-    font-weight:600;
-
-    color:#222;
-
-    white-space:nowrap;
-
-    line-height:12px;
-
-    transform:translate(-50%,-50%);
-
-    text-shadow:
-        1px 1px 2px #fff,
-        -1px -1px 2px #fff,
-        1px -1px 2px #fff,
-        -1px 1px 2px #fff;
-
-}
-
-.map-label-active{
-
-    font-weight:700;
-
-}
-/*====================================================
-KSGM COUNT
-====================================================*/
-
-.ksgm-count{
-
-    display:inline-flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    width:20px;
-
-    height:20px;
-
-    margin-top:3px;
-
-    border-radius:50%;
-
-    background:#d32f2f;
-
-    color:#fff;
-
-    font-size:11px;
-
-    font-weight:700;
-
-    border:2px solid #fff;
-
-    box-shadow:
-        0 0 3px rgba(0,0,0,.3);
-
-}
-
-
-/*====================================================
-SCROLLBAR
-====================================================*/
-
-::-webkit-scrollbar{
-
-    width:7px;
-
-}
-
-
-::-webkit-scrollbar-thumb{
-
-    background:#B0BEC5;
-
-    border-radius:4px;
-
-}
-
-
-::-webkit-scrollbar-thumb:hover{
-
-    background:#78909C;
-
-}
-
-
-/*====================================================
-LÀM MỜ NỀN BẢN ĐỒ
-====================================================*/
-
-.leaflet-tile{
-
-    filter:
-        grayscale(30%)
-        brightness(108%)
-        contrast(90%);
-
-}
-
-
-/*====================================================
-FULLSCREEN BUTTON
-====================================================*/
-
-.fullscreen-btn{
-
-    width:34px;
-
-    height:34px;
-
-    background:#ffffff;
-
-    border:none;
-
-    cursor:pointer;
-
-    font-size:18px;
-
-    font-weight:bold;
-
-    border-radius:4px;
-
-    box-shadow:
-        0 1px 4px rgba(0,0,0,.35);
-
-}
-
-
-.fullscreen-btn:hover{
-
-    background:#f3f4f6;
-
-}
-
-
-.fullscreen-btn:active{
-
-    background:#e5e7eb;
-
-}
-
-
-/*====================================================
-LEAFLET CONTROL
-====================================================*/
-
-.leaflet-control a{
-
-    width:30px;
-
-    height:30px;
-
+.map-title-live{
+    max-width:calc(100% - 190px);
     display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    text-decoration:none;
-
+    flex-direction:column;
+    gap:2px;
+    padding:8px 11px;
+    border-radius:10px;
+    background:rgba(255,255,255,.94);
+    box-shadow:0 4px 14px rgba(20,35,50,.14);
+    pointer-events:auto;
 }
 
-
-.leaflet-control a svg{
-
-    width:18px;
-
-    height:18px;
-
+.map-title-live strong{
+    font-size:13px;
 }
 
+.map-title-live span{
+    font-size:9px;
+    color:#6c7884;
+}
 
-/*====================================================
-ZOOM
-====================================================*/
+.map-actions{
+    display:flex;
+    gap:5px;
+    padding:4px;
+    border-radius:10px;
+    background:rgba(255,255,255,.94);
+    box-shadow:0 4px 14px rgba(20,35,50,.14);
+    pointer-events:auto;
+}
+
+.map-action{
+    width:34px;
+    height:32px;
+    border:0;
+    border-radius:7px;
+    background:#fff;
+    color:#53616e;
+    cursor:pointer;
+}
+
+.map-action:hover,
+.map-action.active{
+    background:#155eef;
+    color:#fff;
+}
+
+.map-action.loading{
+    opacity:.55;
+    cursor:wait;
+}
+
+#map{
+    width:100%;
+    height:100%;
+    min-height:650px;
+    background:#edf1f3;
+}
+
+.leaflet-container{
+    font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
+}
+
+.leaflet-control-zoom{
+    border:0!important;
+    box-shadow:0 3px 12px rgba(20,35,50,.16)!important;
+}
 
 .leaflet-control-zoom a{
+    border:0!important;
+    color:#334155!important;
+}
 
-    width:34px;
+.leaflet-control-scale-line{
+    background:rgba(255,255,255,.9)!important;
+    border:1px solid #64748b!important;
+    color:#334155!important;
+    font-size:10px!important;
+}
 
-    height:34px;
+/* ================= LEGEND ================= */
 
+.legend{
+    width:220px;
+    max-width:220px;
+    padding:12px 13px;
+    border:1px solid rgba(20,35,50,.12);
+    border-radius:12px;
+    background:rgba(255,255,255,.96);
+    box-shadow:0 8px 24px rgba(20,35,50,.18);
+    font-size:11px;
+    line-height:1.35;
+}
+
+.legend-title{
+    margin-bottom:3px;
+    font-size:12px;
+    font-weight:800;
+    color:#17212b;
+}
+
+.legend-method{
+    margin-bottom:8px;
+    color:#788592;
+    font-size:8.5px;
+    line-height:1.3;
+}
+
+.legend-subtitle{
+    margin:6px 0 5px;
+    font-weight:800;
+    color:#334155;
+}
+
+.legend-row{
     display:flex;
-
     align-items:center;
-
-    justify-content:center;
-
-    font-size:18px;
-
-    transition:.2s;
-
+    min-height:19px;
+    gap:7px;
 }
 
-
-.leaflet-control-zoom a:hover{
-
-    background:#f3f4f6;
-
-}
-
-
-.leaflet-control-zoom svg{
-
+.legend-row i{
     width:18px;
-
-    height:18px;
-
+    height:12px;
+    flex:0 0 18px;
+    border:1px solid rgba(0,0,0,.10);
+    border-radius:3px;
 }
 
-
-/*====================================================
-RESPONSIVE
-====================================================*/
-
-@media (max-width:1100px){
-
-    .container{
-
-        grid-template-columns:215px minmax(0,1fr) 260px;
-
-    }
-
-
-    .logo{
-
-        font-size:16px;
-
-    }
-
-
-    .toolbar{
-
-        gap:5px;
-
-    }
-
-
-    .toolbar select{
-
-        min-width:145px;
-
-    }
-
-
-    .toolbar input{
-
-        width:135px;
-
-    }
-
-
-    .toolbar button{
-
-        padding:0 9px;
-
-    }
-
+.legend-divider{
+    height:1px;
+    margin:7px 0;
+    background:#e3e7eb;
 }
 
+.legend-red-dot{
+    width:8px!important;
+    height:8px!important;
+    flex:0 0 8px!important;
+    border-radius:50%;
+    background:#E00000;
+    border:2px solid #fff!important;
+    box-shadow:0 0 0 1px #E00000;
+}
 
-@media (max-width:850px){
+.legend-no-data{
+    width:18px;
+    height:12px;
+    flex:0 0 18px;
+    border-radius:3px;
+    background:#DCE3E8;
+    border:1px solid #AAB5BD;
+}
 
+/* ================= LABEL ================= */
+
+.map-label-wrap{
+    background:transparent;
+    border:0;
+}
+
+.map-label{
+    display:inline-block;
+    max-width:140px;
+    padding:1px 4px;
+    border-radius:4px;
+    background:rgba(255,255,255,.72);
+    color:#26323d;
+    font-size:10px;
+    line-height:16px;
+    font-weight:700;
+    white-space:nowrap;
+    box-shadow:0 1px 3px rgba(0,0,0,.10);
+    text-shadow:0 1px 1px rgba(255,255,255,.8);
+}
+
+/* ================= MAP TITLE FOR EXPORT ================= */
+
+.map-export-title{
+    margin-left:38px;
+    margin-top:2px;
+    padding:8px 10px;
+    border-radius:9px;
+    background:rgba(255,255,255,.95);
+    box-shadow:0 3px 12px rgba(20,35,50,.12);
+    pointer-events:none;
+}
+
+.map-export-title div{
+    font-size:12px;
+    font-weight:800;
+}
+
+.map-export-title span{
+    display:block;
+    margin-top:2px;
+    font-size:8px;
+    color:#778491;
+}
+
+/* ================= RIGHT PANEL ================= */
+
+.panel{
+    background:#fff;
+    border-left:1px solid var(--line);
+    overflow:auto;
+}
+
+.panel-head{
+    padding:17px 17px 13px;
+    border-bottom:1px solid var(--line);
+}
+
+.panel-kicker{
+    display:block;
+    margin-bottom:4px;
+    color:#71808d;
+    font-size:9px;
+    font-weight:800;
+    letter-spacing:.7px;
+}
+
+.panel h2{
+    margin:0;
+    font-size:18px;
+    color:#17212b;
+}
+
+#info-panel{
+    padding:14px;
+}
+
+.empty-panel{
+    min-height:180px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    color:#7a8792;
+    font-size:12px;
+}
+
+.empty-panel i{
+    margin-bottom:10px;
+    font-size:22px;
+    color:#a6b1ba;
+}
+
+.info-block{
+    margin-bottom:12px;
+}
+
+.info-district{
+    font-size:16px;
+    font-weight:800;
+    color:#17212b;
+}
+
+.info-layer{
+    margin-top:3px;
+    color:#6c7884;
+    font-size:11px;
+}
+
+.info-table{
+    margin-top:12px;
+    border:1px solid #e0e6eb;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+.info-row{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    padding:10px 11px;
+    border-bottom:1px solid #e7ebef;
+    font-size:11px;
+}
+
+.info-row:last-child{
+    border-bottom:0;
+}
+
+.info-row span{
+    color:#6d7985;
+}
+
+.info-row b{
+    color:#24313c;
+    text-align:right;
+}
+
+/* ================= FULLSCREEN ================= */
+
+.main-map:fullscreen{
+    width:100vw;
+    height:100vh;
+}
+
+.main-map:fullscreen #map{
+    height:100vh;
+}
+
+/* ================= EXPORT ================= */
+
+.export-hide{
+    display:none!important;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:1400px){
+    .dashboard{
+        grid-template-columns:repeat(4,minmax(0,1fr));
+    }
+
+    .webgis{
+        grid-template-columns:205px minmax(0,1fr) 290px;
+    }
+}
+
+@media(max-width:1050px){
     .header{
-
-        height:auto;
-
-        min-height:60px;
-
-        padding:8px 10px;
-
-        flex-wrap:wrap;
-
-        gap:7px;
-
+        flex-direction:column;
+        align-items:flex-start;
     }
 
-
-    .logo{
-
-        width:100%;
-
-        font-size:15px;
-
+    .header h1{
+        text-align:left;
     }
 
-
-    .toolbar{
-
-        width:100%;
-
-        flex-wrap:wrap;
-
+    .dashboard{
+        grid-template-columns:repeat(2,minmax(0,1fr));
     }
 
-
-    .container{
-
-        height:calc(100vh - 105px);
-
-        grid-template-columns:190px minmax(0,1fr);
-
-    }
-
-
-    .info-panel{
-
-        display:none;
-
-    }
-
-}
-
-
-@media (max-width:600px){
-
-    .container{
-
+    .webgis{
         grid-template-columns:1fr;
-
+        height:auto;
     }
 
+    .sidebar,
+    .panel{
+        border:0;
+    }
 
     .sidebar{
+        display:grid;
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        gap:8px;
+    }
 
+    .side-card{
+        margin:0;
+    }
+
+    .side-button{
+        margin:0;
+    }
+
+    #map{
+        height:72vh;
+        min-height:520px;
+    }
+}
+
+@media(max-width:650px){
+    .dashboard{
+        grid-template-columns:1fr;
+    }
+
+    .sidebar{
+        grid-template-columns:1fr;
+    }
+
+    .map-title-live{
+        max-width:65%;
+    }
+
+    .map-title-live span{
         display:none;
-
     }
 
-
-    .main-content{
-
-        height:100%;
-
+    .legend{
+        width:190px;
+        max-width:190px;
     }
-
 }
