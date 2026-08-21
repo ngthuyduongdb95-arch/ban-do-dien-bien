@@ -1794,9 +1794,7 @@ function featureCenter(
 
 function renderLabels() {
 
-    if (!map || !geojsonData) {
-        return;
-    }
+    if (!map || !geojsonData) return;
 
     if (!labelLayer) {
         labelLayer = L.layerGroup().addTo(map);
@@ -1804,126 +1802,88 @@ function renderLabels() {
 
     labelLayer.clearLayers();
 
-    if (map.getZoom() < 9) {
-        return;
-    }
+    if (map.getZoom() < 9) return;
 
-    /*
-     * Vị trí thủ công theo bố cục thực tế trên bản đồ.
-     * Giá trị là pixel [x, y] so với tâm hình học của xã.
-     * Chỉ chỉnh các tên dễ bị chồng trong vùng trung tâm/bắc.
-     */
+    // Vị trí thủ công cho các xã dễ chồng tên. Có thể tiếp tục tinh chỉnh từng xã.
     const manualLabelOffsets = {
-
-        // Cụm phía Bắc
-        "Mường Chà":      [-12, -13],
-        "Chà Tở":         [ 16,  -8],
-        "Mường Lay":      [ 18,   7],
-        "Mường Tùng":     [ 12,  13],
-        "Mường Chung":    [-22,   5],
-        "Nà Hỳ":          [ -2, -12],
-        "Nà Búng":        [ -2,  12],
-        "Si Pa Phìn":     [ 18,  -3],
-        "Nậm Nèn":        [  2, -15],
-        "Nà Sang":        [ 24,   2],
-        "Tủa Chùa":       [ 18,   9],
-        "Sín Chải":       [  0, -13],
-        "Tủa Thàng":      [ 14, -12],
-
-        // Cụm trung tâm
-        "Mường Phăng":    [-26, -12],
-        "Mường Pồn":      [-23,  13],
-        "Nà Tấu":         [ 23,  -8],
-        "Mường Ảng":      [ 24,  12],
-        "Mường Lạn":      [ 25,   3],
-        "Mường Đăng":     [-18,  12],
-        "Mường Mươn":     [-24,  -6],
-        "Mường Luân":     [ 24,  -4],
-
-        // Cụm Điện Biên Phủ
-        "Điện Biên Phủ":  [ 20,  11],
-        "Thanh An":       [-22,  -8],
-        "Thanh Nưa":      [-20,   8],
-        "Thanh Xương":    [ 18, -10],
-        "Thanh Yên":      [-18,  14],
-        "Noong Hẹt":      [ 18,  -2],
-        "Noong Luống":    [ 23,   9],
-        "Núa Ngam":       [ 22,  -6],
-        "Sam Mứn":        [-20,   8],
-        "Pom Lót":        [ 18,  -8],
-        "Nà Nhạn":        [  0,  13],
-        "Mường Nhà":      [-20,   2],
-        "Mường Lói":      [ 18,   3],
-        "Na Ư":           [ 20,   0],
-        "Pu Nhi":         [ 21,  -5]
-
+        "Mường Chà": [-24,-18], "Chà Tở": [24,-18], "Mường Lay": [25,12],
+        "Mường Tùng": [25,20], "Mường Chung": [-30,12], "Nà Hỳ": [-20,-18],
+        "Nà Búng": [-20,18], "Si Pa Phìn": [28,-6], "Nậm Nèn": [0,-25],
+        "Nà Sang": [30,10], "Tủa Chùa": [25,15], "Sín Chải": [-4,-24],
+        "Tủa Thàng": [25,-18], "Mường Phăng": [-34,-18], "Mường Pồn": [-32,20],
+        "Nà Tấu": [30,-14], "Mường Ảng": [30,18], "Mường Lạn": [32,4],
+        "Mường Đăng": [-28,20], "Mường Mươn": [-32,-8], "Mường Luân": [30,-8],
+        "Điện Biên Phủ": [28,18], "Thanh An": [-30,-14], "Thanh Nưa": [-28,14],
+        "Thanh Xương": [28,-16], "Thanh Yên": [-28,22], "Noong Hẹt": [28,-3],
+        "Noong Luống": [30,16], "Núa Ngam": [30,-12], "Sam Mứn": [-28,14],
+        "Pom Lót": [28,-14], "Nà Nhạn": [0,24], "Mường Nhà": [-28,4],
+        "Mường Lói": [28,6], "Na Ư": [30,0], "Pu Nhi": [30,-9]
     };
 
-    geojsonData.features.forEach(function(feature) {
+    const placed = [];
+    const MIN_GAP = 24;
 
-        if (!hasData(feature)) {
-            return;
-        }
+    geojsonData.features.forEach(function(feature) {
+        if (!hasData(feature)) return;
 
         const name = getName(feature);
-
-        if (!name) {
-            return;
-        }
+        if (!name) return;
 
         const center = featureCenter(feature);
+        if (!center) return;
 
-        if (!center) {
-            return;
+        const base = map.latLngToLayerPoint(center);
+        let offset = manualLabelOffsets[name] || [0,0];
+        let point = L.point(base.x + offset[0], base.y + offset[1]);
+
+        // Tự tránh chồng nhãn: nếu vị trí thủ công vẫn quá gần nhãn trước,
+        // thử các hướng xung quanh theo thứ tự ưu tiên.
+        const candidates = [
+            offset,
+            [offset[0]+28, offset[1]],
+            [offset[0]-28, offset[1]],
+            [offset[0], offset[1]+28],
+            [offset[0], offset[1]-28],
+            [offset[0]+32, offset[1]+20],
+            [offset[0]-32, offset[1]+20],
+            [offset[0]+32, offset[1]-20],
+            [offset[0]-32, offset[1]-20]
+        ];
+
+        for (const candidate of candidates) {
+            const test = L.point(base.x + candidate[0], base.y + candidate[1]);
+            const conflict = placed.some(function(q) {
+                return test.distanceTo(q) < MIN_GAP;
+            });
+            if (!conflict) {
+                point = test;
+                offset = candidate;
+                break;
+            }
         }
 
-        const offset =
-            manualLabelOffsets[name] ||
-            [0, 0];
+        placed.push(point);
 
-        const point =
-            map.latLngToLayerPoint(center);
+        const latlng = map.layerPointToLatLng(point);
 
-        const shiftedPoint = L.point(
-            point.x + offset[0],
-            point.y + offset[1]
-        );
-
-        const latlng =
-            map.layerPointToLatLng(
-                shiftedPoint
-            );
-
-        L.marker(
-            latlng,
-            {
-                interactive: false,
-
-                icon:
-                    L.divIcon({
-
-                        className:
-                            "map-label-wrap",
-
-                        html:
-                            `<span class="map-label">${
-                                escapeHtml(name)
-                            }</span>`,
-
-                        iconSize:
-                            [0, 0],
-
-                        iconAnchor:
-                            [0, 0]
-
-                    })
-            }
-        ).addTo(
-            labelLayer
-        );
-
+        L.marker(latlng, {
+            interactive: false,
+            keyboard: false,
+            pane: "overlayPane",
+            icon: L.divIcon({
+                className: "map-label-wrap",
+                html: `<span class="map-label">${escapeHtml(name)}</span>`,
+                iconSize: [0,0],
+                iconAnchor: [0,0]
+            })
+        }).addTo(labelLayer);
     });
 
+    // Đảm bảo nhãn không bao giờ chặn click vào polygon.
+    document.querySelectorAll(".map-label-wrap").forEach(function(el) {
+        el.style.pointerEvents = "none";
+        el.style.zIndex = "1";
+    });
 }
 
 // ======================================================
@@ -2027,7 +1987,7 @@ function renderDiseaseMarkers() {
                 {
 
                     radius:
-                        5.5,
+                        5,
 
                     color:
                         "#FFFFFF",
@@ -2079,15 +2039,15 @@ function showPanel(feature) {
 
 
     const title =
-        document.getElementById(
-            "panel-title"
-        );
+        document.getElementById("panel-title") ||
+        document.getElementById("infoPanelTitle") ||
+        document.getElementById("info-title");
 
 
     const panel =
-        document.getElementById(
-            "info-panel"
-        );
+        document.getElementById("info-panel") ||
+        document.getElementById("infoPanel") ||
+        document.getElementById("infoPanelContent");
 
 
     if (title) {
@@ -2464,15 +2424,15 @@ function clearPanel() {
 
 
     const title =
-        document.getElementById(
-            "panel-title"
-        );
+        document.getElementById("panel-title") ||
+        document.getElementById("infoPanelTitle") ||
+        document.getElementById("info-title");
 
 
     const panel =
-        document.getElementById(
-            "info-panel"
-        );
+        document.getElementById("info-panel") ||
+        document.getElementById("infoPanel") ||
+        document.getElementById("infoPanelContent");
 
 
     if (title) {
@@ -3127,27 +3087,28 @@ function renderGeoJSON() {
                             click:
                                 function(e) {
 
-                                    if (
-                                        e &&
-                                        e.originalEvent
-                                    ) {
-
-                                        L.DomEvent
-                                            .stopPropagation(
-                                                e.originalEvent
-                                            );
-
+                                    if (e && e.originalEvent) {
+                                        L.DomEvent.stopPropagation(e.originalEvent);
                                     }
 
+                                    selectedFeature = feature;
 
-                                    selectedFeature =
-                                        feature;
+                                    // Giữ xã đã chọn nổi bật và mở thông tin bên phải.
+                                    this.setStyle({
+                                        weight: 2.8,
+                                        color: "#263238",
+                                        fillOpacity: 0.95
+                                    });
 
+                                    showPanel(feature);
 
-                                    showPanel(
-                                        feature
-                                    );
-
+                                    // Không zoom quá mạnh; chỉ đưa xã vào vùng nhìn thấy.
+                                    try {
+                                        const b = this.getBounds();
+                                        if (b && b.isValid()) {
+                                            map.fitBounds(b, { padding: [35,35], maxZoom: 13 });
+                                        }
+                                    } catch (_) {}
                                 }
 
                         });
