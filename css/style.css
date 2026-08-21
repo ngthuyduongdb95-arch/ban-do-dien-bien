@@ -1832,16 +1832,19 @@ function renderLabels() {
         function(feature) {
 
             const row =
-                getRow(feature);
+    getRow(feature);
 
+if (!row) {
+    return;
+}
 
-            if (!row) {
-                return;
-            }
+/* Chỉ hiện tên khi xã có số liệu của lớp đang chọn */
+if (!hasData(feature)) {
+    return;
+}
 
-
-            const name =
-                getName(feature);
+const name =
+    getName(feature);
 
 
             if (!name) {
@@ -2173,15 +2176,12 @@ function renderDiseaseMarkers() {
 
 
 // ======================================================
-// PANEL THÔNG TIN
+// HIỂN THỊ TOÀN BỘ THÔNG TIN XÃ/PHƯỜNG
 // ======================================================
 
-function showPanel(
-    feature
-) {
+function showPanel(feature) {
 
-    selectedFeature =
-        feature;
+    selectedFeature = feature;
 
 
     const row =
@@ -2207,8 +2207,7 @@ function showPanel(
     if (title) {
 
         title.textContent =
-            name ||
-            "Xã/phường";
+            name || "Xã/phường";
 
     }
 
@@ -2222,15 +2221,18 @@ function showPanel(
 
         panel.innerHTML = `
             <div class="empty-panel">
-                <p>
-                    Không có dữ liệu.
-                </p>
+                <p>Không có dữ liệu.</p>
             </div>
         `;
 
         return;
+
     }
 
+
+    // ==================================================
+    // THÔNG TIN CHUNG
+    // ==================================================
 
     let html = `
 
@@ -2241,11 +2243,7 @@ function showPanel(
             </div>
 
             <div class="info-layer">
-                ${escapeHtml(
-                    layerConfig[
-                        currentLayer
-                    ].name
-                )}
+                Thông tin tổng hợp
             </div>
 
         </div>
@@ -2253,318 +2251,282 @@ function showPanel(
     `;
 
 
-    if (
-        currentLayer ===
-        "DTLCP"
-    ) {
+    // ==================================================
+    // DTLCP
+    // ==================================================
 
-        html +=
-            infoRows([
+    html += `
+
+        <div class="info-section">
+
+            <div class="info-section-title">
+                Dịch tả lợn Châu Phi
+            </div>
+
+            ${infoRows([
                 [
                     "Trạng thái",
-                    row[
-                        "DTLCP_Trạng thái"
-                    ] ||
-                    "--"
+                    row["DTLCP_Trạng thái"] || "--"
                 ],
 
                 [
                     "Ổ dịch",
-                    fmt(
-                        row[
-                            "DTLCP_Ổ dịch"
-                        ]
-                    )
+                    fmt(row["DTLCP_Ổ dịch"])
                 ],
 
                 [
                     "Tiêu hủy",
-                    `${fmt(
-                        row[
-                            "DTLCP_Chết"
-                        ]
-                    )} con`
+                    `${fmt(row["DTLCP_Chết"])} con`
                 ],
 
                 [
                     "Khối lượng",
-                    `${fmt(
-                        row[
-                            "DTLCP_Trọng lượng"
-                        ]
-                    )} kg`
+                    `${fmt(row["DTLCP_Trọng lượng"])} kg`
                 ],
 
                 [
                     "Ngày cuối",
                     formatDate(
-                        row[
-                            "DTLCP_Ngày cuối"
-                        ]
+                        row["DTLCP_Ngày cuối"]
                     )
                 ]
-            ]);
+            ])}
 
-    }
+        </div>
+
+    `;
 
 
-    if (
-        currentLayer ===
-        "CGC"
-    ) {
+    // ==================================================
+    // CÚM GIA CẦM
+    // ==================================================
 
-        html +=
-            infoRows([
+    html += `
+
+        <div class="info-section">
+
+            <div class="info-section-title">
+                Cúm gia cầm
+            </div>
+
+            ${infoRows([
                 [
                     "Trạng thái",
-                    row[
-                        "CGC_Trạng thái"
-                    ] ||
-                    "--"
+                    row["CGC_Trạng thái"] || "--"
                 ],
 
                 [
                     "Ổ dịch",
-                    fmt(
-                        row[
-                            "CGC_Ổ dịch"
-                        ]
-                    )
+                    fmt(row["CGC_Ổ dịch"])
                 ],
 
                 [
                     "Tiêu hủy",
-                    `${fmt(
-                        row[
-                            "CGC_Chết"
-                        ]
-                    )} con`
+                    `${fmt(row["CGC_Chết"])} con`
                 ],
 
                 [
                     "Khối lượng",
-                    `${fmt(
-                        row[
-                            "CGC_Trọng lượng"
-                        ]
-                    )} kg`
+                    `${fmt(row["CGC_Trọng lượng"])} kg`
                 ],
 
                 [
                     "Ngày cuối",
                     formatDate(
-                        row[
-                            "CGC_Ngày cuối"
-                        ]
+                        row["CGC_Ngày cuối"]
                     )
                 ]
-            ]);
+            ])}
 
-    }
+        </div>
+
+    `;
 
 
-    if (
-        currentLayer ===
-        "VDNC"
-    ) {
+    // ==================================================
+    // VIÊM DA NỔI CỤC
+    // ==================================================
 
-        html +=
-            infoRows([
+    html += `
+
+        <div class="info-section">
+
+            <div class="info-section-title">
+                Viêm da nổi cục
+            </div>
+
+            ${infoRows([
                 [
                     "Trạng thái",
-                    row[
-                        "VDNC_Trạng thái"
-                    ] ||
-                    "--"
+                    row["VDNC_Trạng thái"] || "--"
                 ],
 
                 [
                     "Ổ dịch",
-                    fmt(
-                        row[
-                            "VDNC_Ổ dịch"
-                        ]
-                    )
+                    fmt(row["VDNC_Ổ dịch"])
                 ],
 
                 [
                     "Mắc",
-                    `${fmt(
-                        row[
-                            "VDNC_Mắc"
-                        ]
-                    )} con`
+                    `${fmt(row["VDNC_Mắc"])} con`
                 ],
 
                 [
                     "Chết",
-                    `${fmt(
-                        row[
-                            "VDNC_Chết"
-                        ]
-                    )} con`
+                    `${fmt(row["VDNC_Chết"])} con`
                 ],
 
                 [
                     "Ngày cuối",
                     formatDate(
-                        row[
-                            "VDNC_Ngày cuối"
-                        ]
+                        row["VDNC_Ngày cuối"]
                     )
                 ]
-            ]);
+            ])}
 
-    }
+        </div>
+
+    `;
 
 
-    if (
-        currentLayer ===
-        "DAI"
-    ) {
+    // ==================================================
+    // BỆNH DẠI
+    // ==================================================
 
-        html +=
-            infoRows([
+    html += `
+
+        <div class="info-section">
+
+            <div class="info-section-title">
+                Bệnh Dại
+            </div>
+
+            ${infoRows([
                 [
                     "Trạng thái",
-                    row[
-                        "DAI_Trạng thái"
-                    ] ||
-                    "--"
+                    row["DAI_Trạng thái"] || "--"
                 ],
 
                 [
                     "Ổ dịch",
-                    fmt(
-                        row[
-                            "DAI_Ổ dịch"
-                        ]
-                    )
+                    fmt(row["DAI_Ổ dịch"])
                 ],
 
                 [
                     "Số chết",
-                    `${fmt(
-                        row[
-                            "DAI_Chết"
-                        ]
-                    )} con`
+                    `${fmt(row["DAI_Chết"])} con`
                 ],
 
                 [
                     "Tiêu hủy",
-                    `${fmt(
-                        row[
-                            "DAI_Tiêu hủy"
-                        ]
-                    )} con`
+                    `${fmt(row["DAI_Tiêu hủy"])} con`
                 ],
 
                 [
                     "Ngày cuối",
                     formatDate(
-                        row[
-                            "DAI_Ngày cuối"
-                        ]
+                        row["DAI_Ngày cuối"]
                     )
                 ]
-            ]);
+            ])}
 
-    }
+        </div>
+
+    `;
 
 
-    if (
-        currentLayer ===
-        "PHUN"
-    ) {
+    // ==================================================
+    // THỰC HIỆN THÁNG TVSKTTĐ
+    // ==================================================
 
-        html +=
-            infoRows([
+    html += `
+
+        <div class="info-section">
+
+            <div class="info-section-title">
+                Thực hiện tháng TVSKTTĐ
+            </div>
+
+            ${infoRows([
                 [
                     "Tiến độ",
-                    row[
-                        "PHUN_Tiến độ"
-                    ] ||
-                    "--"
+                    row["PHUN_Tiến độ"] || "--"
                 ],
 
                 [
                     "Số hộ",
-                    fmt(
-                        row[
-                            "PHUN_Số hộ"
-                        ]
-                    )
+                    fmt(row["PHUN_Số hộ"])
                 ],
 
                 [
                     "Vòng",
-                    fmt(
-                        row[
-                            "PHUN_Vòng"
-                        ]
-                    )
+                    fmt(row["PHUN_Vòng"])
                 ],
 
                 [
                     "Ngày",
                     formatDate(
-                        row[
-                            "PHUN_Ngày"
-                        ]
+                        row["PHUN_Ngày"]
                     )
                 ]
-            ]);
+            ])}
 
-    }
+        </div>
+
+    `;
 
 
-    if (
-        currentLayer ===
-        "KSGM"
-    ) {
+    // ==================================================
+    // KIỂM SOÁT GIẾT MỔ
+    // ==================================================
 
-        html +=
-            infoRows([
+    html += `
+
+        <div class="info-section">
+
+            <div class="info-section-title">
+                Kiểm soát giết mổ
+            </div>
+
+            ${infoRows([
                 [
                     "Trạng thái",
-                    row[
-                        "KSGM_Trạng thái"
-                    ] ||
-                    "--"
+                    row["KSGM_Trạng thái"] || "--"
                 ],
 
                 [
                     "Số cơ sở",
-                    fmt(
-                        row[
-                            "KSGM_Cơ sở"
-                        ]
-                    )
+                    fmt(row["KSGM_Cơ sở"])
                 ]
-            ]);
+            ])}
 
-    }
+        </div>
+
+    `;
 
 
-    if (
-        currentLayer ===
-        "CSBBTTY"
-    ) {
+    // ==================================================
+    // CƠ SỞ BUÔN BÁN THUỐC THÚ Y
+    // ==================================================
 
-        html +=
-            infoRows([
+    html += `
+
+        <div class="info-section">
+
+            <div class="info-section-title">
+                Cơ sở buôn bán thuốc thú y
+            </div>
+
+            ${infoRows([
                 [
                     "Số cơ sở",
-                    fmt(
-                        row[
-                            "CSBBTTY_Cơ sở"
-                        ]
-                    )
+                    fmt(row["CSBBTTY_Cơ sở"])
                 ]
-            ]);
+            ])}
 
-    }
+        </div>
+
+    `;
 
 
     panel.innerHTML =
