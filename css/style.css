@@ -409,28 +409,36 @@ button,input,select{
 /* ================= LABEL ================= */
 
 .map-label-wrap{
-    background:transparent;
-    border:0;
+    background:transparent !important;
+    border:0 !important;
+    box-shadow:none !important;
+    pointer-events:none !important;
 }
 
 .map-label{
     display:inline-block;
-    max-width:140px;
-    padding:1px 4px;
-    border-radius:4px;
-    background:rgba(255,255,255,.72);
+    max-width:150px;
+    padding:0;
+    margin:0;
+    border:0 !important;
+    border-radius:0;
+    background:transparent !important;
     color:#26323d;
     font-size:10px;
-    line-height:16px;
-    font-weight:700;
+    line-height:14px;
+    font-weight:500;
     white-space:nowrap;
-    box-shadow:0 1px 3px rgba(0,0,0,.10);
-    text-shadow:0 1px 1px rgba(255,255,255,.8);
+    box-shadow:none !important;
+    text-shadow:
+        0 1px 2px rgba(255,255,255,.95),
+        0 -1px 2px rgba(255,255,255,.95);
+    pointer-events:none !important;
 }
 
 /* ================= MAP TITLE FOR EXPORT ================= */
 
 .map-export-title{
+    display:none !important;
     margin-left:38px;
     margin-top:2px;
     padding:8px 10px;
@@ -641,25 +649,3 @@ button,input,select{
         max-width:190px;
     }
 }
-
-
-/* =========================================================
-   KPI SIDEBAR - FLEXIBLE HEIGHT, NO TEXT COLLISION
-   ========================================================= */
-.sidebar-kpi{width:100%;display:flex;flex-direction:column;gap:9px;padding:2px 2px 14px 0}
-.sidebar-kpi .summary-card{width:100%;height:auto;min-height:92px;max-height:none;flex:0 0 auto;margin:0;padding:10px 11px;display:flex;flex-direction:column;justify-content:center;gap:3px;box-sizing:border-box;overflow:visible}
-.sidebar-kpi .summary-head{width:100%;min-width:0;height:auto;display:flex;align-items:flex-start;gap:6px;margin:0;font-size:10.5px;line-height:14px;font-weight:800;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:break-word;word-break:normal}
-.sidebar-kpi .summary-head i{flex:0 0 auto;margin-top:1px}
-.sidebar-kpi .summary-main{width:100%;min-width:0;min-height:27px;height:auto;display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 5px;margin:4px 0 3px}
-.sidebar-kpi .summary-main span{font-size:22px;line-height:26px;font-weight:900;white-space:nowrap;flex:0 0 auto}
-.sidebar-kpi .summary-main small{font-size:9px;line-height:13px;font-weight:600;white-space:normal;overflow-wrap:break-word;flex:0 1 auto}
-.sidebar-kpi .summary-grid{width:100%;min-width:0;min-height:0;height:auto;display:flex;flex-direction:column;gap:2px;margin:0;font-size:9.5px;line-height:13px}
-.sidebar-kpi .summary-grid span{width:100%;height:auto;display:block;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:break-word;word-break:normal}
-.sidebar-kpi .summary-grid b{font-size:9.5px;font-weight:800}
-.sidebar-kpi .card-phun,.sidebar-kpi .card-drug{min-height:98px}
-.sidebar-kpi .summary-card *{box-sizing:border-box}
-.sidebar-kpi .summary-card{transition:transform .15s ease,box-shadow .15s ease}
-.sidebar-kpi .summary-card:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(20,35,50,.09)}
-@media(max-width:1100px){.sidebar-kpi .summary-card{padding:9px 10px}.sidebar-kpi .summary-head{font-size:10px;line-height:13px}.sidebar-kpi .summary-main span{font-size:20px;line-height:24px}}
-@media(max-width:700px){.sidebar-kpi{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.sidebar-kpi .summary-card{width:100%;min-width:0;min-height:92px;height:auto;max-height:none;flex:none}.sidebar-kpi .summary-head{font-size:9.5px;line-height:13px}.sidebar-kpi .summary-main span{font-size:20px}}
-@media(max-width:500px){.sidebar-kpi{grid-template-columns:1fr}.sidebar-kpi .summary-card{min-height:88px}}
