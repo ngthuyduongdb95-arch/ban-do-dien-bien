@@ -155,6 +155,7 @@ function initMap() {
     );
 
 
+    // Chấm đỏ nằm trên polygon
     map.createPane("markerPane");
     map.getPane("markerPane").style.zIndex = 700;
 
@@ -221,6 +222,46 @@ function addBaseLayers() {
 // ======================================================
 // TIÊU ĐỀ
 // ======================================================
+
+function addMapTitle() {
+
+    const title =
+        L.control({
+            position: "topleft"
+        });
+
+
+    title.onAdd =
+        function () {
+
+            const div =
+                L.DomUtil.create(
+                    "div",
+                    "map-export-title"
+                );
+
+
+            div.innerHTML = `
+                <div id="exportMapTitle">
+                    ${layerConfig[currentLayer].name}
+                </div>
+
+                <span>
+                    Phân cấp dữ liệu động bằng
+                    Natural Breaks (Jenks)
+                </span>
+            `;
+
+
+            return div;
+
+        };
+
+
+    title.addTo(map);
+
+}
+
 
 function refreshMapTitle() {
 
@@ -376,6 +417,8 @@ function getRow(feature) {
     }
 
 
+    // 1. Ghép theo ID
+
     const rawId =
         feature.properties.ID ??
         feature.properties.id ??
@@ -402,6 +445,8 @@ function getRow(feature) {
     }
     catch (_) {}
 
+
+    // 2. Ghép theo tên xã
 
     const geoName =
         feature.properties["Tên xã"] ||
@@ -1321,7 +1366,7 @@ function getDamageClass(
 
 
 // ======================================================
-// STYLE
+// STYLE DỊCH BỆNH
 // ======================================================
 
 function getDiseaseStyle(row) {
@@ -1397,6 +1442,10 @@ function getDiseaseStyle(row) {
 }
 
 
+// ======================================================
+// STYLE PHUN
+// ======================================================
+
 function getPhunStyle(row) {
 
     const v =
@@ -1460,6 +1509,10 @@ function getPhunStyle(row) {
 
 }
 
+
+// ======================================================
+// STYLE KSGM
+// ======================================================
 
 function getKsgmStyle(row) {
 
@@ -1535,6 +1588,10 @@ function getKsgmStyle(row) {
 }
 
 
+// ======================================================
+// STYLE THUỐC THÚ Y
+// ======================================================
+
 function getDrugStyle(row) {
 
     const count =
@@ -1598,6 +1655,10 @@ function getDrugStyle(row) {
 
 }
 
+
+// ======================================================
+// STYLE FEATURE
+// ======================================================
 
 function getFeatureStyle(
     feature
@@ -1727,116 +1788,143 @@ function featureCenter(
 
 
 // ======================================================
-// TÊN XÃ
+// HIỂN THỊ TÊN XÃ
+// KHÔNG NỀN
 // ======================================================
 
 function renderLabels() {
 
-    if (
-        !map ||
-        !geojsonData
-    ) {
-
+    if (!map || !geojsonData) {
         return;
-
     }
-
 
     if (!labelLayer) {
-
-        labelLayer =
-            L.layerGroup()
-                .addTo(map);
-
+        labelLayer = L.layerGroup().addTo(map);
     }
-
 
     labelLayer.clearLayers();
 
-
-    if (
-        map.getZoom()<9
-    ) {
-
+    if (map.getZoom() < 9) {
         return;
-
     }
 
+    /*
+     * Vị trí thủ công theo bố cục thực tế trên bản đồ.
+     * Giá trị là pixel [x, y] so với tâm hình học của xã.
+     * Chỉ chỉnh các tên dễ bị chồng trong vùng trung tâm/bắc.
+     */
+    const manualLabelOffsets = {
 
-    geojsonData.features.forEach(
-        function(feature) {
+        // Cụm phía Bắc
+        "Mường Chà":      [-12, -13],
+        "Chà Tở":         [ 16,  -8],
+        "Mường Lay":      [ 18,   7],
+        "Mường Tùng":     [ 12,  13],
+        "Mường Chung":    [-22,   5],
+        "Nà Hỳ":          [ -2, -12],
+        "Nà Búng":        [ -2,  12],
+        "Si Pa Phìn":     [ 18,  -3],
+        "Nậm Nèn":        [  2, -15],
+        "Nà Sang":        [ 24,   2],
+        "Tủa Chùa":       [ 18,   9],
+        "Sín Chải":       [  0, -13],
+        "Tủa Thàng":      [ 14, -12],
 
-            const row =
-                getRow(feature);
+        // Cụm trung tâm
+        "Mường Phăng":    [-26, -12],
+        "Mường Pồn":      [-23,  13],
+        "Nà Tấu":         [ 23,  -8],
+        "Mường Ảng":      [ 24,  12],
+        "Mường Lạn":      [ 25,   3],
+        "Mường Đăng":     [-18,  12],
+        "Mường Mươn":     [-24,  -6],
+        "Mường Luân":     [ 24,  -4],
 
+        // Cụm Điện Biên Phủ
+        "Điện Biên Phủ":  [ 20,  11],
+        "Thanh An":       [-22,  -8],
+        "Thanh Nưa":      [-20,   8],
+        "Thanh Xương":    [ 18, -10],
+        "Thanh Yên":      [-18,  14],
+        "Noong Hẹt":      [ 18,  -2],
+        "Noong Luống":    [ 23,   9],
+        "Núa Ngam":       [ 22,  -6],
+        "Sam Mứn":        [-20,   8],
+        "Pom Lót":        [ 18,  -8],
+        "Nà Nhạn":        [  0,  13],
+        "Mường Nhà":      [-20,   2],
+        "Mường Lói":      [ 18,   3],
+        "Na Ư":           [ 20,   0],
+        "Pu Nhi":         [ 21,  -5]
 
-            if (!row) {
-                return;
-            }
+    };
 
+    geojsonData.features.forEach(function(feature) {
 
-            if (!hasData(feature)) {
-                return;
-            }
+        if (!hasData(feature)) {
+            return;
+        }
 
+        const name = getName(feature);
 
-            const name =
-                getName(feature);
+        if (!name) {
+            return;
+        }
 
+        const center = featureCenter(feature);
 
-            if (!name) {
-                return;
-            }
+        if (!center) {
+            return;
+        }
 
+        const offset =
+            manualLabelOffsets[name] ||
+            [0, 0];
 
-            const center =
-                featureCenter(
-                    feature
-                );
+        const point =
+            map.latLngToLayerPoint(center);
 
+        const shiftedPoint = L.point(
+            point.x + offset[0],
+            point.y + offset[1]
+        );
 
-            if (!center) {
-                return;
-            }
-
-
-            L.marker(
-                center,
-                {
-
-                    interactive:false,
-
-                    icon:
-                        L.divIcon({
-
-                            className:
-                                "map-label-wrap",
-
-                            html:
-                                `<span class="map-label">${
-                                    escapeHtml(
-                                        name
-                                    )
-                                }</span>`,
-
-                            iconSize:
-                                [0,0],
-
-                            iconAnchor:
-                                [0,0]
-
-                        })
-
-                }
-            ).addTo(
-                labelLayer
+        const latlng =
+            map.layerPointToLatLng(
+                shiftedPoint
             );
 
-        }
-    );
+        L.marker(
+            latlng,
+            {
+                interactive: false,
+
+                icon:
+                    L.divIcon({
+
+                        className:
+                            "map-label-wrap",
+
+                        html:
+                            `<span class="map-label">${
+                                escapeHtml(name)
+                            }</span>`,
+
+                        iconSize:
+                            [0, 0],
+
+                        iconAnchor:
+                            [0, 0]
+
+                    })
+            }
+        ).addTo(
+            labelLayer
+        );
+
+    });
 
 }
-
 
 // ======================================================
 // ESCAPE
@@ -1870,7 +1958,7 @@ function escapeHtml(value) {
 
 
 // ======================================================
-// CHẤM ĐỎ
+// CHẤM ĐỎ XÃ ĐANG CÓ DỊCH
 // ======================================================
 
 function renderDiseaseMarkers() {
@@ -1974,13 +2062,12 @@ function renderDiseaseMarkers() {
 
 
 // ======================================================
-// PANEL THÔNG TIN
+// HIỂN THỊ TOÀN BỘ THÔNG TIN XÃ/PHƯỜNG
 // ======================================================
 
 function showPanel(feature) {
 
-    selectedFeature =
-        feature;
+    selectedFeature = feature;
 
 
     const row =
@@ -2012,13 +2099,7 @@ function showPanel(feature) {
 
 
     if (!panel) {
-
-        console.warn(
-            "MAP: Không tìm thấy #info-panel trong index.html."
-        );
-
         return;
-
     }
 
 
@@ -2026,9 +2107,7 @@ function showPanel(feature) {
 
         panel.innerHTML = `
             <div class="empty-panel">
-                <p>
-                    Không có dữ liệu.
-                </p>
+                <p>Không có dữ liệu.</p>
             </div>
         `;
 
@@ -2036,6 +2115,10 @@ function showPanel(feature) {
 
     }
 
+
+    // ==================================================
+    // THÔNG TIN CHUNG
+    // ==================================================
 
     let html = `
 
@@ -2054,6 +2137,10 @@ function showPanel(feature) {
     `;
 
 
+    // ==================================================
+    // DTLCP
+    // ==================================================
+
     html += `
 
         <div class="info-section">
@@ -2067,18 +2154,22 @@ function showPanel(feature) {
                     "Trạng thái",
                     row["DTLCP_Trạng thái"] || "--"
                 ],
+
                 [
                     "Ổ dịch",
                     fmt(row["DTLCP_Ổ dịch"])
                 ],
+
                 [
                     "Tiêu hủy",
                     `${fmt(row["DTLCP_Chết"])} con`
                 ],
+
                 [
                     "Khối lượng",
                     `${fmt(row["DTLCP_Trọng lượng"])} kg`
                 ],
+
                 [
                     "Ngày cuối",
                     formatDate(
@@ -2091,6 +2182,10 @@ function showPanel(feature) {
 
     `;
 
+
+    // ==================================================
+    // CÚM GIA CẦM
+    // ==================================================
 
     html += `
 
@@ -2105,18 +2200,22 @@ function showPanel(feature) {
                     "Trạng thái",
                     row["CGC_Trạng thái"] || "--"
                 ],
+
                 [
                     "Ổ dịch",
                     fmt(row["CGC_Ổ dịch"])
                 ],
+
                 [
                     "Tiêu hủy",
                     `${fmt(row["CGC_Chết"])} con`
                 ],
+
                 [
                     "Khối lượng",
                     `${fmt(row["CGC_Trọng lượng"])} kg`
                 ],
+
                 [
                     "Ngày cuối",
                     formatDate(
@@ -2129,6 +2228,10 @@ function showPanel(feature) {
 
     `;
 
+
+    // ==================================================
+    // VIÊM DA NỔI CỤC
+    // ==================================================
 
     html += `
 
@@ -2143,18 +2246,22 @@ function showPanel(feature) {
                     "Trạng thái",
                     row["VDNC_Trạng thái"] || "--"
                 ],
+
                 [
                     "Ổ dịch",
                     fmt(row["VDNC_Ổ dịch"])
                 ],
+
                 [
                     "Mắc",
                     `${fmt(row["VDNC_Mắc"])} con`
                 ],
+
                 [
                     "Chết",
                     `${fmt(row["VDNC_Chết"])} con`
                 ],
+
                 [
                     "Ngày cuối",
                     formatDate(
@@ -2167,6 +2274,10 @@ function showPanel(feature) {
 
     `;
 
+
+    // ==================================================
+    // BỆNH DẠI
+    // ==================================================
 
     html += `
 
@@ -2181,18 +2292,22 @@ function showPanel(feature) {
                     "Trạng thái",
                     row["DAI_Trạng thái"] || "--"
                 ],
+
                 [
                     "Ổ dịch",
                     fmt(row["DAI_Ổ dịch"])
                 ],
+
                 [
                     "Số chết",
                     `${fmt(row["DAI_Chết"])} con`
                 ],
+
                 [
                     "Tiêu hủy",
                     `${fmt(row["DAI_Tiêu hủy"])} con`
                 ],
+
                 [
                     "Ngày cuối",
                     formatDate(
@@ -2205,6 +2320,10 @@ function showPanel(feature) {
 
     `;
 
+
+    // ==================================================
+    // THỰC HIỆN THÁNG TVSKTTĐ
+    // ==================================================
 
     html += `
 
@@ -2219,14 +2338,17 @@ function showPanel(feature) {
                     "Tiến độ",
                     row["PHUN_Tiến độ"] || "--"
                 ],
+
                 [
                     "Số hộ",
                     fmt(row["PHUN_Số hộ"])
                 ],
+
                 [
                     "Vòng",
                     fmt(row["PHUN_Vòng"])
                 ],
+
                 [
                     "Ngày",
                     formatDate(
@@ -2239,6 +2361,10 @@ function showPanel(feature) {
 
     `;
 
+
+    // ==================================================
+    // KIỂM SOÁT GIẾT MỔ
+    // ==================================================
 
     html += `
 
@@ -2253,6 +2379,7 @@ function showPanel(feature) {
                     "Trạng thái",
                     row["KSGM_Trạng thái"] || "--"
                 ],
+
                 [
                     "Số cơ sở",
                     fmt(row["KSGM_Cơ sở"])
@@ -2263,6 +2390,10 @@ function showPanel(feature) {
 
     `;
 
+
+    // ==================================================
+    // CƠ SỞ BUÔN BÁN THUỐC THÚ Y
+    // ==================================================
 
     html += `
 
@@ -2286,9 +2417,6 @@ function showPanel(feature) {
 
     panel.innerHTML =
         html;
-
-
-    panel.scrollTop = 0;
 
 }
 
@@ -2447,6 +2575,10 @@ function updateLegend() {
                 ];
 
 
+            // ==============================
+            // BỆNH
+            // ==============================
+
             if (
                 [
                     "DTLCP",
@@ -2471,6 +2603,7 @@ function updateLegend() {
                         )}
                     </div>
 
+
                     <div style="
                         font-size:9px;
                         color:#6b7785;
@@ -2480,6 +2613,7 @@ function updateLegend() {
                         Phân cấp dữ liệu động bằng
                         Natural Breaks (Jenks)
                     </div>
+
 
                     <div style="
                         display:flex;
@@ -2505,6 +2639,7 @@ function updateLegend() {
                         </span>
 
                     </div>
+
 
                     <div style="
                         display:flex;
@@ -2543,6 +2678,7 @@ function updateLegend() {
                             background:#DDE3E7;
                             margin:7px 0;
                         "></div>
+
 
                         <div style="
                             font-size:10px;
@@ -2629,6 +2765,7 @@ function updateLegend() {
                             margin:7px 0;
                         "></div>
 
+
                         <div style="
                             font-size:10px;
                             color:#7b8791;
@@ -2656,6 +2793,10 @@ function updateLegend() {
             }
 
 
+            // ==============================
+            // PHUN
+            // ==============================
+
             if (
                 currentLayer ===
                 "PHUN"
@@ -2669,6 +2810,7 @@ function updateLegend() {
                     ">
                         Phun khử trùng
                     </div>
+
 
                     ${cfg.colors
                         .map(
@@ -2697,7 +2839,9 @@ function updateLegend() {
                         .join("")
                     }
 
+
                     <div class="legend-divider"></div>
+
 
                     <div class="legend-row">
 
@@ -2722,6 +2866,10 @@ function updateLegend() {
             }
 
 
+            // ==============================
+            // KSGM
+            // ==============================
+
             if (
                 currentLayer ===
                 "KSGM"
@@ -2735,6 +2883,7 @@ function updateLegend() {
                     ">
                         Kiểm soát giết mổ
                     </div>
+
 
                     ${cfg.colors
                         .map(
@@ -2763,7 +2912,9 @@ function updateLegend() {
                         .join("")
                     }
 
+
                     <div class="legend-divider"></div>
+
 
                     <div class="legend-row">
 
@@ -2789,6 +2940,10 @@ function updateLegend() {
             }
 
 
+            // ==============================
+            // THUỐC THÚ Y
+            // ==============================
+
             div.innerHTML = `
 
                 <div style="
@@ -2797,6 +2952,7 @@ function updateLegend() {
                 ">
                     Cơ sở buôn bán thuốc thú y
                 </div>
+
 
                 ${cfg.colors
                     .map(
@@ -2825,7 +2981,9 @@ function updateLegend() {
                     .join("")
                 }
 
+
                 <div class="legend-divider"></div>
+
 
                 <div class="legend-row">
 
@@ -2933,48 +3091,6 @@ function renderGeoJSON() {
 
                         layer.on({
 
-                            click:
-                                function(e) {
-
-                                    if (
-                                        e &&
-                                        e.originalEvent
-                                    ) {
-
-                                        L.DomEvent.stopPropagation(
-                                            e.originalEvent
-                                        );
-
-                                    }
-
-
-                                    selectedFeature =
-                                        feature;
-
-
-                                    showPanel(
-                                        feature
-                                    );
-
-
-                                    const infoPanel =
-                                        document.getElementById(
-                                            "info-panel"
-                                        );
-
-
-                                    if (
-                                        infoPanel
-                                    ) {
-
-                                        infoPanel.scrollTop =
-                                            0;
-
-                                    }
-
-                                },
-
-
                             mouseover:
                                 function() {
 
@@ -3005,6 +3121,33 @@ function renderGeoJSON() {
                                             this
                                         );
 
+                                },
+
+
+                            click:
+                                function(e) {
+
+                                    if (
+                                        e &&
+                                        e.originalEvent
+                                    ) {
+
+                                        L.DomEvent
+                                            .stopPropagation(
+                                                e.originalEvent
+                                            );
+
+                                    }
+
+
+                                    selectedFeature =
+                                        feature;
+
+
+                                    showPanel(
+                                        feature
+                                    );
+
                                 }
 
                         });
@@ -3017,61 +3160,13 @@ function renderGeoJSON() {
         .addTo(map);
 
 
-    // Gắn click trực tiếp cho từng xã/phường
+    // Con trỏ chuột thành pointer
+
     geojsonLayer.eachLayer(
         function(layer) {
 
             layer.options.interactive =
                 true;
-
-
-            layer.off(
-                "click"
-            );
-
-
-            layer.on(
-                "click",
-                function(e) {
-
-                    if (
-                        e &&
-                        e.originalEvent
-                    ) {
-
-                        L.DomEvent.stopPropagation(
-                            e.originalEvent
-                        );
-
-                    }
-
-
-                    selectedFeature =
-                        layer.feature;
-
-
-                    showPanel(
-                        layer.feature
-                    );
-
-
-                    const infoPanel =
-                        document.getElementById(
-                            "info-panel"
-                        );
-
-
-                    if (
-                        infoPanel
-                    ) {
-
-                        infoPanel.scrollTop =
-                            0;
-
-                    }
-
-                }
-            );
 
 
             const el =
@@ -3099,6 +3194,8 @@ function renderGeoJSON() {
 
     refreshMapTitle();
 
+
+    // Kiểm tra số xã ghép được
 
     try {
 
@@ -3578,6 +3675,10 @@ function searchFeature(
 
 }
 
+
+// ======================================================
+// TÌM LAYER
+// ======================================================
 
 function findLayer(
     feature
