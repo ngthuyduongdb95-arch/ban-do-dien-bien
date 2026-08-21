@@ -31,6 +31,18 @@ const STREET_URL =
 const SATELLITE_URL =
     "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
 
+// ------------------------------------------------------
+// Escape HTML - dùng cho nhãn, panel và legend
+// ------------------------------------------------------
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 const layerConfig = {
     DTLCP: {
         name: "Dịch tả lợn Châu Phi",
