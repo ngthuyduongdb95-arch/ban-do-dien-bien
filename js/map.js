@@ -22,7 +22,9 @@ const STREET_URL =
 const SATELLITE_URL =
     "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
 
+
 const layerConfig = {
+
     DTLCP: {
         name: "Dịch tả lợn Châu Phi",
         field: "DTLCP_Chết",
@@ -128,6 +130,7 @@ const layerConfig = {
             "#01579B"
         ]
     }
+
 };
 
 
@@ -150,11 +153,17 @@ function initMap() {
         [21.386, 103.016],
         9
     );
-map.createPane("markerPane");
-map.getPane("markerPane").style.zIndex = 700;
+
+
+    // Chấm đỏ nằm trên polygon
+    map.createPane("markerPane");
+    map.getPane("markerPane").style.zIndex = 700;
+
+
     L.control.zoom({
         position: "topleft"
     }).addTo(map);
+
 
     L.control.scale({
         position: "bottomleft",
@@ -162,9 +171,10 @@ map.getPane("markerPane").style.zIndex = 700;
         maxWidth: 120
     }).addTo(map);
 
-    addBaseLayers();
 
+    addBaseLayers();
     bindControls();
+
 
     return map;
 }
@@ -217,8 +227,7 @@ function addMapTitle() {
 
     const title =
         L.control({
-            position:
-                "topleft"
+            position: "topleft"
         });
 
 
@@ -296,7 +305,6 @@ function refreshMapTitle() {
 
 function getRows() {
 
-    // sheets.js dùng let sheetData
     try {
 
         if (
@@ -312,9 +320,7 @@ function getRows() {
 
 
             if (rows.length) {
-
                 return rows;
-
             }
 
         }
@@ -330,7 +336,6 @@ function getRows() {
     }
 
 
-    // Dự phòng
     if (
         typeof window.getRows ===
         "function"
@@ -369,7 +374,7 @@ function getRows() {
 
 
 // ======================================================
-// CHUẨN HÓA TÊN
+// CHUẨN HÓA TÊN XÃ
 // ======================================================
 
 function normalizeMapName(value) {
@@ -397,8 +402,7 @@ function normalizeMapName(value) {
 
 
 // ======================================================
-// GHÉP GEOJSON VỚI GOOGLE SHEETS
-// Ưu tiên ID, sau đó tên xã
+// GHÉP GEOJSON - GOOGLE SHEETS
 // ======================================================
 
 function getRow(feature) {
@@ -413,9 +417,7 @@ function getRow(feature) {
     }
 
 
-    // ----------------------------------------------
-    // 1. THEO ID
-    // ----------------------------------------------
+    // 1. Ghép theo ID
 
     const rawId =
         feature.properties.ID ??
@@ -444,9 +446,7 @@ function getRow(feature) {
     catch (_) {}
 
 
-    // ----------------------------------------------
-    // 2. THEO TÊN XÃ
-    // ----------------------------------------------
+    // 2. Ghép theo tên xã
 
     const geoName =
         feature.properties["Tên xã"] ||
@@ -464,12 +464,8 @@ function getRow(feature) {
         );
 
 
-    if (
-        !normalizedGeoName
-    ) {
-
+    if (!normalizedGeoName) {
         return null;
-
     }
 
 
@@ -504,7 +500,7 @@ function getRow(feature) {
 
 
 // ======================================================
-// CHUYỂN SỐ
+// SỐ
 // ======================================================
 
 function num(value) {
@@ -514,9 +510,7 @@ function num(value) {
         value === undefined ||
         value === ""
     ) {
-
         return 0;
-
     }
 
 
@@ -541,9 +535,7 @@ function num(value) {
 
 
     if (!s) {
-
         return 0;
-
     }
 
 
@@ -553,14 +545,8 @@ function num(value) {
     ) {
 
         s =
-            s.replace(
-                /\./g,
-                ""
-            )
-            .replace(
-                ",",
-                "."
-            );
+            s.replace(/\./g, "")
+             .replace(",", ".");
 
     }
 
@@ -568,17 +554,15 @@ function num(value) {
         s.includes(",")
     ) {
 
-        const parts =
+        const p =
             s.split(",");
 
 
         s =
-            parts.length === 2 &&
-            parts[1].length <= 2
+            p.length === 2 &&
+            p[1].length <= 2
 
-                ? parts[0] +
-                  "." +
-                  parts[1]
+                ? p[0] + "." + p[1]
 
                 : s.replace(
                     /,/g,
@@ -588,8 +572,7 @@ function num(value) {
     }
 
     else if (
-        (s.match(/\./g) || [])
-            .length > 1
+        (s.match(/\./g) || []).length > 1
     ) {
 
         s =
@@ -601,12 +584,12 @@ function num(value) {
     }
 
 
-    const number =
+    const n =
         Number(s);
 
 
-    return Number.isFinite(number)
-        ? number
+    return Number.isFinite(n)
+        ? n
         : 0;
 
 }
@@ -663,21 +646,13 @@ function getName(feature) {
 
 
     return String(
-
         p["Tên xã"] ||
-
         p["TEN_XA"] ||
-
         p["TENXA"] ||
-
         p["NAME"] ||
-
         p["Name"] ||
-
         p["name"] ||
-
         ""
-
     ).trim();
 
 }
@@ -692,14 +667,16 @@ function isActive(
     config
 ) {
 
-    return !!row &&
+    return (
+        !!row &&
         !!config.status &&
         norm(
             row[
                 config.status
             ]
         ) ===
-        "đang có dịch";
+        "đang có dịch"
+    );
 
 }
 
@@ -715,9 +692,7 @@ function hasData(feature) {
 
 
     if (!row) {
-
         return false;
-
     }
 
 
@@ -728,11 +703,11 @@ function hasData(feature) {
 
 
     if (
-        currentLayer === "PHUN"
+        currentLayer ===
+        "PHUN"
     ) {
 
         return (
-
             num(
                 row["PHUN_Số hộ"]
             ) > 0 ||
@@ -744,18 +719,17 @@ function hasData(feature) {
             norm(
                 row["PHUN_Tiến độ"]
             ) !== ""
-
         );
 
     }
 
 
     if (
-        currentLayer === "KSGM"
+        currentLayer ===
+        "KSGM"
     ) {
 
         return (
-
             num(
                 row["KSGM_Cơ sở"]
             ) > 0 ||
@@ -763,14 +737,14 @@ function hasData(feature) {
             norm(
                 row["KSGM_Trạng thái"]
             ) !== ""
-
         );
 
     }
 
 
     if (
-        currentLayer === "CSBBTTY"
+        currentLayer ===
+        "CSBBTTY"
     ) {
 
         return (
@@ -783,7 +757,6 @@ function hasData(feature) {
 
 
     return (
-
         num(
             row[cfg.field]
         ) > 0 ||
@@ -799,7 +772,6 @@ function hasData(feature) {
         norm(
             row[cfg.status]
         ) !== ""
-
     );
 
 }
@@ -835,15 +807,15 @@ function jenks(
 
 
     const unique =
-        [...new Set(data)];
+        [
+            ...new Set(data)
+        ];
 
 
     if (
         !unique.length
     ) {
-
         return [];
-
     }
 
 
@@ -945,18 +917,17 @@ function jenks(
             weight += 1;
             sum += val;
             sumSq +=
-                val*val;
+                val * val;
 
 
             const varianceClass =
                 sumSq -
-                (
-                    sum*sum
-                ) / weight;
+                (sum*sum) /
+                weight;
 
 
             if (
-                idx===1
+                idx === 1
             ) {
 
                 variance[l][1] =
@@ -1088,7 +1059,7 @@ function jenks(
     }
 
 
-    const ranges = [];
+    const ranges=[];
 
 
     for (
@@ -1175,7 +1146,9 @@ function jenks(
     ranges[
         ranges.length-1
     ].max =
-        data[n-1];
+        data[
+            n-1
+        ];
 
 
     return ranges;
@@ -1191,9 +1164,7 @@ function equalIntegerRanges(
     if (
         !data.length
     ) {
-
         return [];
-
     }
 
 
@@ -1204,7 +1175,10 @@ function equalIntegerRanges(
         return [
             {
                 min:1,
-                max:data[data.length-1]
+                max:
+                    data[
+                        data.length-1
+                    ]
             }
         ];
 
@@ -1222,7 +1196,9 @@ function equalIntegerRanges(
 
         const start =
             Math.floor(
-                i*data.length/k
+                i *
+                data.length /
+                k
             );
 
 
@@ -1232,8 +1208,9 @@ function equalIntegerRanges(
                 Math.floor(
                     (
                         i+1
-                    )*
-                    data.length/k
+                    ) *
+                    data.length /
+                    k
                 )-1
             );
 
@@ -1293,7 +1270,7 @@ function equalIntegerRanges(
 
 
 // ======================================================
-// TÍNH KHOẢNG
+// TÍNH KHOẢNG THIỆT HẠI
 // ======================================================
 
 function calculateDamageRanges() {
@@ -1315,7 +1292,7 @@ function calculateDamageRanges() {
         )
     ) {
 
-        damageRanges = [];
+        damageRanges=[];
 
         return damageRanges;
 
@@ -1389,7 +1366,7 @@ function getDamageClass(
 
 
 // ======================================================
-// STYLE BỆNH
+// STYLE DỊCH BỆNH
 // ======================================================
 
 function getDiseaseStyle(row) {
@@ -1431,14 +1408,10 @@ function getDiseaseStyle(row) {
     }
 
 
-    const ranges =
-        damageRanges;
-
-
     const idx =
         getDamageClass(
             value,
-            ranges
+            damageRanges
         );
 
 
@@ -1735,7 +1708,8 @@ function getFeatureStyle(
 
 
     if (
-        currentLayer === "PHUN"
+        currentLayer ===
+        "PHUN"
     ) {
 
         return getPhunStyle(
@@ -1746,7 +1720,8 @@ function getFeatureStyle(
 
 
     if (
-        currentLayer === "KSGM"
+        currentLayer ===
+        "KSGM"
     ) {
 
         return getKsgmStyle(
@@ -1813,7 +1788,8 @@ function featureCenter(
 
 
 // ======================================================
-// NHÃN
+// HIỂN THỊ TÊN XÃ
+// CHỈ XÃ CÓ SỐ LIỆU CỦA LỚP ĐANG CHỌN
 // ======================================================
 
 function renderLabels() {
@@ -1860,9 +1836,14 @@ function renderLabels() {
 
 
             if (!row) {
-
                 return;
+            }
 
+
+            // CHỈ HIỆN TÊN NẾU CÓ SỐ LIỆU
+            // CỦA LỚP ĐANG CHỌN
+            if (!hasData(feature)) {
+                return;
             }
 
 
@@ -1871,9 +1852,7 @@ function renderLabels() {
 
 
             if (!name) {
-
                 return;
-
             }
 
 
@@ -1884,17 +1863,13 @@ function renderLabels() {
 
 
             if (!center) {
-
                 return;
-
             }
 
 
             candidates.push({
-
                 name,
                 center
-
             });
 
         }
@@ -1905,25 +1880,15 @@ function renderLabels() {
 
 
     const offsets=[
-
         [0,0],
-
         [18,0],
-
         [-18,0],
-
         [0,-18],
-
         [0,18],
-
         [22,-15],
-
         [-22,-15],
-
         [22,15],
-
         [-22,15]
-
     ];
 
 
@@ -1945,8 +1910,7 @@ function renderLabels() {
                 const width =
                     Math.max(
                         48,
-                        item.name.length*
-                        5.3
+                        item.name.length*5.3
                     );
 
 
@@ -1962,7 +1926,6 @@ function renderLabels() {
                 ) {
 
                     const point={
-
                         x:
                             base.x+
                             offset[0],
@@ -1970,12 +1933,10 @@ function renderLabels() {
                         y:
                             base.y+
                             offset[1]
-
                     };
 
 
                     const box={
-
                         left:
                             point.x-
                             width/2,
@@ -1991,7 +1952,6 @@ function renderLabels() {
                         bottom:
                             point.y+
                             height/2
-
                     };
 
 
@@ -2017,9 +1977,7 @@ function renderLabels() {
                         );
 
 
-                    if (
-                        !collision
-                    ) {
+                    if (!collision) {
 
                         selected={
                             point,
@@ -2034,9 +1992,7 @@ function renderLabels() {
 
 
                 if (!selected) {
-
                     return;
-
                 }
 
 
@@ -2055,8 +2011,7 @@ function renderLabels() {
                     latlng,
                     {
 
-                        interactive:
-                            false,
+                        interactive:false,
 
                         icon:
                             L.divIcon({
@@ -2122,7 +2077,7 @@ function escapeHtml(value) {
 
 
 // ======================================================
-// CHẤM ĐỎ
+// CHẤM ĐỎ XÃ ĐANG CÓ DỊCH
 // ======================================================
 
 function renderDiseaseMarkers() {
@@ -2182,32 +2137,42 @@ function renderDiseaseMarkers() {
 
 
             if (!center) {
-
                 return;
-
             }
 
 
             L.circleMarker(
-    center,
-    {
-        radius: 5.5,
+                center,
+                {
 
-        color: "#FFFFFF",
+                    radius:
+                        5.5,
 
-        weight: 2,
+                    color:
+                        "#FFFFFF",
 
-        fillColor: "#D50000",
+                    weight:
+                        2,
 
-        fillOpacity: 1,
+                    fillColor:
+                        "#D50000",
 
-        opacity: 1,
+                    fillOpacity:
+                        1,
 
-        interactive: false,
+                    opacity:
+                        1,
 
-        pane: "markerPane"
-    }
-).addTo(diseaseMarkerLayer);
+                    interactive:
+                        false,
+
+                    pane:
+                        "markerPane"
+
+                }
+            ).addTo(
+                diseaseMarkerLayer
+            );
 
         }
     );
@@ -2216,13 +2181,12 @@ function renderDiseaseMarkers() {
 
 
 // ======================================================
-// PANEL
+// HIỂN THỊ TOÀN BỘ THÔNG TIN XÃ
 // ======================================================
 
 function showPanel(feature) {
 
-    selectedFeature =
-        feature;
+    selectedFeature = feature;
 
 
     const row =
@@ -2248,16 +2212,13 @@ function showPanel(feature) {
     if (title) {
 
         title.textContent =
-            name ||
-            "Xã/phường";
+            name || "Xã/phường";
 
     }
 
 
     if (!panel) {
-
         return;
-
     }
 
 
@@ -2272,7 +2233,6 @@ function showPanel(feature) {
         `;
 
         return;
-
     }
 
 
@@ -2281,19 +2241,11 @@ function showPanel(feature) {
         <div class="info-block">
 
             <div class="info-district">
-
                 ${escapeHtml(name)}
-
             </div>
 
             <div class="info-layer">
-
-                ${escapeHtml(
-                    layerConfig[
-                        currentLayer
-                    ].name
-                )}
-
+                Thông tin tổng hợp
             </div>
 
         </div>
@@ -2301,324 +2253,268 @@ function showPanel(feature) {
     `;
 
 
-    if (
-        currentLayer ===
-        "DTLCP"
-    ) {
+    // DTLCP
 
-        html +=
-            infoRows([
+    html += `
+
+        <div class="info-section">
+
+            <div class="info-section-title">
+                Dịch tả lợn Châu Phi
+            </div>
+
+            ${infoRows([
                 [
                     "Trạng thái",
-                    row[
-                        "DTLCP_Trạng thái"
-                    ] ||
-                    "--"
+                    row["DTLCP_Trạng thái"] || "--"
                 ],
 
                 [
                     "Ổ dịch",
-                    fmt(
-                        row[
-                            "DTLCP_Ổ dịch"
-                        ]
-                    )
+                    fmt(row["DTLCP_Ổ dịch"])
                 ],
 
                 [
                     "Tiêu hủy",
-                    `${fmt(
-                        row[
-                            "DTLCP_Chết"
-                        ]
-                    )} con`
+                    `${fmt(row["DTLCP_Chết"])} con`
                 ],
 
                 [
                     "Khối lượng",
-                    `${fmt(
-                        row[
-                            "DTLCP_Trọng lượng"
-                        ]
-                    )} kg`
+                    `${fmt(row["DTLCP_Trọng lượng"])} kg`
                 ],
 
                 [
                     "Ngày cuối",
                     formatDate(
-                        row[
-                            "DTLCP_Ngày cuối"
-                        ]
+                        row["DTLCP_Ngày cuối"]
                     )
                 ]
+            ])}
 
-            ]);
+        </div>
 
-    }
+    `;
 
 
-    if (
-        currentLayer ===
-        "CGC"
-    ) {
+    // CGC
 
-        html +=
-            infoRows([
+    html += `
+
+        <div class="info-section">
+
+            <div class="info-section-title">
+                Cúm gia cầm
+            </div>
+
+            ${infoRows([
                 [
                     "Trạng thái",
-                    row[
-                        "CGC_Trạng thái"
-                    ] ||
-                    "--"
+                    row["CGC_Trạng thái"] || "--"
                 ],
 
                 [
                     "Ổ dịch",
-                    fmt(
-                        row[
-                            "CGC_Ổ dịch"
-                        ]
-                    )
+                    fmt(row["CGC_Ổ dịch"])
                 ],
 
                 [
                     "Tiêu hủy",
-                    `${fmt(
-                        row[
-                            "CGC_Chết"
-                        ]
-                    )} con`
+                    `${fmt(row["CGC_Chết"])} con`
                 ],
 
                 [
                     "Khối lượng",
-                    `${fmt(
-                        row[
-                            "CGC_Trọng lượng"
-                        ]
-                    )} kg`
+                    `${fmt(row["CGC_Trọng lượng"])} kg`
                 ],
 
                 [
                     "Ngày cuối",
                     formatDate(
-                        row[
-                            "CGC_Ngày cuối"
-                        ]
+                        row["CGC_Ngày cuối"]
                     )
                 ]
+            ])}
 
-            ]);
+        </div>
 
-    }
+    `;
 
 
-    if (
-        currentLayer ===
-        "VDNC"
-    ) {
+    // VDNC
 
-        html +=
-            infoRows([
+    html += `
+
+        <div class="info-section">
+
+            <div class="info-section-title">
+                Viêm da nổi cục
+            </div>
+
+            ${infoRows([
                 [
                     "Trạng thái",
-                    row[
-                        "VDNC_Trạng thái"
-                    ] ||
-                    "--"
+                    row["VDNC_Trạng thái"] || "--"
                 ],
 
                 [
                     "Ổ dịch",
-                    fmt(
-                        row[
-                            "VDNC_Ổ dịch"
-                        ]
-                    )
+                    fmt(row["VDNC_Ổ dịch"])
                 ],
 
                 [
                     "Mắc",
-                    `${fmt(
-                        row[
-                            "VDNC_Mắc"
-                        ]
-                    )} con`
+                    `${fmt(row["VDNC_Mắc"])} con`
                 ],
 
                 [
                     "Chết",
-                    `${fmt(
-                        row[
-                            "VDNC_Chết"
-                        ]
-                    )} con`
+                    `${fmt(row["VDNC_Chết"])} con`
                 ],
 
                 [
                     "Ngày cuối",
                     formatDate(
-                        row[
-                            "VDNC_Ngày cuối"
-                        ]
+                        row["VDNC_Ngày cuối"]
                     )
                 ]
+            ])}
 
-            ]);
+        </div>
 
-    }
+    `;
 
 
-    if (
-        currentLayer ===
-        "DAI"
-    ) {
+    // Dại
 
-        html +=
-            infoRows([
+    html += `
+
+        <div class="info-section">
+
+            <div class="info-section-title">
+                Bệnh Dại
+            </div>
+
+            ${infoRows([
                 [
                     "Trạng thái",
-                    row[
-                        "DAI_Trạng thái"
-                    ] ||
-                    "--"
+                    row["DAI_Trạng thái"] || "--"
                 ],
 
                 [
                     "Ổ dịch",
-                    fmt(
-                        row[
-                            "DAI_Ổ dịch"
-                        ]
-                    )
+                    fmt(row["DAI_Ổ dịch"])
                 ],
 
                 [
                     "Số chết",
-                    `${fmt(
-                        row[
-                            "DAI_Chết"
-                        ]
-                    )} con`
+                    `${fmt(row["DAI_Chết"])} con`
                 ],
 
                 [
                     "Tiêu hủy",
-                    `${fmt(
-                        row[
-                            "DAI_Tiêu hủy"
-                        ]
-                    )} con`
+                    `${fmt(row["DAI_Tiêu hủy"])} con`
                 ],
 
                 [
                     "Ngày cuối",
                     formatDate(
-                        row[
-                            "DAI_Ngày cuối"
-                        ]
+                        row["DAI_Ngày cuối"]
                     )
                 ]
+            ])}
 
-            ]);
+        </div>
 
-    }
+    `;
 
 
-    if (
-        currentLayer ===
-        "PHUN"
-    ) {
+    // TVSKTTĐ
 
-        html +=
-            infoRows([
+    html += `
+
+        <div class="info-section">
+
+            <div class="info-section-title">
+                Thực hiện tháng TVSKTTĐ
+            </div>
+
+            ${infoRows([
                 [
                     "Tiến độ",
-                    row[
-                        "PHUN_Tiến độ"
-                    ] ||
-                    "--"
+                    row["PHUN_Tiến độ"] || "--"
                 ],
 
                 [
                     "Số hộ",
-                    fmt(
-                        row[
-                            "PHUN_Số hộ"
-                        ]
-                    )
+                    fmt(row["PHUN_Số hộ"])
                 ],
 
                 [
                     "Vòng",
-                    fmt(
-                        row[
-                            "PHUN_Vòng"
-                        ]
-                    )
+                    fmt(row["PHUN_Vòng"])
                 ],
 
                 [
                     "Ngày",
                     formatDate(
-                        row[
-                            "PHUN_Ngày"
-                        ]
+                        row["PHUN_Ngày"]
                     )
                 ]
+            ])}
 
-            ]);
+        </div>
 
-    }
+    `;
 
 
-    if (
-        currentLayer ===
-        "KSGM"
-    ) {
+    // KSGM
 
-        html +=
-            infoRows([
+    html += `
+
+        <div class="info-section">
+
+            <div class="info-section-title">
+                Kiểm soát giết mổ
+            </div>
+
+            ${infoRows([
                 [
                     "Trạng thái",
-                    row[
-                        "KSGM_Trạng thái"
-                    ] ||
-                    "--"
+                    row["KSGM_Trạng thái"] || "--"
                 ],
 
                 [
                     "Số cơ sở",
-                    fmt(
-                        row[
-                            "KSGM_Cơ sở"
-                        ]
-                    )
+                    fmt(row["KSGM_Cơ sở"])
                 ]
+            ])}
 
-            ]);
+        </div>
 
-    }
+    `;
 
 
-    if (
-        currentLayer ===
-        "CSBBTTY"
-    ) {
+    // Thuốc thú y
 
-        html +=
-            infoRows([
+    html += `
+
+        <div class="info-section">
+
+            <div class="info-section-title">
+                Cơ sở buôn bán thuốc thú y
+            </div>
+
+            ${infoRows([
                 [
                     "Số cơ sở",
-                    fmt(
-                        row[
-                            "CSBBTTY_Cơ sở"
-                        ]
-                    )
+                    fmt(row["CSBBTTY_Cơ sở"])
                 ]
-            ]);
+            ])}
 
-    }
+        </div>
+
+    `;
 
 
     panel.innerHTML =
@@ -2632,28 +2528,29 @@ function infoRows(items) {
     return `
         <div class="info-table">
 
-            ${items
-                .map(
-                    ([label,value]) =>
-                        `
-                            <div class="info-row">
+            ${
+                items
+                    .map(
+                        ([label,value]) =>
+                            `
+                                <div class="info-row">
 
-                                <span>
-                                    ${escapeHtml(
-                                        label
-                                    )}
-                                </span>
+                                    <span>
+                                        ${escapeHtml(
+                                            label
+                                        )}
+                                    </span>
 
-                                <b>
-                                    ${escapeHtml(
-                                        value
-                                    )}
-                                </b>
+                                    <b>
+                                        ${escapeHtml(
+                                            value
+                                        )}
+                                    </b>
 
-                            </div>
-                        `
-                )
-                .join("")
+                                </div>
+                            `
+                    )
+                    .join("")
             }
 
         </div>
@@ -2691,6 +2588,7 @@ function clearPanel() {
     if (panel) {
 
         panel.innerHTML = `
+
             <div class="empty-panel">
 
                 <i class="fa-solid fa-arrow-pointer"></i>
@@ -2712,9 +2610,7 @@ function clearPanel() {
 function formatDate(value) {
 
     if (!value) {
-
         return "--";
-
     }
 
 
@@ -2766,7 +2662,7 @@ function updateLegend() {
 
 
     legendControl.onAdd =
-        function () {
+        function() {
 
             const div =
                 L.DomUtil.create(
@@ -2780,10 +2676,6 @@ function updateLegend() {
                     currentLayer
                 ];
 
-
-            // ------------------------------------------
-            // BỆNH
-            // ------------------------------------------
 
             if (
                 [
@@ -2809,6 +2701,7 @@ function updateLegend() {
                         )}
                     </div>
 
+
                     <div style="
                         font-size:9px;
                         color:#6b7785;
@@ -2818,6 +2711,7 @@ function updateLegend() {
                         Phân cấp dữ liệu động bằng
                         Natural Breaks (Jenks)
                     </div>
+
 
                     <div style="
                         display:flex;
@@ -2843,6 +2737,7 @@ function updateLegend() {
                         </span>
 
                     </div>
+
 
                     <div style="
                         display:flex;
@@ -2882,6 +2777,7 @@ function updateLegend() {
                             margin:7px 0;
                         "></div>
 
+
                         <div style="
                             font-size:10px;
                             font-weight:800;
@@ -2915,15 +2811,13 @@ function updateLegend() {
 
                                     ? `${fmt(
                                         range.min
-                                      )}
-                                      ${cfg.unit}`
+                                      )} ${cfg.unit}`
 
                                     : `${fmt(
                                         range.min
                                       )}–${fmt(
                                         range.max
-                                      )}
-                                      ${cfg.unit}`;
+                                      )} ${cfg.unit}`;
 
 
                             html += `
@@ -2952,7 +2846,6 @@ function updateLegend() {
                                     </span>
 
                                 </div>
-
                             `;
 
                         }
@@ -2969,6 +2862,7 @@ function updateLegend() {
                             background:#DDE3E7;
                             margin:7px 0;
                         "></div>
+
 
                         <div style="
                             font-size:10px;
@@ -2997,10 +2891,6 @@ function updateLegend() {
             }
 
 
-            // ------------------------------------------
-            // PHUN
-            // ------------------------------------------
-
             if (
                 currentLayer ===
                 "PHUN"
@@ -3014,6 +2904,7 @@ function updateLegend() {
                     ">
                         Phun khử trùng
                     </div>
+
 
                     ${cfg.colors
                         .map(
@@ -3042,7 +2933,9 @@ function updateLegend() {
                         .join("")
                     }
 
+
                     <div class="legend-divider"></div>
+
 
                     <div class="legend-row">
 
@@ -3053,7 +2946,6 @@ function updateLegend() {
                         </span>
 
                     </div>
-
                 `;
 
 
@@ -3067,10 +2959,6 @@ function updateLegend() {
 
             }
 
-
-            // ------------------------------------------
-            // KSGM
-            // ------------------------------------------
 
             if (
                 currentLayer ===
@@ -3086,6 +2974,7 @@ function updateLegend() {
                         Kiểm soát giết mổ
                     </div>
 
+
                     ${cfg.colors
                         .map(
                             (
@@ -3100,13 +2989,11 @@ function updateLegend() {
                                         "></i>
 
                                         <span>
-
                                             ${
                                                 i < 5
                                                 ? `${i+1} cơ sở`
                                                 : "6 cơ sở trở lên"
                                             }
-
                                         </span>
 
                                     </div>
@@ -3115,7 +3002,9 @@ function updateLegend() {
                         .join("")
                     }
 
+
                     <div class="legend-divider"></div>
+
 
                     <div class="legend-row">
 
@@ -3141,10 +3030,6 @@ function updateLegend() {
             }
 
 
-            // ------------------------------------------
-            // THUỐC THÚ Y
-            // ------------------------------------------
-
             div.innerHTML = `
 
                 <div style="
@@ -3153,6 +3038,7 @@ function updateLegend() {
                 ">
                     Cơ sở buôn bán thuốc thú y
                 </div>
+
 
                 ${cfg.colors
                     .map(
@@ -3168,13 +3054,11 @@ function updateLegend() {
                                     "></i>
 
                                     <span>
-
                                         ${
                                             i < 5
                                             ? `${i+1} cơ sở`
                                             : "6 cơ sở trở lên"
                                         }
-
                                     </span>
 
                                 </div>
@@ -3183,7 +3067,9 @@ function updateLegend() {
                     .join("")
                 }
 
+
                 <div class="legend-divider"></div>
+
 
                 <div class="legend-row">
 
@@ -3194,7 +3080,6 @@ function updateLegend() {
                     </span>
 
                 </div>
-
             `;
 
 
@@ -3258,9 +3143,7 @@ function renderGeoJSON() {
             .addTo(map);
 
 
-    if (
-        diseaseMarkerLayer
-    ) {
+    if (diseaseMarkerLayer) {
 
         map.removeLayer(
             diseaseMarkerLayer
@@ -3288,7 +3171,38 @@ function renderGeoJSON() {
                         layer
                     ) {
 
+                        layer.options.interactive =
+                            true;
+
+
                         layer.on({
+
+                            click:
+                                function(e) {
+
+                                    if (
+                                        e &&
+                                        e.originalEvent
+                                    ) {
+
+                                        L.DomEvent
+                                            .stopPropagation(
+                                                e.originalEvent
+                                            );
+
+                                    }
+
+
+                                    selectedFeature =
+                                        feature;
+
+
+                                    showPanel(
+                                        feature
+                                    );
+
+                                },
+
 
                             mouseover:
                                 function() {
@@ -3296,10 +3210,10 @@ function renderGeoJSON() {
                                     this.setStyle({
 
                                         weight:
-                                            2.2,
+                                            2.5,
 
                                         color:
-                                            "#243B53",
+                                            "#263238",
 
                                         fillOpacity:
                                             0.95
@@ -3311,6 +3225,7 @@ function renderGeoJSON() {
 
                                 },
 
+
                             mouseout:
                                 function() {
 
@@ -3319,15 +3234,6 @@ function renderGeoJSON() {
                                             this
                                         );
 
-                                },
-
-                            click:
-                                function() {
-
-                                    showPanel(
-                                        feature
-                                    );
-
                                 }
 
                         });
@@ -3335,8 +3241,33 @@ function renderGeoJSON() {
                     }
 
             }
+
         )
         .addTo(map);
+
+
+    geojsonLayer.eachLayer(
+        function(layer) {
+
+            layer.options.interactive =
+                true;
+
+
+            const el =
+                layer.getElement
+                    ? layer.getElement()
+                    : null;
+
+
+            if (el) {
+
+                el.style.cursor =
+                    "pointer";
+
+            }
+
+        }
+    );
 
 
     renderLabels();
@@ -3348,7 +3279,6 @@ function renderGeoJSON() {
     refreshMapTitle();
 
 
-    // Kiểm tra ghép
     try {
 
         const matched =
@@ -3427,7 +3357,7 @@ function refreshMap() {
 
 
 // ======================================================
-// TẢI GEOJSON
+// LOAD GEOJSON
 // ======================================================
 
 async function loadGeoJSON() {
@@ -3478,9 +3408,6 @@ async function loadGeoJSON() {
     renderGeoJSON();
 
 
-    // Luôn ưu tiên trung tâm Điện Biên
-    // thay vì fit toàn bộ extent bất thường.
-
     setTimeout(
         function() {
 
@@ -3511,9 +3438,7 @@ function setBasemap(
 ) {
 
     if (!map) {
-
         return;
-
     }
 
 
@@ -3591,11 +3516,9 @@ function setBasemap(
         .getElementById(
             "btnStreet"
         )
-        ?.classList
-        .toggle(
+        ?.classList.toggle(
             "active",
-            mode ===
-            "street"
+            mode === "street"
         );
 
 
@@ -3603,11 +3526,9 @@ function setBasemap(
         .getElementById(
             "btnSatellite"
         )
-        ?.classList
-        .toggle(
+        ?.classList.toggle(
             "active",
-            mode ===
-            "satellite"
+            mode === "satellite"
         );
 
 }
@@ -3625,7 +3546,7 @@ function bindControls() {
         )
         ?.addEventListener(
             "change",
-            e => {
+            function(e) {
 
                 setLayer(
                     e.target.value
@@ -3822,10 +3743,8 @@ function searchFeature(
         map.fitBounds(
             layer.getBounds(),
             {
-                padding:
-                    [40,40],
-                maxZoom:
-                    13
+                padding:[40,40],
+                maxZoom:13
             }
         );
 
@@ -3878,7 +3797,7 @@ function findLayer(
 
 
 // ======================================================
-// VỊ TRÍ
+// ĐỊNH VỊ
 // ======================================================
 
 function locateUser() {
@@ -3903,41 +3822,31 @@ function locateUser() {
             const lat =
                 position.coords.latitude;
 
-
             const lng =
                 position.coords.longitude;
 
 
             map.setView(
-                [
-                    lat,
-                    lng
-                ],
+                [lat,lng],
                 13
             );
 
 
             L.circleMarker(
-                [
-                    lat,
-                    lng
-                ],
+                [lat,lng],
                 {
 
-                    radius:
-                        6,
+                    radius:6,
 
                     color:
                         "#FFFFFF",
 
-                    weight:
-                        2,
+                    weight:2,
 
                     fillColor:
                         "#1976D2",
 
-                    fillOpacity:
-                        1
+                    fillOpacity:1
 
                 }
             )
@@ -4054,10 +3963,13 @@ async function exportMapImage() {
 
 
         controls.forEach(
-            el =>
+            function(el) {
+
                 el.classList.add(
                     "export-hide"
-                )
+                );
+
+            }
         );
 
 
@@ -4066,33 +3978,31 @@ async function exportMapImage() {
                 mapElement,
                 {
 
-                    useCORS:
-                        true,
+                    useCORS:true,
 
-                    allowTaint:
-                        false,
+                    allowTaint:false,
 
                     backgroundColor:
                         "#F7F9FB",
 
-                    scale:
-                        2,
+                    scale:2,
 
-                    logging:
-                        false,
+                    logging:false,
 
-                    imageTimeout:
-                        15000
+                    imageTimeout:15000
 
                 }
             );
 
 
         controls.forEach(
-            el =>
+            function(el) {
+
                 el.classList.remove(
                     "export-hide"
-                )
+                );
+
+            }
         );
 
 
@@ -4146,10 +4056,13 @@ async function exportMapImage() {
                 ".export-hide"
             )
             .forEach(
-                el =>
+                function(el) {
+
                     el.classList.remove(
                         "export-hide"
-                    )
+                    );
+
+                }
             );
 
 
@@ -4167,7 +4080,7 @@ async function exportMapImage() {
 
 
 // ======================================================
-// LÀM MỚI
+// LÀM MỚI DỮ LIỆU
 // ======================================================
 
 async function reloadData() {
