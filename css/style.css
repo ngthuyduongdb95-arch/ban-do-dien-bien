@@ -1,1094 +1,536 @@
-/* =========================================================
-   WEBGIS QUẢN LÝ THÚ Y TỈNH ĐIỆN BIÊN
-   STYLE.CSS - BẢN SẠCH
-   ========================================================= */
+/* ======================================================
+   WEBGIS ĐIỆN BIÊN - STYLE
+   ====================================================== */
 
 :root{
-    --green:#1B5E20;
-    --green-dark:#124218;
-
-    --text:#1f2933;
-    --muted:#65727e;
-
-    --line:#d9e1e7;
+    --ink:#17212b;
+    --muted:#6b7785;
+    --line:#dce3e8;
     --panel:#ffffff;
-    --page:#eef2f4;
-    --sidebar:#f5f7f9;
-
-    --dtlcp:#D32F2F;
-    --cgc:#2E7D32;
-    --vdnc:#1565C0;
-    --dai:#6A1B9A;
-    --phun:#00838F;
-    --ksgm:#6D4C41;
-    --drug:#0277BD;
+    --page:#f3f6f8;
+    --blue:#155eef;
+    --shadow:0 8px 24px rgba(20,35,50,.10);
 }
-
-
-/* =========================================================
-   RESET
-   ========================================================= */
 
 *{
     box-sizing:border-box;
 }
 
-html,
-body{
-    width:100%;
-    height:100%;
+html,body{
     margin:0;
     padding:0;
-
-    font-family:
-        "Segoe UI",
-        Arial,
-        sans-serif;
-
-    color:var(--text);
+    width:100%;
+    min-height:100%;
+    font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
+    color:var(--ink);
     background:var(--page);
 }
 
-button,
-input,
-select{
+button,input,select{
     font:inherit;
 }
 
-
-/* =========================================================
-   HEADER
-   ========================================================= */
-
 .header{
-    width:100%;
-    height:70px;
-    min-height:70px;
-
-    display:grid;
-
-    grid-template-columns:
-        minmax(250px,1fr)
-        minmax(420px,1.5fr)
-        minmax(360px,1fr);
-
+    min-height:78px;
+    display:flex;
     align-items:center;
-
-    gap:18px;
-
-    padding:
-        8px 18px;
-
-    background:var(--green);
-
-    color:#fff;
-
-    border-bottom:
-        1px solid
-        rgba(255,255,255,.12);
-
-    box-shadow:
-        0 3px 12px
-        rgba(0,0,0,.15);
-
-    position:relative;
-    z-index:2000;
-}
-
-
-/* Tên cơ quan */
-
-.agency{
-    min-width:0;
+    justify-content:space-between;
+    gap:24px;
+    padding:14px 24px;
+    background:#fff;
+    border-bottom:1px solid var(--line);
 }
 
 .agency-line1{
-    color:#fff;
-
-    font-size:12.5px;
-    line-height:1.2;
-
-    font-weight:900;
-
-    letter-spacing:.1px;
-
-    white-space:nowrap;
-
-    overflow:hidden;
-    text-overflow:ellipsis;
-
-    -webkit-font-smoothing:antialiased;
+    font-size:12px;
+    font-weight:800;
+    letter-spacing:.25px;
 }
 
 .agency-line2{
     margin-top:3px;
-
-    color:#E8F5E9;
-
-    font-size:10.5px;
-    line-height:1.2;
-
-    font-weight:800;
-
-    white-space:nowrap;
-
-    overflow:hidden;
-    text-overflow:ellipsis;
-
-    -webkit-font-smoothing:antialiased;
+    font-size:11px;
+    color:#637083;
+    font-weight:700;
 }
-
-
-/* Tiêu đề */
 
 .header h1{
-    min-width:0;
-
     margin:0;
+    font-size:20px;
+    letter-spacing:.3px;
+    text-align:right;
+}
 
-    text-align:center;
+/* ================= DASHBOARD ================= */
 
-    color:#fff;
+.dashboard{
+    display:grid;
+    grid-template-columns:repeat(7,minmax(0,1fr));
+    gap:10px;
+    padding:12px 16px;
+    background:#f8fafb;
+    border-bottom:1px solid var(--line);
+}
 
-    font-size:19px;
-    line-height:1.2;
+.summary-card{
+    min-width:0;
+    padding:12px 13px;
+    border:1px solid var(--line);
+    border-radius:12px;
+    background:#fff;
+    box-shadow:0 3px 12px rgba(20,35,50,.05);
+}
 
-    font-weight:900;
-
-    letter-spacing:.2px;
-
+.summary-head{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    font-size:12px;
+    color:#44515e;
     white-space:nowrap;
-
     overflow:hidden;
     text-overflow:ellipsis;
-
-    -webkit-font-smoothing:antialiased;
 }
 
-
-/* Bộ điều khiển */
-
-.header-controls{
-    min-width:0;
-
-    display:flex;
-    align-items:center;
-    justify-content:flex-end;
-
-    gap:6px;
+.summary-head i{
+    font-size:13px;
 }
 
-.header-layer{
-    min-width:0;
-
+.summary-main{
     display:flex;
-    align-items:center;
-
+    align-items:baseline;
     gap:7px;
+    margin:6px 0 7px;
 }
 
-.header-layer-label{
-    color:#E8F5E9;
-
-    font-size:9px;
-
+.summary-main span{
+    font-size:25px;
+    line-height:1;
     font-weight:800;
-
-    letter-spacing:.5px;
-
-    white-space:nowrap;
 }
 
-.header-layer select{
-    width:195px;
-    height:34px;
+.summary-main small{
+    font-size:10px;
+    color:var(--muted);
+}
 
-    padding:
-        0 9px;
+.summary-grid{
+    display:grid;
+    gap:3px;
+    font-size:10px;
+    color:#6b7785;
+}
 
-    border:
-        1px solid
-        rgba(255,255,255,.25);
+.summary-grid span{
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
 
-    border-radius:8px;
+.summary-grid b{
+    color:#25313d;
+}
 
+.card-dtlcp{border-top:3px solid #E6392E}
+.card-cgc{border-top:3px solid #388E3C}
+.card-vdnc{border-top:3px solid #2F7DF6}
+.card-dai{border-top:3px solid #6A35D1}
+.card-phun{border-top:3px solid #19A7B3}
+.card-ksgm{border-top:3px solid #795548}
+.card-drug{border-top:3px solid #0288B8}
+
+/* ================= WEBGIS ================= */
+
+.webgis{
+    display:grid;
+    grid-template-columns:220px minmax(0,1fr) 310px;
+    gap:0;
+    height:calc(100vh - 174px);
+    min-height:650px;
+}
+
+.sidebar{
+    padding:12px;
+    background:#f7f9fa;
+    border-right:1px solid var(--line);
+    overflow:auto;
+}
+
+.side-card{
     background:#fff;
+    border:1px solid var(--line);
+    border-radius:11px;
+    padding:11px;
+    margin-bottom:10px;
+}
 
-    color:#24313c;
+.side-title{
+    margin-bottom:7px;
+    font-size:11px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.35px;
+    color:#4c5b68;
+}
 
-    font-size:10.5px;
-
-    font-weight:700;
-
+.side-card select,
+.search-row input{
+    width:100%;
+    height:37px;
+    border:1px solid #cfd8df;
+    border-radius:8px;
+    padding:0 9px;
+    background:#fff;
+    color:#1d2a35;
     outline:none;
 }
 
-.header-icon-btn{
-    width:34px;
-    height:34px;
-
-    flex:0 0 34px;
-
+.search-row{
     display:flex;
-    align-items:center;
-    justify-content:center;
+    gap:6px;
+}
 
+.search-row input{
+    min-width:0;
+}
+
+.search-row button{
+    width:38px;
+    flex:0 0 38px;
     border:0;
     border-radius:8px;
-
-    background:#fff;
-
-    color:#23415a;
-
+    background:#155eef;
+    color:#fff;
     cursor:pointer;
-
-    box-shadow:
-        0 2px 7px
-        rgba(0,0,0,.12);
 }
 
-.header-icon-btn:hover{
-    background:#eef5f0;
+.side-note{
+    font-size:11px;
+    line-height:1.5;
+    color:#667481;
 }
 
+.side-note p{
+    margin:4px 0;
+}
 
-/* =========================================================
-   WEBGIS 3 CỘT
-   ========================================================= */
-
-.webgis{
+.side-button{
     width:100%;
-
-    display:grid;
-
-    grid-template-columns:
-        250px
-        minmax(0,1fr)
-        290px;
-
-    height:
-        calc(100vh - 70px);
-
-    min-height:0;
+    height:38px;
+    margin-bottom:8px;
+    border:0;
+    border-radius:9px;
+    background:#155eef;
+    color:#fff;
+    font-weight:700;
+    cursor:pointer;
 }
 
-
-/* =========================================================
-   SIDEBAR / KPI
-   ========================================================= */
-
-.sidebar{
-    min-width:0;
-    min-height:0;
-
-    height:100%;
-
-    padding:
-        9px;
-
-    background:
-        linear-gradient(
-            180deg,
-            #f7f9fa 0%,
-            #f1f4f6 100%
-        );
-
-    border-right:
-        1px solid
-        var(--line);
-
-    overflow-y:auto;
-    overflow-x:hidden;
-
-    scrollbar-width:thin;
-
-    scrollbar-color:
-        #aebbc5
-        transparent;
-}
-
-.sidebar::-webkit-scrollbar{
-    width:6px;
-}
-
-.sidebar::-webkit-scrollbar-track{
-    background:transparent;
-}
-
-.sidebar::-webkit-scrollbar-thumb{
-    background:#aebbc5;
-    border-radius:8px;
-}
-
-
-/* Chỉ dùng KPI trong sidebar */
-
-.sidebar-kpi{
-    width:100%;
-
-    display:flex;
-
-    flex-direction:column;
-
-    gap:9px;
-
-    padding:
-        2px
-        2px
-        14px
-        0;
-}
-
-
-/* =========================================================
-   KPI CARD
-   ========================================================= */
-
-.sidebar-kpi .summary-card{
-    width:100%;
-
-    height:96px;
-    min-height:96px;
-    max-height:96px;
-
-    flex:
-        0 0 96px;
-
-    margin:0;
-
-    padding:
-        9px 10px;
-
-    display:flex;
-
-    flex-direction:column;
-
-    justify-content:center;
-
-    border:
-        1px solid
-        var(--line);
-
-    border-radius:10px;
-
+.side-button.secondary{
     background:#fff;
-
-    overflow:hidden;
-
-    box-shadow:
-        0 2px 8px
-        rgba(20,35,50,.06);
+    color:#334155;
+    border:1px solid #cfd8df;
 }
-
-
-/* Màu từng KPI */
-
-.card-dtlcp{
-    border-top:
-        3px solid
-        var(--dtlcp);
-}
-
-.card-cgc{
-    border-top:
-        3px solid
-        var(--cgc);
-}
-
-.card-vdnc{
-    border-top:
-        3px solid
-        var(--vdnc);
-}
-
-.card-dai{
-    border-top:
-        3px solid
-        var(--dai);
-}
-
-.card-phun{
-    border-top:
-        3px solid
-        var(--phun);
-}
-
-.card-ksgm{
-    border-top:
-        3px solid
-        var(--ksgm);
-}
-
-.card-drug{
-    border-top:
-        3px solid
-        var(--drug);
-}
-
-
-/* Tên KPI */
-
-.sidebar-kpi .summary-head{
-    width:100%;
-
-    min-height:16px;
-
-    display:flex;
-
-    align-items:flex-start;
-
-    gap:6px;
-
-    margin:0;
-
-    color:#26343f;
-
-    font-size:10.5px;
-
-    line-height:14px;
-
-    font-weight:800;
-
-    white-space:normal;
-
-    overflow:visible;
-
-    text-overflow:clip;
-}
-
-.sidebar-kpi .summary-head i{
-    flex:
-        0 0 auto;
-
-    margin-top:1px;
-
-    font-size:10px;
-}
-
-
-/* Số chính */
-
-.sidebar-kpi .summary-main{
-    width:100%;
-
-    height:27px;
-    min-height:27px;
-
-    display:flex;
-
-    align-items:baseline;
-
-    gap:5px;
-
-    margin:
-        4px 0;
-}
-
-.sidebar-kpi .summary-main span{
-    color:#101820;
-
-    font-size:22px;
-
-    line-height:27px;
-
-    font-weight:900;
-
-    white-space:nowrap;
-
-    -webkit-font-smoothing:antialiased;
-}
-
-.sidebar-kpi .summary-main small{
-    color:#596775;
-
-    font-size:9px;
-
-    line-height:13px;
-
-    font-weight:600;
-
-    white-space:nowrap;
-}
-
-
-/* Thông tin phụ */
-
-.sidebar-kpi .summary-grid{
-    width:100%;
-
-    min-height:29px;
-
-    display:flex;
-
-    flex-direction:column;
-
-    gap:2px;
-
-    margin:0;
-
-    color:#4E5D6A;
-
-    font-size:9.5px;
-
-    line-height:12px;
-}
-
-.sidebar-kpi .summary-grid span{
-    width:100%;
-
-    min-height:12px;
-
-    display:block;
-
-    line-height:12px;
-
-    white-space:normal;
-
-    overflow:hidden;
-
-    text-overflow:ellipsis;
-
-    overflow-wrap:break-word;
-}
-
-.sidebar-kpi .summary-grid b{
-    color:#1D2A35;
-
-    font-size:9.5px;
-
-    font-weight:800;
-}
-
-
-/* KPI có tiêu đề dài */
-
-.sidebar-kpi .card-phun .summary-head,
-.sidebar-kpi .card-drug .summary-head{
-    font-size:9.5px;
-
-    line-height:12px;
-}
-
-
-/* =========================================================
-   MAIN MAP
-   ========================================================= */
 
 .main-map{
     position:relative;
-
     min-width:0;
-    min-height:0;
-
+    background:#e9eef1;
     overflow:hidden;
-
-    background:#edf1f3;
 }
-
-#map{
-    width:100%;
-    height:100%;
-
-    min-height:0;
-}
-
-
-/* Nền đường phố */
-
-.leaflet-tile{
-    filter:
-        grayscale(14%)
-        brightness(103%)
-        contrast(92%);
-}
-
-
-/* =========================================================
-   MAP TOOLBAR
-   ========================================================= */
 
 .map-toolbar{
     position:absolute;
-
-    top:10px;
-    right:10px;
-
-    left:auto;
-
-    z-index:1200;
-
+    z-index:1000;
+    left:12px;
+    right:12px;
+    top:12px;
     display:flex;
-
+    justify-content:space-between;
     align-items:center;
-    justify-content:flex-end;
-
+    gap:10px;
     pointer-events:none;
 }
 
-.map-toolbar .map-title-live{
-    display:none !important;
+.map-title-live{
+    max-width:calc(100% - 190px);
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    padding:8px 11px;
+    border-radius:10px;
+    background:rgba(255,255,255,.94);
+    box-shadow:0 4px 14px rgba(20,35,50,.14);
+    pointer-events:auto;
+}
+
+.map-title-live strong{
+    font-size:13px;
+}
+
+.map-title-live span{
+    font-size:9px;
+    color:#6c7884;
 }
 
 .map-actions{
     display:flex;
-
-    align-items:center;
-
-    gap:4px;
-
+    gap:5px;
     padding:4px;
-
-    border:
-        1px solid
-        rgba(34,55,72,.10);
-
     border-radius:10px;
-
-    background:
-        rgba(255,255,255,.96);
-
-    box-shadow:
-        0 4px 14px
-        rgba(20,35,50,.14);
-
+    background:rgba(255,255,255,.94);
+    box-shadow:0 4px 14px rgba(20,35,50,.14);
     pointer-events:auto;
 }
 
 .map-action{
     width:34px;
     height:32px;
-
-    display:flex;
-
-    align-items:center;
-    justify-content:center;
-
     border:0;
     border-radius:7px;
-
     background:#fff;
-
-    color:#425466;
-
+    color:#53616e;
     cursor:pointer;
 }
 
-.map-action:hover{
-    background:#eef5fa;
-}
-
+.map-action:hover,
 .map-action.active{
-    background:#1769e0;
+    background:#155eef;
     color:#fff;
 }
 
+.map-action.loading{
+    opacity:.55;
+    cursor:wait;
+}
 
-/* =========================================================
-   LEAFLET CONTROLS
-   ========================================================= */
+#map{
+    width:100%;
+    height:100%;
+    min-height:650px;
+    background:#edf1f3;
+}
 
-.leaflet-top.leaflet-left{
-    top:10px;
-    left:10px;
+.leaflet-container{
+    font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
 }
 
 .leaflet-control-zoom{
-    margin:0 !important;
-
-    border:0 !important;
-
-    border-radius:9px !important;
-
-    overflow:hidden;
-
-    box-shadow:
-        0 4px 14px
-        rgba(20,35,50,.16) !important;
+    border:0!important;
+    box-shadow:0 3px 12px rgba(20,35,50,.16)!important;
 }
 
 .leaflet-control-zoom a{
-    width:34px !important;
-    height:34px !important;
-
-    line-height:34px !important;
-
-    background:#fff !important;
-
-    color:#334155 !important;
-
-    border:0 !important;
+    border:0!important;
+    color:#334155!important;
 }
 
-.leaflet-control-zoom a:hover{
-    background:#f1f5f9 !important;
+.leaflet-control-scale-line{
+    background:rgba(255,255,255,.9)!important;
+    border:1px solid #64748b!important;
+    color:#334155!important;
+    font-size:10px!important;
 }
 
-.leaflet-bottom.leaflet-left{
-    left:10px;
-    bottom:10px;
-}
-
-.leaflet-control-scale{
-    margin:0 !important;
-}
-
-.leaflet-bottom.leaflet-right{
-    right:10px;
-    bottom:10px;
-}
-
-
-/* =========================================================
-   LEGEND
-   ========================================================= */
+/* ================= LEGEND ================= */
 
 .legend{
     width:220px;
     max-width:220px;
-
-    padding:
-        11px 12px;
-
-    background:
-        rgba(255,255,255,.97);
-
-    border:
-        1px solid
-        #cfd8df;
-
-    border-radius:10px;
-
-    box-shadow:
-        0 7px 20px
-        rgba(20,35,50,.16);
-
-    color:#263238;
-
-    font-size:10px;
-
+    padding:12px 13px;
+    border:1px solid rgba(20,35,50,.12);
+    border-radius:12px;
+    background:rgba(255,255,255,.96);
+    box-shadow:0 8px 24px rgba(20,35,50,.18);
+    font-size:11px;
     line-height:1.35;
 }
 
 .legend-title{
+    margin-bottom:3px;
     font-size:12px;
     font-weight:800;
+    color:#17212b;
 }
 
 .legend-method{
-    margin-bottom:6px;
-
+    margin-bottom:8px;
     color:#788592;
-
     font-size:8.5px;
+    line-height:1.3;
+}
+
+.legend-subtitle{
+    margin:6px 0 5px;
+    font-weight:800;
+    color:#334155;
 }
 
 .legend-row{
     display:flex;
-
     align-items:center;
-
-    gap:7px;
-
     min-height:19px;
+    gap:7px;
 }
 
 .legend-row i{
     width:18px;
-    height:13px;
-
-    flex:
-        0 0 18px;
-
-    border:
-        1px solid
-        rgba(0,0,0,.18);
-
+    height:12px;
+    flex:0 0 18px;
+    border:1px solid rgba(0,0,0,.10);
     border-radius:3px;
-}
-
-.legend-no-data{
-    width:18px;
-    height:13px;
-
-    flex:
-        0 0 18px;
-
-    border-radius:3px;
-
-    background:#D7E0E5;
-
-    border:
-        1px solid
-        #71808A;
-}
-
-.legend-red-dot{
-    width:9px;
-    height:9px;
-
-    flex:
-        0 0 9px;
-
-    border-radius:50%;
-
-    background:#D50000;
-
-    border:
-        2px solid
-        #fff;
-
-    box-shadow:
-        0 0 0 1px
-        #D50000;
 }
 
 .legend-divider{
     height:1px;
-
-    margin:
-        7px 0;
-
-    background:#dde3e7;
+    margin:7px 0;
+    background:#e3e7eb;
 }
 
+.legend-red-dot{
+    width:8px!important;
+    height:8px!important;
+    flex:0 0 8px!important;
+    border-radius:50%;
+    background:#E00000;
+    border:2px solid #fff!important;
+    box-shadow:0 0 0 1px #E00000;
+}
 
-/* =========================================================
-   TÊN XÃ
-   KHÔNG NỀN
-   ========================================================= */
+.legend-no-data{
+    width:18px;
+    height:12px;
+    flex:0 0 18px;
+    border-radius:3px;
+    background:#DCE3E8;
+    border:1px solid #AAB5BD;
+}
+
+/* ================= LABEL ================= */
 
 .map-label-wrap{
-    background:transparent !important;
-    border:0 !important;
+    background:transparent;
+    border:0;
 }
 
 .map-label{
     display:inline-block;
-
-    padding:0 !important;
-
-    background:transparent !important;
-
-    border:0 !important;
-
-    box-shadow:none !important;
-
-    color:#263238;
-
+    max-width:140px;
+    padding:1px 4px;
+    border-radius:4px;
+    background:rgba(255,255,255,.72);
+    color:#26323d;
     font-size:10px;
-
-    line-height:14px;
-
+    line-height:16px;
     font-weight:700;
-
     white-space:nowrap;
-
-    text-shadow:
-        -1px -1px 0 #fff,
-         1px -1px 0 #fff,
-        -1px  1px 0 #fff,
-         1px  1px 0 #fff,
-         0 0 2px
-         rgba(255,255,255,.85);
+    box-shadow:0 1px 3px rgba(0,0,0,.10);
+    text-shadow:0 1px 1px rgba(255,255,255,.8);
 }
 
+/* ================= MAP TITLE FOR EXPORT ================= */
 
-/* =========================================================
-   PANEL THÔNG TIN XÃ
-   ========================================================= */
+.map-export-title{
+    margin-left:38px;
+    margin-top:2px;
+    padding:8px 10px;
+    border-radius:9px;
+    background:rgba(255,255,255,.95);
+    box-shadow:0 3px 12px rgba(20,35,50,.12);
+    pointer-events:none;
+}
+
+.map-export-title div{
+    font-size:12px;
+    font-weight:800;
+}
+
+.map-export-title span{
+    display:block;
+    margin-top:2px;
+    font-size:8px;
+    color:#778491;
+}
+
+/* ================= RIGHT PANEL ================= */
 
 .panel{
-    min-width:0;
-    min-height:0;
-
-    height:100%;
-
     background:#fff;
-
-    border-left:
-        1px solid
-        #d7e0e6;
-
-    overflow:hidden;
+    border-left:1px solid var(--line);
+    overflow:auto;
 }
 
 .panel-head{
-    height:70px;
-
-    padding:
-        13px 15px 11px;
-
-    background:
-        linear-gradient(
-            180deg,
-            #fff 0%,
-            #f9fbfc 100%
-        );
-
-    border-bottom:
-        1px solid
-        var(--line);
+    padding:17px 17px 13px;
+    border-bottom:1px solid var(--line);
 }
 
 .panel-kicker{
     display:block;
-
     margin-bottom:4px;
-
     color:#71808d;
-
-    font-size:8px;
-
+    font-size:9px;
     font-weight:800;
-
-    letter-spacing:.6px;
+    letter-spacing:.7px;
 }
 
 .panel h2{
     margin:0;
-
+    font-size:18px;
     color:#17212b;
-
-    font-size:17px;
-
-    line-height:22px;
-
-    font-weight:800;
-
-    white-space:nowrap;
-
-    overflow:hidden;
-
-    text-overflow:ellipsis;
 }
-
-
-/* Vùng thông tin có thanh cuộn */
 
 #info-panel{
-    width:100%;
-
-    height:
-        calc(100% - 70px);
-
-    padding:12px;
-
-    overflow-y:auto;
-
-    overflow-x:hidden;
-
-    scrollbar-width:thin;
-
-    scrollbar-color:
-        #aebbc5
-        transparent;
+    padding:14px;
 }
 
-#info-panel::-webkit-scrollbar{
-    width:6px;
+.empty-panel{
+    min-height:180px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    color:#7a8792;
+    font-size:12px;
 }
 
-#info-panel::-webkit-scrollbar-track{
-    background:transparent;
+.empty-panel i{
+    margin-bottom:10px;
+    font-size:22px;
+    color:#a6b1ba;
 }
-
-#info-panel::-webkit-scrollbar-thumb{
-    background:#aebbc5;
-    border-radius:8px;
-}
-
-
-/* Thông tin chung */
 
 .info-block{
-    margin-bottom:10px;
+    margin-bottom:12px;
 }
 
 .info-district{
-    color:#17212b;
-
     font-size:16px;
-
-    line-height:20px;
-
-    font-weight:900;
+    font-weight:800;
+    color:#17212b;
 }
 
 .info-layer{
     margin-top:3px;
-
-    color:#6d7985;
-
-    font-size:10px;
-}
-
-
-/* Nhóm thông tin */
-
-.info-section{
-    margin-bottom:10px;
-
-    padding-bottom:9px;
-
-    border-bottom:
-        1px solid
-        #e2e7eb;
-}
-
-.info-section:last-child{
-    border-bottom:0;
-}
-
-.info-section-title{
-    margin-bottom:5px;
-
-    color:var(--green);
-
+    color:#6c7884;
     font-size:11px;
-
-    line-height:15px;
-
-    font-weight:800;
 }
-
-
-/* Bảng */
 
 .info-table{
-    width:100%;
-
-    margin-top:0;
-
+    margin-top:12px;
+    border:1px solid #e0e6eb;
+    border-radius:10px;
     overflow:hidden;
-
-    border:
-        1px solid
-        #e0e6eb;
-
-    border-radius:9px;
 }
 
 .info-row{
-    min-height:29px;
-
     display:flex;
-
-    align-items:center;
-
     justify-content:space-between;
-
-    gap:10px;
-
-    padding:
-        6px 8px;
-
-    border-bottom:
-        1px solid
-        #e7ebef;
-
-    font-size:10px;
-
-    line-height:13px;
+    gap:12px;
+    padding:10px 11px;
+    border-bottom:1px solid #e7ebef;
+    font-size:11px;
 }
 
 .info-row:last-child{
@@ -1096,78 +538,15 @@ select{
 }
 
 .info-row span{
-    min-width:0;
-
     color:#6d7985;
-
-    white-space:nowrap;
 }
 
 .info-row b{
-    min-width:0;
-
     color:#24313c;
-
     text-align:right;
-
-    white-space:normal;
 }
 
-
-/* Empty */
-
-.empty-panel{
-    min-height:150px;
-
-    display:flex;
-
-    flex-direction:column;
-
-    align-items:center;
-
-    justify-content:center;
-
-    margin:
-        20px 4px;
-
-    padding:
-        25px 16px;
-
-    border:
-        1px dashed
-        #d3dde4;
-
-    border-radius:12px;
-
-    background:#f9fbfc;
-
-    text-align:center;
-
-    color:#7a8792;
-}
-
-.empty-panel i{
-    margin-bottom:10px;
-
-    color:#9aaab7;
-
-    font-size:24px;
-}
-
-.empty-panel p{
-    max-width:210px;
-
-    margin:0;
-
-    font-size:11px;
-
-    line-height:1.55;
-}
-
-
-/* =========================================================
-   FULLSCREEN
-   ========================================================= */
+/* ================= FULLSCREEN ================= */
 
 .main-map:fullscreen{
     width:100vw;
@@ -1175,190 +554,86 @@ select{
 }
 
 .main-map:fullscreen #map{
-    width:100%;
-    height:100%;
+    height:100vh;
 }
 
-
-/* =========================================================
-   EXPORT
-   ========================================================= */
+/* ================= EXPORT ================= */
 
 .export-hide{
-    display:none !important;
+    display:none!important;
 }
 
+/* ================= RESPONSIVE ================= */
 
-/* =========================================================
-   RESPONSIVE
-   ========================================================= */
-
-@media(max-width:1100px){
-
-    .header{
-        grid-template-columns:
-            minmax(220px,1fr)
-            minmax(330px,1.3fr)
-            minmax(300px,1fr);
-
-        gap:12px;
-
-        padding:
-            8px 12px;
-    }
-
-    .header h1{
-        font-size:17px;
-    }
-
-    .header-layer select{
-        width:165px;
+@media(max-width:1400px){
+    .dashboard{
+        grid-template-columns:repeat(4,minmax(0,1fr));
     }
 
     .webgis{
-        grid-template-columns:
-            225px
-            minmax(0,1fr)
-            275px;
+        grid-template-columns:205px minmax(0,1fr) 290px;
     }
 }
 
-
-/* Chỉ chuyển layout khi màn hình thực sự nhỏ */
-
-@media(max-width:700px){
-
+@media(max-width:1050px){
     .header{
-        height:auto;
-        min-height:82px;
-
-        grid-template-columns:1fr;
-
-        gap:7px;
-
-        padding:
-            9px 12px;
-    }
-
-    .agency-line1,
-    .agency-line2{
-        white-space:normal;
-
-        overflow:visible;
-
-        text-overflow:clip;
+        flex-direction:column;
+        align-items:flex-start;
     }
 
     .header h1{
         text-align:left;
-
-        white-space:normal;
-
-        font-size:17px;
     }
 
-    .header-controls{
-        justify-content:flex-start;
-
-        flex-wrap:wrap;
+    .dashboard{
+        grid-template-columns:repeat(2,minmax(0,1fr));
     }
-
-    .header-layer{
-        flex:1;
-
-        min-width:220px;
-    }
-
-    .header-layer select{
-        width:auto;
-        flex:1;
-    }
-
 
     .webgis{
         grid-template-columns:1fr;
-
         height:auto;
+    }
+
+    .sidebar,
+    .panel{
+        border:0;
     }
 
     .sidebar{
-        order:1;
-
-        height:auto;
-
-        max-height:430px;
-
-        border-right:0;
-
-        border-bottom:
-            1px solid
-            var(--line);
-    }
-
-    .main-map{
-        order:2;
-
-        height:600px;
-
-        min-height:600px;
-    }
-
-    .panel{
-        order:3;
-
-        height:500px;
-
-        border-left:0;
-
-        border-top:
-            1px solid
-            var(--line);
-    }
-
-    #info-panel{
-        height:
-            calc(100% - 70px);
-    }
-
-    .sidebar-kpi{
         display:grid;
-
-        grid-template-columns:
-            repeat(
-                2,
-                minmax(0,1fr)
-            );
-
+        grid-template-columns:repeat(2,minmax(0,1fr));
         gap:8px;
     }
 
-    .sidebar-kpi .summary-card{
-        height:96px;
-        min-height:96px;
-        max-height:96px;
-
-        flex:
-            0 0 96px;
+    .side-card{
+        margin:0;
     }
 
+    .side-button{
+        margin:0;
+    }
+
+    #map{
+        height:72vh;
+        min-height:520px;
+    }
 }
 
-
-/* Điện thoại */
-
-@media(max-width:500px){
-
-    .sidebar-kpi{
+@media(max-width:650px){
+    .dashboard{
         grid-template-columns:1fr;
     }
 
-    .map-actions{
-        gap:2px;
+    .sidebar{
+        grid-template-columns:1fr;
     }
 
-    .map-action{
-        width:32px;
-        height:30px;
+    .map-title-live{
+        max-width:65%;
+    }
+
+    .map-title-live span{
+        display:none;
     }
 
     .legend{
@@ -1366,3 +641,25 @@ select{
         max-width:190px;
     }
 }
+
+
+/* =========================================================
+   KPI SIDEBAR - FLEXIBLE HEIGHT, NO TEXT COLLISION
+   ========================================================= */
+.sidebar-kpi{width:100%;display:flex;flex-direction:column;gap:9px;padding:2px 2px 14px 0}
+.sidebar-kpi .summary-card{width:100%;height:auto;min-height:92px;max-height:none;flex:0 0 auto;margin:0;padding:10px 11px;display:flex;flex-direction:column;justify-content:center;gap:3px;box-sizing:border-box;overflow:visible}
+.sidebar-kpi .summary-head{width:100%;min-width:0;height:auto;display:flex;align-items:flex-start;gap:6px;margin:0;font-size:10.5px;line-height:14px;font-weight:800;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:break-word;word-break:normal}
+.sidebar-kpi .summary-head i{flex:0 0 auto;margin-top:1px}
+.sidebar-kpi .summary-main{width:100%;min-width:0;min-height:27px;height:auto;display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 5px;margin:4px 0 3px}
+.sidebar-kpi .summary-main span{font-size:22px;line-height:26px;font-weight:900;white-space:nowrap;flex:0 0 auto}
+.sidebar-kpi .summary-main small{font-size:9px;line-height:13px;font-weight:600;white-space:normal;overflow-wrap:break-word;flex:0 1 auto}
+.sidebar-kpi .summary-grid{width:100%;min-width:0;min-height:0;height:auto;display:flex;flex-direction:column;gap:2px;margin:0;font-size:9.5px;line-height:13px}
+.sidebar-kpi .summary-grid span{width:100%;height:auto;display:block;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:break-word;word-break:normal}
+.sidebar-kpi .summary-grid b{font-size:9.5px;font-weight:800}
+.sidebar-kpi .card-phun,.sidebar-kpi .card-drug{min-height:98px}
+.sidebar-kpi .summary-card *{box-sizing:border-box}
+.sidebar-kpi .summary-card{transition:transform .15s ease,box-shadow .15s ease}
+.sidebar-kpi .summary-card:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(20,35,50,.09)}
+@media(max-width:1100px){.sidebar-kpi .summary-card{padding:9px 10px}.sidebar-kpi .summary-head{font-size:10px;line-height:13px}.sidebar-kpi .summary-main span{font-size:20px;line-height:24px}}
+@media(max-width:700px){.sidebar-kpi{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.sidebar-kpi .summary-card{width:100%;min-width:0;min-height:92px;height:auto;max-height:none;flex:none}.sidebar-kpi .summary-head{font-size:9.5px;line-height:13px}.sidebar-kpi .summary-main span{font-size:20px}}
+@media(max-width:500px){.sidebar-kpi{grid-template-columns:1fr}.sidebar-kpi .summary-card{min-height:88px}}
