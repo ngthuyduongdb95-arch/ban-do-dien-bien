@@ -755,7 +755,17 @@ function showPanel(feature, layer) {
     =============================== */
 
     const name = getName(feature);
-    const row = getRow(feature);
+const row = getRow(feature);
+
+console.log("=== CLICK XÃ ===");
+console.log("Tên xã từ GeoJSON:", name);
+console.log("Feature:", feature);
+console.log("Dòng dữ liệu tìm được:", row);
+console.log("Số dòng dữ liệu Google Sheets:",
+    Array.isArray(window.sheetData)
+        ? window.sheetData.length
+        : "không tìm thấy sheetData"
+);
 
     /* ===============================
        HIGHLIGHT XÃ ĐƯỢC CHỌN
