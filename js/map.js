@@ -31,18 +31,6 @@ const STREET_URL =
 const SATELLITE_URL =
     "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
 
-// ------------------------------------------------------
-// Escape HTML - dùng cho nhãn, panel và legend
-// ------------------------------------------------------
-function escapeHtml(value) {
-    return String(value ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
-
 const layerConfig = {
     DTLCP: {
         name: "Dịch tả lợn Châu Phi",
@@ -118,8 +106,11 @@ function initMap() {
     }).addTo(map);
 
     addBaseLayers();
-    // Không đặt tiêu đề nổi trên bản đồ; tiêu đề lớp dữ liệu nằm ở header/panel.
     addProvinceEmphasis();
+    map.createPane("diseaseMarkers");
+    map.getPane("diseaseMarkers").style.zIndex = 640;
+    map.createPane("mapLabels");
+    map.getPane("mapLabels").style.zIndex = 650;
     bindControls();
 
     return map;
@@ -149,16 +140,7 @@ function addProvinceEmphasis() {
     // và toàn bộ khu vực Điện Biên được đặt ở trung tâm bản đồ.
 }
 
-function addMapTitle() {
-    // Cố ý không tạo hộp tiêu đề trên bản đồ.
-    // Giữ tên lớp ở giao diện chính, tránh che bản đồ và zoom control.
-}
-
-
 function refreshMapTitle() {
-    const el = document.getElementById("exportMapTitle");
-    if (el) el.textContent = layerConfig[currentLayer].name;
-
     const title = document.getElementById("mapTitle");
     if (title) title.textContent = layerConfig[currentLayer].name;
 }
@@ -167,33 +149,59 @@ function refreshMapTitle() {
 // Dữ liệu
 // ------------------------------------------------------
 
+function normalizeMapName(value) {
+    return String(value ?? "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/đ/g, "d")
+        .replace(/\s+/g, " ")
+        .trim()
+        .replace(/^(xa|phuong|thi tran)\s+/i, "");
+}
+
 function getRows() {
+    try {
+        if (typeof sheetData !== "undefined" && sheetData && typeof sheetData === "object") {
+            const rows = Object.values(sheetData);
+            if (rows.length) return rows;
+        }
+    } catch (error) {
+        console.warn("MAP: không đọc được sheetData", error);
+    }
+
     if (typeof window.getRows === "function") {
         try {
             const rows = window.getRows();
             if (Array.isArray(rows)) return rows;
-        } catch (_) {}
+        } catch (error) {
+            console.warn("MAP: getRows() lỗi", error);
+        }
     }
-
-    if (typeof window.sheetData !== "undefined" && window.sheetData) {
-        return Object.values(window.sheetData);
-    }
-
     return [];
 }
 
 function getRow(feature) {
     if (!feature || !feature.properties) return null;
+    const p = feature.properties;
 
-    const id = Number(feature.properties.ID);
-    if (!Number.isFinite(id)) return null;
+    const rawId = p.ID ?? p.id ?? p.Id ?? p.id_xa ?? p.ID_XA;
+    const id = Number(rawId);
 
-    if (typeof window.sheetData !== "undefined" && window.sheetData) {
-        return window.sheetData[id] || null;
-    }
+    try {
+        if (Number.isFinite(id) && typeof sheetData !== "undefined" && sheetData && sheetData[id]) {
+            return sheetData[id];
+        }
+    } catch (_) {}
 
-    const rows = getRows();
-    return rows.find(r => Number(r["ID"]) === id) || null;
+    const geoName = p["Tên xã"] || p["Tên xã/phường"] || p.TEN_XA || p.TENXA || p.NAME || p.Name || p.name || "";
+    const target = normalizeMapName(geoName);
+    if (!target) return null;
+
+    return getRows().find(row => {
+        const sheetName = row["Tên xã"] || row["Tên xã/phường"] || row.TEN_XA || row.TENXA || row.NAME || row.Name || row.name || "";
+        return normalizeMapName(sheetName) === target;
+    }) || null;
 }
 
 function num(value) {
@@ -230,20 +238,13 @@ function norm(value) {
 
 function getName(feature) {
     const row = getRow(feature);
-
-    if (row && row["Tên xã"]) {
-        return String(row["Tên xã"]).trim();
+    if (row) {
+        const name = row["Tên xã"] || row["Tên xã/phường"] || row.TEN_XA || row.TENXA || row.NAME || row.Name || row.name;
+        if (String(name || "").trim()) return String(name).trim();
     }
-
     const p = feature?.properties || {};
     return String(
-        p["Tên xã"] ||
-        p["TEN_XA"] ||
-        p["TENXA"] ||
-        p["NAME"] ||
-        p["Name"] ||
-        p["name"] ||
-        ""
+        p["Tên xã"] || p["Tên xã/phường"] || p.TEN_XA || p.TENXA || p.NAME || p.Name || p.name || ""
     ).trim();
 }
 
@@ -276,7 +277,7 @@ function hasData(feature) {
     return num(row[cfg.field]) > 0 ||
            num(row[cfg.outbreak]) > 0 ||
            num(row[cfg.death]) > 0 ||
-           norm(row[cfg.status]) !== "";
+           norm(row[cfg.status]) === "đang có dịch";
 }
 
 // ------------------------------------------------------
@@ -286,96 +287,137 @@ function hasData(feature) {
 function jenks(values, classCount) {
     const data = values
         .filter(v => Number.isFinite(v) && v > 0)
+        .map(v => Math.max(1, Math.round(v)))
         .sort((a, b) => a - b);
 
     const unique = [...new Set(data)];
     if (!unique.length) return [];
     if (unique.length === 1) {
-        return [{ min: unique[0], max: unique[0] }];
+        return [{ min: 1, max: unique[0] }];
     }
 
     const k = Math.min(classCount, unique.length);
     const n = data.length;
 
-    const lower = Array.from(
-        { length: n + 1 },
-        () => new Array(k + 1).fill(0)
-    );
+    const lower = Array.from({ length: n + 1 }, () => Array(k + 1).fill(0));
+    const variance = Array.from({ length: n + 1 }, () => Array(k + 1).fill(Infinity));
 
-    const variance = Array.from(
-        { length: n + 1 },
-        () => new Array(k + 1).fill(Infinity)
-    );
+    variance[0][0] = 0;
 
-    for (let i = 1; i <= k; i++) {
-        lower[1][i] = 1;
-        variance[1][i] = 0;
+    for (let i = 1; i <= n; i++) {
+        variance[i][1] = 0;
+        lower[i][1] = 1;
     }
 
     for (let l = 2; l <= n; l++) {
         let sum = 0;
         let sumSq = 0;
-        let w = 0;
+        let weight = 0;
 
         for (let m = 1; m <= l; m++) {
             const idx = l - m + 1;
             const val = data[idx - 1];
 
-            w++;
+            weight += 1;
             sum += val;
             sumSq += val * val;
 
-            const v = sumSq - (sum * sum) / w;
+            const varianceClass = sumSq - (sum * sum) / weight;
 
-            if (idx !== 1) {
-                for (let j = 2; j <= k; j++) {
-                    const candidate = v + variance[idx - 1][j - 1];
-                    if (candidate <= variance[l][j]) {
-                        lower[l][j] = idx;
-                        variance[l][j] = candidate;
-                    }
+            if (idx === 1) {
+                variance[l][1] = varianceClass;
+                lower[l][1] = 1;
+                continue;
+            }
+
+            for (let j = 2; j <= k; j++) {
+                if (idx - 1 < j - 1) continue;
+
+                const previous = variance[idx - 1][j - 1];
+                if (!Number.isFinite(previous)) continue;
+
+                const candidate = previous + varianceClass;
+
+                if (candidate < variance[l][j]) {
+                    variance[l][j] = candidate;
+                    lower[l][j] = idx;
                 }
             }
         }
-
-        lower[l][1] = 1;
-        variance[l][1] = sumSq - (sum * sum) / w;
     }
 
-    const breaks = new Array(k + 1);
-    breaks[k] = data[n - 1];
+    if (!Number.isFinite(variance[n][k])) {
+        return equalIntegerRanges(data, k);
+    }
 
-    let idx = n;
+    const classStarts = Array(k + 1).fill(0);
+    classStarts[k] = 1;
+
+    let count = n;
+
     for (let j = k; j >= 2; j--) {
-        const id = lower[idx][j] - 2;
-        breaks[j - 1] = data[id];
-        idx = lower[idx][j] - 1;
+        const start = lower[count][j];
+        if (!start) return equalIntegerRanges(data, k);
+        classStarts[j - 1] = start;
+        count = start - 1;
     }
 
     const ranges = [];
 
+    for (let i = 1; i <= k; i++) {
+        const startIndex = i === 1 ? 0 : classStarts[i] - 1;
+        const endIndex = i === k ? n - 1 : classStarts[i + 1] - 2;
+
+        if (startIndex < 0 || endIndex < startIndex || endIndex >= n) continue;
+
+        const min = i === 1 ? 1 : data[startIndex];
+        const max = data[endIndex];
+
+        if (min <= max) ranges.push({ min, max });
+    }
+
+    if (!ranges.length) return equalIntegerRanges(data, k);
+
+    ranges[0].min = 1;
+
+    for (let i = 1; i < ranges.length; i++) {
+        ranges[i].min = ranges[i - 1].max + 1;
+    }
+
+    ranges[ranges.length - 1].max = data[n - 1];
+
+    return ranges;
+}
+
+function equalIntegerRanges(data, k) {
+    if (!data.length) return [];
+    if (k <= 1) return [{ min: 1, max: data[data.length - 1] }];
+
+    const ranges = [];
     for (let i = 0; i < k; i++) {
-        const min = i === 0 ? data[0] : breaks[i] + 1;
-        const max = breaks[i + 1];
+        const start = Math.floor(i * data.length / k);
+        const end = Math.max(start, Math.floor((i + 1) * data.length / k) - 1);
 
-        if (min <= max) {
-            ranges.push({ min, max });
-        }
+        const min = i === 0 ? 1 : data[start];
+        const max = data[Math.min(end, data.length - 1)];
+
+        if (min <= max) ranges.push({ min, max });
     }
 
-    // Bảo đảm giá trị lớn nhất luôn thuộc lớp cuối.
-    if (ranges.length) {
-        ranges[ranges.length - 1].max = data[data.length - 1];
+    for (let i = 1; i < ranges.length; i++) {
+        ranges[i].min = ranges[i - 1].max + 1;
     }
 
+    ranges[ranges.length - 1].max = data[data.length - 1];
     return ranges;
 }
 
 function calculateDamageRanges() {
     const cfg = layerConfig[currentLayer];
 
-    if (!["DTLCP", "CGC", "VDNC", "DAI"].includes(currentLayer)) {
-        return [];
+    if (!['DTLCP', 'CGC', 'VDNC', 'DAI'].includes(currentLayer)) {
+        damageRanges = [];
+        return damageRanges;
     }
 
     const values = getRows()
@@ -390,9 +432,7 @@ function getDamageClass(value, ranges) {
     if (value <= 0 || !ranges.length) return -1;
 
     for (let i = 0; i < ranges.length; i++) {
-        if (value >= ranges[i].min && value <= ranges[i].max) {
-            return i;
-        }
+        if (value >= ranges[i].min && value <= ranges[i].max) return i;
     }
 
     return ranges.length - 1;
@@ -408,10 +448,10 @@ function getDiseaseStyle(row) {
 
     if (value <= 0) {
         return {
-            fillColor: "#DCE3E8",
-            fillOpacity: 0.48,
-            color: "#AAB5BD",
-            weight: 0.8
+            fillColor: cfg.colors[0],
+            fillOpacity: 0.62,
+            color: "#FFFFFF",
+            weight: 0.85
         };
     }
 
@@ -431,10 +471,10 @@ function getPhunStyle(row) {
 
     if (v <= 0) {
         return {
-            fillColor: "#DCE3E8",
-            fillOpacity: 0.48,
-            color: "#AAB5BD",
-            weight: 0.8
+            fillColor: layerConfig.PHUN.colors[0],
+            fillOpacity: 0.62,
+            color: "#FFFFFF",
+            weight: 0.85
         };
     }
 
@@ -453,10 +493,10 @@ function getKsgmStyle(row) {
 
     if (!active && count <= 0) {
         return {
-            fillColor: "#DCE3E8",
-            fillOpacity: 0.48,
-            color: "#AAB5BD",
-            weight: 0.8
+            fillColor: layerConfig.KSGM.colors[0],
+            fillOpacity: 0.62,
+            color: "#FFFFFF",
+            weight: 0.85
         };
     }
 
@@ -475,10 +515,10 @@ function getDrugStyle(row) {
 
     if (count <= 0) {
         return {
-            fillColor: "#DCE3E8",
-            fillOpacity: 0.48,
-            color: "#AAB5BD",
-            weight: 0.8
+            fillColor: layerConfig.CSBBTTY.colors[0],
+            fillOpacity: 0.62,
+            color: "#FFFFFF",
+            weight: 0.85
         };
     }
 
@@ -524,19 +564,58 @@ function getFeatureStyle(feature) {
 // Nhãn xã - chỉ hiện khi có số liệu, tự động theo zoom
 // ------------------------------------------------------
 
-const labelOffsets = {
-    "Điện Biên Phủ": [0.004, 0],
-    "Thanh Yên": [0.002, 0.004],
-    "Thanh Nưa": [0.004, -0.004],
-    "Thanh An": [0.002, 0],
-    "Mường Phăng": [0.002, 0],
-    "Na Sang": [0.002, 0],
-    "Nà Tấu": [0.002, 0],
-    "Mường Ảng": [0.002, 0],
-    "Mường Lay": [0.002, 0],
-    "Mường Chà": [0.002, 0],
-    "Mường Nhé": [0.002, 0],
-    "Sín Thầu": [0.002, 0]
+/*
+ * Vị trí nhãn thủ công theo pixel.
+ * Không dùng thuật toán tự ẩn nhãn: xã đã có số liệu thì luôn hiện tên.
+ * Có thể tinh chỉnh từng xã mà không ảnh hưởng dữ liệu.
+ */
+const labelPixelOffsets = {
+    "Điện Biên Phủ": [0, 15],
+    "Thanh Yên": [0, 18],
+    "Thanh Nưa": [0, -18],
+    "Thanh Xương": [-8, 18],
+    "Thanh An": [12, -12],
+    "Noong Hẹt": [15, 10],
+    "Noong Luống": [-12, -14],
+    "Sam Mứn": [0, 18],
+    "Núa Ngam": [15, -10],
+    "Mường Phăng": [0, -16],
+    "Mường Lạn": [15, 10],
+    "Mường Ảng": [0, 18],
+    "Búng Lao": [15, -10],
+    "Mường Đăng": [-15, 10],
+    "Mường Lói": [0, -16],
+    "Nà Tấu": [12, 8],
+    "Nà Nhạn": [-12, -10],
+    "Nậm Nhừ": [12, -12],
+    "Nậm Kè": [0, -15],
+    "Nà Hỳ": [-12, 10],
+    "Nà Bủng": [0, 18],
+    "Sín Thầu": [0, -16],
+    "Mường Nhé": [12, 10],
+    "Mường Toong": [-12, -10],
+    "Chà Cang": [0, 16],
+    "Chà Tở": [12, -12],
+    "Mường Tùng": [0, 18],
+    "Mường Mươn": [-14, 10],
+    "Mường Chà": [12, -12],
+    "Ma Thì Hồ": [0, 16],
+    "Pa Ham": [14, -10],
+    "Si Pa Phìn": [0, 18],
+    "Na Sang": [12, -12],
+    "Nậm Nèn": [0, -16],
+    "Mường Lay": [12, 10],
+    "Lay Nưa": [0, -15],
+    "Tủa Chùa": [12, -10],
+    "Tủa Thàng": [0, 18],
+    "Mường Báng": [-12, -10],
+    "Sính Phình": [12, 12],
+    "Sín Chải": [0, -16],
+    "Xá Nhè": [12, 10],
+    "Mường Đun": [0, 16],
+    "Quài Tở": [12, -12],
+    "Quài Nưa": [0, 16],
+    "Chiềng Sinh": [0, -15]
 };
 
 function featureCenter(feature) {
@@ -546,57 +625,60 @@ function featureCenter(feature) {
 }
 
 function labelVisibleAtZoom() {
-    if (map.getZoom() >= 10) return true;
-    if (map.getZoom() >= 9 && ["DTLCP", "CGC", "VDNC", "DAI"].includes(currentLayer)) {
-        return true;
-    }
-    return false;
+    return map.getZoom() >= 8;
 }
 
 function renderLabels() {
     if (!map || !geojsonData) return;
-
-    if (!labelLayer) {
-        labelLayer = L.layerGroup().addTo(map);
-    }
-
+    if (!labelLayer) labelLayer = L.layerGroup().addTo(map);
     labelLayer.clearLayers();
-
     if (!labelVisibleAtZoom()) return;
 
-    // Chỉ hiện tên xã/phường có số liệu. KHÔNG tự động ẩn tên vì chồng nhau.
     geojsonData.features.forEach(feature => {
         if (!hasData(feature)) return;
-
         const name = getName(feature);
         if (!name) return;
-
         const center = featureCenter(feature);
         if (!center) return;
 
-        const offset = labelOffsets[name] || [0, 0];
-        const latlng = L.latLng(
-            center.lat + offset[0],
-            center.lng + offset[1]
-        );
-
-        const width = Math.max(46, name.length * 6.2);
+        const basePoint = map.latLngToLayerPoint(center);
+        const offset = getLabelOffset(name);
+        const labelPoint = L.point(basePoint.x + offset[0], basePoint.y + offset[1]);
+        const latlng = map.layerPointToLatLng(labelPoint);
+        const width = Math.max(42, Math.min(150, name.length * 5.7 + 8));
 
         const marker = L.marker(latlng, {
             interactive: false,
             keyboard: false,
             bubblingMouseEvents: false,
-            zIndexOffset: 100,
+            zIndexOffset: 0,
+            pane: "mapLabels",
             icon: L.divIcon({
                 className: "map-label-wrap",
-                html: `<span class="map-label" style="pointer-events:none;background:transparent!important;border:0!important;box-shadow:none!important;color:#26323d;font-size:10px;font-weight:500;line-height:14px;white-space:nowrap;text-shadow:0 1px 2px rgba(255,255,255,.95),0 -1px 2px rgba(255,255,255,.95)">${escapeHtml(name)}</span>`,
+                html: `<span class="map-label">${escapeHtml(name)}</span>`,
                 iconSize: [width, 18],
-                iconAnchor: [width / 2, 9] 
+                iconAnchor: [width / 2, 9]
             })
         });
-
         labelLayer.addLayer(marker);
     });
+}
+
+
+function getLabelOffset(name) {
+    const raw = String(name || "").trim();
+    if (labelPixelOffsets[raw]) return labelPixelOffsets[raw];
+    const clean = raw.replace(/^(xã|phường|thị trấn)\s+/i, "").trim();
+    return labelPixelOffsets[clean] || [0, 12];
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
 
 // ------------------------------------------------------
@@ -622,6 +704,7 @@ function renderDiseaseMarkers() {
         if (!center) return;
 
         L.circleMarker(center, {
+            pane: "diseaseMarkers",
             radius: 4.5,
             color: "#FFFFFF",
             weight: 2.5,
@@ -637,131 +720,110 @@ function renderDiseaseMarkers() {
 // Panel bên phải
 // ------------------------------------------------------
 
+function statusBadge(value) {
+    const text = String(value || "--").trim();
+    const n = normalizeMapName(text);
+    let cls = "neutral";
+    if (n === "dang co dich") cls = "danger";
+    else if (n === "da het dich") cls = "success";
+    else if (n === "da trien khai" || n === "hoan thanh") cls = "success";
+    return `<span class="info-status ${cls}">${escapeHtml(text)}</span>`;
+}
+
+function infoSection(title, rows, tone="blue") {
+    return `
+        <section class="info-section info-${tone}">
+            <div class="info-section-title">${escapeHtml(title)}</div>
+            <div class="info-table">
+                ${rows.map(([label, value, type]) => `
+                    <div class="info-row">
+                        <span>${escapeHtml(label)}</span>
+                        <b>${type === "status" ? statusBadge(value) : escapeHtml(value)}</b>
+                    </div>
+                `).join("")}
+            </div>
+        </section>
+    `;
+}
+
 function showPanel(feature, layer = null) {
     selectedFeature = feature;
 
-    if (selectedLayer && selectedLayer !== layer && geojsonLayer) {
-        try { geojsonLayer.resetStyle(selectedLayer); } catch (_) {}
-    }
-
-    selectedLayer = layer || findLayer(feature);
-
-    if (selectedLayer) {
-        selectedLayer.setStyle({
-            weight: 3,
-            color: "#0B57D0",
-            fillOpacity: 0.96
-        });
-        selectedLayer.bringToFront();
-    }
-
     const row = getRow(feature);
-    const name = getName(feature);
+    const name = getName(feature) || "Xã/phường";
+    const title = document.getElementById("panel-title");
+    const panel = document.getElementById("info-panel");
 
-    const title =
-        document.getElementById("panel-title") ||
-        document.querySelector("aside.panel h2, .panel h2");
-
-    const panel =
-        document.getElementById("info-panel") ||
-        document.querySelector("aside.panel #info-panel, .panel #info-panel");
-
-    if (title) {
-        title.textContent = name || "Xã/phường";
-        title.style.display = "block";
-    }
-
-    if (!panel) {
-        console.warn("WEBGIS: Không tìm thấy #info-panel");
-        return;
-    }
+    if (title) title.textContent = name;
+    if (!panel) return;
 
     if (!row) {
-        panel.innerHTML = `<div class="empty-panel"><p>Không có dữ liệu.</p></div>`;
+        panel.innerHTML = `
+            <div class="empty-panel">
+                <strong>${escapeHtml(name)}</strong>
+                <p>Chưa tìm thấy dòng dữ liệu tương ứng trong Google Sheets.</p>
+            </div>`;
         return;
     }
 
-    let html = `<div class="info-block">
-        <div class="info-district">${escapeHtml(name)}</div>
-        <div class="info-layer">${escapeHtml(layerConfig[currentLayer].name)}</div>
-    </div>`;
+    let html = `
+        <div class="selected-summary">
+            <div class="selected-name">${escapeHtml(name)}</div>
+            <div class="selected-hint">Thông tin tổng hợp của xã/phường</div>
+        </div>
+    `;
 
-    if (currentLayer === "DTLCP") {
-        html += infoRows([
-            ["Trạng thái", row["DTLCP_Trạng thái"] || "--"],
-            ["Ổ dịch", fmt(row["DTLCP_Ổ dịch"])],
-            ["Tiêu hủy", `${fmt(row["DTLCP_Chết"])} con`],
-            ["Khối lượng", `${fmt(row["DTLCP_Trọng lượng"])} kg`],
-            ["Ngày cuối", formatDate(row["DTLCP_Ngày cuối"])]
-        ]);
-    }
+    html += infoSection("Dịch tả lợn Châu Phi", [
+        ["Trạng thái", row["DTLCP_Trạng thái"] || "--", "status"],
+        ["Ổ dịch", fmt(row["DTLCP_Ổ dịch"]) + " ổ"],
+        ["Tiêu hủy", fmt(row["DTLCP_Chết"]) + " con"],
+        ["Khối lượng", fmt(row["DTLCP_Trọng lượng"]) + " kg"],
+        ["Ngày cuối", formatDate(row["DTLCP_Ngày cuối"])]
+    ], "red");
 
-    if (currentLayer === "CGC") {
-        html += infoRows([
-            ["Trạng thái", row["CGC_Trạng thái"] || "--"],
-            ["Ổ dịch", fmt(row["CGC_Ổ dịch"])],
-            ["Tiêu hủy", `${fmt(row["CGC_Chết"])} con`],
-            ["Khối lượng", `${fmt(row["CGC_Trọng lượng"])} kg`],
-            ["Ngày cuối", formatDate(row["CGC_Ngày cuối"])]
-        ]);
-    }
+    html += infoSection("Cúm gia cầm", [
+        ["Trạng thái", row["CGC_Trạng thái"] || "--", "status"],
+        ["Ổ dịch", fmt(row["CGC_Ổ dịch"]) + " ổ"],
+        ["Tiêu hủy", fmt(row["CGC_Chết"]) + " con"],
+        ["Khối lượng", fmt(row["CGC_Trọng lượng"]) + " kg"],
+        ["Ngày cuối", formatDate(row["CGC_Ngày cuối"])]
+    ], "green");
 
-    if (currentLayer === "VDNC") {
-        html += infoRows([
-            ["Trạng thái", row["VDNC_Trạng thái"] || "--"],
-            ["Ổ dịch", fmt(row["VDNC_Ổ dịch"])],
-            ["Mắc", `${fmt(row["VDNC_Mắc"])} con`],
-            ["Chết", `${fmt(row["VDNC_Chết"])} con`],
-            ["Ngày cuối", formatDate(row["VDNC_Ngày cuối"])]
-        ]);
-    }
+    html += infoSection("Viêm da nổi cục", [
+        ["Trạng thái", row["VDNC_Trạng thái"] || "--", "status"],
+        ["Ổ dịch", fmt(row["VDNC_Ổ dịch"]) + " ổ"],
+        ["Mắc", fmt(row["VDNC_Mắc"]) + " con"],
+        ["Chết", fmt(row["VDNC_Chết"]) + " con"],
+        ["Ngày cuối", formatDate(row["VDNC_Ngày cuối"])]
+    ], "blue");
 
-    if (currentLayer === "DAI") {
-        html += infoRows([
-            ["Trạng thái", row["DAI_Trạng thái"] || "--"],
-            ["Ổ dịch", fmt(row["DAI_Ổ dịch"])],
-            ["Chết", `${fmt(row["DAI_Chết"])} con`],
-            ["Tiêu hủy", `${fmt(row["DAI_Tiêu hủy"])} con`],
-            ["Ngày cuối", formatDate(row["DAI_Ngày cuối"])]
-        ]);
-    }
+    html += infoSection("Bệnh Dại", [
+        ["Trạng thái", row["DAI_Trạng thái"] || "--", "status"],
+        ["Ổ dịch", fmt(row["DAI_Ổ dịch"]) + " ổ"],
+        ["Chết", fmt(row["DAI_Chết"]) + " con"],
+        ["Tiêu hủy", fmt(row["DAI_Tiêu hủy"]) + " con"],
+        ["Ngày cuối", formatDate(row["DAI_Ngày cuối"])]
+    ], "purple");
 
-    if (currentLayer === "PHUN") {
-        html += infoRows([
-            ["Tiến độ", row["PHUN_Tiến độ"] || "--"],
-            ["Số hộ", fmt(row["PHUN_Số hộ"])],
-            ["Vòng", fmt(row["PHUN_Vòng"])],
-            ["Diện tích", row["PHUN_Diện tích"] || "--"],
-            ["Ngày", formatDate(row["PHUN_Ngày"])]
-        ]);
-    }
+    html += infoSection("Thực hiện tháng Tổng vệ sinh, khử trùng", [
+        ["Tiến độ", row["PHUN_Tiến độ"] || "--"],
+        ["Số hộ", fmt(row["PHUN_Số hộ"]) + " hộ"],
+        ["Số vòng", fmt(row["PHUN_Vòng"])],
+        ["Diện tích", row["PHUN_Diện tích"] || "--"],
+        ["Ngày", formatDate(row["PHUN_Ngày"])]
+    ], "teal");
 
-    if (currentLayer === "KSGM") {
-        html += infoRows([
-            ["Trạng thái", row["KSGM_Trạng thái"] || "--"],
-            ["Số cơ sở", fmt(row["KSGM_Cơ sở"])]
-        ]);
-    }
+    html += infoSection("Kiểm soát giết mổ", [
+        ["Trạng thái", row["KSGM_Trạng thái"] || "--", "status"],
+        ["Số cơ sở", fmt(row["KSGM_Cơ sở"]) + " cơ sở"]
+    ], "brown");
 
-    if (currentLayer === "CSBBTTY") {
-        html += infoRows([
-            ["Số cơ sở", fmt(row["CSBBTTY_Cơ sở"])]
-        ]);
-    }
+    html += infoSection("Cơ sở buôn bán thuốc thú y", [
+        ["Số cơ sở", fmt(row["CSBBTTY_Cơ sở"]) + " cơ sở"]
+    ], "cyan");
 
     panel.innerHTML = html;
     panel.scrollTop = 0;
-}
-
-function infoRows(items) {
-    return `<div class="info-table">
-        ${items.map(([label, value]) => `
-            <div class="info-row">
-                <span>${escapeHtml(label)}</span>
-                <b>${escapeHtml(value)}</b>
-            </div>
-        `).join("")}
-    </div>`;
 }
 
 function clearPanel() {
@@ -770,18 +832,15 @@ function clearPanel() {
     }
     selectedLayer = null;
     selectedFeature = null;
-
     const title = document.getElementById("panel-title");
     const panel = document.getElementById("info-panel");
-
     if (title) title.textContent = "Chưa chọn xã/phường";
     if (panel) {
         panel.innerHTML = `
             <div class="empty-panel">
                 <i class="fa-solid fa-arrow-pointer"></i>
                 <p>Nhấn vào một xã/phường trên bản đồ để xem thông tin chi tiết.</p>
-            </div>
-        `;
+            </div>`;
     }
 }
 
@@ -802,108 +861,101 @@ function updateLegend() {
         legendControl = null;
     }
 
-    legendControl = L.control({ position: "bottomright" });
+    legendControl = L.control({ position: 'bottomright' });
 
     legendControl.onAdd = function () {
-        const div = L.DomUtil.create("div", "legend");
+        const div = L.DomUtil.create('div', 'legend');
         const cfg = layerConfig[currentLayer];
 
-        if (["DTLCP", "CGC", "VDNC", "DAI"].includes(currentLayer)) {
+        // Bệnh: giữ cách chú giải cũ, chỉ thay khoảng màu bằng Jenks động.
+        if (['DTLCP', 'CGC', 'VDNC', 'DAI'].includes(currentLayer)) {
             const ranges = damageRanges;
 
             let html = `
-                <div class="legend-title">${escapeHtml(cfg.name)}</div>
-                <div class="legend-method">
-                    Phân cấp dữ liệu động bằng phương pháp Natural Breaks (Jenks)
-                </div>
+                <h4>${escapeHtml(cfg.name)}</h4>
 
-                <div class="legend-subtitle">Mức độ thiệt hại</div>
-            `;
-
-            ranges.forEach((range, i) => {
-                const color = cfg.colors[Math.min(i, cfg.colors.length - 1)];
-                const label = range.min === range.max
-                    ? `${fmt(range.min)} con`
-                    : `${fmt(range.min)}–${fmt(range.max)} con`;
-
-                html += `
-                    <div class="legend-row">
-                        <i style="background:${color}"></i>
-                        <span>${label}</span>
-                    </div>
-                `;
-            });
-
-            html += `
-                <div class="legend-divider"></div>
-                <div class="legend-row">
+                <div class="legend-dot-row">
                     <span class="legend-red-dot"></span>
                     <span>Xã đang có dịch</span>
                 </div>
+
                 <div class="legend-row">
-                    <span class="legend-no-data"></span>
-                    <span>0 – không có dịch</span>
+                    <i style="background:${cfg.colors[0]}"></i>
+                    <span>Xã không có dịch</span>
                 </div>
             `;
+
+            if (ranges.length) {
+                html += `<hr><div class="legend-section-title">Mức độ thiệt hại</div>`;
+
+                ranges.forEach((range, index) => {
+                    const color = cfg.colors[Math.min(index, cfg.colors.length - 1)];
+                    const label = range.min === range.max
+                        ? `${fmt(range.min)} con`
+                        : `${fmt(range.min)}–${fmt(range.max)} con`;
+
+                    html += `
+                        <div class="legend-row">
+                            <i style="background:${color}"></i>
+                            <span>${label}</span>
+                        </div>
+                    `;
+                });
+            } else {
+                html += `<hr><div class="legend-empty">Chưa có số liệu thiệt hại</div>`;
+            }
 
             div.innerHTML = html;
+            L.DomEvent.disableClickPropagation(div);
             return div;
         }
 
-        if (currentLayer === "PHUN") {
+        // Phun: giữ cách chú giải cũ, theo vòng.
+        if (currentLayer === 'PHUN') {
             div.innerHTML = `
-                <div class="legend-title">Phun khử trùng</div>
-                <div class="legend-subtitle">Số vòng</div>
-                ${cfg.colors.map((color, i) => `
-                    <div class="legend-row">
-                        <i style="background:${color}"></i>
-                        <span>Vòng ${i + 1}</span>
-                    </div>
-                `).join("")}
-                <div class="legend-divider"></div>
-                <div class="legend-row">
-                    <span class="legend-no-data"></span>
-                    <span>Chưa triển khai</span>
-                </div>
+                <h4>Phun khử trùng</h4>
+                <div class="legend-row"><i style="background:${cfg.colors[0]}"></i><span>Vòng 1</span></div>
+                <div class="legend-row"><i style="background:${cfg.colors[1]}"></i><span>Vòng 2</span></div>
+                <div class="legend-row"><i style="background:${cfg.colors[2]}"></i><span>Vòng 3</span></div>
+                <div class="legend-row"><i style="background:${cfg.colors[3]}"></i><span>Vòng 4</span></div>
+                <div class="legend-row"><i style="background:${cfg.colors[4]}"></i><span>Vòng 5 trở lên</span></div>
+                <hr>
+                <div class="legend-row"><i style="background:${cfg.colors[0]}"></i><span>Chưa triển khai / 0</span></div>
             `;
+            L.DomEvent.disableClickPropagation(div);
             return div;
         }
 
-        if (currentLayer === "KSGM") {
+        // KSGM và CSBBTTY: giữ cách chú giải cũ theo số cơ sở.
+        if (currentLayer === 'KSGM') {
             div.innerHTML = `
-                <div class="legend-title">Kiểm soát giết mổ</div>
-                <div class="legend-subtitle">Số cơ sở</div>
-                ${cfg.colors.map((color, i) => `
-                    <div class="legend-row">
-                        <i style="background:${color}"></i>
-                        <span>${i + 1} cơ sở</span>
-                    </div>
-                `).join("")}
-                <div class="legend-divider"></div>
-                <div class="legend-row">
-                    <span class="legend-no-data"></span>
-                    <span>Chưa triển khai / 0 cơ sở</span>
-                </div>
+                <h4>Kiểm soát giết mổ</h4>
+                <div class="legend-row"><i style="background:${cfg.colors[0]}"></i><span>1 cơ sở</span></div>
+                <div class="legend-row"><i style="background:${cfg.colors[1]}"></i><span>2 cơ sở</span></div>
+                <div class="legend-row"><i style="background:${cfg.colors[2]}"></i><span>3 cơ sở</span></div>
+                <div class="legend-row"><i style="background:${cfg.colors[3]}"></i><span>4 cơ sở</span></div>
+                <div class="legend-row"><i style="background:${cfg.colors[4]}"></i><span>5 cơ sở</span></div>
+                <div class="legend-row"><i style="background:${cfg.colors[5]}"></i><span>6 cơ sở trở lên</span></div>
+                <hr>
+                <div class="legend-row"><i style="background:${cfg.colors[0]}"></i><span>0 cơ sở / chưa triển khai</span></div>
             `;
+            L.DomEvent.disableClickPropagation(div);
             return div;
         }
 
         div.innerHTML = `
-            <div class="legend-title">Cơ sở buôn bán thuốc thú y</div>
-            <div class="legend-subtitle">Số cơ sở</div>
-            ${cfg.colors.map((color, i) => `
-                <div class="legend-row">
-                    <i style="background:${color}"></i>
-                    <span>${i + 1} cơ sở</span>
-                </div>
-            `).join("")}
-            <div class="legend-divider"></div>
-            <div class="legend-row">
-                <span class="legend-no-data"></span>
-                <span>0 cơ sở</span>
-            </div>
+            <h4>Cơ sở thuốc thú y</h4>
+            <div class="legend-row"><i style="background:${cfg.colors[0]}"></i><span>1 cơ sở</span></div>
+            <div class="legend-row"><i style="background:${cfg.colors[1]}"></i><span>2 cơ sở</span></div>
+            <div class="legend-row"><i style="background:${cfg.colors[2]}"></i><span>3 cơ sở</span></div>
+            <div class="legend-row"><i style="background:${cfg.colors[3]}"></i><span>4 cơ sở</span></div>
+            <div class="legend-row"><i style="background:${cfg.colors[4]}"></i><span>5 cơ sở</span></div>
+            <div class="legend-row"><i style="background:${cfg.colors[5]}"></i><span>6 cơ sở trở lên</span></div>
+            <hr>
+            <div class="legend-row"><i style="background:${cfg.colors[0]}"></i><span>0 cơ sở</span></div>
         `;
 
+        L.DomEvent.disableClickPropagation(div);
         return div;
     };
 
@@ -923,6 +975,7 @@ function renderGeoJSON() {
         map.removeLayer(geojsonLayer);
         geojsonLayer = null;
     }
+    selectedLayer = null;
 
     if (labelLayer) {
         map.removeLayer(labelLayer);
@@ -949,14 +1002,18 @@ function renderGeoJSON() {
                 },
 
                 mouseout() {
-                    geojsonLayer.resetStyle(this);
+                    if (selectedLayer !== this) geojsonLayer.resetStyle(this);
                 },
 
                 click(e) {
-                    if (e && e.originalEvent) {
-                        L.DomEvent.stopPropagation(e.originalEvent);
+                    if (selectedLayer && selectedLayer !== this && geojsonLayer) {
+                        try { geojsonLayer.resetStyle(selectedLayer); } catch (_) {}
                     }
+                    selectedLayer = this;
+                    this.setStyle({ weight: 2.8, color: "#0B57D0", fillOpacity: 0.95 });
+                    this.bringToFront();
                     showPanel(feature, this);
+                    if (e && e.originalEvent) L.DomEvent.stopPropagation(e.originalEvent);
                 }
             });
         }
@@ -969,7 +1026,11 @@ function renderGeoJSON() {
 
     if (selectedFeature) {
         const row = getRow(selectedFeature);
-        if (row) showPanel(selectedFeature);
+        const freshLayer = findLayer(selectedFeature);
+        if (row) {
+            selectedLayer = freshLayer;
+            showPanel(selectedFeature, freshLayer);
+        }
     }
 }
 
@@ -983,28 +1044,50 @@ function refreshMap() {
 // ------------------------------------------------------
 
 async function loadGeoJSON() {
-    const response = await fetch("data/dienbien_xa.geojson", {
-        cache: "no-store"
-    });
+    const urls = [
+        "data/dienbien_xa.geojson",
+        "https://ngthuyduongb95-arch.github.io/ban-do-dien-bien/data/dienbien_xa.geojson"
+    ];
 
-    if (!response.ok) {
-        throw new Error("Không đọc được GeoJSON: HTTP " + response.status);
+    let response = null;
+    let lastError = null;
+
+    for (const url of urls) {
+        try {
+            const res = await fetch(url, { cache: "no-store" });
+            if (res.ok) {
+                response = res;
+                break;
+            }
+            lastError = new Error("HTTP " + res.status + " - " + url);
+        } catch (err) {
+            lastError = err;
+        }
+    }
+
+    if (!response) {
+        throw new Error("Không đọc được GeoJSON. " + (lastError?.message || ""));
     }
 
     const data = await response.json();
-
     if (!data || data.type !== "FeatureCollection") {
         throw new Error("GeoJSON phải là FeatureCollection.");
     }
 
     geojsonData = data;
+    const matchedFeatures = data.features.filter(f => !!getRow(f));
+    const matched = matchedFeatures.length;
+    const unmatched = data.features.filter(f => !getRow(f)).map(getName).filter(Boolean);
+    console.log(`MAP: Ghép dữ liệu ${matched}/${data.features.length} xã/phường`);
+    if (unmatched.length) console.warn("MAP: Chưa ghép được:", unmatched);
+    if (matched === 0) {
+        console.error("MAP: 0 xã/phường được ghép dữ liệu. Kiểm tra ID hoặc tên xã trong Google Sheets/GeoJSON.");
+    }
     renderGeoJSON();
 
     const bounds = L.geoJSON(data).getBounds();
     if (bounds.isValid()) {
-        map.fitBounds(bounds, {
-            padding: [35, 35]
-        });
+        map.fitBounds(bounds, { padding: [28, 28] });
     }
 }
 
@@ -1097,13 +1180,19 @@ function searchFeature(keyword) {
     const layer = findLayer(feature);
 
     if (layer) {
+        if (selectedLayer && selectedLayer !== layer && geojsonLayer) {
+            try { geojsonLayer.resetStyle(selectedLayer); } catch (_) {}
+        }
+        selectedLayer = layer;
+        layer.setStyle({ weight: 2.8, color: "#0B57D0", fillOpacity: 0.95 });
+        layer.bringToFront();
         map.fitBounds(layer.getBounds(), {
             padding: [40, 40],
             maxZoom: 13
         });
     }
 
-    showPanel(feature);
+    showPanel(feature, layer);
 }
 
 function findLayer(feature) {
@@ -1234,26 +1323,13 @@ async function reloadData() {
 }
 
 // ------------------------------------------------------
-// Start
+// API khởi tạo - app.js gọi các hàm này theo đúng thứ tự:
+// loadSheet -> loadGeoJSON -> dashboard.update
 // ------------------------------------------------------
 
-document.addEventListener("DOMContentLoaded", async () => {
-    try {
-        initMap();
-
-        await loadGeoJSON();
-
-        if (typeof window.loadSheet === "function") {
-            await window.loadSheet();
-            refreshMap();
-        }
-
-        if (typeof window.updateDashboard === "function") {
-            window.updateDashboard();
-        }
-
-        console.log("WEBGIS: Khởi tạo hoàn tất.");
-    } catch (err) {
-        console.error("WEBGIS: Lỗi khởi tạo:", err);
-    }
-});
+window.initMap = initMap;
+window.loadGeoJSON = loadGeoJSON;
+window.setLayer = setLayer;
+window.reloadData = reloadData;
+window.searchFeature = searchFeature;
+window.exportCurrentMap = exportMapImage;
