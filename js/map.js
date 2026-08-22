@@ -775,18 +775,51 @@ function infoRows(items) {
 
     }).join("");
 }
-function hasData(items) {
-    return items.some(item => {
-        const value = item[1];
+function hasData(feature) {
+
+    const row = getRow(feature);
+
+    if (!row) return false;
+
+    const cfg = layerConfig[currentLayer];
+
+    if (!cfg) return false;
+
+
+    if (currentLayer === "PHUN") {
 
         return (
-            value !== null &&
-            value !== undefined &&
-            value !== "" &&
-            value !== "--" &&
-            value !== "—"
+            num(row["PHUN_Số hộ"]) > 0 ||
+            num(row["PHUN_Vòng"]) > 0 ||
+            norm(row["PHUN_Tiến độ"]) !== ""
         );
-    });
+
+    }
+
+
+    if (currentLayer === "KSGM") {
+
+        return (
+            num(row["KSGM_Cơ sở"]) > 0 ||
+            norm(row["KSGM_Trạng thái"]) !== ""
+        );
+
+    }
+
+
+    if (currentLayer === "CSBBTTY") {
+
+        return num(row["CSBBTTY_Cơ sở"]) > 0;
+
+    }
+
+
+    return (
+        num(row[cfg.field]) > 0 ||
+        num(row[cfg.outbreak]) > 0 ||
+        num(row[cfg.death]) > 0 ||
+        norm(row[cfg.status]) === "đang có dịch"
+    );
 }
 
 function showPanel(feature, layer) {
@@ -898,7 +931,104 @@ function showPanel(feature, layer) {
         });
 
     }
+function hasPanelData(type, row) {
 
+    if (!row) return false;
+
+    /* ===============================
+       CÁC BỆNH DỊCH
+    =============================== */
+
+    if (
+        type === "DTLCP" ||
+        type === "CGC" ||
+        type === "VDNC" ||
+        type === "DAI"
+    ) {
+
+        const status = norm(row[type + "_Trạng thái"]);
+
+        const activeStatus =
+            status === "đang có dịch" ||
+            status === "có dịch" ||
+            status === "đang xảy ra dịch";
+
+        if (activeStatus) return true;
+
+        const outbreak = num(row[type + "_Ổ dịch"]);
+
+        const death = num(
+            row[
+                type === "VDNC"
+                    ? "VDNC_Chết"
+                    : type === "DAI"
+                        ? "DAI_Chết"
+                        : type + "_Chết"
+            ]
+        );
+
+        if (outbreak > 0 || death > 0) return true;
+
+        if (type === "DTLCP" || type === "CGC") {
+
+            const weight = num(row[type + "_Trọng lượng"]);
+
+            if (weight > 0) return true;
+        }
+
+        if (type === "VDNC") {
+
+            const sick = num(row["VDNC_Mắc"]);
+
+            if (sick > 0) return true;
+        }
+
+        return false;
+    }
+
+
+    /* ===============================
+       THÁNG TVSKTTĐ
+    =============================== */
+
+    if (type === "PHUN") {
+
+        return (
+            num(row["PHUN_Số hộ"]) > 0 ||
+            num(row["PHUN_Vòng"]) > 0 ||
+            norm(row["PHUN_Tiến độ"]) !== ""
+        );
+    }
+
+
+    /* ===============================
+       KIỂM SOÁT GIẾT MỔ
+    =============================== */
+
+    if (type === "KSGM") {
+
+        return (
+            num(row["KSGM_Cơ sở"]) > 0 ||
+            (
+                norm(row["KSGM_Trạng thái"]) !== "" &&
+                norm(row["KSGM_Trạng thái"]) !== "không có"
+            )
+        );
+    }
+
+
+    /* ===============================
+       CƠ SỞ THUỐC THÚ Y
+    =============================== */
+
+    if (type === "CSBBTTY") {
+
+        return num(row["CSBBTTY_Cơ sở"]) > 0;
+    }
+
+
+    return false;
+}
 
     /* ===============================
        THÔNG TIN CHUNG
@@ -959,7 +1089,7 @@ function showPanel(feature, layer) {
     ]);
 
 
-    if (dtlcpRows.length > 0) {
+    if (hasPanelData("DTLCP", row)) {
 
         html += `
 
@@ -1015,7 +1145,7 @@ function showPanel(feature, layer) {
     ]);
 
 
-    if (cgcRows.length > 0) {
+    if (hasPanelData("CGC", row)) {
 
         html += `
 
@@ -1071,7 +1201,7 @@ function showPanel(feature, layer) {
     ]);
 
 
-    if (vdncRows.length > 0) {
+    if (hasPanelData("VDNC", row)) {
 
         html += `
 
@@ -1127,7 +1257,7 @@ function showPanel(feature, layer) {
     ]);
 
 
-    if (daiRows.length > 0) {
+    if (hasPanelData("DAI", row)) {
 
         html += `
 
@@ -1179,7 +1309,7 @@ function showPanel(feature, layer) {
     ]);
 
 
-    if (phunRows.length > 0) {
+    if (hasPanelData("PHUN", row)) {
 
         html += `
 
@@ -1216,7 +1346,7 @@ function showPanel(feature, layer) {
     ]);
 
 
-    if (ksgmRows.length > 0) {
+    if (hasPanelData("KSGM", row)) {
 
         html += `
 
@@ -1248,7 +1378,7 @@ function showPanel(feature, layer) {
     ]);
 
 
-    if (csbbttyRows.length > 0) {
+    if (hasPanelData("CSBBTTY", row)) {
 
         html += `
 
