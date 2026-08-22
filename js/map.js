@@ -756,54 +756,520 @@ function escapeHtml(value) {
         .replace(/'/g, "&#039;");
 }
 function infoRows(items) {
+    return items.map(function(item) {
 
-    return items
-        .filter(function(item) {
+        const label = item[0];
+        const value = item[1];
 
-            const value = item[1];
-
-            // Không hiển thị nếu không có dữ liệu
-            if (
-                value === null ||
-                value === undefined ||
-                value === "" ||
-                value === "--" ||
-                value === "—" ||
-                value === "N/A" ||
-                value === "undefined" ||
-                value === "null"
-            ) {
-                return false;
-            }
-
-            // Số 0 vẫn là số liệu hợp lệ → vẫn hiển thị
-            return true;
-        })
-
-        .map(function(item) {
-
-            const label = item[0];
-            const value = item[1];
-
-            return `
-                <div class="info-row">
-                    <div class="info-label">
-                        ${escapeHtml(label)}
-                    </div>
-
-                    <div class="info-value">
-                        ${escapeHtml(value)}
-                    </div>
+        return `
+            <div class="info-row">
+                <div class="info-label">
+                    ${escapeHtml(label)}
                 </div>
-            `;
 
-        })
+                <div class="info-value">
+                    ${escapeHtml(value ?? "--")}
+                </div>
+            </div>
+        `;
 
-        .join("");
+    }).join("");
 }
-function showPanel(feature, layer) {
+function hasData(items) {
+    return items.some(item => {
+        const value = item[1];
+
+        return (
+            value !== null &&
+            value !== undefined &&
+            value !== "" &&
+            value !== "--" &&
+            value !== "—"
+        );
+    });
+}
+
+function showPanel(feature, layer = null) {
 
     selectedFeature = feature;
+
+    const row = getRow(feature);
+    const name = getName(feature) || "Xã/phường";
+
+    const title = document.getElementById("panel-title");
+    const panel = document.getElementById("info-panel");
+
+    /* ===============================
+       HIGHLIGHT XÃ ĐƯỢC CHỌN
+    =============================== */
+
+    if (
+        selectedLayer &&
+        selectedLayer !== layer &&
+        geojsonLayer
+    ) {
+        try {
+            geojsonLayer.resetStyle(selectedLayer);
+        } catch (_) {}
+    }
+
+    if (layer) {
+
+        selectedLayer = layer;
+
+        layer.setStyle({
+            weight: 2.8,
+            color: "#0B57D0",
+            fillOpacity: 0.95
+        });
+
+        layer.bringToFront();
+    }
+
+
+    /* ===============================
+       TIÊU ĐỀ PANEL
+    =============================== */
+
+    if (title) {
+        title.textContent = name;
+    }
+
+
+    if (!panel) {
+        console.error("Không tìm thấy #info-panel");
+        return;
+    }
+
+
+    /* ===============================
+       KHÔNG CÓ DÒNG DỮ LIỆU
+    =============================== */
+
+    if (!row) {
+
+        panel.innerHTML = `
+            <div class="empty-panel">
+                <div class="empty-title">
+                    ${escapeHtml(name)}
+                </div>
+
+                <p>Chưa có dữ liệu cho xã/phường này.</p>
+            </div>
+        `;
+
+        return;
+    }
+
+
+    /* ===============================
+       KIỂM TRA NHÓM CÓ DỮ LIỆU
+    =============================== */
+
+    function hasData(items) {
+
+        return items.some(item => {
+
+            const value = item[1];
+
+            return (
+                value !== null &&
+                value !== undefined &&
+                value !== "" &&
+                value !== "--" &&
+                value !== "—"
+            );
+
+        });
+
+    }
+
+
+    /* ===============================
+       HTML PANEL
+    =============================== */
+
+    let html = `
+        <div class="info-block">
+
+            <div class="info-district">
+                ${escapeHtml(name)}
+            </div>
+
+            <div class="info-layer">
+                Thông tin tổng hợp
+            </div>
+
+        </div>
+    `;
+
+
+    /* =====================================================
+       1. DTLCP
+    ===================================================== */
+
+    const dtlcpRows = [
+
+        [
+            "Trạng thái",
+            row["DTLCP_Trạng thái"]
+        ],
+
+        [
+            "Ổ dịch",
+            row["DTLCP_Ổ dịch"]
+        ],
+
+        [
+            "Tiêu hủy",
+            row["DTLCP_Chết"] !== null &&
+            row["DTLCP_Chết"] !== undefined &&
+            row["DTLCP_Chết"] !== ""
+                ? `${fmt(row["DTLCP_Chết"])} con`
+                : ""
+        ],
+
+        [
+            "Khối lượng",
+            row["DTLCP_Trọng lượng"] !== null &&
+            row["DTLCP_Trọng lượng"] !== undefined &&
+            row["DTLCP_Trọng lượng"] !== ""
+                ? `${fmt(row["DTLCP_Trọng lượng"])} kg`
+                : ""
+        ],
+
+        [
+            "Ngày cuối",
+            formatDate(row["DTLCP_Ngày cuối"])
+        ]
+
+    ];
+
+
+    if (hasData(dtlcpRows)) {
+
+        html += `
+            <div class="info-section">
+
+                <div class="info-section-title">
+                    Dịch tả lợn Châu Phi
+                </div>
+
+                ${infoRows(dtlcpRows)}
+
+            </div>
+        `;
+    }
+
+
+    /* =====================================================
+       2. CÚM GIA CẦM
+    ===================================================== */
+
+    const cgcRows = [
+
+        [
+            "Trạng thái",
+            row["CGC_Trạng thái"]
+        ],
+
+        [
+            "Ổ dịch",
+            row["CGC_Ổ dịch"]
+        ],
+
+        [
+            "Tiêu hủy",
+            row["CGC_Chết"] !== null &&
+            row["CGC_Chết"] !== undefined &&
+            row["CGC_Chết"] !== ""
+                ? `${fmt(row["CGC_Chết"])} con`
+                : ""
+        ],
+
+        [
+            "Khối lượng",
+            row["CGC_Trọng lượng"] !== null &&
+            row["CGC_Trọng lượng"] !== undefined &&
+            row["CGC_Trọng lượng"] !== ""
+                ? `${fmt(row["CGC_Trọng lượng"])} kg`
+                : ""
+        ],
+
+        [
+            "Ngày cuối",
+            formatDate(row["CGC_Ngày cuối"])
+        ]
+
+    ];
+
+
+    if (hasData(cgcRows)) {
+
+        html += `
+            <div class="info-section">
+
+                <div class="info-section-title">
+                    Cúm gia cầm
+                </div>
+
+                ${infoRows(cgcRows)}
+
+            </div>
+        `;
+    }
+
+
+    /* =====================================================
+       3. VIÊM DA NỔI CỤC
+    ===================================================== */
+
+    const vdncRows = [
+
+        [
+            "Trạng thái",
+            row["VDNC_Trạng thái"]
+        ],
+
+        [
+            "Ổ dịch",
+            row["VDNC_Ổ dịch"]
+        ],
+
+        [
+            "Mắc",
+            row["VDNC_Mắc"] !== null &&
+            row["VDNC_Mắc"] !== undefined &&
+            row["VDNC_Mắc"] !== ""
+                ? `${fmt(row["VDNC_Mắc"])} con`
+                : ""
+        ],
+
+        [
+            "Chết",
+            row["VDNC_Chết"] !== null &&
+            row["VDNC_Chết"] !== undefined &&
+            row["VDNC_Chết"] !== ""
+                ? `${fmt(row["VDNC_Chết"])} con`
+                : ""
+        ],
+
+        [
+            "Ngày cuối",
+            formatDate(row["VDNC_Ngày cuối"])
+        ]
+
+    ];
+
+
+    if (hasData(vdncRows)) {
+
+        html += `
+            <div class="info-section">
+
+                <div class="info-section-title">
+                    Viêm da nổi cục
+                </div>
+
+                ${infoRows(vdncRows)}
+
+            </div>
+        `;
+    }
+
+
+    /* =====================================================
+       4. BỆNH DẠI
+    ===================================================== */
+
+    const daiRows = [
+
+        [
+            "Trạng thái",
+            row["DAI_Trạng thái"]
+        ],
+
+        [
+            "Ổ dịch",
+            row["DAI_Ổ dịch"]
+        ],
+
+        [
+            "Chết",
+            row["DAI_Chết"] !== null &&
+            row["DAI_Chết"] !== undefined &&
+            row["DAI_Chết"] !== ""
+                ? `${fmt(row["DAI_Chết"])} con`
+                : ""
+        ],
+
+        [
+            "Tiêu hủy",
+            row["DAI_Tiêu hủy"] !== null &&
+            row["DAI_Tiêu hủy"] !== undefined &&
+            row["DAI_Tiêu hủy"] !== ""
+                ? `${fmt(row["DAI_Tiêu hủy"])} con`
+                : ""
+        ],
+
+        [
+            "Ngày cuối",
+            formatDate(row["DAI_Ngày cuối"])
+        ]
+
+    ];
+
+
+    if (hasData(daiRows)) {
+
+        html += `
+            <div class="info-section">
+
+                <div class="info-section-title">
+                    Bệnh Dại
+                </div>
+
+                ${infoRows(daiRows)}
+
+            </div>
+        `;
+    }
+
+
+    /* =====================================================
+       5. THỰC HIỆN THÁNG TVSKTTĐ
+    ===================================================== */
+
+    const phunRows = [
+
+        [
+            "Tiến độ",
+            row["PHUN_Tiến độ"]
+        ],
+
+        [
+            "Số hộ",
+            row["PHUN_Số hộ"]
+        ],
+
+        [
+            "Vòng",
+            row["PHUN_Vòng"]
+        ],
+
+        [
+            "Diện tích",
+            row["PHUN_Diện tích"]
+        ],
+
+        [
+            "Ngày",
+            formatDate(row["PHUN_Ngày"])
+        ]
+
+    ];
+
+
+    if (hasData(phunRows)) {
+
+        html += `
+            <div class="info-section">
+
+                <div class="info-section-title">
+                    Thực hiện tháng TVSKTTĐ
+                </div>
+
+                ${infoRows(phunRows)}
+
+            </div>
+        `;
+    }
+
+
+    /* =====================================================
+       6. KIỂM SOÁT GIẾT MỔ
+    ===================================================== */
+
+    const ksgmRows = [
+
+        [
+            "Trạng thái",
+            row["KSGM_Trạng thái"]
+        ],
+
+        [
+            "Số cơ sở",
+            row["KSGM_Cơ sở"]
+        ]
+
+    ];
+
+
+    if (hasData(ksgmRows)) {
+
+        html += `
+            <div class="info-section">
+
+                <div class="info-section-title">
+                    Kiểm soát giết mổ
+                </div>
+
+                ${infoRows(ksgmRows)}
+
+            </div>
+        `;
+    }
+
+
+    /* =====================================================
+       7. CƠ SỞ BUÔN BÁN THUỐC THÚ Y
+    ===================================================== */
+
+    const csbbttyRows = [
+
+        [
+            "Số cơ sở",
+            row["CSBBTTY_Cơ sở"]
+        ]
+
+    ];
+
+
+    if (hasData(csbbttyRows)) {
+
+        html += `
+            <div class="info-section">
+
+                <div class="info-section-title">
+                    Cơ sở buôn bán thuốc thú y
+                </div>
+
+                ${infoRows(csbbttyRows)}
+
+            </div>
+        `;
+    }
+
+
+    /* ===============================
+       HIỂN THỊ PANEL
+    =============================== */
+
+    panel.innerHTML = html;
+
+
+    /* ===============================
+       DEBUG
+    =============================== */
+
+    console.log(
+        "Đã chọn xã:",
+        name,
+        "Dữ liệu:",
+        row
+    );
+}
+
 
     /* ===============================
        XÁC ĐỊNH XÃ
