@@ -991,32 +991,117 @@ function renderGeoJSON() {
         style: getFeatureStyle,
 
         onEachFeature(feature, layer) {
-            layer.on({
-                mouseover() {
-                    this.setStyle({
-                        weight: 2.2,
-                        color: "#243B53",
-                        fillOpacity: 0.95
-                    });
-                    this.bringToFront();
-                },
 
-                mouseout() {
-                    if (selectedLayer !== this) geojsonLayer.resetStyle(this);
-                },
+    layer.on({
 
-                click(e) {
-                    if (selectedLayer && selectedLayer !== this && geojsonLayer) {
-                        try { geojsonLayer.resetStyle(selectedLayer); } catch (_) {}
-                    }
-                    selectedLayer = this;
-                    this.setStyle({ weight: 2.8, color: "#0B57D0", fillOpacity: 0.95 });
-                    this.bringToFront();
-                    showPanel(feature, this);
-                    if (e && e.originalEvent) L.DomEvent.stopPropagation(e.originalEvent);
-                }
+        mouseover: function () {
+
+            if (selectedLayer !== this) {
+                this.setStyle({
+                    weight: 2.2,
+                    color: "#243B53",
+                    fillOpacity: 0.95
+                });
+            }
+
+            this.bringToFront();
+        },
+
+
+        mouseout: function () {
+
+            if (selectedLayer !== this && geojsonLayer) {
+                try {
+                    geojsonLayer.resetStyle(this);
+                } catch (_) {}
+            }
+        },
+
+
+        click: function (e) {
+
+            /* =========================================
+               CHẶN CLICK LAN RA MAP
+               ========================================= */
+
+            if (e) {
+                L.DomEvent.stopPropagation(e);
+                L.DomEvent.preventDefault(e);
+            }
+
+
+            /* =========================================
+               BỎ HIGHLIGHT XÃ CŨ
+               ========================================= */
+
+            if (
+                selectedLayer &&
+                selectedLayer !== this &&
+                geojsonLayer
+            ) {
+                try {
+                    geojsonLayer.resetStyle(selectedLayer);
+                } catch (_) {}
+            }
+
+
+            /* =========================================
+               GHI NHẬN XÃ ĐANG CHỌN
+               ========================================= */
+
+            selectedLayer = this;
+
+
+            /* =========================================
+               HIGHLIGHT XÃ
+               ========================================= */
+
+            this.setStyle({
+
+                weight: 2.8,
+
+                color: "#0B57D0",
+
+                fillOpacity: 0.95
             });
+
+
+            /* Đưa xã lên trên */
+
+            this.bringToFront();
+
+
+            /* =========================================
+               HIỂN THỊ PANEL
+               ========================================= */
+
+            if (typeof showPanel === "function") {
+
+                showPanel(
+                    feature,
+                    this
+                );
+
+            } else {
+
+                console.error(
+                    "Không tìm thấy hàm showPanel()"
+                );
+
+            }
+
+
+            /* =========================================
+               DEBUG - KIỂM TRA CLICK
+               ========================================= */
+
+            console.log(
+                "ĐÃ CLICK XÃ:",
+                feature.properties
+            );
         }
+    });
+}
     }).addTo(map);
 
     renderLabels();
