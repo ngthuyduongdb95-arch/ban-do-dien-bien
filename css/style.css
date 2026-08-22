@@ -1,1237 +1,854 @@
-:root{
-  --ink:#17212b;
-  --muted:#6d7985;
-  --line:#dce3e8;
-  --page:#f3f6f8;
-  --blue:#155eef;
-  --panel:#fff;
-  --shadow:0 6px 18px rgba(20,35,50,.10);
-}
-
-*{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);background:var(--page)}
-body{overflow:hidden}
-button,input,select{font:inherit}
-
-/* ================= HEADER ================= */
-.header{
-  height:74px;
-  display:grid;
-  grid-template-columns:minmax(260px,1fr) minmax(420px,1.35fr) auto;
-  align-items:center;
-  gap:20px;
-  padding:10px 18px;
-  background:#fff;
-  border-bottom:1px solid var(--line);
-  box-shadow:0 2px 8px rgba(20,35,50,.05);
-  position:relative;
-  z-index:1100;
-}
-.agency-line1{font-size:11px;line-height:1.25;font-weight:800;letter-spacing:.25px;color:#17212b}
-.agency-line2{margin-top:3px;font-size:10px;line-height:1.2;font-weight:700;color:#6a7682}
-.header h1{margin:0;text-align:center;font-size:20px;line-height:1.2;font-weight:800;letter-spacing:.35px;white-space:nowrap}
-.header-controls{display:flex;align-items:center;justify-content:flex-end;gap:7px}
-.header-layer{display:flex;align-items:center;gap:7px}
-.header-layer-label{font-size:9px;font-weight:800;color:#5c6975;letter-spacing:.4px;white-space:nowrap}
-.header-layer select{width:220px;height:34px;border:1px solid #cfd8df;border-radius:8px;padding:0 9px;background:#fff;color:#26343f;font-size:12px;outline:none}
-.header-icon-btn{width:34px;height:34px;border:1px solid #cfd8df;border-radius:8px;background:#fff;color:#4c5b68;cursor:pointer}
-.header-icon-btn:hover{background:#155eef;color:#fff;border-color:#155eef}
-
-/* ================= MAIN 3-COLUMN LAYOUT ================= */
-.webgis{
-  display:grid;
-  grid-template-columns:205px minmax(0,1fr) 315px;
-  width:100%;
-  height:calc(100vh - 74px);
-  min-height:0;
-}
-
-/* ================= KPI SIDEBAR ================= */
-.sidebar{
-  min-width:0;
-  padding:10px 9px;
-  background:#f7f9fa;
-  border-right:1px solid var(--line);
-  overflow-y:auto;
-  overflow-x:hidden;
-}
-.sidebar-kpi{display:flex;flex-direction:column;gap:8px;padding:2px 2px 12px}
-.summary-card{
-  width:100%;
-  min-width:0;
-  min-height:0;
-  height:auto;
-  padding:10px 11px;
-  border:1px solid var(--line);
-  border-radius:10px;
-  background:#fff;
-  box-shadow:0 2px 8px rgba(20,35,50,.055);
-  overflow:visible;
-}
-.summary-card:hover{box-shadow:0 4px 12px rgba(20,35,50,.09)}
-.summary-head{display:flex;align-items:flex-start;gap:6px;margin:0;color:#44515e;font-size:10.5px;line-height:14px;font-weight:700;white-space:normal;overflow:visible}
-.summary-head i{flex:0 0 auto;margin-top:1px;font-size:10px}
-.summary-main{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 5px;margin:4px 0 4px}
-.summary-main span{font-size:23px;line-height:25px;font-weight:900;white-space:nowrap;color:#101820}
-.summary-main small{font-size:9px;line-height:12px;color:#6d7985;white-space:normal}
-.summary-grid{display:flex;flex-direction:column;gap:2px;font-size:9px;line-height:13px;color:#697682}
-.summary-grid span{display:block;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
-.summary-grid b{color:#27343f;font-weight:800}
-.card-dtlcp{border-top:3px solid #e6392e}
-.card-cgc{border-top:3px solid #388e3c}
-.card-vdnc{border-top:3px solid #2f7df6}
-.card-dai{border-top:3px solid #6a35d1}
-.card-phun{border-top:3px solid #19a7b3}
-.card-ksgm{border-top:3px solid #795548}
-.card-drug{border-top:3px solid #0288b8}
-
-/* ================= MAP ================= */
-.main-map{position:relative;min-width:0;min-height:0;background:#e9eef1;overflow:hidden}
-#map{width:100%;height:100%;min-height:0;background:#edf1f3}
-.leaflet-container{font-family:Inter,Segoe UI,Roboto,Arial,sans-serif}
-.leaflet-control-zoom{border:0!important;box-shadow:0 3px 12px rgba(20,35,50,.16)!important}
-.leaflet-control-zoom a{border:0!important;color:#334155!important}
-.leaflet-control-scale-line{background:rgba(255,255,255,.92)!important;border:1px solid #64748b!important;color:#334155!important;font-size:9px!important}
-
-/* chỉ giữ cụm công cụ; KHÔNG có hộp tiêu đề nổi trên bản đồ */
-.map-toolbar{position:absolute;z-index:1000;right:12px;top:12px;pointer-events:none}
-.map-title-live{display:none}
-.map-actions{display:flex;gap:4px;padding:4px;border-radius:10px;background:rgba(255,255,255,.96);box-shadow:0 4px 14px rgba(20,35,50,.14);pointer-events:auto}
-.map-action{width:34px;height:32px;border:0;border-radius:7px;background:#fff;color:#53616e;cursor:pointer}
-.map-action:hover,.map-action.active{background:#155eef;color:#fff}
-.map-action.loading{opacity:.55;cursor:wait}
-
-/* ================= LABELS ================= */
-.map-label-wrap{background:transparent!important;border:0!important;pointer-events:none!important}
-.map-label{
-  display:inline-block;
-  padding:0;
-  margin:0;
-  background:transparent!important;
-  border:0!important;
-  box-shadow:none!important;
-  color:#27343d;
-  font-size:9.5px;
-  line-height:16px;
-  font-weight:400;
-  letter-spacing:.05px;
-  white-space:nowrap;
-  text-shadow:1px 0 1px rgba(255,255,255,.95),-1px 0 1px rgba(255,255,255,.95),0 1px 2px rgba(255,255,255,.95),0 -1px 2px rgba(255,255,255,.95);
-}
-
-/* ================= LEGEND ================= */
-.legend{
-  width:205px;
-  max-width:205px;
-  padding:10px 11px;
-  border:1px solid rgba(20,35,50,.12);
-  border-radius:10px;
-  background:rgba(255,255,255,.96);
-  box-shadow:0 7px 20px rgba(20,35,50,.16);
-  font-size:10px;
-  line-height:1.3;
-}
-.legend h4{margin:0 0 6px;padding:0 0 6px;border-bottom:1px solid #e5e7eb;font-size:12px;line-height:15px;font-weight:800;color:#263238}
-.legend-row{display:flex;align-items:center;gap:7px;min-height:18px;margin:2px 0}
-.legend-row i{width:17px;height:11px;flex:0 0 17px;border:1px solid rgba(0,0,0,.12);border-radius:3px}
-.legend-dot-row{display:flex;align-items:center;gap:7px;min-height:18px;margin:2px 0}
-.legend-red-dot{width:8px!important;height:8px!important;flex:0 0 8px!important;border-radius:50%;background:#d50000;border:2px solid #fff!important;box-shadow:0 0 0 1px #d50000}
-.legend-no-data{width:17px;height:11px;flex:0 0 17px;border-radius:3px;background:#dce3e8;border:1px solid #7e8a92}
-.legend-section-title{margin:6px 0 4px;font-weight:800;color:#334155}
-.legend-empty{margin-top:6px;color:#7b8794;font-style:italic}
-.legend hr{border:0;border-top:1px solid #e3e7eb;margin:6px 0}
-
-/* ================= RIGHT PANEL ================= */
-.panel{min-width:0;background:#fff;border-left:1px solid var(--line);overflow-y:auto;overflow-x:hidden}
-.panel-head{position:sticky;top:0;z-index:2;padding:12px 14px 10px;background:#fff;border-bottom:1px solid var(--line)}
-.panel-kicker{display:block;margin-bottom:3px;color:#74818d;font-size:8.5px;font-weight:800;letter-spacing:.65px}
-.panel h2{margin:0;font-size:17px;line-height:22px;color:#17212b;word-break:break-word}
-#info-panel{padding:11px 12px 18px}
-.empty-panel{min-height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#7a8792;font-size:11px;line-height:1.5;padding:20px}
-.empty-panel i{margin-bottom:9px;font-size:22px;color:#a6b1ba}
-.empty-panel strong{font-size:14px;color:#25313c}
-.selected-summary{padding:10px 11px;margin-bottom:10px;border:1px solid #e1e7eb;border-radius:9px;background:#f8fafb}
-.selected-name{font-size:15px;line-height:19px;font-weight:800;color:#17212b}
-.selected-hint{margin-top:2px;font-size:9px;color:#7a8792}
-.info-section{margin:0 0 9px;border:1px solid #e0e6eb;border-radius:9px;overflow:hidden;background:#fff}
-.info-section-title{padding:7px 9px;font-size:10.5px;line-height:14px;font-weight:800;color:#25313c;background:#f6f8fa;border-left:3px solid #6b7c8a}
-.info-red .info-section-title{border-left-color:#e6392e}
-.info-green .info-section-title{border-left-color:#388e3c}
-.info-blue .info-section-title{border-left-color:#2f7df6}
-.info-purple .info-section-title{border-left-color:#6a35d1}
-.info-teal .info-section-title{border-left-color:#19a7b3}
-.info-brown .info-section-title{border-left-color:#795548}
-.info-cyan .info-section-title{border-left-color:#0288b8}
-.info-table{margin:0}
-.info-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:8px;padding:7px 9px;border-bottom:1px solid #edf0f2;font-size:10px;line-height:13px}
-.info-row:last-child{border-bottom:0}
-.info-row>span{color:#6d7985;min-width:0}
-.info-row>b{color:#24313c;text-align:right;min-width:0;overflow-wrap:anywhere;font-weight:700}
-.info-status{display:inline-block;padding:2px 5px;border-radius:999px;font-size:8.5px;line-height:11px;font-weight:800;white-space:normal}
-.info-status.danger{background:#fde8e8;color:#b42318}
-.info-status.success{background:#e8f5e9;color:#2e7d32}
-.info-status.neutral{background:#eef2f5;color:#596874}
-
-/* ================= FULLSCREEN / EXPORT ================= */
-.main-map:fullscreen{width:100vw;height:100vh}
-.main-map:fullscreen #map{height:100vh}
-.export-hide{display:none!important}
-
-/* ================= RESPONSIVE ================= */
-@media(max-width:1200px){
-  .webgis{grid-template-columns:195px minmax(0,1fr) 300px}
-  .header h1{font-size:18px}
-  .header-layer select{width:195px}
-}
-@media(max-width:950px){
-  body{overflow:auto}
-  .header{height:auto;min-height:74px;grid-template-columns:1fr auto;grid-template-areas:"agency controls" "title title";row-gap:7px}
-  .agency{grid-area:agency}.header h1{grid-area:title;text-align:left;white-space:normal}.header-controls{grid-area:controls}
-  .webgis{grid-template-columns:185px minmax(0,1fr);height:calc(100vh - 104px)}
-  .panel{grid-column:1/-1;height:360px;border-left:0;border-top:1px solid var(--line)}
-  #map{min-height:480px}
-}
-@media(max-width:700px){
-  .header{grid-template-columns:1fr;grid-template-areas:"agency" "title" "controls";padding:9px 12px}
-  .header-controls{justify-content:flex-start;flex-wrap:wrap}.header-layer{width:100%}.header-layer select{flex:1;max-width:none}
-  .webgis{grid-template-columns:1fr;height:auto}
-  .sidebar{max-height:none;overflow:visible;border-right:0;border-bottom:1px solid var(--line)}
-  .sidebar-kpi{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
-  .panel{height:auto;max-height:none}
-  .main-map{height:70vh;min-height:500px}
-}
-@media(max-width:450px){
-  .sidebar-kpi{grid-template-columns:1fr}
-  .header h1{font-size:16px}
-  .legend{width:185px;max-width:185px}
-}
-
 /* =========================================================
-   WEBGIS FINAL - HIỂN THỊ THEO YÊU CẦU
+   WEBGIS - GIAO DIỆN
+   KPI TRÁI | BẢN ĐỒ GIỮA | PANEL PHẢI
    ========================================================= */
 
-/* KPI: tự giãn theo nội dung, không ép bằng chiều cao */
-.sidebar-kpi .summary-card{
-  height:auto!important;
-  min-height:0!important;
-  max-height:none!important;
-  flex:0 0 auto!important;
-  overflow:visible!important;
-}
-.sidebar-kpi .summary-head{
-  white-space:normal!important;
-  overflow:visible!important;
-  text-overflow:clip!important;
-  overflow-wrap:anywhere;
-}
-.sidebar-kpi .summary-main small,
-.sidebar-kpi .summary-grid span{
-  white-space:normal!important;
-  overflow:visible!important;
-  text-overflow:clip!important;
-  overflow-wrap:anywhere;
-}
-.sidebar-kpi .card-phun .summary-head,
-.sidebar-kpi .card-drug .summary-head{
-  line-height:13px;
-}
 
-/* Tên xã: thanh mảnh, không nền/khung/bóng */
-.map-label-wrap,
-.map-label-wrap.leaflet-marker-icon{
-  background:transparent!important;
-  border:0!important;
-  box-shadow:none!important;
-  pointer-events:none!important;
-}
-.map-label{
-  background:transparent!important;
-  border:0!important;
-  box-shadow:none!important;
-  color:#334155!important;
-  font-size:9.5px!important;
-  line-height:16px!important;
-  font-weight:400!important;
-  letter-spacing:.02px!important;
-  padding:0!important;
-  margin:0!important;
-  white-space:nowrap!important;
-  text-shadow:1px 0 1px rgba(255,255,255,.95),-1px 0 1px rgba(255,255,255,.95),0 1px 2px rgba(255,255,255,.95),0 -1px 2px rgba(255,255,255,.95)!important;
-}
-
-/* Chấm đỏ: nhỏ, duy nhất, không animation */
-.leaflet-pane.diseaseMarkers .leaflet-interactive{
-  cursor:default!important;
-}
-
-/* Legend: gọn và rõ */
-.legend{
-  width:205px!important;
-  max-width:205px!important;
-  padding:9px 10px!important;
-}
-.legend-red-dot{
-  width:8px!important;
-  height:8px!important;
-  flex:0 0 8px!important;
-}
-
-/* Không cho lớp tiêu đề nổi trên bản đồ xuất hiện */
-.map-export-title{display:none!important}
 /* =========================================================
-   WEBGIS – GIAO DIỆN 3 CỘT CÂN ĐỐI
-   KPI TRÁI | BẢN ĐỒ GIỮA | PANEL PHẢI
-========================================================= */
+   HEADER
+   ========================================================= */
 
-:root {
-    --header-height: 74px;
+.header{
+    height:74px;
+    min-height:74px;
 
-    --left-width: 205px;
-    --right-width: 315px;
+    display:grid;
+    grid-template-columns:290px minmax(420px,1fr) auto;
 
-    --panel-gap: 10px;
+    align-items:center;
+    gap:20px;
 
-    --text-main: #172033;
-    --text-sub: #64748b;
+    padding:8px 18px;
 
-    --border: #e2e8f0;
-    --bg-panel: #ffffff;
+    background:#fff;
+    border-bottom:1px solid #dfe5ea;
+
+    box-sizing:border-box;
+}
+
+.agency{
+    min-width:0;
+}
+
+.agency-line1{
+    font-size:11px;
+    line-height:15px;
+    font-weight:800;
+
+    color:#17212b;
+
+    letter-spacing:.15px;
+
+    white-space:nowrap;
+}
+
+.agency-line2{
+    margin-top:2px;
+
+    font-size:9px;
+    line-height:13px;
+
+    color:#687684;
+
+    font-weight:700;
+}
+
+
+/* TIÊU ĐỀ WEBGIS */
+
+.header h1{
+    margin:0;
+
+    font-size:23px;
+    line-height:28px;
+
+    font-weight:900;
+
+    letter-spacing:.2px;
+
+    color:#182b3c;
+
+    text-align:center;
+
+    white-space:nowrap;
 }
 
 
 /* =========================================================
-   1. KHUNG TOÀN BỘ ỨNG DỤNG
-========================================================= */
+   DASHBOARD / KPI
+   ========================================================= */
 
-html,
-body {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    overflow: hidden;
-    font-family:
-        Inter,
-        "Segoe UI",
-        Arial,
-        sans-serif;
-    color: var(--text-main);
-    background: #f8fafc;
+.dashboard{
+    display:flex;
+    flex-direction:column;
+
+    gap:8px;
+
+    padding:10px;
+
+    background:#f5f7f9;
+
+    border-right:1px solid #dfe5ea;
+
+    border-bottom:0;
+
+    overflow-y:auto;
+    overflow-x:hidden;
+
+    min-width:0;
+
+    box-sizing:border-box;
 }
 
 
-/* =========================================================
-   2. HEADER
-========================================================= */
+/* Ô KPI */
 
-header,
-.app-header,
-.top-header,
-#header {
-    height: var(--header-height);
-    min-height: var(--header-height);
+.summary-card{
+    width:100%;
+    min-width:0;
 
-    box-sizing: border-box;
+    flex:0 0 auto;
 
-    display: flex;
-    align-items: center;
+    padding:10px 11px;
 
-    padding: 0 18px;
+    border:1px solid #dce3e8;
+    border-radius:11px;
 
-    background: #ffffff;
+    background:#fff;
 
-    border-bottom: 1px solid #e5e7eb;
+    box-shadow:0 2px 8px rgba(20,35,50,.06);
 
-    position: relative;
-    z-index: 1000;
-}
+    overflow:hidden;
 
-
-/* Tên cơ quan */
-
-.header-left,
-.brand,
-.brand-area {
-    min-width: 280px;
-}
-
-.header-left *,
-.brand *,
-.brand-area * {
-    line-height: 1.15;
-}
-
-
-/* Tên sở */
-
-.header-left .agency-name,
-.brand .agency-name,
-.brand-title {
-    font-size: 13px;
-    font-weight: 800;
-    letter-spacing: .15px;
-    color: #162033;
-}
-
-
-/* Tên chi cục */
-
-.header-left .agency-sub,
-.brand .agency-sub,
-.brand-subtitle {
-    margin-top: 3px;
-
-    font-size: 10px;
-    font-weight: 500;
-
-    color: #64748b;
-}
-
-
-/* =========================================================
-   3. TIÊU ĐỀ WEBGIS
-========================================================= */
-
-.header-title,
-.app-title,
-#app-title {
-
-    flex: 1;
-
-    text-align: center;
-
-    margin: 0 18px;
-
-    font-size: 22px;
-    line-height: 1.1;
-
-    font-weight: 800;
-
-    letter-spacing: .2px;
-
-    color: #162033;
-
-    white-space: nowrap;
-}
-
-
-/* =========================================================
-   4. KHU VỰC ĐIỀU KHIỂN BÊN PHẢI HEADER
-========================================================= */
-
-.header-controls,
-.top-controls,
-.layer-control-area {
-
-    display: flex;
-    align-items: center;
-
-    gap: 7px;
-
-    flex-shrink: 0;
-}
-
-
-.header-controls label,
-.top-controls label {
-
-    font-size: 10px;
-    font-weight: 700;
-
-    color: #64748b;
-
-    white-space: nowrap;
-}
-
-
-.header-controls select,
-.top-controls select,
-#layer-select {
-
-    height: 34px;
-
-    min-width: 190px;
-
-    padding: 0 10px;
-
-    border: 1px solid #d7dee8;
-    border-radius: 7px;
-
-    background: #fff;
-
-    color: #334155;
-
-    font-size: 12px;
-
-    outline: none;
-}
-
-
-.header-controls button,
-.top-controls button {
-
-    width: 34px;
-    height: 34px;
-
-    padding: 0;
-
-    border: 1px solid #d7dee8;
-    border-radius: 7px;
-
-    background: #fff;
-
-    cursor: pointer;
-}
-
-
-/* =========================================================
-   5. KHUNG CHÍNH
-========================================================= */
-
-#app,
-.app,
-.main-layout,
-.dashboard-layout {
-
-    width: 100%;
-    height: calc(100vh - var(--header-height));
-
-    display: grid;
-
-    grid-template-columns:
-        var(--left-width)
-        minmax(0, 1fr)
-        var(--right-width);
-
-    gap: var(--panel-gap);
-
-    padding: 10px;
-
-    box-sizing: border-box;
-
-    background: #f5f7fa;
-}
-
-
-/* =========================================================
-   6. CỘT KPI BÊN TRÁI
-========================================================= */
-
-#sidebar,
-.sidebar,
-.left-panel,
-.kpi-sidebar {
-
-    width: var(--left-width);
-
-    min-width: 0;
-
-    height: 100%;
-
-    overflow-y: auto;
-    overflow-x: hidden;
-
-    padding-right: 2px;
-
-    box-sizing: border-box;
-}
-
-
-/* scrollbar */
-
-#sidebar::-webkit-scrollbar,
-.sidebar::-webkit-scrollbar,
-.left-panel::-webkit-scrollbar {
-
-    width: 5px;
-}
-
-#sidebar::-webkit-scrollbar-thumb,
-.sidebar::-webkit-scrollbar-thumb,
-.left-panel::-webkit-scrollbar-thumb {
-
-    background: #cbd5e1;
-
-    border-radius: 10px;
-}
-
-
-/* =========================================================
-   7. KPI CARD
-========================================================= */
-
-.kpi-card,
-.stat-card,
-.dashboard-card {
-
-    width: 100%;
-
-    min-height: 108px;
-
-    height: auto;
-
-    box-sizing: border-box;
-
-    margin-bottom: 8px;
-
-    padding: 11px 12px;
-
-    background: #ffffff;
-
-    border: 1px solid #e2e8f0;
-
-    border-radius: 12px;
-
-    box-shadow:
-        0 2px 8px rgba(15, 23, 42, .06);
-
-    overflow: hidden;
-}
-
-
-/* Không ép chiều cao 96px */
-
-.kpi-card {
-    height: auto !important;
-    flex: none !important;
+    box-sizing:border-box;
 }
 
 
 /* Tiêu đề KPI */
 
-.kpi-title,
-.stat-title,
-.dashboard-card-title {
+.summary-head{
+    display:flex;
 
-    display: flex;
+    align-items:flex-start;
 
-    align-items: center;
+    gap:7px;
 
-    gap: 6px;
+    min-width:0;
 
-    margin-bottom: 5px;
+    margin-bottom:2px;
 
-    font-size: 11px;
+    font-size:11px;
+    line-height:15px;
 
-    line-height: 1.25;
+    font-weight:800;
 
-    font-weight: 750;
+    color:#465564;
 
-    color: #334155;
+    white-space:normal;
+}
+
+.summary-head i{
+    flex:0 0 auto;
+
+    font-size:12px;
+}
+
+.summary-head b{
+    min-width:0;
+
+    white-space:normal;
+
+    overflow-wrap:anywhere;
 }
 
 
-/* Số lớn */
+/* Số chính KPI */
 
-.kpi-value,
-.stat-value,
-.dashboard-card-value {
+.summary-main{
+    display:flex;
 
-    display: inline-block;
+    align-items:baseline;
 
-    margin: 0 5px 3px 0;
+    gap:5px;
 
-    font-size: 25px;
+    margin:4px 0 6px;
 
-    line-height: 1;
+    min-width:0;
+}
 
-    font-weight: 800;
+.summary-main span{
+    font-size:24px;
+    line-height:26px;
 
-    color: #172033;
+    font-weight:900;
+
+    color:#17212b;
+}
+
+.summary-main small{
+    font-size:9px;
+    line-height:13px;
+
+    color:#74818d;
+
+    white-space:normal;
 }
 
 
-/* Đơn vị */
+/* Số liệu phụ */
 
-.kpi-unit,
-.stat-unit {
+.summary-grid{
+    display:flex;
 
-    font-size: 9px;
+    flex-direction:column;
 
-    font-weight: 500;
+    gap:3px;
 
-    color: #64748b;
+    font-size:9px;
+    line-height:13px;
+
+    color:#6d7985;
 }
 
+.summary-grid span{
+    white-space:normal;
 
-/* Các dòng số liệu */
-
-.kpi-row,
-.stat-row,
-.dashboard-card-row {
-
-    display: flex;
-
-    align-items: baseline;
-
-    gap: 4px;
-
-    margin-top: 3px;
-
-    font-size: 9px;
-
-    line-height: 1.35;
-
-    color: #64748b;
-
-    white-space: normal;
+    overflow-wrap:anywhere;
 }
 
+.summary-grid b{
+    color:#25313d;
 
-.kpi-row strong,
-.stat-row strong {
-
-    color: #334155;
-
-    font-weight: 700;
-}
-
-
-/* =========================================================
-   8. BẢN ĐỒ
-========================================================= */
-
-#map,
-.map-container,
-.map-area {
-
-    position: relative;
-
-    min-width: 0;
-    min-height: 0;
-
-    width: 100%;
-    height: 100%;
-
-    overflow: hidden;
-
-    border-radius: 10px;
-
-    background: #eef2f5;
-
-    border: 1px solid #e2e8f0;
-
-    box-shadow:
-        0 2px 8px rgba(15, 23, 42, .05);
-}
-
-
-/* Leaflet phải chiếm toàn bộ */
-
-#map .leaflet-container,
-.map-container .leaflet-container {
-
-    width: 100%;
-    height: 100%;
+    font-weight:800;
 }
 
 
 /* =========================================================
-   9. BỎ HỘP TIÊU ĐỀ NỔI TRÊN BẢN ĐỒ
-========================================================= */
+   MÀU VIỀN KPI
+   ========================================================= */
 
-.map-title,
-.map-header,
-.map-title-box,
-.leaflet-map-title,
-#map-title {
+.card-dtlcp{
+    border-top:3px solid #E53935;
+}
 
-    display: none !important;
+.card-cgc{
+    border-top:3px solid #43A047;
+}
+
+.card-vdnc{
+    border-top:3px solid #2F7DF6;
+}
+
+.card-dai{
+    border-top:3px solid #6A35D1;
+}
+
+.card-phun{
+    border-top:3px solid #19A7B3;
+}
+
+.card-ksgm{
+    border-top:3px solid #795548;
+}
+
+.card-drug{
+    border-top:3px solid #0288B8;
 }
 
 
 /* =========================================================
-   10. NÚT LEAFLET
-========================================================= */
+   BỐ CỤC CHÍNH
+   ========================================================= */
 
-.leaflet-control-zoom a {
+.webgis{
+    display:grid;
 
-    width: 30px !important;
-    height: 30px !important;
+    grid-template-columns:
+        minmax(185px,205px)
+        minmax(0,1fr)
+        minmax(285px,310px);
 
-    line-height: 30px !important;
+    gap:0;
 
-    font-size: 17px !important;
+    height:calc(100vh - 74px);
 
-    color: #334155 !important;
+    min-height:600px;
 
-    background: #ffffff !important;
+    background:#eef2f4;
+
+    box-sizing:border-box;
 }
 
 
-.leaflet-control {
+/*
+   Nếu HTML có sidebar cũ thì ẩn.
+   KPI vẫn lấy từ .dashboard.
+*/
 
-    border: 0 !important;
-
-    box-shadow:
-        0 2px 8px rgba(15, 23, 42, .12) !important;
-}
-
-
-/* =========================================================
-   11. LEGEND
-========================================================= */
-
-.leaflet-control.legend,
-.legend {
-
-    max-width: 210px;
-
-    padding: 10px 12px !important;
-
-    border-radius: 10px !important;
-
-    background: rgba(255,255,255,.97) !important;
-
-    box-shadow:
-        0 3px 12px rgba(15,23,42,.12) !important;
-
-    font-size: 10px !important;
-
-    line-height: 1.35 !important;
-}
-
-
-.legend-title {
-
-    margin-bottom: 7px;
-
-    font-size: 13px;
-
-    font-weight: 800;
-
-    color: #172033;
-}
-
-
-.legend-item {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 7px;
-
-    margin: 4px 0;
+.webgis > .sidebar{
+    display:none !important;
 }
 
 
 /* =========================================================
-   12. TÊN XÃ TRÊN BẢN ĐỒ
-========================================================= */
+   BẢN ĐỒ
+   ========================================================= */
 
-.commune-label,
-.xa-label,
-.map-label {
+.main-map{
+    position:relative;
 
-    background: transparent !important;
+    min-width:0;
+    min-height:0;
 
-    border: none !important;
+    background:#e9eef1;
 
-    box-shadow: none !important;
-
-    padding: 0 !important;
-
-    margin: 0 !important;
-
-    color: #334155 !important;
-
-    font-size: 9px !important;
-
-    font-weight: 400 !important;
-
-    line-height: 1 !important;
-
-    white-space: nowrap;
-
-    pointer-events: none !important;
+    overflow:hidden;
 }
 
+#map{
+    width:100%;
+    height:100%;
 
-/* bỏ mũi tên */
+    min-height:0;
 
-.commune-label::before,
-.xa-label::before,
-.map-label::before {
-
-    display: none !important;
+    background:#edf1f3;
 }
 
 
 /* =========================================================
-   13. CHẤM ĐỎ
-========================================================= */
+   BỎ HỘP TIÊU ĐỀ NỔI TRÊN BẢN ĐỒ
+   ========================================================= */
 
-.disease-marker {
-
-    width: 9px !important;
-    height: 9px !important;
-
-    border-radius: 50%;
-
-    border: 2px solid #ffffff;
-
-    box-sizing: border-box;
-
-    box-shadow:
-        0 1px 4px rgba(0,0,0,.25);
+.map-title-live{
+    display:none !important;
 }
 
 
 /* =========================================================
-   14. PANEL BÊN PHẢI
-========================================================= */
+   TOOLBAR BẢN ĐỒ
+   ========================================================= */
 
-#info-panel,
-.info-panel,
-.right-panel,
-.detail-panel {
+.map-toolbar{
+    position:absolute;
 
-    width: var(--right-width);
+    z-index:1000;
 
-    min-width: 0;
+    right:12px;
+    top:12px;
+    left:auto;
 
-    height: 100%;
+    display:flex;
 
-    box-sizing: border-box;
+    justify-content:flex-end;
 
-    overflow-y: auto;
-    overflow-x: hidden;
+    align-items:center;
 
-    background: #ffffff;
+    gap:8px;
 
-    border: 1px solid #e2e8f0;
-
-    border-radius: 10px;
-
-    box-shadow:
-        0 2px 8px rgba(15,23,42,.05);
+    pointer-events:none;
 }
 
+.map-actions{
+    display:flex;
 
-/* scrollbar */
+    gap:4px;
 
-#info-panel::-webkit-scrollbar,
-.info-panel::-webkit-scrollbar,
-.right-panel::-webkit-scrollbar {
+    padding:4px;
 
-    width: 5px;
+    border-radius:9px;
+
+    background:rgba(255,255,255,.95);
+
+    box-shadow:0 3px 12px rgba(20,35,50,.13);
+
+    pointer-events:auto;
 }
 
-#info-panel::-webkit-scrollbar-thumb,
-.info-panel::-webkit-scrollbar-thumb,
-.right-panel::-webkit-scrollbar-thumb {
+.map-action{
+    width:34px;
+    height:32px;
 
-    background: #cbd5e1;
+    border:0;
 
-    border-radius: 10px;
+    border-radius:7px;
+
+    background:#fff;
+
+    color:#53616e;
+
+    cursor:pointer;
 }
 
+.map-action:hover,
+.map-action.active{
+    background:#155eef;
 
-/* =========================================================
-   15. TIÊU ĐỀ PANEL
-========================================================= */
-
-#panel-title,
-.panel-title {
-
-    padding: 14px 14px 10px;
-
-    margin: 0;
-
-    border-bottom: 1px solid #e5e7eb;
-
-    font-size: 18px;
-
-    line-height: 1.2;
-
-    font-weight: 800;
-
-    color: #172033;
-
-    white-space: normal;
-
-    overflow-wrap: anywhere;
-}
-
-
-/* dòng "THÔNG TIN XÃ / PHƯỜNG" */
-
-.panel-heading,
-.info-panel-heading {
-
-    padding: 12px 14px 0;
-
-    font-size: 10px;
-
-    line-height: 1.2;
-
-    font-weight: 800;
-
-    letter-spacing: .5px;
-
-    color: #64748b;
-
-    text-transform: uppercase;
+    color:#fff;
 }
 
 
 /* =========================================================
-   16. NỘI DUNG PANEL
-========================================================= */
+   PANEL BÊN PHẢI
+   ========================================================= */
 
-#info-panel > *,
-.info-panel > *,
-.right-panel > * {
+.panel{
+    min-width:0;
 
-    box-sizing: border-box;
+    background:#fff;
+
+    border-left:1px solid #dfe5ea;
+
+    overflow-y:auto;
+    overflow-x:hidden;
+
+    box-sizing:border-box;
 }
 
 
-/* thông tin tổng hợp */
+/* Đầu panel */
 
-.info-block {
+.panel-head{
+    padding:13px 14px 11px;
 
-    padding: 12px 14px 7px;
+    border-bottom:1px solid #e1e6ea;
+
+    background:#fff;
+}
+
+.panel-kicker{
+    display:block;
+
+    margin-bottom:3px;
+
+    color:#73808c;
+
+    font-size:9px;
+    line-height:13px;
+
+    font-weight:800;
+
+    letter-spacing:.6px;
+}
+
+.panel h2{
+    margin:0;
+
+    color:#17212b;
+
+    font-size:19px;
+    line-height:24px;
+
+    font-weight:900;
+
+    overflow-wrap:anywhere;
 }
 
 
-.info-district {
+/* Nội dung panel */
 
-    margin-bottom: 3px;
+#info-panel{
+    padding:12px;
 
-    font-size: 18px;
-
-    line-height: 1.2;
-
-    font-weight: 800;
-
-    color: #172033;
+    box-sizing:border-box;
 }
 
 
-.info-layer {
+/* Tên xã */
 
-    font-size: 12px;
-
-    color: #64748b;
+.info-block{
+    margin-bottom:10px;
 }
 
+.info-district{
+    color:#17212b;
 
-/* =========================================================
-   17. CÁC KHỐI THÔNG TIN
-========================================================= */
+    font-size:15px;
+    line-height:20px;
 
-.info-section {
+    font-weight:900;
 
-    margin: 7px 10px;
-
-    border: 1px solid #e2e8f0;
-
-    border-radius: 9px;
-
-    background: #ffffff;
-
-    overflow: hidden;
-
-    box-shadow:
-        0 1px 4px rgba(15,23,42,.04);
+    overflow-wrap:anywhere;
 }
 
+.info-layer{
+    margin-top:2px;
 
-.info-section-title {
+    color:#74818d;
 
-    padding: 8px 10px;
-
-    background: #f8fafc;
-
-    border-left: 3px solid #64748b;
-
-    border-bottom: 1px solid #e5e7eb;
-
-    font-size: 11px;
-
-    line-height: 1.25;
-
-    font-weight: 800;
-
-    color: #243247;
-
-    white-space: normal;
-
-    overflow-wrap: anywhere;
-}
-
-
-/* =========================================================
-   18. DÒNG THÔNG TIN
-========================================================= */
-
-.info-row {
-
-    display: grid;
-
-    grid-template-columns: minmax(85px, 1fr) minmax(80px, 1.25fr);
-
-    gap: 8px;
-
-    padding: 7px 10px;
-
-    border-bottom: 1px solid #f1f5f9;
-
-    font-size: 10px;
-
-    line-height: 1.35;
-}
-
-
-.info-row:last-child {
-
-    border-bottom: 0;
-}
-
-
-.info-label {
-
-    color: #64748b;
-
-    font-weight: 500;
-
-    white-space: normal;
-}
-
-
-.info-value {
-
-    color: #263244;
-
-    font-weight: 650;
-
-    text-align: right;
-
-    overflow-wrap: anywhere;
+    font-size:10px;
+    line-height:14px;
 }
 
 
 /* =========================================================
-   19. PANEL TRỐNG
-========================================================= */
+   CÁC NHÓM THÔNG TIN TRONG PANEL
+   ========================================================= */
 
-.empty-panel {
+.info-section{
+    margin-bottom:9px;
 
-    padding: 35px 20px;
+    padding:0;
 
-    text-align: center;
+    border:1px solid #e1e6ea;
 
-    color: #94a3b8;
+    border-radius:9px;
+
+    overflow:hidden;
+
+    background:#fff;
 }
 
+.info-section-title{
+    margin:0;
 
-.empty-title {
+    padding:7px 9px;
 
-    margin-bottom: 8px;
+    background:#f5f7f9;
 
-    font-size: 18px;
+    border-left:3px solid #607d8b;
 
-    font-weight: 800;
+    color:#25313d;
 
-    color: #334155;
-}
+    font-size:10px;
+    line-height:14px;
 
+    font-weight:800;
 
-.empty-panel p {
-
-    margin: 0;
-
-    font-size: 11px;
-
-    line-height: 1.5;
+    overflow-wrap:anywhere;
 }
 
 
 /* =========================================================
-   20. RESPONSIVE
-========================================================= */
+   DÒNG SỐ LIỆU
+   ========================================================= */
 
-@media (max-width: 1200px) {
+.info-table{
+    width:100%;
 
-    :root {
-        --left-width: 190px;
-        --right-width: 285px;
+    margin:0;
+
+    border:0;
+
+    border-radius:0;
+
+    overflow:hidden;
+}
+
+.info-row{
+    min-height:30px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:10px;
+
+    padding:6px 9px;
+
+    border-bottom:1px solid #edf0f2;
+
+    font-size:10px;
+    line-height:14px;
+
+    box-sizing:border-box;
+}
+
+.info-row:last-child{
+    border-bottom:0;
+}
+
+.info-row span{
+    min-width:0;
+
+    color:#71808d;
+
+    white-space:normal;
+
+    overflow-wrap:anywhere;
+}
+
+.info-row b{
+    min-width:0;
+
+    color:#24313c;
+
+    text-align:right;
+
+    white-space:normal;
+
+    overflow-wrap:anywhere;
+}
+
+
+/* =========================================================
+   PANEL TRỐNG
+   ========================================================= */
+
+.empty-panel{
+    min-height:190px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    justify-content:center;
+
+    margin:12px 2px;
+
+    padding:24px 14px;
+
+    border:1px dashed #d4dde4;
+
+    border-radius:10px;
+
+    background:#fafcfd;
+
+    text-align:center;
+
+    color:#7a8792;
+
+    box-sizing:border-box;
+}
+
+.empty-panel p{
+    max-width:210px;
+
+    margin:0;
+
+    font-size:10px;
+    line-height:16px;
+}
+
+
+/* =========================================================
+   TÊN XÃ TRÊN BẢN ĐỒ
+   ========================================================= */
+
+.map-label{
+    padding:0 !important;
+
+    background:transparent !important;
+
+    border:0 !important;
+
+    border-radius:0 !important;
+
+    box-shadow:none !important;
+
+    color:#35424d !important;
+
+    font-size:9px !important;
+
+    line-height:12px !important;
+
+    font-weight:500 !important;
+
+    text-shadow:
+        0 1px 2px rgba(255,255,255,.95),
+        0 -1px 2px rgba(255,255,255,.95),
+        1px 0 2px rgba(255,255,255,.95),
+        -1px 0 2px rgba(255,255,255,.95);
+
+    pointer-events:none !important;
+}
+
+
+/* =========================================================
+   LEGEND
+   ========================================================= */
+
+.legend{
+    width:205px;
+    max-width:205px;
+
+    padding:10px 11px;
+
+    border-radius:10px;
+
+    background:rgba(255,255,255,.96);
+
+    box-shadow:0 5px 16px rgba(20,35,50,.14);
+
+    font-size:10px;
+    line-height:14px;
+
+    box-sizing:border-box;
+}
+
+.legend-title{
+    margin-bottom:3px;
+
+    font-size:12px;
+    line-height:16px;
+
+    font-weight:800;
+}
+
+.legend-method{
+    margin-bottom:6px;
+
+    font-size:8px;
+    line-height:11px;
+}
+
+.legend-subtitle{
+    margin:6px 0 4px;
+
+    font-size:10px;
+}
+
+.legend-row{
+    min-height:18px;
+
+    gap:6px;
+}
+
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
+.dashboard,
+.panel{
+    scrollbar-width:thin;
+
+    scrollbar-color:#b7c1c9 transparent;
+}
+
+.dashboard::-webkit-scrollbar,
+.panel::-webkit-scrollbar{
+    width:6px;
+}
+
+.dashboard::-webkit-scrollbar-track,
+.panel::-webkit-scrollbar-track{
+    background:transparent;
+}
+
+.dashboard::-webkit-scrollbar-thumb,
+.panel::-webkit-scrollbar-thumb{
+    background:#b7c1c9;
+
+    border-radius:8px;
+}
+
+
+/* =========================================================
+   MÀN HÌNH 1400PX
+   ========================================================= */
+
+@media(max-width:1400px){
+
+    .webgis{
+        grid-template-columns:
+            190px
+            minmax(0,1fr)
+            290px;
     }
 
-    .header-title,
-    .app-title,
-    #app-title {
-        font-size: 19px;
+    .header{
+        grid-template-columns:
+            250px
+            minmax(360px,1fr)
+            auto;
     }
 
-    .header-left,
-    .brand,
-    .brand-area {
-        min-width: 235px;
+    .header h1{
+        font-size:21px;
     }
-
-}
-
-
-@media (max-width: 950px) {
-
-    :root {
-        --left-width: 175px;
-        --right-width: 260px;
-    }
-
-    .header-title,
-    .app-title,
-    #app-title {
-        font-size: 16px;
-    }
-
-    .header-controls label,
-    .top-controls label {
-        display: none;
-    }
-
-    .header-controls select,
-    .top-controls select,
-    #layer-select {
-        min-width: 150px;
-    }
-
 }
 
 
 /* =========================================================
-   21. QUAN TRỌNG:
-      KHÔNG ĐỂ CSS CŨ ÉP 3 CỘT THÀNH KÍCH THƯỚC KHÁC
-========================================================= */
+   MÀN HÌNH 1050PX
+   ========================================================= */
 
-#app > .sidebar,
-#app > .left-panel,
-#app > .kpi-sidebar {
+@media(max-width:1050px){
 
-    width: var(--left-width) !important;
+    .header{
+        height:auto;
+        min-height:70px;
 
-    min-width: 0 !important;
+        grid-template-columns:1fr;
+
+        gap:3px;
+
+        padding:9px 14px;
+    }
+
+    .header h1{
+        text-align:left;
+
+        font-size:19px;
+        line-height:24px;
+
+        white-space:normal;
+    }
+
+    .dashboard{
+        display:grid;
+
+        grid-template-columns:
+            repeat(2,minmax(0,1fr));
+
+        overflow:visible;
+
+        border-right:0;
+        border-bottom:1px solid #dfe5ea;
+    }
+
+    .webgis{
+        grid-template-columns:1fr;
+
+        height:auto;
+
+        min-height:0;
+    }
+
+    .main-map{
+        height:65vh;
+
+        min-height:500px;
+    }
+
+    .panel{
+        min-height:500px;
+
+        border-left:0;
+
+        border-top:1px solid #dfe5ea;
+    }
 }
 
 
-#app > #map,
-#app > .map-container,
-#app > .map-area {
+/* =========================================================
+   MOBILE
+   ========================================================= */
 
-    width: 100% !important;
+@media(max-width:650px){
 
-    min-width: 0 !important;
-}
+    .dashboard{
+        grid-template-columns:1fr;
+    }
 
+    .header h1{
+        font-size:17px;
+        line-height:22px;
+    }
 
-#app > #info-panel,
-#app > .info-panel,
-#app > .right-panel,
-#app > .detail-panel {
+    .main-map{
+        height:65vh;
 
-    width: var(--right-width) !important;
+        min-height:450px;
+    }
 
-    min-width: 0 !important;
+    .legend{
+        width:185px;
+
+        max-width:185px;
+    }
 }
