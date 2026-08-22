@@ -278,3 +278,1188 @@ button,input,select{font:inherit}
 
 /* Không cho lớp tiêu đề nổi trên bản đồ xuất hiện */
 .map-export-title{display:none!important}
+/* =========================================================
+   WEBGIS - GIAO DIỆN HOÀN THIỆN
+   MODERN / CLEAN / PROFESSIONAL
+   ========================================================= */
+
+:root{
+    --primary:#174A6E;
+    --primary-dark:#123B59;
+    --primary-soft:#EAF3F8;
+
+    --text:#17212B;
+    --text-soft:#526170;
+    --muted:#7B8995;
+
+    --line:#DCE4EA;
+    --line-soft:#E9EEF2;
+
+    --page:#F3F6F8;
+    --panel:#FFFFFF;
+    --sidebar:#F7F9FB;
+
+    --shadow-soft:
+        0 2px 10px rgba(25,45,60,.07);
+
+    --shadow-panel:
+        0 3px 14px rgba(25,45,60,.09);
+}
+
+
+/* =========================================================
+   1. HEADER
+   ========================================================= */
+
+.header{
+    height:76px !important;
+    min-height:76px !important;
+
+    display:grid !important;
+
+    grid-template-columns:
+        275px
+        minmax(420px,1fr)
+        385px !important;
+
+    align-items:center;
+
+    gap:18px;
+
+    padding:9px 18px !important;
+
+    background:
+        linear-gradient(
+            135deg,
+            #EEF5F9 0%,
+            #E5EFF5 52%,
+            #DCEAF2 100%
+        ) !important;
+
+    color:var(--text) !important;
+
+    border-bottom:
+        1px solid #CFDDE6 !important;
+
+    box-shadow:
+        0 2px 10px rgba(24,55,75,.08) !important;
+
+    position:relative;
+    z-index:2000;
+}
+
+
+/* Cơ quan */
+
+.agency{
+    min-width:0;
+}
+
+.agency-line1{
+    color:#173B56 !important;
+
+    font-size:12px !important;
+    line-height:1.25 !important;
+
+    font-weight:850 !important;
+
+    letter-spacing:.15px;
+
+    white-space:nowrap;
+}
+
+.agency-line2{
+    margin-top:4px !important;
+
+    color:#60798A !important;
+
+    font-size:9.5px !important;
+    line-height:1.2 !important;
+
+    font-weight:700 !important;
+
+    letter-spacing:.25px;
+
+    white-space:nowrap;
+}
+
+
+/* Tiêu đề chính */
+
+.header h1{
+    margin:0 !important;
+
+    color:#163A56 !important;
+
+    font-size:21px !important;
+    line-height:1.15 !important;
+
+    font-weight:850 !important;
+
+    letter-spacing:.15px;
+
+    text-align:center;
+
+    white-space:nowrap;
+
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+
+/* Khu vực điều khiển */
+
+.header-controls{
+    min-width:0;
+
+    display:flex !important;
+    align-items:center;
+    justify-content:flex-end;
+
+    gap:7px !important;
+}
+
+.header-layer{
+    min-width:0;
+
+    display:flex;
+    align-items:center;
+
+    gap:7px !important;
+}
+
+.header-layer-label{
+    color:#607789 !important;
+
+    font-size:8.5px !important;
+    font-weight:800 !important;
+
+    letter-spacing:.5px;
+}
+
+.header-layer select{
+    width:205px !important;
+    height:36px !important;
+
+    padding:0 11px !important;
+
+    background:#FFFFFF !important;
+
+    color:#243B4D !important;
+
+    border:
+        1px solid #CBD9E2 !important;
+
+    border-radius:9px !important;
+
+    font-size:10.5px !important;
+    font-weight:650 !important;
+
+    outline:none;
+
+    box-shadow:
+        0 1px 4px rgba(25,55,75,.06);
+}
+
+.header-layer select:focus{
+    border-color:#76A8C7 !important;
+
+    box-shadow:
+        0 0 0 3px rgba(55,125,170,.10);
+}
+
+
+/* Nút header */
+
+.header-icon-btn{
+    width:36px !important;
+    height:36px !important;
+
+    flex:0 0 36px !important;
+
+    border:
+        1px solid #CBD9E2 !important;
+
+    border-radius:9px !important;
+
+    background:#FFFFFF !important;
+
+    color:#31566F !important;
+
+    box-shadow:
+        0 1px 5px rgba(25,55,75,.07) !important;
+
+    transition:
+        background .15s ease,
+        border-color .15s ease,
+        transform .15s ease;
+}
+
+.header-icon-btn:hover{
+    background:#F2F8FC !important;
+
+    border-color:#A9C3D4 !important;
+
+    transform:translateY(-1px);
+}
+
+
+/* =========================================================
+   2. KHUNG 3 CỘT
+   ========================================================= */
+
+.webgis{
+    width:100%;
+
+    display:grid !important;
+
+    /*
+       Hai panel trái/phải bằng nhau.
+       Bản đồ nhận toàn bộ phần còn lại.
+    */
+    grid-template-columns:
+        255px
+        minmax(0,1fr)
+        255px !important;
+
+    height:
+        calc(100vh - 76px) !important;
+
+    min-height:0;
+}
+
+
+/* =========================================================
+   3. PANEL KPI BÊN TRÁI
+   ========================================================= */
+
+.sidebar{
+    min-width:0;
+    min-height:0;
+
+    height:100%;
+
+    padding:
+        10px 9px 12px !important;
+
+    background:
+        linear-gradient(
+            180deg,
+            #F8FAFC 0%,
+            #F3F6F8 100%
+        ) !important;
+
+    border-right:
+        1px solid #D7E1E7 !important;
+
+    overflow-y:auto;
+    overflow-x:hidden;
+}
+
+
+/* khoảng cách KPI */
+
+.sidebar-kpi{
+    width:100%;
+
+    display:flex !important;
+
+    flex-direction:column;
+
+    gap:8px !important;
+
+    padding:
+        1px 1px 12px !important;
+}
+
+
+/* =========================================================
+   4. KPI CARD
+   ========================================================= */
+
+/*
+   Không khóa chiều cao.
+   Card tự cao theo nội dung.
+*/
+
+.sidebar-kpi .summary-card{
+    width:100%;
+
+    height:auto !important;
+    min-height:0 !important;
+    max-height:none !important;
+
+    flex:
+        0 0 auto !important;
+
+    margin:0 !important;
+
+    padding:
+        10px 11px 11px !important;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:flex-start !important;
+
+    border:
+        1px solid #DCE4EA !important;
+
+    border-top-width:3px !important;
+
+    border-radius:11px !important;
+
+    background:#FFFFFF !important;
+
+    overflow:visible !important;
+
+    box-shadow:
+        0 2px 8px rgba(25,45,60,.055) !important;
+
+    transition:
+        transform .15s ease,
+        box-shadow .15s ease;
+}
+
+.sidebar-kpi .summary-card:hover{
+    transform:translateY(-1px);
+
+    box-shadow:
+        0 4px 13px rgba(25,45,60,.10) !important;
+}
+
+
+/* =========================================================
+   5. TIÊU ĐỀ KPI
+   ========================================================= */
+
+.sidebar-kpi .summary-head{
+    width:100%;
+
+    min-height:17px;
+
+    display:flex;
+
+    align-items:flex-start;
+
+    gap:6px;
+
+    margin:0 !important;
+
+    color:#344654 !important;
+
+    font-size:10.5px !important;
+
+    line-height:15px !important;
+
+    font-weight:800 !important;
+
+    white-space:normal !important;
+
+    overflow:visible !important;
+
+    text-overflow:clip !important;
+
+    overflow-wrap:anywhere;
+}
+
+.sidebar-kpi .summary-head i{
+    flex:0 0 auto;
+
+    margin-top:2px;
+
+    font-size:10px !important;
+}
+
+
+/* =========================================================
+   6. SỐ KPI
+   ========================================================= */
+
+.sidebar-kpi .summary-main{
+    width:100%;
+
+    height:auto !important;
+    min-height:0 !important;
+
+    display:flex;
+
+    align-items:baseline;
+
+    gap:5px;
+
+    margin:
+        5px 0 5px !important;
+}
+
+.sidebar-kpi .summary-main span{
+    color:#17212B !important;
+
+    font-size:24px !important;
+
+    line-height:27px !important;
+
+    font-weight:850 !important;
+
+    white-space:nowrap;
+}
+
+.sidebar-kpi .summary-main small{
+    color:#697887 !important;
+
+    font-size:8.5px !important;
+
+    line-height:13px !important;
+
+    font-weight:600 !important;
+
+    white-space:normal !important;
+}
+
+
+/* =========================================================
+   7. THÔNG TIN PHỤ KPI
+   ========================================================= */
+
+.sidebar-kpi .summary-grid{
+    width:100%;
+
+    min-height:0 !important;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:3px !important;
+
+    margin:0 !important;
+
+    color:#5D6C78 !important;
+
+    font-size:9px !important;
+
+    line-height:13px !important;
+
+    overflow:visible !important;
+}
+
+.sidebar-kpi .summary-grid span{
+    width:100%;
+
+    min-height:13px;
+
+    display:block;
+
+    white-space:normal !important;
+
+    overflow:visible !important;
+
+    text-overflow:clip !important;
+
+    overflow-wrap:anywhere;
+}
+
+.sidebar-kpi .summary-grid b{
+    color:#263743 !important;
+
+    font-size:9.2px !important;
+
+    font-weight:800 !important;
+}
+
+
+/* KPI tiêu đề dài */
+
+.sidebar-kpi .card-phun .summary-head,
+.sidebar-kpi .card-drug .summary-head{
+    font-size:9.5px !important;
+
+    line-height:13px !important;
+}
+
+
+/* =========================================================
+   8. MÀU KPI
+   ========================================================= */
+
+.card-dtlcp{
+    border-top-color:#D32F2F !important;
+}
+
+.card-cgc{
+    border-top-color:#369447 !important;
+}
+
+.card-vdnc{
+    border-top-color:#3478D4 !important;
+}
+
+.card-dai{
+    border-top-color:#7040B5 !important;
+}
+
+.card-phun{
+    border-top-color:#1597A3 !important;
+}
+
+.card-ksgm{
+    border-top-color:#80604F !important;
+}
+
+.card-drug{
+    border-top-color:#2878A8 !important;
+}
+
+
+/* =========================================================
+   9. BẢN ĐỒ
+   ========================================================= */
+
+.main-map{
+    position:relative;
+
+    min-width:0;
+    min-height:0;
+
+    overflow:hidden;
+
+    background:#EDF2F5 !important;
+}
+
+#map{
+    width:100%;
+    height:100%;
+}
+
+
+/* =========================================================
+   10. TOOLBAR BẢN ĐỒ
+   ========================================================= */
+
+.map-toolbar{
+    top:10px !important;
+    right:10px !important;
+}
+
+.map-actions{
+    display:flex;
+
+    align-items:center;
+
+    gap:4px;
+
+    padding:4px !important;
+
+    border:
+        1px solid rgba(40,65,85,.12) !important;
+
+    border-radius:10px !important;
+
+    background:
+        rgba(255,255,255,.96) !important;
+
+    box-shadow:
+        0 4px 14px rgba(20,35,50,.12) !important;
+}
+
+.map-action{
+    width:34px !important;
+    height:32px !important;
+
+    border-radius:7px !important;
+
+    background:#FFFFFF !important;
+
+    color:#456073 !important;
+}
+
+.map-action:hover{
+    background:#EFF6FA !important;
+
+    color:#174A6E !important;
+}
+
+.map-action.active{
+    background:#1D6FA5 !important;
+
+    color:#FFFFFF !important;
+}
+
+
+/* =========================================================
+   11. ZOOM
+   ========================================================= */
+
+.leaflet-top.leaflet-left{
+    top:10px !important;
+    left:10px !important;
+}
+
+.leaflet-control-zoom{
+    border:0 !important;
+
+    border-radius:9px !important;
+
+    overflow:hidden;
+
+    box-shadow:
+        0 3px 12px rgba(20,35,50,.13) !important;
+}
+
+.leaflet-control-zoom a{
+    width:34px !important;
+    height:34px !important;
+
+    line-height:34px !important;
+
+    background:#FFFFFF !important;
+
+    color:#344E60 !important;
+
+    border:0 !important;
+}
+
+.leaflet-control-zoom a:hover{
+    background:#F1F6F9 !important;
+}
+
+
+/* =========================================================
+   12. TÊN XÃ TRÊN BẢN ĐỒ
+   ========================================================= */
+
+.map-label-wrap{
+    background:transparent !important;
+
+    border:0 !important;
+}
+
+.map-label{
+    display:inline-block;
+
+    padding:0 !important;
+
+    background:transparent !important;
+
+    border:0 !important;
+
+    box-shadow:none !important;
+
+    color:#334955 !important;
+
+    font-size:9px !important;
+
+    line-height:12px !important;
+
+    font-weight:600 !important;
+
+    white-space:nowrap;
+
+    pointer-events:none !important;
+
+    text-shadow:
+        -1px -1px 0 #fff,
+         1px -1px 0 #fff,
+        -1px  1px 0 #fff,
+         1px  1px 0 #fff;
+}
+
+
+/* =========================================================
+   13. PANEL PHẢI
+   ========================================================= */
+
+.panel{
+    min-width:0;
+    min-height:0;
+
+    height:100%;
+
+    background:#FFFFFF !important;
+
+    border-left:
+        1px solid #D7E1E7 !important;
+
+    overflow:hidden;
+}
+
+
+/* Đầu panel */
+
+.panel-head{
+    height:76px !important;
+
+    padding:
+        13px 14px 11px !important;
+
+    background:
+        linear-gradient(
+            180deg,
+            #F7FAFC 0%,
+            #FFFFFF 100%
+        ) !important;
+
+    border-bottom:
+        1px solid #E0E7EC !important;
+}
+
+.panel-kicker{
+    display:block;
+
+    margin-bottom:4px !important;
+
+    color:#718392 !important;
+
+    font-size:8px !important;
+
+    line-height:11px;
+
+    font-weight:800 !important;
+
+    letter-spacing:.7px;
+}
+
+.panel h2{
+    margin:0 !important;
+
+    color:#18384F !important;
+
+    font-size:17px !important;
+
+    line-height:21px !important;
+
+    font-weight:800 !important;
+
+    white-space:normal !important;
+
+    overflow:visible !important;
+
+    text-overflow:clip !important;
+}
+
+
+/* =========================================================
+   14. NỘI DUNG PANEL
+   ========================================================= */
+
+#info-panel{
+    width:100%;
+
+    height:
+        calc(100% - 76px) !important;
+
+    padding:
+        12px !important;
+
+    overflow-y:auto;
+
+    overflow-x:hidden;
+
+    scrollbar-width:thin;
+
+    scrollbar-color:
+        #B8C6D0 transparent;
+}
+
+
+/* Tên xã */
+
+.info-block{
+    margin-bottom:12px !important;
+}
+
+.info-district{
+    color:#173B56 !important;
+
+    font-size:17px !important;
+
+    line-height:21px !important;
+
+    font-weight:800 !important;
+}
+
+.info-layer{
+    margin-top:3px !important;
+
+    color:#788794 !important;
+
+    font-size:9px !important;
+
+    line-height:13px !important;
+}
+
+
+/* =========================================================
+   15. CÁC NHÓM THÔNG TIN
+   ========================================================= */
+
+.info-section{
+    margin-bottom:10px !important;
+
+    padding:0 0 9px !important;
+
+    border-bottom:
+        1px solid #E5EBEF !important;
+}
+
+.info-section:last-child{
+    border-bottom:0 !important;
+}
+
+.info-section-title{
+    margin:
+        0 0 6px !important;
+
+    padding-left:8px;
+
+    color:#294B61 !important;
+
+    font-size:10.5px !important;
+
+    line-height:15px !important;
+
+    font-weight:800 !important;
+
+    border-left:
+        3px solid #5C8AA5;
+}
+
+
+/* =========================================================
+   16. BẢNG THÔNG TIN
+   ========================================================= */
+
+.info-table{
+    width:100%;
+
+    margin:0 !important;
+
+    overflow:hidden;
+
+    border:
+        1px solid #E1E7EB !important;
+
+    border-radius:8px !important;
+
+    background:#FFFFFF;
+}
+
+.info-row{
+    min-height:28px !important;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:8px;
+
+    padding:
+        6px 8px !important;
+
+    border-bottom:
+        1px solid #EDF0F2 !important;
+
+    font-size:9px !important;
+
+    line-height:13px !important;
+}
+
+.info-row:last-child{
+    border-bottom:0;
+}
+
+.info-row span{
+    min-width:0;
+
+    color:#71808D !important;
+
+    white-space:normal !important;
+}
+
+.info-row b{
+    min-width:0;
+
+    color:#263844 !important;
+
+    text-align:right;
+
+    white-space:normal !important;
+
+    overflow-wrap:anywhere;
+}
+
+
+/* =========================================================
+   17. PANEL TRỐNG
+   ========================================================= */
+
+.empty-panel{
+    min-height:190px !important;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    justify-content:center;
+
+    margin:
+        18px 2px !important;
+
+    padding:
+        24px 14px !important;
+
+    border:
+        1px dashed #D4DFE6 !important;
+
+    border-radius:11px !important;
+
+    background:#FAFCFD !important;
+
+    text-align:center;
+
+    color:#7C8A95 !important;
+}
+
+.empty-panel i{
+    margin-bottom:9px;
+
+    color:#9BAAB5;
+
+    font-size:22px;
+}
+
+.empty-panel p{
+    max-width:210px;
+
+    margin:0;
+
+    font-size:10px;
+
+    line-height:1.55;
+}
+
+
+/* =========================================================
+   18. LEGEND
+   ========================================================= */
+
+.legend{
+    width:205px !important;
+
+    max-width:205px !important;
+
+    padding:
+        10px 11px !important;
+
+    background:
+        rgba(255,255,255,.96) !important;
+
+    border:
+        1px solid #D9E2E8 !important;
+
+    border-radius:10px !important;
+
+    box-shadow:
+        0 5px 16px rgba(20,35,50,.12) !important;
+
+    color:#31424F !important;
+
+    font-size:9px !important;
+
+    line-height:1.35 !important;
+}
+
+.legend-title{
+    font-size:11px !important;
+
+    font-weight:800 !important;
+
+    color:#233E50 !important;
+}
+
+.legend-method{
+    margin-bottom:5px !important;
+
+    color:#82909A !important;
+
+    font-size:8px !important;
+}
+
+.legend-row{
+    min-height:18px !important;
+
+    gap:6px !important;
+}
+
+.legend-row i{
+    width:17px !important;
+    height:12px !important;
+
+    flex:0 0 17px !important;
+
+    border-radius:3px !important;
+}
+
+.legend-no-data{
+    width:17px !important;
+    height:12px !important;
+
+    flex:0 0 17px !important;
+
+    border-radius:3px !important;
+}
+
+
+/* =========================================================
+   19. THANH CUỘN
+   ========================================================= */
+
+.sidebar::-webkit-scrollbar,
+#info-panel::-webkit-scrollbar{
+    width:5px;
+}
+
+.sidebar::-webkit-scrollbar-track,
+#info-panel::-webkit-scrollbar-track{
+    background:transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb,
+#info-panel::-webkit-scrollbar-thumb{
+    background:#B8C5CE;
+
+    border-radius:8px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover,
+#info-panel::-webkit-scrollbar-thumb:hover{
+    background:#9DADB8;
+}
+
+
+/* =========================================================
+   20. RESPONSIVE
+   ========================================================= */
+
+@media(max-width:1100px){
+
+    .header{
+        grid-template-columns:
+            235px
+            minmax(300px,1fr)
+            330px !important;
+
+        gap:10px !important;
+
+        padding:
+            8px 12px !important;
+    }
+
+    .header h1{
+        font-size:18px !important;
+    }
+
+    .header-layer select{
+        width:175px !important;
+    }
+
+    .webgis{
+        grid-template-columns:
+            235px
+            minmax(0,1fr)
+            235px !important;
+    }
+}
+
+
+@media(max-width:700px){
+
+    .header{
+        height:auto !important;
+
+        min-height:90px !important;
+
+        grid-template-columns:1fr !important;
+
+        gap:7px !important;
+
+        padding:
+            9px 12px !important;
+    }
+
+    .header h1{
+        text-align:left;
+
+        white-space:normal;
+
+        font-size:17px !important;
+    }
+
+    .header-controls{
+        justify-content:flex-start;
+
+        flex-wrap:wrap;
+    }
+
+    .webgis{
+        grid-template-columns:1fr !important;
+
+        height:auto !important;
+    }
+
+    .sidebar{
+        order:1;
+
+        height:auto;
+
+        max-height:420px;
+    }
+
+    .main-map{
+        order:2;
+
+        height:600px;
+
+        min-height:600px;
+    }
+
+    .panel{
+        order:3;
+
+        height:500px;
+    }
+
+    .sidebar-kpi .summary-card{
+        min-height:0 !important;
+
+        height:auto !important;
+    }
+}
+
+
+@media(max-width:500px){
+
+    .sidebar-kpi{
+        gap:7px !important;
+    }
+
+    .map-actions{
+        gap:2px;
+    }
+
+    .map-action{
+        width:32px !important;
+        height:30px !important;
+    }
+
+    .legend{
+        width:185px !important;
+
+        max-width:185px !important;
+    }
+}
