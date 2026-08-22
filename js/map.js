@@ -747,7 +747,34 @@ function infoSection(title, rows, tone="blue") {
         </section>
     `;
 }
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+function infoRows(items) {
+    return items.map(function(item) {
 
+        const label = item[0];
+        const value = item[1];
+
+        return `
+            <div class="info-row">
+                <div class="info-label">
+                    ${escapeHtml(label)}
+                </div>
+
+                <div class="info-value">
+                    ${escapeHtml(value ?? "--")}
+                </div>
+            </div>
+        `;
+
+    }).join("");
+}
 function showPanel(feature, layer) {
 
     selectedFeature = feature;
