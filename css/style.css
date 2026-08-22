@@ -1,854 +1,280 @@
-/* =========================================================
-   WEBGIS - GIAO DIỆN
-   KPI TRÁI | BẢN ĐỒ GIỮA | PANEL PHẢI
-   ========================================================= */
+:root{
+  --ink:#17212b;
+  --muted:#6d7985;
+  --line:#dce3e8;
+  --page:#f3f6f8;
+  --blue:#155eef;
+  --panel:#fff;
+  --shadow:0 6px 18px rgba(20,35,50,.10);
+}
 
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);background:var(--page)}
+body{overflow:hidden}
+button,input,select{font:inherit}
 
-/* =========================================================
-   HEADER
-   ========================================================= */
-
+/* ================= HEADER ================= */
 .header{
-    height:74px;
-    min-height:74px;
-
-    display:grid;
-    grid-template-columns:290px minmax(420px,1fr) auto;
-
-    align-items:center;
-    gap:20px;
-
-    padding:8px 18px;
-
-    background:#fff;
-    border-bottom:1px solid #dfe5ea;
-
-    box-sizing:border-box;
+  height:74px;
+  display:grid;
+  grid-template-columns:minmax(260px,1fr) minmax(420px,1.35fr) auto;
+  align-items:center;
+  gap:20px;
+  padding:10px 18px;
+  background:#fff;
+  border-bottom:1px solid var(--line);
+  box-shadow:0 2px 8px rgba(20,35,50,.05);
+  position:relative;
+  z-index:1100;
 }
-
-.agency{
-    min-width:0;
-}
-
-.agency-line1{
-    font-size:11px;
-    line-height:15px;
-    font-weight:800;
-
-    color:#17212b;
-
-    letter-spacing:.15px;
-
-    white-space:nowrap;
-}
-
-.agency-line2{
-    margin-top:2px;
-
-    font-size:9px;
-    line-height:13px;
-
-    color:#687684;
-
-    font-weight:700;
-}
-
-
-/* TIÊU ĐỀ WEBGIS */
-
-.header h1{
-    margin:0;
-
-    font-size:23px;
-    line-height:28px;
-
-    font-weight:900;
-
-    letter-spacing:.2px;
-
-    color:#182b3c;
-
-    text-align:center;
-
-    white-space:nowrap;
-}
-
-
-/* =========================================================
-   DASHBOARD / KPI
-   ========================================================= */
-
-.dashboard{
-    display:flex;
-    flex-direction:column;
-
-    gap:8px;
-
-    padding:10px;
-
-    background:#f5f7f9;
-
-    border-right:1px solid #dfe5ea;
-
-    border-bottom:0;
-
-    overflow-y:auto;
-    overflow-x:hidden;
-
-    min-width:0;
-
-    box-sizing:border-box;
-}
-
-
-/* Ô KPI */
-
-.summary-card{
-    width:100%;
-    min-width:0;
-
-    flex:0 0 auto;
-
-    padding:10px 11px;
-
-    border:1px solid #dce3e8;
-    border-radius:11px;
-
-    background:#fff;
-
-    box-shadow:0 2px 8px rgba(20,35,50,.06);
-
-    overflow:hidden;
-
-    box-sizing:border-box;
-}
-
-
-/* Tiêu đề KPI */
-
-.summary-head{
-    display:flex;
-
-    align-items:flex-start;
-
-    gap:7px;
-
-    min-width:0;
-
-    margin-bottom:2px;
-
-    font-size:11px;
-    line-height:15px;
-
-    font-weight:800;
-
-    color:#465564;
-
-    white-space:normal;
-}
-
-.summary-head i{
-    flex:0 0 auto;
-
-    font-size:12px;
-}
-
-.summary-head b{
-    min-width:0;
-
-    white-space:normal;
-
-    overflow-wrap:anywhere;
-}
-
-
-/* Số chính KPI */
-
-.summary-main{
-    display:flex;
-
-    align-items:baseline;
-
-    gap:5px;
-
-    margin:4px 0 6px;
-
-    min-width:0;
-}
-
-.summary-main span{
-    font-size:24px;
-    line-height:26px;
-
-    font-weight:900;
-
-    color:#17212b;
-}
-
-.summary-main small{
-    font-size:9px;
-    line-height:13px;
-
-    color:#74818d;
-
-    white-space:normal;
-}
-
-
-/* Số liệu phụ */
-
-.summary-grid{
-    display:flex;
-
-    flex-direction:column;
-
-    gap:3px;
-
-    font-size:9px;
-    line-height:13px;
-
-    color:#6d7985;
-}
-
-.summary-grid span{
-    white-space:normal;
-
-    overflow-wrap:anywhere;
-}
-
-.summary-grid b{
-    color:#25313d;
-
-    font-weight:800;
-}
-
-
-/* =========================================================
-   MÀU VIỀN KPI
-   ========================================================= */
-
-.card-dtlcp{
-    border-top:3px solid #E53935;
-}
-
-.card-cgc{
-    border-top:3px solid #43A047;
-}
-
-.card-vdnc{
-    border-top:3px solid #2F7DF6;
-}
-
-.card-dai{
-    border-top:3px solid #6A35D1;
-}
-
-.card-phun{
-    border-top:3px solid #19A7B3;
-}
-
-.card-ksgm{
-    border-top:3px solid #795548;
-}
-
-.card-drug{
-    border-top:3px solid #0288B8;
-}
-
-
-/* =========================================================
-   BỐ CỤC CHÍNH
-   ========================================================= */
-
+.agency-line1{font-size:11px;line-height:1.25;font-weight:800;letter-spacing:.25px;color:#17212b}
+.agency-line2{margin-top:3px;font-size:10px;line-height:1.2;font-weight:700;color:#6a7682}
+.header h1{margin:0;text-align:center;font-size:20px;line-height:1.2;font-weight:800;letter-spacing:.35px;white-space:nowrap}
+.header-controls{display:flex;align-items:center;justify-content:flex-end;gap:7px}
+.header-layer{display:flex;align-items:center;gap:7px}
+.header-layer-label{font-size:9px;font-weight:800;color:#5c6975;letter-spacing:.4px;white-space:nowrap}
+.header-layer select{width:220px;height:34px;border:1px solid #cfd8df;border-radius:8px;padding:0 9px;background:#fff;color:#26343f;font-size:12px;outline:none}
+.header-icon-btn{width:34px;height:34px;border:1px solid #cfd8df;border-radius:8px;background:#fff;color:#4c5b68;cursor:pointer}
+.header-icon-btn:hover{background:#155eef;color:#fff;border-color:#155eef}
+
+/* ================= MAIN 3-COLUMN LAYOUT ================= */
 .webgis{
-    display:grid;
-
-    grid-template-columns:
-        minmax(185px,205px)
-        minmax(0,1fr)
-        minmax(285px,310px);
-
-    gap:0;
-
-    height:calc(100vh - 74px);
-
-    min-height:600px;
-
-    background:#eef2f4;
-
-    box-sizing:border-box;
+  display:grid;
+  grid-template-columns:205px minmax(0,1fr) 315px;
+  width:100%;
+  height:calc(100vh - 74px);
+  min-height:0;
 }
 
-
-/*
-   Nếu HTML có sidebar cũ thì ẩn.
-   KPI vẫn lấy từ .dashboard.
-*/
-
-.webgis > .sidebar{
-    display:none !important;
+/* ================= KPI SIDEBAR ================= */
+.sidebar{
+  min-width:0;
+  padding:10px 9px;
+  background:#f7f9fa;
+  border-right:1px solid var(--line);
+  overflow-y:auto;
+  overflow-x:hidden;
 }
-
-
-/* =========================================================
-   BẢN ĐỒ
-   ========================================================= */
-
-.main-map{
-    position:relative;
-
-    min-width:0;
-    min-height:0;
-
-    background:#e9eef1;
-
-    overflow:hidden;
+.sidebar-kpi{display:flex;flex-direction:column;gap:8px;padding:2px 2px 12px}
+.summary-card{
+  width:100%;
+  min-width:0;
+  min-height:0;
+  height:auto;
+  padding:10px 11px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:#fff;
+  box-shadow:0 2px 8px rgba(20,35,50,.055);
+  overflow:visible;
 }
-
-#map{
-    width:100%;
-    height:100%;
-
-    min-height:0;
-
-    background:#edf1f3;
-}
-
-
-/* =========================================================
-   BỎ HỘP TIÊU ĐỀ NỔI TRÊN BẢN ĐỒ
-   ========================================================= */
-
-.map-title-live{
-    display:none !important;
-}
-
-
-/* =========================================================
-   TOOLBAR BẢN ĐỒ
-   ========================================================= */
-
-.map-toolbar{
-    position:absolute;
-
-    z-index:1000;
-
-    right:12px;
-    top:12px;
-    left:auto;
-
-    display:flex;
-
-    justify-content:flex-end;
-
-    align-items:center;
-
-    gap:8px;
-
-    pointer-events:none;
-}
-
-.map-actions{
-    display:flex;
-
-    gap:4px;
-
-    padding:4px;
-
-    border-radius:9px;
-
-    background:rgba(255,255,255,.95);
-
-    box-shadow:0 3px 12px rgba(20,35,50,.13);
-
-    pointer-events:auto;
-}
-
-.map-action{
-    width:34px;
-    height:32px;
-
-    border:0;
-
-    border-radius:7px;
-
-    background:#fff;
-
-    color:#53616e;
-
-    cursor:pointer;
-}
-
-.map-action:hover,
-.map-action.active{
-    background:#155eef;
-
-    color:#fff;
-}
-
-
-/* =========================================================
-   PANEL BÊN PHẢI
-   ========================================================= */
-
-.panel{
-    min-width:0;
-
-    background:#fff;
-
-    border-left:1px solid #dfe5ea;
-
-    overflow-y:auto;
-    overflow-x:hidden;
-
-    box-sizing:border-box;
-}
-
-
-/* Đầu panel */
-
-.panel-head{
-    padding:13px 14px 11px;
-
-    border-bottom:1px solid #e1e6ea;
-
-    background:#fff;
-}
-
-.panel-kicker{
-    display:block;
-
-    margin-bottom:3px;
-
-    color:#73808c;
-
-    font-size:9px;
-    line-height:13px;
-
-    font-weight:800;
-
-    letter-spacing:.6px;
-}
-
-.panel h2{
-    margin:0;
-
-    color:#17212b;
-
-    font-size:19px;
-    line-height:24px;
-
-    font-weight:900;
-
-    overflow-wrap:anywhere;
-}
-
-
-/* Nội dung panel */
-
-#info-panel{
-    padding:12px;
-
-    box-sizing:border-box;
-}
-
-
-/* Tên xã */
-
-.info-block{
-    margin-bottom:10px;
-}
-
-.info-district{
-    color:#17212b;
-
-    font-size:15px;
-    line-height:20px;
-
-    font-weight:900;
-
-    overflow-wrap:anywhere;
-}
-
-.info-layer{
-    margin-top:2px;
-
-    color:#74818d;
-
-    font-size:10px;
-    line-height:14px;
-}
-
-
-/* =========================================================
-   CÁC NHÓM THÔNG TIN TRONG PANEL
-   ========================================================= */
-
-.info-section{
-    margin-bottom:9px;
-
-    padding:0;
-
-    border:1px solid #e1e6ea;
-
-    border-radius:9px;
-
-    overflow:hidden;
-
-    background:#fff;
-}
-
-.info-section-title{
-    margin:0;
-
-    padding:7px 9px;
-
-    background:#f5f7f9;
-
-    border-left:3px solid #607d8b;
-
-    color:#25313d;
-
-    font-size:10px;
-    line-height:14px;
-
-    font-weight:800;
-
-    overflow-wrap:anywhere;
-}
-
-
-/* =========================================================
-   DÒNG SỐ LIỆU
-   ========================================================= */
-
-.info-table{
-    width:100%;
-
-    margin:0;
-
-    border:0;
-
-    border-radius:0;
-
-    overflow:hidden;
-}
-
-.info-row{
-    min-height:30px;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:space-between;
-
-    gap:10px;
-
-    padding:6px 9px;
-
-    border-bottom:1px solid #edf0f2;
-
-    font-size:10px;
-    line-height:14px;
-
-    box-sizing:border-box;
-}
-
-.info-row:last-child{
-    border-bottom:0;
-}
-
-.info-row span{
-    min-width:0;
-
-    color:#71808d;
-
-    white-space:normal;
-
-    overflow-wrap:anywhere;
-}
-
-.info-row b{
-    min-width:0;
-
-    color:#24313c;
-
-    text-align:right;
-
-    white-space:normal;
-
-    overflow-wrap:anywhere;
-}
-
-
-/* =========================================================
-   PANEL TRỐNG
-   ========================================================= */
-
-.empty-panel{
-    min-height:190px;
-
-    display:flex;
-
-    flex-direction:column;
-
-    align-items:center;
-
-    justify-content:center;
-
-    margin:12px 2px;
-
-    padding:24px 14px;
-
-    border:1px dashed #d4dde4;
-
-    border-radius:10px;
-
-    background:#fafcfd;
-
-    text-align:center;
-
-    color:#7a8792;
-
-    box-sizing:border-box;
-}
-
-.empty-panel p{
-    max-width:210px;
-
-    margin:0;
-
-    font-size:10px;
-    line-height:16px;
-}
-
-
-/* =========================================================
-   TÊN XÃ TRÊN BẢN ĐỒ
-   ========================================================= */
-
+.summary-card:hover{box-shadow:0 4px 12px rgba(20,35,50,.09)}
+.summary-head{display:flex;align-items:flex-start;gap:6px;margin:0;color:#44515e;font-size:10.5px;line-height:14px;font-weight:700;white-space:normal;overflow:visible}
+.summary-head i{flex:0 0 auto;margin-top:1px;font-size:10px}
+.summary-main{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 5px;margin:4px 0 4px}
+.summary-main span{font-size:23px;line-height:25px;font-weight:900;white-space:nowrap;color:#101820}
+.summary-main small{font-size:9px;line-height:12px;color:#6d7985;white-space:normal}
+.summary-grid{display:flex;flex-direction:column;gap:2px;font-size:9px;line-height:13px;color:#697682}
+.summary-grid span{display:block;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
+.summary-grid b{color:#27343f;font-weight:800}
+.card-dtlcp{border-top:3px solid #e6392e}
+.card-cgc{border-top:3px solid #388e3c}
+.card-vdnc{border-top:3px solid #2f7df6}
+.card-dai{border-top:3px solid #6a35d1}
+.card-phun{border-top:3px solid #19a7b3}
+.card-ksgm{border-top:3px solid #795548}
+.card-drug{border-top:3px solid #0288b8}
+
+/* ================= MAP ================= */
+.main-map{position:relative;min-width:0;min-height:0;background:#e9eef1;overflow:hidden}
+#map{width:100%;height:100%;min-height:0;background:#edf1f3}
+.leaflet-container{font-family:Inter,Segoe UI,Roboto,Arial,sans-serif}
+.leaflet-control-zoom{border:0!important;box-shadow:0 3px 12px rgba(20,35,50,.16)!important}
+.leaflet-control-zoom a{border:0!important;color:#334155!important}
+.leaflet-control-scale-line{background:rgba(255,255,255,.92)!important;border:1px solid #64748b!important;color:#334155!important;font-size:9px!important}
+
+/* chỉ giữ cụm công cụ; KHÔNG có hộp tiêu đề nổi trên bản đồ */
+.map-toolbar{position:absolute;z-index:1000;right:12px;top:12px;pointer-events:none}
+.map-title-live{display:none}
+.map-actions{display:flex;gap:4px;padding:4px;border-radius:10px;background:rgba(255,255,255,.96);box-shadow:0 4px 14px rgba(20,35,50,.14);pointer-events:auto}
+.map-action{width:34px;height:32px;border:0;border-radius:7px;background:#fff;color:#53616e;cursor:pointer}
+.map-action:hover,.map-action.active{background:#155eef;color:#fff}
+.map-action.loading{opacity:.55;cursor:wait}
+
+/* ================= LABELS ================= */
+.map-label-wrap{background:transparent!important;border:0!important;pointer-events:none!important}
 .map-label{
-    padding:0 !important;
-
-    background:transparent !important;
-
-    border:0 !important;
-
-    border-radius:0 !important;
-
-    box-shadow:none !important;
-
-    color:#35424d !important;
-
-    font-size:9px !important;
-
-    line-height:12px !important;
-
-    font-weight:500 !important;
-
-    text-shadow:
-        0 1px 2px rgba(255,255,255,.95),
-        0 -1px 2px rgba(255,255,255,.95),
-        1px 0 2px rgba(255,255,255,.95),
-        -1px 0 2px rgba(255,255,255,.95);
-
-    pointer-events:none !important;
+  display:inline-block;
+  padding:0;
+  margin:0;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  color:#27343d;
+  font-size:9.5px;
+  line-height:16px;
+  font-weight:400;
+  letter-spacing:.05px;
+  white-space:nowrap;
+  text-shadow:1px 0 1px rgba(255,255,255,.95),-1px 0 1px rgba(255,255,255,.95),0 1px 2px rgba(255,255,255,.95),0 -1px 2px rgba(255,255,255,.95);
 }
 
-
-/* =========================================================
-   LEGEND
-   ========================================================= */
-
+/* ================= LEGEND ================= */
 .legend{
-    width:205px;
-    max-width:205px;
-
-    padding:10px 11px;
-
-    border-radius:10px;
-
-    background:rgba(255,255,255,.96);
-
-    box-shadow:0 5px 16px rgba(20,35,50,.14);
-
-    font-size:10px;
-    line-height:14px;
-
-    box-sizing:border-box;
+  width:205px;
+  max-width:205px;
+  padding:10px 11px;
+  border:1px solid rgba(20,35,50,.12);
+  border-radius:10px;
+  background:rgba(255,255,255,.96);
+  box-shadow:0 7px 20px rgba(20,35,50,.16);
+  font-size:10px;
+  line-height:1.3;
 }
+.legend h4{margin:0 0 6px;padding:0 0 6px;border-bottom:1px solid #e5e7eb;font-size:12px;line-height:15px;font-weight:800;color:#263238}
+.legend-row{display:flex;align-items:center;gap:7px;min-height:18px;margin:2px 0}
+.legend-row i{width:17px;height:11px;flex:0 0 17px;border:1px solid rgba(0,0,0,.12);border-radius:3px}
+.legend-dot-row{display:flex;align-items:center;gap:7px;min-height:18px;margin:2px 0}
+.legend-red-dot{width:8px!important;height:8px!important;flex:0 0 8px!important;border-radius:50%;background:#d50000;border:2px solid #fff!important;box-shadow:0 0 0 1px #d50000}
+.legend-no-data{width:17px;height:11px;flex:0 0 17px;border-radius:3px;background:#dce3e8;border:1px solid #7e8a92}
+.legend-section-title{margin:6px 0 4px;font-weight:800;color:#334155}
+.legend-empty{margin-top:6px;color:#7b8794;font-style:italic}
+.legend hr{border:0;border-top:1px solid #e3e7eb;margin:6px 0}
 
-.legend-title{
-    margin-bottom:3px;
+/* ================= RIGHT PANEL ================= */
+.panel{min-width:0;background:#fff;border-left:1px solid var(--line);overflow-y:auto;overflow-x:hidden}
+.panel-head{position:sticky;top:0;z-index:2;padding:12px 14px 10px;background:#fff;border-bottom:1px solid var(--line)}
+.panel-kicker{display:block;margin-bottom:3px;color:#74818d;font-size:8.5px;font-weight:800;letter-spacing:.65px}
+.panel h2{margin:0;font-size:17px;line-height:22px;color:#17212b;word-break:break-word}
+#info-panel{padding:11px 12px 18px}
+.empty-panel{min-height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#7a8792;font-size:11px;line-height:1.5;padding:20px}
+.empty-panel i{margin-bottom:9px;font-size:22px;color:#a6b1ba}
+.empty-panel strong{font-size:14px;color:#25313c}
+.selected-summary{padding:10px 11px;margin-bottom:10px;border:1px solid #e1e7eb;border-radius:9px;background:#f8fafb}
+.selected-name{font-size:15px;line-height:19px;font-weight:800;color:#17212b}
+.selected-hint{margin-top:2px;font-size:9px;color:#7a8792}
+.info-section{margin:0 0 9px;border:1px solid #e0e6eb;border-radius:9px;overflow:hidden;background:#fff}
+.info-section-title{padding:7px 9px;font-size:10.5px;line-height:14px;font-weight:800;color:#25313c;background:#f6f8fa;border-left:3px solid #6b7c8a}
+.info-red .info-section-title{border-left-color:#e6392e}
+.info-green .info-section-title{border-left-color:#388e3c}
+.info-blue .info-section-title{border-left-color:#2f7df6}
+.info-purple .info-section-title{border-left-color:#6a35d1}
+.info-teal .info-section-title{border-left-color:#19a7b3}
+.info-brown .info-section-title{border-left-color:#795548}
+.info-cyan .info-section-title{border-left-color:#0288b8}
+.info-table{margin:0}
+.info-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:8px;padding:7px 9px;border-bottom:1px solid #edf0f2;font-size:10px;line-height:13px}
+.info-row:last-child{border-bottom:0}
+.info-row>span{color:#6d7985;min-width:0}
+.info-row>b{color:#24313c;text-align:right;min-width:0;overflow-wrap:anywhere;font-weight:700}
+.info-status{display:inline-block;padding:2px 5px;border-radius:999px;font-size:8.5px;line-height:11px;font-weight:800;white-space:normal}
+.info-status.danger{background:#fde8e8;color:#b42318}
+.info-status.success{background:#e8f5e9;color:#2e7d32}
+.info-status.neutral{background:#eef2f5;color:#596874}
 
-    font-size:12px;
-    line-height:16px;
+/* ================= FULLSCREEN / EXPORT ================= */
+.main-map:fullscreen{width:100vw;height:100vh}
+.main-map:fullscreen #map{height:100vh}
+.export-hide{display:none!important}
 
-    font-weight:800;
+/* ================= RESPONSIVE ================= */
+@media(max-width:1200px){
+  .webgis{grid-template-columns:195px minmax(0,1fr) 300px}
+  .header h1{font-size:18px}
+  .header-layer select{width:195px}
 }
-
-.legend-method{
-    margin-bottom:6px;
-
-    font-size:8px;
-    line-height:11px;
+@media(max-width:950px){
+  body{overflow:auto}
+  .header{height:auto;min-height:74px;grid-template-columns:1fr auto;grid-template-areas:"agency controls" "title title";row-gap:7px}
+  .agency{grid-area:agency}.header h1{grid-area:title;text-align:left;white-space:normal}.header-controls{grid-area:controls}
+  .webgis{grid-template-columns:185px minmax(0,1fr);height:calc(100vh - 104px)}
+  .panel{grid-column:1/-1;height:360px;border-left:0;border-top:1px solid var(--line)}
+  #map{min-height:480px}
 }
-
-.legend-subtitle{
-    margin:6px 0 4px;
-
-    font-size:10px;
+@media(max-width:700px){
+  .header{grid-template-columns:1fr;grid-template-areas:"agency" "title" "controls";padding:9px 12px}
+  .header-controls{justify-content:flex-start;flex-wrap:wrap}.header-layer{width:100%}.header-layer select{flex:1;max-width:none}
+  .webgis{grid-template-columns:1fr;height:auto}
+  .sidebar{max-height:none;overflow:visible;border-right:0;border-bottom:1px solid var(--line)}
+  .sidebar-kpi{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  .panel{height:auto;max-height:none}
+  .main-map{height:70vh;min-height:500px}
 }
-
-.legend-row{
-    min-height:18px;
-
-    gap:6px;
+@media(max-width:450px){
+  .sidebar-kpi{grid-template-columns:1fr}
+  .header h1{font-size:16px}
+  .legend{width:185px;max-width:185px}
 }
-
 
 /* =========================================================
-   SCROLLBAR
+   WEBGIS FINAL - HIỂN THỊ THEO YÊU CẦU
    ========================================================= */
 
-.dashboard,
-.panel{
-    scrollbar-width:thin;
-
-    scrollbar-color:#b7c1c9 transparent;
+/* KPI: tự giãn theo nội dung, không ép bằng chiều cao */
+.sidebar-kpi .summary-card{
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  flex:0 0 auto!important;
+  overflow:visible!important;
+}
+.sidebar-kpi .summary-head{
+  white-space:normal!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+  overflow-wrap:anywhere;
+}
+.sidebar-kpi .summary-main small,
+.sidebar-kpi .summary-grid span{
+  white-space:normal!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+  overflow-wrap:anywhere;
+}
+.sidebar-kpi .card-phun .summary-head,
+.sidebar-kpi .card-drug .summary-head{
+  line-height:13px;
 }
 
-.dashboard::-webkit-scrollbar,
-.panel::-webkit-scrollbar{
-    width:6px;
+/* Tên xã: thanh mảnh, không nền/khung/bóng */
+.map-label-wrap,
+.map-label-wrap.leaflet-marker-icon{
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  pointer-events:none!important;
+}
+.map-label{
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  color:#334155!important;
+  font-size:9.5px!important;
+  line-height:16px!important;
+  font-weight:400!important;
+  letter-spacing:.02px!important;
+  padding:0!important;
+  margin:0!important;
+  white-space:nowrap!important;
+  text-shadow:1px 0 1px rgba(255,255,255,.95),-1px 0 1px rgba(255,255,255,.95),0 1px 2px rgba(255,255,255,.95),0 -1px 2px rgba(255,255,255,.95)!important;
 }
 
-.dashboard::-webkit-scrollbar-track,
-.panel::-webkit-scrollbar-track{
-    background:transparent;
+/* Chấm đỏ: nhỏ, duy nhất, không animation */
+.leaflet-pane.diseaseMarkers .leaflet-interactive{
+  cursor:default!important;
 }
 
-.dashboard::-webkit-scrollbar-thumb,
-.panel::-webkit-scrollbar-thumb{
-    background:#b7c1c9;
-
-    border-radius:8px;
+/* Legend: gọn và rõ */
+.legend{
+  width:205px!important;
+  max-width:205px!important;
+  padding:9px 10px!important;
+}
+.legend-red-dot{
+  width:8px!important;
+  height:8px!important;
+  flex:0 0 8px!important;
 }
 
-
-/* =========================================================
-   MÀN HÌNH 1400PX
-   ========================================================= */
-
-@media(max-width:1400px){
-
-    .webgis{
-        grid-template-columns:
-            190px
-            minmax(0,1fr)
-            290px;
-    }
-
-    .header{
-        grid-template-columns:
-            250px
-            minmax(360px,1fr)
-            auto;
-    }
-
-    .header h1{
-        font-size:21px;
-    }
-}
-
-
-/* =========================================================
-   MÀN HÌNH 1050PX
-   ========================================================= */
-
-@media(max-width:1050px){
-
-    .header{
-        height:auto;
-        min-height:70px;
-
-        grid-template-columns:1fr;
-
-        gap:3px;
-
-        padding:9px 14px;
-    }
-
-    .header h1{
-        text-align:left;
-
-        font-size:19px;
-        line-height:24px;
-
-        white-space:normal;
-    }
-
-    .dashboard{
-        display:grid;
-
-        grid-template-columns:
-            repeat(2,minmax(0,1fr));
-
-        overflow:visible;
-
-        border-right:0;
-        border-bottom:1px solid #dfe5ea;
-    }
-
-    .webgis{
-        grid-template-columns:1fr;
-
-        height:auto;
-
-        min-height:0;
-    }
-
-    .main-map{
-        height:65vh;
-
-        min-height:500px;
-    }
-
-    .panel{
-        min-height:500px;
-
-        border-left:0;
-
-        border-top:1px solid #dfe5ea;
-    }
-}
-
-
-/* =========================================================
-   MOBILE
-   ========================================================= */
-
-@media(max-width:650px){
-
-    .dashboard{
-        grid-template-columns:1fr;
-    }
-
-    .header h1{
-        font-size:17px;
-        line-height:22px;
-    }
-
-    .main-map{
-        height:65vh;
-
-        min-height:450px;
-    }
-
-    .legend{
-        width:185px;
-
-        max-width:185px;
-    }
-}
+/* Không cho lớp tiêu đề nổi trên bản đồ xuất hiện */
+.map-export-title{display:none!important}
