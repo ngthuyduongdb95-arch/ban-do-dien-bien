@@ -278,3 +278,960 @@ button,input,select{font:inherit}
 
 /* Không cho lớp tiêu đề nổi trên bản đồ xuất hiện */
 .map-export-title{display:none!important}
+/* =========================================================
+   WEBGIS – GIAO DIỆN 3 CỘT CÂN ĐỐI
+   KPI TRÁI | BẢN ĐỒ GIỮA | PANEL PHẢI
+========================================================= */
+
+:root {
+    --header-height: 74px;
+
+    --left-width: 205px;
+    --right-width: 315px;
+
+    --panel-gap: 10px;
+
+    --text-main: #172033;
+    --text-sub: #64748b;
+
+    --border: #e2e8f0;
+    --bg-panel: #ffffff;
+}
+
+
+/* =========================================================
+   1. KHUNG TOÀN BỘ ỨNG DỤNG
+========================================================= */
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    font-family:
+        Inter,
+        "Segoe UI",
+        Arial,
+        sans-serif;
+    color: var(--text-main);
+    background: #f8fafc;
+}
+
+
+/* =========================================================
+   2. HEADER
+========================================================= */
+
+header,
+.app-header,
+.top-header,
+#header {
+    height: var(--header-height);
+    min-height: var(--header-height);
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 18px;
+
+    background: #ffffff;
+
+    border-bottom: 1px solid #e5e7eb;
+
+    position: relative;
+    z-index: 1000;
+}
+
+
+/* Tên cơ quan */
+
+.header-left,
+.brand,
+.brand-area {
+    min-width: 280px;
+}
+
+.header-left *,
+.brand *,
+.brand-area * {
+    line-height: 1.15;
+}
+
+
+/* Tên sở */
+
+.header-left .agency-name,
+.brand .agency-name,
+.brand-title {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: .15px;
+    color: #162033;
+}
+
+
+/* Tên chi cục */
+
+.header-left .agency-sub,
+.brand .agency-sub,
+.brand-subtitle {
+    margin-top: 3px;
+
+    font-size: 10px;
+    font-weight: 500;
+
+    color: #64748b;
+}
+
+
+/* =========================================================
+   3. TIÊU ĐỀ WEBGIS
+========================================================= */
+
+.header-title,
+.app-title,
+#app-title {
+
+    flex: 1;
+
+    text-align: center;
+
+    margin: 0 18px;
+
+    font-size: 22px;
+    line-height: 1.1;
+
+    font-weight: 800;
+
+    letter-spacing: .2px;
+
+    color: #162033;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   4. KHU VỰC ĐIỀU KHIỂN BÊN PHẢI HEADER
+========================================================= */
+
+.header-controls,
+.top-controls,
+.layer-control-area {
+
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    flex-shrink: 0;
+}
+
+
+.header-controls label,
+.top-controls label {
+
+    font-size: 10px;
+    font-weight: 700;
+
+    color: #64748b;
+
+    white-space: nowrap;
+}
+
+
+.header-controls select,
+.top-controls select,
+#layer-select {
+
+    height: 34px;
+
+    min-width: 190px;
+
+    padding: 0 10px;
+
+    border: 1px solid #d7dee8;
+    border-radius: 7px;
+
+    background: #fff;
+
+    color: #334155;
+
+    font-size: 12px;
+
+    outline: none;
+}
+
+
+.header-controls button,
+.top-controls button {
+
+    width: 34px;
+    height: 34px;
+
+    padding: 0;
+
+    border: 1px solid #d7dee8;
+    border-radius: 7px;
+
+    background: #fff;
+
+    cursor: pointer;
+}
+
+
+/* =========================================================
+   5. KHUNG CHÍNH
+========================================================= */
+
+#app,
+.app,
+.main-layout,
+.dashboard-layout {
+
+    width: 100%;
+    height: calc(100vh - var(--header-height));
+
+    display: grid;
+
+    grid-template-columns:
+        var(--left-width)
+        minmax(0, 1fr)
+        var(--right-width);
+
+    gap: var(--panel-gap);
+
+    padding: 10px;
+
+    box-sizing: border-box;
+
+    background: #f5f7fa;
+}
+
+
+/* =========================================================
+   6. CỘT KPI BÊN TRÁI
+========================================================= */
+
+#sidebar,
+.sidebar,
+.left-panel,
+.kpi-sidebar {
+
+    width: var(--left-width);
+
+    min-width: 0;
+
+    height: 100%;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    padding-right: 2px;
+
+    box-sizing: border-box;
+}
+
+
+/* scrollbar */
+
+#sidebar::-webkit-scrollbar,
+.sidebar::-webkit-scrollbar,
+.left-panel::-webkit-scrollbar {
+
+    width: 5px;
+}
+
+#sidebar::-webkit-scrollbar-thumb,
+.sidebar::-webkit-scrollbar-thumb,
+.left-panel::-webkit-scrollbar-thumb {
+
+    background: #cbd5e1;
+
+    border-radius: 10px;
+}
+
+
+/* =========================================================
+   7. KPI CARD
+========================================================= */
+
+.kpi-card,
+.stat-card,
+.dashboard-card {
+
+    width: 100%;
+
+    min-height: 108px;
+
+    height: auto;
+
+    box-sizing: border-box;
+
+    margin-bottom: 8px;
+
+    padding: 11px 12px;
+
+    background: #ffffff;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 2px 8px rgba(15, 23, 42, .06);
+
+    overflow: hidden;
+}
+
+
+/* Không ép chiều cao 96px */
+
+.kpi-card {
+    height: auto !important;
+    flex: none !important;
+}
+
+
+/* Tiêu đề KPI */
+
+.kpi-title,
+.stat-title,
+.dashboard-card-title {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    margin-bottom: 5px;
+
+    font-size: 11px;
+
+    line-height: 1.25;
+
+    font-weight: 750;
+
+    color: #334155;
+}
+
+
+/* Số lớn */
+
+.kpi-value,
+.stat-value,
+.dashboard-card-value {
+
+    display: inline-block;
+
+    margin: 0 5px 3px 0;
+
+    font-size: 25px;
+
+    line-height: 1;
+
+    font-weight: 800;
+
+    color: #172033;
+}
+
+
+/* Đơn vị */
+
+.kpi-unit,
+.stat-unit {
+
+    font-size: 9px;
+
+    font-weight: 500;
+
+    color: #64748b;
+}
+
+
+/* Các dòng số liệu */
+
+.kpi-row,
+.stat-row,
+.dashboard-card-row {
+
+    display: flex;
+
+    align-items: baseline;
+
+    gap: 4px;
+
+    margin-top: 3px;
+
+    font-size: 9px;
+
+    line-height: 1.35;
+
+    color: #64748b;
+
+    white-space: normal;
+}
+
+
+.kpi-row strong,
+.stat-row strong {
+
+    color: #334155;
+
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   8. BẢN ĐỒ
+========================================================= */
+
+#map,
+.map-container,
+.map-area {
+
+    position: relative;
+
+    min-width: 0;
+    min-height: 0;
+
+    width: 100%;
+    height: 100%;
+
+    overflow: hidden;
+
+    border-radius: 10px;
+
+    background: #eef2f5;
+
+    border: 1px solid #e2e8f0;
+
+    box-shadow:
+        0 2px 8px rgba(15, 23, 42, .05);
+}
+
+
+/* Leaflet phải chiếm toàn bộ */
+
+#map .leaflet-container,
+.map-container .leaflet-container {
+
+    width: 100%;
+    height: 100%;
+}
+
+
+/* =========================================================
+   9. BỎ HỘP TIÊU ĐỀ NỔI TRÊN BẢN ĐỒ
+========================================================= */
+
+.map-title,
+.map-header,
+.map-title-box,
+.leaflet-map-title,
+#map-title {
+
+    display: none !important;
+}
+
+
+/* =========================================================
+   10. NÚT LEAFLET
+========================================================= */
+
+.leaflet-control-zoom a {
+
+    width: 30px !important;
+    height: 30px !important;
+
+    line-height: 30px !important;
+
+    font-size: 17px !important;
+
+    color: #334155 !important;
+
+    background: #ffffff !important;
+}
+
+
+.leaflet-control {
+
+    border: 0 !important;
+
+    box-shadow:
+        0 2px 8px rgba(15, 23, 42, .12) !important;
+}
+
+
+/* =========================================================
+   11. LEGEND
+========================================================= */
+
+.leaflet-control.legend,
+.legend {
+
+    max-width: 210px;
+
+    padding: 10px 12px !important;
+
+    border-radius: 10px !important;
+
+    background: rgba(255,255,255,.97) !important;
+
+    box-shadow:
+        0 3px 12px rgba(15,23,42,.12) !important;
+
+    font-size: 10px !important;
+
+    line-height: 1.35 !important;
+}
+
+
+.legend-title {
+
+    margin-bottom: 7px;
+
+    font-size: 13px;
+
+    font-weight: 800;
+
+    color: #172033;
+}
+
+
+.legend-item {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    margin: 4px 0;
+}
+
+
+/* =========================================================
+   12. TÊN XÃ TRÊN BẢN ĐỒ
+========================================================= */
+
+.commune-label,
+.xa-label,
+.map-label {
+
+    background: transparent !important;
+
+    border: none !important;
+
+    box-shadow: none !important;
+
+    padding: 0 !important;
+
+    margin: 0 !important;
+
+    color: #334155 !important;
+
+    font-size: 9px !important;
+
+    font-weight: 400 !important;
+
+    line-height: 1 !important;
+
+    white-space: nowrap;
+
+    pointer-events: none !important;
+}
+
+
+/* bỏ mũi tên */
+
+.commune-label::before,
+.xa-label::before,
+.map-label::before {
+
+    display: none !important;
+}
+
+
+/* =========================================================
+   13. CHẤM ĐỎ
+========================================================= */
+
+.disease-marker {
+
+    width: 9px !important;
+    height: 9px !important;
+
+    border-radius: 50%;
+
+    border: 2px solid #ffffff;
+
+    box-sizing: border-box;
+
+    box-shadow:
+        0 1px 4px rgba(0,0,0,.25);
+}
+
+
+/* =========================================================
+   14. PANEL BÊN PHẢI
+========================================================= */
+
+#info-panel,
+.info-panel,
+.right-panel,
+.detail-panel {
+
+    width: var(--right-width);
+
+    min-width: 0;
+
+    height: 100%;
+
+    box-sizing: border-box;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    background: #ffffff;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 10px;
+
+    box-shadow:
+        0 2px 8px rgba(15,23,42,.05);
+}
+
+
+/* scrollbar */
+
+#info-panel::-webkit-scrollbar,
+.info-panel::-webkit-scrollbar,
+.right-panel::-webkit-scrollbar {
+
+    width: 5px;
+}
+
+#info-panel::-webkit-scrollbar-thumb,
+.info-panel::-webkit-scrollbar-thumb,
+.right-panel::-webkit-scrollbar-thumb {
+
+    background: #cbd5e1;
+
+    border-radius: 10px;
+}
+
+
+/* =========================================================
+   15. TIÊU ĐỀ PANEL
+========================================================= */
+
+#panel-title,
+.panel-title {
+
+    padding: 14px 14px 10px;
+
+    margin: 0;
+
+    border-bottom: 1px solid #e5e7eb;
+
+    font-size: 18px;
+
+    line-height: 1.2;
+
+    font-weight: 800;
+
+    color: #172033;
+
+    white-space: normal;
+
+    overflow-wrap: anywhere;
+}
+
+
+/* dòng "THÔNG TIN XÃ / PHƯỜNG" */
+
+.panel-heading,
+.info-panel-heading {
+
+    padding: 12px 14px 0;
+
+    font-size: 10px;
+
+    line-height: 1.2;
+
+    font-weight: 800;
+
+    letter-spacing: .5px;
+
+    color: #64748b;
+
+    text-transform: uppercase;
+}
+
+
+/* =========================================================
+   16. NỘI DUNG PANEL
+========================================================= */
+
+#info-panel > *,
+.info-panel > *,
+.right-panel > * {
+
+    box-sizing: border-box;
+}
+
+
+/* thông tin tổng hợp */
+
+.info-block {
+
+    padding: 12px 14px 7px;
+}
+
+
+.info-district {
+
+    margin-bottom: 3px;
+
+    font-size: 18px;
+
+    line-height: 1.2;
+
+    font-weight: 800;
+
+    color: #172033;
+}
+
+
+.info-layer {
+
+    font-size: 12px;
+
+    color: #64748b;
+}
+
+
+/* =========================================================
+   17. CÁC KHỐI THÔNG TIN
+========================================================= */
+
+.info-section {
+
+    margin: 7px 10px;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 9px;
+
+    background: #ffffff;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 1px 4px rgba(15,23,42,.04);
+}
+
+
+.info-section-title {
+
+    padding: 8px 10px;
+
+    background: #f8fafc;
+
+    border-left: 3px solid #64748b;
+
+    border-bottom: 1px solid #e5e7eb;
+
+    font-size: 11px;
+
+    line-height: 1.25;
+
+    font-weight: 800;
+
+    color: #243247;
+
+    white-space: normal;
+
+    overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   18. DÒNG THÔNG TIN
+========================================================= */
+
+.info-row {
+
+    display: grid;
+
+    grid-template-columns: minmax(85px, 1fr) minmax(80px, 1.25fr);
+
+    gap: 8px;
+
+    padding: 7px 10px;
+
+    border-bottom: 1px solid #f1f5f9;
+
+    font-size: 10px;
+
+    line-height: 1.35;
+}
+
+
+.info-row:last-child {
+
+    border-bottom: 0;
+}
+
+
+.info-label {
+
+    color: #64748b;
+
+    font-weight: 500;
+
+    white-space: normal;
+}
+
+
+.info-value {
+
+    color: #263244;
+
+    font-weight: 650;
+
+    text-align: right;
+
+    overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   19. PANEL TRỐNG
+========================================================= */
+
+.empty-panel {
+
+    padding: 35px 20px;
+
+    text-align: center;
+
+    color: #94a3b8;
+}
+
+
+.empty-title {
+
+    margin-bottom: 8px;
+
+    font-size: 18px;
+
+    font-weight: 800;
+
+    color: #334155;
+}
+
+
+.empty-panel p {
+
+    margin: 0;
+
+    font-size: 11px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   20. RESPONSIVE
+========================================================= */
+
+@media (max-width: 1200px) {
+
+    :root {
+        --left-width: 190px;
+        --right-width: 285px;
+    }
+
+    .header-title,
+    .app-title,
+    #app-title {
+        font-size: 19px;
+    }
+
+    .header-left,
+    .brand,
+    .brand-area {
+        min-width: 235px;
+    }
+
+}
+
+
+@media (max-width: 950px) {
+
+    :root {
+        --left-width: 175px;
+        --right-width: 260px;
+    }
+
+    .header-title,
+    .app-title,
+    #app-title {
+        font-size: 16px;
+    }
+
+    .header-controls label,
+    .top-controls label {
+        display: none;
+    }
+
+    .header-controls select,
+    .top-controls select,
+    #layer-select {
+        min-width: 150px;
+    }
+
+}
+
+
+/* =========================================================
+   21. QUAN TRỌNG:
+      KHÔNG ĐỂ CSS CŨ ÉP 3 CỘT THÀNH KÍCH THƯỚC KHÁC
+========================================================= */
+
+#app > .sidebar,
+#app > .left-panel,
+#app > .kpi-sidebar {
+
+    width: var(--left-width) !important;
+
+    min-width: 0 !important;
+}
+
+
+#app > #map,
+#app > .map-container,
+#app > .map-area {
+
+    width: 100% !important;
+
+    min-width: 0 !important;
+}
+
+
+#app > #info-panel,
+#app > .info-panel,
+#app > .right-panel,
+#app > .detail-panel {
+
+    width: var(--right-width) !important;
+
+    min-width: 0 !important;
+}
