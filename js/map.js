@@ -756,24 +756,50 @@ function escapeHtml(value) {
         .replace(/'/g, "&#039;");
 }
 function infoRows(items) {
-    return items.map(function(item) {
 
-        const label = item[0];
-        const value = item[1];
+    return items
+        .filter(function(item) {
 
-        return `
-            <div class="info-row">
-                <div class="info-label">
-                    ${escapeHtml(label)}
+            const value = item[1];
+
+            // Không hiển thị nếu không có dữ liệu
+            if (
+                value === null ||
+                value === undefined ||
+                value === "" ||
+                value === "--" ||
+                value === "—" ||
+                value === "N/A" ||
+                value === "undefined" ||
+                value === "null"
+            ) {
+                return false;
+            }
+
+            // Số 0 vẫn là số liệu hợp lệ → vẫn hiển thị
+            return true;
+        })
+
+        .map(function(item) {
+
+            const label = item[0];
+            const value = item[1];
+
+            return `
+                <div class="info-row">
+                    <div class="info-label">
+                        ${escapeHtml(label)}
+                    </div>
+
+                    <div class="info-value">
+                        ${escapeHtml(value)}
+                    </div>
                 </div>
+            `;
 
-                <div class="info-value">
-                    ${escapeHtml(value ?? "--")}
-                </div>
-            </div>
-        `;
+        })
 
-    }).join("");
+        .join("");
 }
 function showPanel(feature, layer) {
 
