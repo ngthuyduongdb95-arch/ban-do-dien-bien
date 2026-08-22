@@ -92,11 +92,11 @@ function initMap() {
     if (map) return map;
 
     map = L.map("map", {
-        zoomControl: false,
-        preferCanvas: true,
-        minZoom: 7,
-        maxZoom: 18
-    }).setView([21.386, 103.016], 9);
+    zoomControl: false,
+    preferCanvas: false,
+    minZoom: 7,
+    maxZoom: 18
+}).setView([21.386, 103.016], 9);
 
     L.control.zoom({ position: "topleft" }).addTo(map);
     L.control.scale({
@@ -111,6 +111,8 @@ function initMap() {
     map.getPane("diseaseMarkers").style.zIndex = 640;
     map.createPane("mapLabels");
     map.getPane("mapLabels").style.zIndex = 650;
+    map.getPane("diseaseMarkers").style.pointerEvents = "none";
+    map.getPane("mapLabels").style.pointerEvents = "none";
     bindControls();
 
     return map;
