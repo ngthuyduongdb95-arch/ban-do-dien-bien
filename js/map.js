@@ -1140,9 +1140,72 @@ function hasPanelData(type, row) {
             <div class="info-section">
 
 <div class="info-section-title info-title-cgc">
-    <span class="panel-section-icon">
-        <i class="fa-solid fa-Chicken"></i>
-    </span>
+    <span class="panel-section-icon panel-icon-chicken">
+    <svg viewBox="0 0 64 64"
+         xmlns="http://www.w3.org/2000/svg"
+         aria-hidden="true">
+
+        <!-- Mào -->
+        <path d="M38 15
+                 C39 10 44 9 46 13
+                 C49 9 54 11 52 16
+                 C56 15 58 18 55 21"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"/>
+
+        <!-- Đầu + cổ + thân -->
+        <path d="M39 20
+                 C32 17 24 20 22 27
+                 C20 34 25 38 32 39
+                 C38 40 43 37 46 33
+                 C50 28 47 22 39 20Z"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linejoin="round"/>
+
+        <!-- Mỏ -->
+        <path d="M22 27 L15 30 L22 32"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linejoin="round"/>
+
+        <!-- Mắt -->
+        <circle cx="36" cy="25" r="1.8"
+                fill="currentColor"/>
+
+        <!-- Cánh -->
+        <path d="M31 31
+                 C35 29 40 30 42 33
+                 C38 36 33 36 29 34"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linecap="round"/>
+
+        <!-- Chân -->
+        <path d="M30 39 L29 49
+                 M40 38 L40 49"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linecap="round"/>
+
+        <!-- Bàn chân -->
+        <path d="M29 49 L24 52
+                 M29 49 L30 53
+                 M40 49 L36 52
+                 M40 49 L43 52"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linecap="round"/>
+    </svg>
+</span>
     <span>Cúm gia cầm</span>
 </div>
                 ${infoRows(cgcRows)}
