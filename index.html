@@ -1,5 +1,251 @@
 <!DOCTYPE html>
 <html lang="vi">
+/* =========================================================
+   RESPONSIVE MOBILE - KHÔNG THAY ĐỔI GIAO DIỆN DESKTOP
+========================================================= */
+
+@media (max-width: 768px) {
+
+    /* -------------------------
+       TOÀN BỘ TRANG
+    ------------------------- */
+
+    html,
+    body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+
+    /* -------------------------
+       KHUNG WEBGIS
+    ------------------------- */
+
+    .app,
+    .webgis-container,
+    .dashboard-container {
+        width: 100%;
+        height: 100dvh;
+        min-height: 0;
+    }
+
+    /* -------------------------
+       KHU VỰC CHÍNH
+       Desktop: trái - bản đồ - phải
+       Mobile: bản đồ + panel bên dưới
+    ------------------------- */
+
+    .main-content,
+    .content-area,
+    .dashboard-main {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+    }
+
+    /* -------------------------
+       KPI
+    ------------------------- */
+
+    .kpi-container,
+    .kpi-panel,
+    .kpi-grid {
+        width: 100%;
+        flex: 0 0 auto;
+
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+
+        padding: 6px;
+        box-sizing: border-box;
+    }
+
+    .kpi-card {
+        min-width: 0;
+        height: auto;
+        min-height: 58px;
+
+        padding: 7px 9px;
+    }
+
+    .kpi-title {
+        font-size: 10px;
+        line-height: 1.15;
+    }
+
+    .kpi-number {
+        font-size: 20px;
+        line-height: 1.1;
+    }
+
+    .kpi-icon {
+        width: 30px;
+        height: 30px;
+        flex: 0 0 30px;
+
+        font-size: 13px;
+    }
+
+    /* -------------------------
+       BẢN ĐỒ
+    ------------------------- */
+
+    #map {
+        width: 100%;
+        flex: 1 1 auto;
+        min-height: 0;
+    }
+
+    /* -------------------------
+       PANEL BÊN PHẢI
+       Chuyển thành panel dưới bản đồ
+    ------------------------- */
+
+    .right-panel,
+    .info-panel-container,
+    .sidebar-right {
+        position: relative;
+
+        width: 100%;
+        max-width: none;
+
+        height: 38dvh;
+        min-height: 220px;
+
+        flex: 0 0 38dvh;
+
+        overflow: hidden;
+
+        box-sizing: border-box;
+    }
+
+    #info-panel {
+        height: 100%;
+        max-height: none;
+
+        overflow-y: auto;
+        overflow-x: hidden;
+
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* -------------------------
+       TIÊU ĐỀ PANEL
+    ------------------------- */
+
+    .panel-head {
+        padding: 10px 12px 8px;
+    }
+
+    .panel-kicker {
+        font-size: 10px;
+    }
+
+    .panel-head-icon {
+        width: 24px;
+        height: 24px;
+
+        font-size: 11px;
+    }
+
+    #panel-title {
+        margin-top: 4px;
+
+        font-size: 19px;
+        line-height: 1.2;
+    }
+
+    /* -------------------------
+       TIÊU ĐỀ CÁC NHÓM THÔNG TIN
+    ------------------------- */
+
+    .info-section {
+        margin: 6px 8px;
+    }
+
+    .info-section-title {
+        min-height: 32px;
+
+        padding: 4px 7px;
+
+        font-size: 11px;
+        gap: 7px;
+    }
+
+    .panel-section-icon {
+        width: 26px;
+        height: 26px;
+        flex: 0 0 26px;
+
+        font-size: 12px;
+    }
+
+    .panel-icon-chicken svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    /* -------------------------
+       DÒNG DỮ LIỆU
+    ------------------------- */
+
+    .info-row {
+        min-height: 30px;
+
+        padding: 5px 7px;
+
+        font-size: 11px;
+    }
+
+    /* -------------------------
+       LEGEND
+    ------------------------- */
+
+    .legend {
+        max-width: 170px;
+
+        padding: 7px 9px;
+
+        font-size: 10px;
+    }
+
+    .legend h4 {
+        font-size: 11px;
+        margin: 0 0 5px;
+    }
+
+    .legend-row {
+        gap: 5px;
+        margin: 3px 0;
+    }
+
+    /* -------------------------
+       NÚT LEAFLET
+    ------------------------- */
+
+    .leaflet-control-zoom a {
+        width: 34px !important;
+        height: 34px !important;
+
+        line-height: 34px !important;
+
+        font-size: 18px !important;
+    }
+
+    /* -------------------------
+       TÊN XÃ TRÊN BẢN ĐỒ
+    ------------------------- */
+
+    .district-label {
+        font-size: 9px;
+    }
+
+}
 <style>
 /* ================================
    ICON TIÊU ĐỀ PANEL
