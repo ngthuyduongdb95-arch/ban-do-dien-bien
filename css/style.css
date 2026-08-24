@@ -828,7 +828,15 @@ button,input,select{font:inherit}
 .panel-section-icon i{
     font-size:12px;
 }
+.panel-icon-chicken {
+    color: #16803C;
+}
 
+.panel-icon-chicken svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+}
 
 /* =========================
    DTLCP - ĐỎ
