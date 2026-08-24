@@ -1141,7 +1141,7 @@ function hasPanelData(type, row) {
 
 <div class="info-section-title info-title-cgc">
     <span class="panel-section-icon">
-        <i class="fa-solid fa-dove"></i>
+        <i class="fa-solid fa-egg"></i>
     </span>
     <span>Cúm gia cầm</span>
 </div>
