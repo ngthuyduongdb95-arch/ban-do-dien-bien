@@ -1401,18 +1401,24 @@ function hasPanelData(type, row) {
     if (hasPanelData("CSBBTTY", row)) {
 
         html += `
+<div class="info-section">
 
+            <div class="info-section-title info-title-drug">
 
-                <div class="info-section-title info-title-drug">
+                <span class="panel-section-icon">
+                    <i class="fa-solid fa-pills"></i>
+                </span>
 
-    <span class="panel-section-icon">
-        <i class="fa-solid fa-pills"></i>
-    </span>
+                <span>Cơ sở buôn bán thuốc thú y</span>
 
-    <span>Cơ sở buôn bán thuốc thú y</span>
+            </div>
 
-</div>
-    }
+            ${infoRows(csbbttyRows)}
+
+        </div>
+
+    `;
+}
 
 
     /* ===============================
