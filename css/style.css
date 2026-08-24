@@ -802,23 +802,28 @@ button,input,select{font:inherit}
 
 /* Ô ICON */
 
-.panel-section-icon{
-    width:26px;
-    height:26px;
+.panel-section-icon {
+    width: 30px;
+    height: 30px;
 
-    display:flex;
-    align-items:center;
-    justify-content:center;
+    flex: 0 0 30px;
 
-    flex:0 0 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-    border-radius:7px;
+    border: 1.8px solid currentColor;
+    border-radius: 50%;
 
-    font-size:12px;
-    line-height:1;
+    background: #ffffff;
 
-    box-shadow:0 1px 3px rgba(0,0,0,.06);
+    font-size: 14px;
+    line-height: 1;
 }
+
+.panel-section-icon i {
+    line-height: 1;
+}}
 
 .panel-section-icon i{
     font-size:12px;
