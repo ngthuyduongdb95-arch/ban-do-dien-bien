@@ -1388,20 +1388,21 @@ function hasPanelData(type, row) {
        7. CƠ SỞ BUÔN BÁN THUỐC THÚ Y
     ===================================================== */
 
-    const csbbttyRows = makeRows([
+const csbbttyRows = makeRows([
 
-        [
-            "Số cơ sở",
-            row["CSBBTTY_Cơ sở"]
-        ]
+    [
+        "Số cơ sở",
+        row["CSBBTTY_Cơ sở"]
+    ]
 
-    ]);
+]);
 
 
-    if (hasPanelData("CSBBTTY", row)) {
+if (hasPanelData("CSBBTTY", row)) {
 
-        html += `
-<div class="info-section">
+    html += `
+
+        <div class="info-section">
 
             <div class="info-section-title info-title-drug">
 
@@ -1419,7 +1420,6 @@ function hasPanelData(type, row) {
 
     `;
 }
-
 
     /* ===============================
        HIỂN THỊ PANEL
