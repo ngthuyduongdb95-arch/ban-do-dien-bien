@@ -278,3 +278,505 @@ button,input,select{font:inherit}
 
 /* Không cho lớp tiêu đề nổi trên bản đồ xuất hiện */
 .map-export-title{display:none!important}
+/* =========================================================
+   GIAO DIỆN WEBGIS - TINH CHỈNH
+   GIỮ NGUYÊN BỐ CỤC HIỆN TẠI
+   ========================================================= */
+
+
+/* =========================================================
+   1. HEADER
+   Không đổi chiều cao/bố cục
+   ========================================================= */
+
+.header{
+    background:#eef5f9;
+    border-bottom:1px solid #d5e0e7;
+    box-shadow:0 2px 8px rgba(25,45,60,.06);
+}
+
+.agency-line1{
+    color:#18384f;
+    font-size:12px;
+    font-weight:850;
+    letter-spacing:.25px;
+}
+
+.agency-line2{
+    color:#637887;
+    font-size:10px;
+    font-weight:700;
+}
+
+.header h1{
+    color:#173b56;
+    font-size:21px;
+    font-weight:900;
+    letter-spacing:.35px;
+}
+
+
+/* =========================================================
+   2. KPI
+   Giữ nguyên kích thước và vị trí các ô
+   Chỉ làm tên KPI nổi bật hơn
+   ========================================================= */
+
+.summary-card{
+    background:#ffffff;
+    border:1px solid #dbe3e8;
+    border-radius:11px;
+    box-shadow:0 3px 10px rgba(25,45,60,.055);
+
+    /* Không ép chiều cao */
+    height:auto;
+    min-height:0;
+
+    transition:
+        box-shadow .18s ease,
+        border-color .18s ease;
+}
+
+.summary-card:hover{
+    box-shadow:0 5px 14px rgba(25,45,60,.10);
+    border-color:#cbd7df;
+}
+
+
+/* TÊN KPI */
+
+.summary-head{
+    display:flex;
+    align-items:center;
+    gap:7px;
+
+    color:#263b4b;
+    font-size:11.5px;
+    line-height:15px;
+    font-weight:850;
+
+    /* Cho phép tiêu đề dài xuống dòng */
+    white-space:normal;
+    overflow:visible;
+    text-overflow:clip;
+}
+
+.summary-head b{
+    color:#243b4d;
+    font-weight:900;
+}
+
+.summary-head i{
+    font-size:12px;
+    flex:0 0 auto;
+}
+
+
+/* SỐ CHÍNH */
+
+.summary-main{
+    margin:6px 0 7px;
+    gap:6px;
+}
+
+.summary-main span{
+    color:#122b3d;
+    font-size:27px;
+    line-height:1;
+    font-weight:900;
+    letter-spacing:-.4px;
+}
+
+.summary-main small{
+    color:#71808c;
+    font-size:9.5px;
+    font-weight:600;
+}
+
+
+/* SỐ LIỆU PHỤ */
+
+.summary-grid{
+    gap:4px;
+    font-size:9.5px;
+    line-height:13px;
+    color:#657582;
+}
+
+.summary-grid span{
+    white-space:normal;
+    overflow:visible;
+    text-overflow:clip;
+    line-height:13px;
+}
+
+.summary-grid b{
+    color:#263a49;
+    font-weight:800;
+}
+
+
+/* =========================================================
+   3. MÀU TÊN KPI THEO TỪNG NHÓM
+   ========================================================= */
+
+.card-dtlcp .summary-head{
+    color:#d8322d;
+}
+
+.card-dtlcp .summary-head b{
+    color:#c92c27;
+}
+
+.card-cgc .summary-head{
+    color:#2f8739;
+}
+
+.card-cgc .summary-head b{
+    color:#287632;
+}
+
+.card-vdnc .summary-head{
+    color:#286fd7;
+}
+
+.card-vdnc .summary-head b{
+    color:#245fb9;
+}
+
+.card-dai .summary-head{
+    color:#6535c7;
+}
+
+.card-dai .summary-head b{
+    color:#5830ac;
+}
+
+.card-phun .summary-head{
+    color:#1598a6;
+}
+
+.card-phun .summary-head b{
+    color:#138794;
+}
+
+.card-ksgm .summary-head{
+    color:#765446;
+}
+
+.card-ksgm .summary-head b{
+    color:#65463a;
+}
+
+.card-drug .summary-head{
+    color:#087fa8;
+}
+
+.card-drug .summary-head b{
+    color:#087396;
+}
+
+
+/* =========================================================
+   4. PANEL BÊN PHẢI
+   Không đổi chiều rộng panel
+   ========================================================= */
+
+.panel{
+    background:#ffffff;
+    border-left:1px solid #d9e2e8;
+}
+
+
+/* Dòng THÔNG TIN XÃ / PHƯỜNG */
+
+.panel-head{
+    padding:15px 15px 12px;
+    background:#f3f7fa;
+    border-bottom:1px solid #d9e2e8;
+}
+
+.panel-kicker{
+    margin-bottom:5px;
+
+    color:#687b89;
+    font-size:9px;
+    font-weight:850;
+    letter-spacing:.75px;
+}
+
+
+/* TÊN XÃ */
+
+.panel h2{
+    margin:0;
+
+    color:#173b56;
+    font-size:21px;
+    line-height:25px;
+    font-weight:900;
+    letter-spacing:-.2px;
+}
+
+
+/* Nội dung */
+
+#info-panel{
+    padding:13px;
+}
+
+
+/* Tên xã trong phần nội dung */
+
+.info-district{
+    color:#173b56;
+    font-size:17px;
+    line-height:22px;
+    font-weight:900;
+}
+
+.info-layer{
+    margin-top:3px;
+    color:#778692;
+    font-size:10px;
+}
+
+
+/* =========================================================
+   5. CÁC NHÓM THÔNG TIN TRONG PANEL
+   ========================================================= */
+
+.info-section{
+    margin-top:12px;
+    padding:0;
+
+    background:#ffffff;
+
+    border:1px solid #dfe6eb;
+    border-left:4px solid #3d6f8f;
+
+    border-radius:9px;
+
+    overflow:hidden;
+}
+
+
+/* Tiêu đề nhóm */
+
+.info-section-title{
+    padding:8px 10px;
+
+    background:#f3f6f8;
+
+    color:#213b4d;
+    font-size:11px;
+    line-height:14px;
+    font-weight:900;
+}
+
+
+/* Dòng số liệu */
+
+.info-row{
+    padding:8px 10px;
+
+    border-bottom:1px solid #e8edf0;
+
+    font-size:10.5px;
+    line-height:14px;
+}
+
+.info-row:last-child{
+    border-bottom:0;
+}
+
+.info-row span{
+    color:#71808c;
+}
+
+.info-row b{
+    color:#253b4b;
+    font-weight:800;
+}
+
+
+/* =========================================================
+   6. TÊN NHÓM PANEL THEO MÀU
+   ========================================================= */
+
+.info-section:nth-of-type(1){
+    border-left-color:#d8322d;
+}
+
+.info-section:nth-of-type(2){
+    border-left-color:#388e3c;
+}
+
+.info-section:nth-of-type(3){
+    border-left-color:#2f7df6;
+}
+
+.info-section:nth-of-type(4){
+    border-left-color:#6a35d1;
+}
+
+.info-section:nth-of-type(5){
+    border-left-color:#19a7b3;
+}
+
+.info-section:nth-of-type(6){
+    border-left-color:#795548;
+}
+
+.info-section:nth-of-type(7){
+    border-left-color:#0288b8;
+}
+
+
+/* =========================================================
+   7. PANEL TRỐNG
+   ========================================================= */
+
+.empty-panel{
+    color:#7b8994;
+    font-size:11px;
+}
+
+.empty-panel i{
+    color:#aab7c0;
+}
+
+
+/* =========================================================
+   8. BẢN ĐỒ
+   Không thay đổi kích thước bản đồ
+   ========================================================= */
+
+#map{
+    box-shadow:none;
+}
+
+
+/* =========================================================
+   9. LABEL XÃ
+   Giữ nguyên vị trí và logic hiện tại
+   Chỉ làm chữ thanh mảnh hơn
+   ========================================================= */
+
+.map-label{
+    background:transparent !important;
+    border:0 !important;
+    box-shadow:none !important;
+
+    color:#394b58;
+
+    font-size:9.5px;
+    line-height:14px;
+    font-weight:500;
+
+    padding:0 !important;
+
+    text-shadow:none !important;
+
+    pointer-events:none;
+}
+
+
+/* Nếu Leaflet tạo pseudo-element */
+
+.map-label-wrap{
+    background:transparent !important;
+    border:0 !important;
+    box-shadow:none !important;
+}
+
+
+/* =========================================================
+   10. LEGEND
+   Nhỏ gọn hơn nhưng không đổi vị trí
+   ========================================================= */
+
+.legend{
+    padding:8px 10px;
+    border-radius:8px;
+
+    font-size:10px;
+    line-height:17px;
+
+    box-shadow:0 3px 10px rgba(20,35,50,.12);
+}
+
+.legend-row{
+    min-height:17px;
+    gap:6px;
+}
+
+.legend-row i{
+    width:16px;
+    height:11px;
+    flex-basis:16px;
+}
+
+.legend-red-dot{
+    width:7px !important;
+    height:7px !important;
+    flex-basis:7px !important;
+}
+
+
+/* =========================================================
+   11. TOOLBAR BẢN ĐỒ
+   Không đổi bố cục
+   ========================================================= */
+
+.map-toolbar{
+    background:rgba(255,255,255,.96);
+    border-bottom:1px solid #dce4e9;
+}
+
+.map-title-live strong{
+    color:#173b56;
+}
+
+.map-title-live span{
+    color:#778691;
+}
+
+
+/* =========================================================
+   12. NÚT CÔNG CỤ
+   ========================================================= */
+
+.map-action{
+    transition:.15s ease;
+}
+
+.map-action:hover{
+    transform:translateY(-1px);
+}
+
+
+/* =========================================================
+   13. THANH CUỘN PANEL / KPI
+   ========================================================= */
+
+.sidebar::-webkit-scrollbar,
+.panel::-webkit-scrollbar{
+    width:6px;
+}
+
+.sidebar::-webkit-scrollbar-track,
+.panel::-webkit-scrollbar-track{
+    background:transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb,
+.panel::-webkit-scrollbar-thumb{
+    background:#cbd5dc;
+    border-radius:10px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover,
+.panel::-webkit-scrollbar-thumb:hover{
+    background:#aebbc4;
+}
