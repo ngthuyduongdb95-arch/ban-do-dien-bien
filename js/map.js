@@ -1078,26 +1078,22 @@ function hasPanelData(type, row) {
     if (hasPanelData("DTLCP", row)) {
 
         html += `
+    <div class="info-section">
 
-            <div class="info-section">
+        <div class="info-section-title info-title-dtlcp">
 
-                <div class="info-section-title info-title-dtlcp">
+            <span class="panel-section-icon">
+                <i class="fa-solid fa-paw"></i>
+            </span>
 
-    <span class="panel-section-icon">
-        <i class="fa-solid fa-piggy-bank"></i>
-    </span>
+            <span>Dịch tả lợn Châu Phi</span>
 
-    <span>Dịch tả lợn Châu Phi</span>
+        </div>
 
-</div>
+        ${infoRows(dtlcpRows)}
 
-                ${infoRows(dtlcpRows)}
-
-            </div>
-
-        `;
-    }
-
+    </div>
+`;
 
     /* =====================================================
        2. CÚM GIA CẦM
