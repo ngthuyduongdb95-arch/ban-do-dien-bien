@@ -830,108 +830,101 @@ button,input,select{font:inherit}
 }
 
 
-/* =====================================================
-   DTLCP
-   ===================================================== */
+/* =========================
+   DTLCP - ĐỎ
+========================= */
 
-.info-title-dtlcp{
-    color:#b92c27;
-    background:#fff1f0;
+.info-title-dtlcp {
+    color: #E53935;
+    background: #FFF7F7;
 }
 
-.info-title-dtlcp .panel-section-icon{
-    color:#c92c27;
-    background:#ffe0de;
-}
-
-
-/* =====================================================
-   CÚM GIA CẦM
-   ===================================================== */
-
-.info-title-cgc{
-    color:#287635;
-    background:#f0f8f1;
-}
-
-.info-title-cgc .panel-section-icon{
-    color:#287635;
-    background:#dff0e1;
+.info-title-dtlcp .panel-section-icon {
+    color: #E53935;
 }
 
 
-/* =====================================================
-   VDNC
-   ===================================================== */
+/* =========================
+   CGC - XANH LÁ
+========================= */
 
-.info-title-vdnc{
-    color:#245fb9;
-    background:#eef5ff;
+.info-title-cgc {
+    color: #16803C;
+    background: #F4FBF6;
 }
 
-.info-title-vdnc .panel-section-icon{
-    color:#245fb9;
-    background:#dceaff;
-}
-
-
-/* =====================================================
-   DẠI
-   ===================================================== */
-
-.info-title-dai{
-    color:#5930a8;
-    background:#f5f0ff;
-}
-
-.info-title-dai .panel-section-icon{
-    color:#5930a8;
-    background:#e8dcff;
+.info-title-cgc .panel-section-icon {
+    color: #16803C;
 }
 
 
-/* =====================================================
-   TVSKTTĐ
-   ===================================================== */
+/* =========================
+   VDNC - XANH DƯƠNG
+========================= */
 
-.info-title-phun{
-    color:#138794;
-    background:#eefafa;
+.info-title-vdnc {
+    color: #1769E0;
+    background: #F4F8FF;
 }
 
-.info-title-phun .panel-section-icon{
-    color:#138794;
-    background:#d9f1f3;
-}
-
-
-/* =====================================================
-   KSGM
-   ===================================================== */
-
-.info-title-ksgm{
-    color:#65463a;
-    background:#f7f2ef;
-}
-
-.info-title-ksgm .panel-section-icon{
-    color:#65463a;
-    background:#eadfd9;
+.info-title-vdnc .panel-section-icon {
+    color: #1769E0;
 }
 
 
-/* =====================================================
-   THUỐC THÚ Y
-   ===================================================== */
+/* =========================
+   DẠI - TÍM
+========================= */
 
-.info-title-drug{
-    color:#087396;
-    background:#edf8fb;
+.info-title-dai {
+    color: #7B1FA2;
+    background: #FAF5FC;
 }
 
-.info-title-drug .panel-section-icon{
-    color:#087396;
-    background:#d9f0f5;
+.info-title-dai .panel-section-icon {
+    color: #7B1FA2;
+}
+
+
+/* =========================
+   TVSKTTĐ - XANH NGỌC
+========================= */
+
+.info-title-phun {
+    color: #008C95;
+    background: #F2FAFA;
+}
+
+.info-title-phun .panel-section-icon {
+    color: #008C95;
+}
+
+
+/* =========================
+   KSGM - CAM
+========================= */
+
+.info-title-ksgm {
+    color: #F57C00;
+    background: #FFF8F0;
+}
+
+.info-title-ksgm .panel-section-icon {
+    color: #F57C00;
+}
+
+
+/* =========================
+   THUỐC THÚ Y - XANH DƯƠNG
+========================= */
+
+.info-title-drug {
+    color: #1769E0;
+    background: #F4F8FF;
+}
+
+.info-title-drug .panel-section-icon {
+    color: #1769E0;
 }
 /* ================================
    TIÊU ĐỀ PANEL
