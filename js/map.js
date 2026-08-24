@@ -1083,7 +1083,7 @@ function hasPanelData(type, row) {
         <div class="info-section-title info-title-dtlcp">
 
             <span class="panel-section-icon">
-                <i class="fa-solid fa-paw"></i>
+                <i class="fa-solid fa-piggy-bank"></i>
             </span>
 
             <span>Dịch tả lợn Châu Phi</span>
@@ -1141,7 +1141,7 @@ function hasPanelData(type, row) {
 
 <div class="info-section-title info-title-cgc">
     <span class="panel-section-icon">
-        <i class="fa-solid fa-egg"></i>
+        <i class="fa-solid fa-Chicken"></i>
     </span>
     <span>Cúm gia cầm</span>
 </div>
