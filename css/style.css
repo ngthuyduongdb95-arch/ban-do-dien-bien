@@ -780,3 +780,151 @@ button,input,select{font:inherit}
 .panel::-webkit-scrollbar-thumb:hover{
     background:#aebbc4;
 }
+/* =====================================================
+   ICON + TIÊU ĐỀ NHÓM PANEL
+   ===================================================== */
+
+.info-section-title{
+    display:flex;
+    align-items:center;
+    gap:8px;
+
+    min-height:42px;
+    padding:7px 10px;
+
+    font-size:11px;
+    line-height:15px;
+    font-weight:900;
+
+    border-bottom:1px solid rgba(0,0,0,.04);
+}
+
+
+/* Ô ICON */
+
+.panel-section-icon{
+    width:26px;
+    height:26px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    flex:0 0 26px;
+
+    border-radius:7px;
+
+    font-size:12px;
+    line-height:1;
+
+    box-shadow:0 1px 3px rgba(0,0,0,.06);
+}
+
+.panel-section-icon i{
+    font-size:12px;
+}
+
+
+/* =====================================================
+   DTLCP
+   ===================================================== */
+
+.info-title-dtlcp{
+    color:#b92c27;
+    background:#fff1f0;
+}
+
+.info-title-dtlcp .panel-section-icon{
+    color:#c92c27;
+    background:#ffe0de;
+}
+
+
+/* =====================================================
+   CÚM GIA CẦM
+   ===================================================== */
+
+.info-title-cgc{
+    color:#287635;
+    background:#f0f8f1;
+}
+
+.info-title-cgc .panel-section-icon{
+    color:#287635;
+    background:#dff0e1;
+}
+
+
+/* =====================================================
+   VDNC
+   ===================================================== */
+
+.info-title-vdnc{
+    color:#245fb9;
+    background:#eef5ff;
+}
+
+.info-title-vdnc .panel-section-icon{
+    color:#245fb9;
+    background:#dceaff;
+}
+
+
+/* =====================================================
+   DẠI
+   ===================================================== */
+
+.info-title-dai{
+    color:#5930a8;
+    background:#f5f0ff;
+}
+
+.info-title-dai .panel-section-icon{
+    color:#5930a8;
+    background:#e8dcff;
+}
+
+
+/* =====================================================
+   TVSKTTĐ
+   ===================================================== */
+
+.info-title-phun{
+    color:#138794;
+    background:#eefafa;
+}
+
+.info-title-phun .panel-section-icon{
+    color:#138794;
+    background:#d9f1f3;
+}
+
+
+/* =====================================================
+   KSGM
+   ===================================================== */
+
+.info-title-ksgm{
+    color:#65463a;
+    background:#f7f2ef;
+}
+
+.info-title-ksgm .panel-section-icon{
+    color:#65463a;
+    background:#eadfd9;
+}
+
+
+/* =====================================================
+   THUỐC THÚ Y
+   ===================================================== */
+
+.info-title-drug{
+    color:#087396;
+    background:#edf8fb;
+}
+
+.info-title-drug .panel-section-icon{
+    color:#087396;
+    background:#d9f0f5;
+}
