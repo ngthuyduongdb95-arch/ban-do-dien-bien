@@ -1034,21 +1034,7 @@ function hasPanelData(type, row) {
        THÔNG TIN CHUNG
     =============================== */
 
-    let html = `
-
-        <div class="info-block">
-
-            <div class="info-district">
-                ${escapeHtml(name)}
-            </div>
-
-            <div class="info-layer">
-                Thông tin tổng hợp
-            </div>
-
-        </div>
-
-    `;
+    let html = "";
 
 
     /* =====================================================
@@ -1095,9 +1081,15 @@ function hasPanelData(type, row) {
 
             <div class="info-section">
 
-                <div class="info-section-title">
-                    Dịch tả lợn Châu Phi
-                </div>
+                <div class="info-section-title info-title-dtlcp">
+
+    <span class="panel-section-icon">
+        <i class="fa-solid fa-pig"></i>
+    </span>
+
+    <span>Dịch tả lợn Châu Phi</span>
+
+</div>
 
                 ${infoRows(dtlcpRows)}
 
@@ -1151,10 +1143,15 @@ function hasPanelData(type, row) {
 
             <div class="info-section">
 
-                <div class="info-section-title">
-                    Cúm gia cầm
-                </div>
+<div class="info-section-title info-title-cgc">
 
+    <span class="panel-section-icon">
+        <i class="fa-solid fa-dove"></i>
+    </span>
+
+    <span>Cúm gia cầm</span>
+
+</div>
                 ${infoRows(cgcRows)}
 
             </div>
@@ -1207,9 +1204,15 @@ function hasPanelData(type, row) {
 
             <div class="info-section">
 
-                <div class="info-section-title">
-                    Viêm da nổi cục
-                </div>
+<div class="info-section-title info-title-vdnc">
+
+    <span class="panel-section-icon">
+        <i class="fa-solid fa-cow"></i>
+    </span>
+
+    <span>Viêm da nổi cục</span>
+
+</div>
 
                 ${infoRows(vdncRows)}
 
@@ -1263,9 +1266,15 @@ function hasPanelData(type, row) {
 
             <div class="info-section">
 
-                <div class="info-section-title">
-                    Bệnh Dại
-                </div>
+<div class="info-section-title info-title-dai">
+
+    <span class="panel-section-icon">
+        <i class="fa-solid fa-dog"></i>
+    </span>
+
+    <span>Bệnh Dại</span>
+
+</div>
 
                 ${infoRows(daiRows)}
 
@@ -1315,10 +1324,15 @@ function hasPanelData(type, row) {
 
             <div class="info-section">
 
-                <div class="info-section-title">
-                    Thực hiện tháng TVSKTTĐ
-                </div>
+<div class="info-section-title info-title-phun">
 
+    <span class="panel-section-icon">
+        <i class="fa-solid fa-spray-can"></i>
+    </span>
+
+    <span>Thực hiện tháng TVSKTTĐ</span>
+
+</div>
                 ${infoRows(phunRows)}
 
             </div>
@@ -1352,9 +1366,15 @@ function hasPanelData(type, row) {
 
             <div class="info-section">
 
-                <div class="info-section-title">
-                    Kiểm soát giết mổ
-                </div>
+<div class="info-section-title info-title-ksgm">
+
+    <span class="panel-section-icon">
+        <i class="fa-solid fa-drumstick-bite"></i>
+    </span>
+
+    <span>Kiểm soát giết mổ</span>
+
+</div>
 
                 ${infoRows(ksgmRows)}
 
@@ -1382,17 +1402,16 @@ function hasPanelData(type, row) {
 
         html += `
 
-            <div class="info-section">
 
-                <div class="info-section-title">
-                    Cơ sở buôn bán thuốc thú y
-                </div>
+                <div class="info-section-title info-title-drug">
 
-                ${infoRows(csbbttyRows)}
+    <span class="panel-section-icon">
+        <i class="fa-solid fa-pills"></i>
+    </span>
 
-            </div>
+    <span>Cơ sở buôn bán thuốc thú y</span>
 
-        `;
+</div>
     }
 
 
