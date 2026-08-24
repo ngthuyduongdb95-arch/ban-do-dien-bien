@@ -1,933 +1,636 @@
-:root{
-  --ink:#17212b;
-  --muted:#6d7985;
-  --line:#dce3e8;
-  --page:#f3f6f8;
-  --blue:#155eef;
-  --panel:#fff;
-  --shadow:0 6px 18px rgba(20,35,50,.10);
-}
-
-*{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);background:var(--page)}
-body{overflow:hidden}
-button,input,select{font:inherit}
-
-/* ================= HEADER ================= */
-.header{
-  height:74px;
-  display:grid;
-  grid-template-columns:minmax(260px,1fr) minmax(420px,1.35fr) auto;
-  align-items:center;
-  gap:20px;
-  padding:10px 18px;
-  background:#fff;
-  border-bottom:1px solid var(--line);
-  box-shadow:0 2px 8px rgba(20,35,50,.05);
-  position:relative;
-  z-index:1100;
-}
-.agency-line1{font-size:11px;line-height:1.25;font-weight:800;letter-spacing:.25px;color:#17212b}
-.agency-line2{margin-top:3px;font-size:10px;line-height:1.2;font-weight:700;color:#6a7682}
-.header h1{margin:0;text-align:center;font-size:20px;line-height:1.2;font-weight:800;letter-spacing:.35px;white-space:nowrap}
-.header-controls{display:flex;align-items:center;justify-content:flex-end;gap:7px}
-.header-layer{display:flex;align-items:center;gap:7px}
-.header-layer-label{font-size:9px;font-weight:800;color:#5c6975;letter-spacing:.4px;white-space:nowrap}
-.header-layer select{width:220px;height:34px;border:1px solid #cfd8df;border-radius:8px;padding:0 9px;background:#fff;color:#26343f;font-size:12px;outline:none}
-.header-icon-btn{width:34px;height:34px;border:1px solid #cfd8df;border-radius:8px;background:#fff;color:#4c5b68;cursor:pointer}
-.header-icon-btn:hover{background:#155eef;color:#fff;border-color:#155eef}
-
-/* ================= MAIN 3-COLUMN LAYOUT ================= */
-.webgis{
-  display:grid;
-  grid-template-columns:205px minmax(0,1fr) 315px;
-  width:100%;
-  height:calc(100vh - 74px);
-  min-height:0;
-}
-
-/* ================= KPI SIDEBAR ================= */
-.sidebar{
-  min-width:0;
-  padding:10px 9px;
-  background:#f7f9fa;
-  border-right:1px solid var(--line);
-  overflow-y:auto;
-  overflow-x:hidden;
-}
-.sidebar-kpi{display:flex;flex-direction:column;gap:8px;padding:2px 2px 12px}
-.summary-card{
-  width:100%;
-  min-width:0;
-  min-height:0;
-  height:auto;
-  padding:10px 11px;
-  border:1px solid var(--line);
-  border-radius:10px;
-  background:#fff;
-  box-shadow:0 2px 8px rgba(20,35,50,.055);
-  overflow:visible;
-}
-.summary-card:hover{box-shadow:0 4px 12px rgba(20,35,50,.09)}
-.summary-head{display:flex;align-items:flex-start;gap:6px;margin:0;color:#44515e;font-size:10.5px;line-height:14px;font-weight:700;white-space:normal;overflow:visible}
-.summary-head i{flex:0 0 auto;margin-top:1px;font-size:10px}
-.summary-main{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 5px;margin:4px 0 4px}
-.summary-main span{font-size:23px;line-height:25px;font-weight:900;white-space:nowrap;color:#101820}
-.summary-main small{font-size:9px;line-height:12px;color:#6d7985;white-space:normal}
-.summary-grid{display:flex;flex-direction:column;gap:2px;font-size:9px;line-height:13px;color:#697682}
-.summary-grid span{display:block;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
-.summary-grid b{color:#27343f;font-weight:800}
-.card-dtlcp{border-top:3px solid #e6392e}
-.card-cgc{border-top:3px solid #388e3c}
-.card-vdnc{border-top:3px solid #2f7df6}
-.card-dai{border-top:3px solid #6a35d1}
-.card-phun{border-top:3px solid #19a7b3}
-.card-ksgm{border-top:3px solid #795548}
-.card-drug{border-top:3px solid #0288b8}
-
-/* ================= MAP ================= */
-.main-map{position:relative;min-width:0;min-height:0;background:#e9eef1;overflow:hidden}
-#map{width:100%;height:100%;min-height:0;background:#edf1f3}
-.leaflet-container{font-family:Inter,Segoe UI,Roboto,Arial,sans-serif}
-.leaflet-control-zoom{border:0!important;box-shadow:0 3px 12px rgba(20,35,50,.16)!important}
-.leaflet-control-zoom a{border:0!important;color:#334155!important}
-.leaflet-control-scale-line{background:rgba(255,255,255,.92)!important;border:1px solid #64748b!important;color:#334155!important;font-size:9px!important}
-
-/* chỉ giữ cụm công cụ; KHÔNG có hộp tiêu đề nổi trên bản đồ */
-.map-toolbar{position:absolute;z-index:1000;right:12px;top:12px;pointer-events:none}
-.map-title-live{display:none}
-.map-actions{display:flex;gap:4px;padding:4px;border-radius:10px;background:rgba(255,255,255,.96);box-shadow:0 4px 14px rgba(20,35,50,.14);pointer-events:auto}
-.map-action{width:34px;height:32px;border:0;border-radius:7px;background:#fff;color:#53616e;cursor:pointer}
-.map-action:hover,.map-action.active{background:#155eef;color:#fff}
-.map-action.loading{opacity:.55;cursor:wait}
-
-/* ================= LABELS ================= */
-.map-label-wrap{background:transparent!important;border:0!important;pointer-events:none!important}
-.map-label{
-  display:inline-block;
-  padding:0;
-  margin:0;
-  background:transparent!important;
-  border:0!important;
-  box-shadow:none!important;
-  color:#27343d;
-  font-size:9.5px;
-  line-height:16px;
-  font-weight:400;
-  letter-spacing:.05px;
-  white-space:nowrap;
-  text-shadow:1px 0 1px rgba(255,255,255,.95),-1px 0 1px rgba(255,255,255,.95),0 1px 2px rgba(255,255,255,.95),0 -1px 2px rgba(255,255,255,.95);
-}
-
-/* ================= LEGEND ================= */
-.legend{
-  width:205px;
-  max-width:205px;
-  padding:10px 11px;
-  border:1px solid rgba(20,35,50,.12);
-  border-radius:10px;
-  background:rgba(255,255,255,.96);
-  box-shadow:0 7px 20px rgba(20,35,50,.16);
-  font-size:10px;
-  line-height:1.3;
-}
-.legend h4{margin:0 0 6px;padding:0 0 6px;border-bottom:1px solid #e5e7eb;font-size:12px;line-height:15px;font-weight:800;color:#263238}
-.legend-row{display:flex;align-items:center;gap:7px;min-height:18px;margin:2px 0}
-.legend-row i{width:17px;height:11px;flex:0 0 17px;border:1px solid rgba(0,0,0,.12);border-radius:3px}
-.legend-dot-row{display:flex;align-items:center;gap:7px;min-height:18px;margin:2px 0}
-.legend-red-dot{width:8px!important;height:8px!important;flex:0 0 8px!important;border-radius:50%;background:#d50000;border:2px solid #fff!important;box-shadow:0 0 0 1px #d50000}
-.legend-no-data{width:17px;height:11px;flex:0 0 17px;border-radius:3px;background:#dce3e8;border:1px solid #7e8a92}
-.legend-section-title{margin:6px 0 4px;font-weight:800;color:#334155}
-.legend-empty{margin-top:6px;color:#7b8794;font-style:italic}
-.legend hr{border:0;border-top:1px solid #e3e7eb;margin:6px 0}
-
-/* ================= RIGHT PANEL ================= */
-.panel{min-width:0;background:#fff;border-left:1px solid var(--line);overflow-y:auto;overflow-x:hidden}
-.panel-head{position:sticky;top:0;z-index:2;padding:12px 14px 10px;background:#fff;border-bottom:1px solid var(--line)}
-.panel-kicker{display:block;margin-bottom:3px;color:#74818d;font-size:8.5px;font-weight:800;letter-spacing:.65px}
-.panel h2{margin:0;font-size:17px;line-height:22px;color:#17212b;word-break:break-word}
-#info-panel{padding:11px 12px 18px}
-.empty-panel{min-height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#7a8792;font-size:11px;line-height:1.5;padding:20px}
-.empty-panel i{margin-bottom:9px;font-size:22px;color:#a6b1ba}
-.empty-panel strong{font-size:14px;color:#25313c}
-.selected-summary{padding:10px 11px;margin-bottom:10px;border:1px solid #e1e7eb;border-radius:9px;background:#f8fafb}
-.selected-name{font-size:15px;line-height:19px;font-weight:800;color:#17212b}
-.selected-hint{margin-top:2px;font-size:9px;color:#7a8792}
-.info-section{margin:0 0 9px;border:1px solid #e0e6eb;border-radius:9px;overflow:hidden;background:#fff}
-.info-section-title{padding:7px 9px;font-size:10.5px;line-height:14px;font-weight:800;color:#25313c;background:#f6f8fa;border-left:3px solid #6b7c8a}
-.info-red .info-section-title{border-left-color:#e6392e}
-.info-green .info-section-title{border-left-color:#388e3c}
-.info-blue .info-section-title{border-left-color:#2f7df6}
-.info-purple .info-section-title{border-left-color:#6a35d1}
-.info-teal .info-section-title{border-left-color:#19a7b3}
-.info-brown .info-section-title{border-left-color:#795548}
-.info-cyan .info-section-title{border-left-color:#0288b8}
-.info-table{margin:0}
-.info-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:8px;padding:7px 9px;border-bottom:1px solid #edf0f2;font-size:10px;line-height:13px}
-.info-row:last-child{border-bottom:0}
-.info-row>span{color:#6d7985;min-width:0}
-.info-row>b{color:#24313c;text-align:right;min-width:0;overflow-wrap:anywhere;font-weight:700}
-.info-status{display:inline-block;padding:2px 5px;border-radius:999px;font-size:8.5px;line-height:11px;font-weight:800;white-space:normal}
-.info-status.danger{background:#fde8e8;color:#b42318}
-.info-status.success{background:#e8f5e9;color:#2e7d32}
-.info-status.neutral{background:#eef2f5;color:#596874}
-
-/* ================= FULLSCREEN / EXPORT ================= */
-.main-map:fullscreen{width:100vw;height:100vh}
-.main-map:fullscreen #map{height:100vh}
-.export-hide{display:none!important}
-
-/* ================= RESPONSIVE ================= */
-@media(max-width:1200px){
-  .webgis{grid-template-columns:195px minmax(0,1fr) 300px}
-  .header h1{font-size:18px}
-  .header-layer select{width:195px}
-}
-@media(max-width:950px){
-  body{overflow:auto}
-  .header{height:auto;min-height:74px;grid-template-columns:1fr auto;grid-template-areas:"agency controls" "title title";row-gap:7px}
-  .agency{grid-area:agency}.header h1{grid-area:title;text-align:left;white-space:normal}.header-controls{grid-area:controls}
-  .webgis{grid-template-columns:185px minmax(0,1fr);height:calc(100vh - 104px)}
-  .panel{grid-column:1/-1;height:360px;border-left:0;border-top:1px solid var(--line)}
-  #map{min-height:480px}
-}
-@media(max-width:700px){
-  .header{grid-template-columns:1fr;grid-template-areas:"agency" "title" "controls";padding:9px 12px}
-  .header-controls{justify-content:flex-start;flex-wrap:wrap}.header-layer{width:100%}.header-layer select{flex:1;max-width:none}
-  .webgis{grid-template-columns:1fr;height:auto}
-  .sidebar{max-height:none;overflow:visible;border-right:0;border-bottom:1px solid var(--line)}
-  .sidebar-kpi{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
-  .panel{height:auto;max-height:none}
-  .main-map{height:70vh;min-height:500px}
-}
-@media(max-width:450px){
-  .sidebar-kpi{grid-template-columns:1fr}
-  .header h1{font-size:16px}
-  .legend{width:185px;max-width:185px}
-}
-
-/* =========================================================
-   WEBGIS FINAL - HIỂN THỊ THEO YÊU CẦU
-   ========================================================= */
-
-/* KPI: tự giãn theo nội dung, không ép bằng chiều cao */
-.sidebar-kpi .summary-card{
-  height:auto!important;
-  min-height:0!important;
-  max-height:none!important;
-  flex:0 0 auto!important;
-  overflow:visible!important;
-}
-.sidebar-kpi .summary-head{
-  white-space:normal!important;
-  overflow:visible!important;
-  text-overflow:clip!important;
-  overflow-wrap:anywhere;
-}
-.sidebar-kpi .summary-main small,
-.sidebar-kpi .summary-grid span{
-  white-space:normal!important;
-  overflow:visible!important;
-  text-overflow:clip!important;
-  overflow-wrap:anywhere;
-}
-.sidebar-kpi .card-phun .summary-head,
-.sidebar-kpi .card-drug .summary-head{
-  line-height:13px;
-}
-
-/* Tên xã: thanh mảnh, không nền/khung/bóng */
-.map-label-wrap,
-.map-label-wrap.leaflet-marker-icon{
-  background:transparent!important;
-  border:0!important;
-  box-shadow:none!important;
-  pointer-events:none!important;
-}
-.map-label{
-  background:transparent!important;
-  border:0!important;
-  box-shadow:none!important;
-  color:#334155!important;
-  font-size:9.5px!important;
-  line-height:16px!important;
-  font-weight:400!important;
-  letter-spacing:.02px!important;
-  padding:0!important;
-  margin:0!important;
-  white-space:nowrap!important;
-  text-shadow:1px 0 1px rgba(255,255,255,.95),-1px 0 1px rgba(255,255,255,.95),0 1px 2px rgba(255,255,255,.95),0 -1px 2px rgba(255,255,255,.95)!important;
-}
-
-/* Chấm đỏ: nhỏ, duy nhất, không animation */
-.leaflet-pane.diseaseMarkers .leaflet-interactive{
-  cursor:default!important;
-}
-
-/* Legend: gọn và rõ */
-.legend{
-  width:205px!important;
-  max-width:205px!important;
-  padding:9px 10px!important;
-}
-.legend-red-dot{
-  width:8px!important;
-  height:8px!important;
-  flex:0 0 8px!important;
-}
-
-/* Không cho lớp tiêu đề nổi trên bản đồ xuất hiện */
-.map-export-title{display:none!important}
-/* =========================================================
-   WEBGIS - GIAO DIỆN HOÀN THIỆN
-   MODERN / CLEAN / PROFESSIONAL
-   ========================================================= */
+/* ======================================================
+   WEBGIS ĐIỆN BIÊN - STYLE
+   ====================================================== */
 
 :root{
-    --primary:#174A6E;
-    --primary-dark:#123B59;
-    --primary-soft:#EAF3F8;
-
-    --text:#17212B;
-    --text-soft:#526170;
-    --muted:#7B8995;
-
-    --line:#DCE4EA;
-    --line-soft:#E9EEF2;
-
-    --page:#F3F6F8;
-    --panel:#FFFFFF;
-    --sidebar:#F7F9FB;
-
-    --shadow-soft:
-        0 2px 10px rgba(25,45,60,.07);
-
-    --shadow-panel:
-        0 3px 14px rgba(25,45,60,.09);
+    --ink:#17212b;
+    --muted:#6b7785;
+    --line:#dce3e8;
+    --panel:#ffffff;
+    --page:#f3f6f8;
+    --blue:#155eef;
+    --shadow:0 8px 24px rgba(20,35,50,.10);
 }
 
+*{
+    box-sizing:border-box;
+}
 
-/* =========================================================
-   1. HEADER
-   ========================================================= */
+html,body{
+    margin:0;
+    padding:0;
+    width:100%;
+    min-height:100%;
+    font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
+    color:var(--ink);
+    background:var(--page);
+}
+
+button,input,select{
+    font:inherit;
+}
+
+/* ======================================================
+   HEADER
+   ====================================================== */
 
 .header{
-    height:76px !important;
-    min-height:76px !important;
+    min-height:74px !important;
+    height:74px !important;
 
-    display:grid !important;
-
-    grid-template-columns:
-        275px
-        minmax(420px,1fr)
-        385px !important;
-
+    display:flex;
     align-items:center;
+    justify-content:space-between;
 
-    gap:18px;
-
+    gap:24px;
     padding:9px 18px !important;
 
     background:
         linear-gradient(
             135deg,
-            #EEF5F9 0%,
-            #E5EFF5 52%,
-            #DCEAF2 100%
+            #EEF6FA 0%,
+            #E2EFF6 100%
         ) !important;
 
-    color:var(--text) !important;
-
-    border-bottom:
-        1px solid #CFDDE6 !important;
+    border-bottom:1px solid #CFDEE7 !important;
 
     box-shadow:
         0 2px 10px rgba(24,55,75,.08) !important;
-
-    position:relative;
-    z-index:2000;
-}
-
-
-/* Cơ quan */
-
-.agency{
-    min-width:0;
 }
 
 .agency-line1{
-    color:#173B56 !important;
-
-    font-size:12px !important;
-    line-height:1.25 !important;
-
-    font-weight:850 !important;
-
-    letter-spacing:.15px;
-
-    white-space:nowrap;
+    color:#173E5A !important;
+    font-size:11.5px !important;
+    font-weight:900 !important;
+    letter-spacing:.25px;
 }
 
 .agency-line2{
-    margin-top:4px !important;
+    margin-top:3px;
 
-    color:#60798A !important;
+    color:#6A7F8E !important;
+    font-size:9px !important;
+    font-weight:750 !important;
+}
 
-    font-size:9.5px !important;
-    line-height:1.2 !important;
+.header h1{
+    margin:0;
+
+    color:#123F63 !important;
+
+    font-size:22px !important;
+    line-height:26px !important;
+
+    font-weight:900 !important;
+
+    letter-spacing:.15px !important;
+
+    text-align:right;
+}
+
+/* ======================================================
+   DASHBOARD / KPI
+   ====================================================== */
+
+.dashboard{
+    display:grid;
+
+    grid-template-columns:
+        repeat(7,minmax(0,1fr));
+
+    gap:10px;
+
+    padding:12px 16px;
+
+    background:#f8fafb;
+
+    border-bottom:1px solid var(--line);
+}
+
+.summary-card{
+    min-width:0;
+
+    height:auto !important;
+    min-height:0 !important;
+
+    padding:11px 11px 12px !important;
+
+    border:1px solid #D9E3E9 !important;
+    border-top-width:4px !important;
+
+    border-radius:11px !important;
+
+    background:#fff !important;
+
+    overflow:visible !important;
+
+    box-shadow:
+        0 3px 11px rgba(25,50,70,.07) !important;
+}
+
+.summary-head{
+    display:flex;
+
+    align-items:flex-start;
+
+    gap:7px;
+
+    min-height:18px;
+
+    color:#263F52 !important;
+
+    font-size:11px !important;
+    line-height:15px !important;
+
+    font-weight:900 !important;
+
+    white-space:normal !important;
+
+    overflow:visible !important;
+    text-overflow:clip !important;
+
+    letter-spacing:.05px !important;
+}
+
+.summary-head i{
+    flex:0 0 auto;
+
+    margin-top:1px;
+
+    font-size:11px !important;
+}
+
+.summary-main{
+    display:flex;
+
+    align-items:baseline;
+
+    gap:6px;
+
+    height:auto !important;
+    min-height:0 !important;
+
+    margin:5px 0 5px !important;
+}
+
+.summary-main span{
+    color:#142D40 !important;
+
+    font-size:26px !important;
+    line-height:28px !important;
+
+    font-weight:900 !important;
+}
+
+.summary-main small{
+    color:#647785 !important;
+
+    font-size:8.5px !important;
+    line-height:13px !important;
 
     font-weight:700 !important;
 
-    letter-spacing:.25px;
-
-    white-space:nowrap;
+    white-space:normal !important;
 }
 
+.summary-grid{
+    display:grid;
 
-/* Tiêu đề chính */
+    gap:3px;
 
-.header h1{
-    margin:0 !important;
+    min-height:0 !important;
 
-    color:#163A56 !important;
+    color:#61727F !important;
 
-    font-size:21px !important;
-    line-height:1.15 !important;
+    font-size:9.3px !important;
+    line-height:13px !important;
+}
+
+.summary-grid span{
+    min-height:13px !important;
+
+    color:#61727F !important;
+
+    white-space:normal !important;
+
+    overflow:visible !important;
+
+    text-overflow:clip !important;
+
+    overflow-wrap:anywhere !important;
+}
+
+.summary-grid b{
+    color:#263C4C !important;
+
+    font-size:9.5px !important;
 
     font-weight:850 !important;
-
-    letter-spacing:.15px;
-
-    text-align:center;
-
-    white-space:nowrap;
-
-    overflow:hidden;
-    text-overflow:ellipsis;
 }
 
+/* ======================================================
+   MÀU TỪNG KPI
+   ====================================================== */
 
-/* Khu vực điều khiển */
-
-.header-controls{
-    min-width:0;
-
-    display:flex !important;
-    align-items:center;
-    justify-content:flex-end;
-
-    gap:7px !important;
+.card-dtlcp{
+    border-top-color:#E6392E !important;
 }
 
-.header-layer{
-    min-width:0;
-
-    display:flex;
-    align-items:center;
-
-    gap:7px !important;
+.card-cgc{
+    border-top-color:#388E3C !important;
 }
 
-.header-layer-label{
-    color:#607789 !important;
-
-    font-size:8.5px !important;
-    font-weight:800 !important;
-
-    letter-spacing:.5px;
+.card-vdnc{
+    border-top-color:#2F7DF6 !important;
 }
 
-.header-layer select{
-    width:205px !important;
-    height:36px !important;
-
-    padding:0 11px !important;
-
-    background:#FFFFFF !important;
-
-    color:#243B4D !important;
-
-    border:
-        1px solid #CBD9E2 !important;
-
-    border-radius:9px !important;
-
-    font-size:10.5px !important;
-    font-weight:650 !important;
-
-    outline:none;
-
-    box-shadow:
-        0 1px 4px rgba(25,55,75,.06);
+.card-dai{
+    border-top-color:#6A35D1 !important;
 }
 
-.header-layer select:focus{
-    border-color:#76A8C7 !important;
-
-    box-shadow:
-        0 0 0 3px rgba(55,125,170,.10);
+.card-phun{
+    border-top-color:#19A7B3 !important;
 }
 
-
-/* Nút header */
-
-.header-icon-btn{
-    width:36px !important;
-    height:36px !important;
-
-    flex:0 0 36px !important;
-
-    border:
-        1px solid #CBD9E2 !important;
-
-    border-radius:9px !important;
-
-    background:#FFFFFF !important;
-
-    color:#31566F !important;
-
-    box-shadow:
-        0 1px 5px rgba(25,55,75,.07) !important;
-
-    transition:
-        background .15s ease,
-        border-color .15s ease,
-        transform .15s ease;
+.card-ksgm{
+    border-top-color:#795548 !important;
 }
 
-.header-icon-btn:hover{
-    background:#F2F8FC !important;
-
-    border-color:#A9C3D4 !important;
-
-    transform:translateY(-1px);
+.card-drug{
+    border-top-color:#0288B8 !important;
 }
 
+/* Tiêu đề dài */
 
-/* =========================================================
-   2. KHUNG 3 CỘT
-   ========================================================= */
+.card-phun .summary-head,
+.card-drug .summary-head{
+    font-size:9.8px !important;
+    line-height:13px !important;
+}
+
+/* ======================================================
+   WEBGIS - 3 CỘT
+   ====================================================== */
 
 .webgis{
-    width:100%;
+    display:grid;
 
-    display:grid !important;
-
-    /*
-       Hai panel trái/phải bằng nhau.
-       Bản đồ nhận toàn bộ phần còn lại.
-    */
     grid-template-columns:
         255px
         minmax(0,1fr)
         255px !important;
 
-    height:
-        calc(100vh - 76px) !important;
+    gap:0;
 
-    min-height:0;
+    height:calc(100vh - 74px) !important;
+
+    min-height:0 !important;
 }
 
-
-/* =========================================================
-   3. PANEL KPI BÊN TRÁI
-   ========================================================= */
+/* ======================================================
+   SIDEBAR
+   ====================================================== */
 
 .sidebar{
-    min-width:0;
-    min-height:0;
-
-    height:100%;
-
-    padding:
-        10px 9px 12px !important;
+    padding:10px 9px 12px !important;
 
     background:
         linear-gradient(
             180deg,
-            #F8FAFC 0%,
-            #F3F6F8 100%
+            #F8FAFC,
+            #F1F5F7
         ) !important;
 
-    border-right:
-        1px solid #D7E1E7 !important;
+    border-right:1px solid var(--line);
 
-    overflow-y:auto;
-    overflow-x:hidden;
+    overflow:auto;
 }
 
-
-/* khoảng cách KPI */
+/* Nếu sidebar chứa riêng nhóm KPI */
 
 .sidebar-kpi{
-    width:100%;
-
-    display:flex !important;
-
-    flex-direction:column;
-
     gap:8px !important;
 
-    padding:
-        1px 1px 12px !important;
+    padding:1px 1px 12px !important;
 }
 
-
-/* =========================================================
-   4. KPI CARD
-   ========================================================= */
-
-/*
-   Không khóa chiều cao.
-   Card tự cao theo nội dung.
-*/
-
 .sidebar-kpi .summary-card{
-    width:100%;
+    width:100% !important;
 
     height:auto !important;
+
     min-height:0 !important;
+
     max-height:none !important;
 
-    flex:
-        0 0 auto !important;
+    flex:0 0 auto !important;
 
-    margin:0 !important;
+    padding:11px 11px 12px !important;
 
-    padding:
-        10px 11px 11px !important;
+    border:1px solid #D9E3E9 !important;
 
-    display:flex;
-
-    flex-direction:column;
-
-    justify-content:flex-start !important;
-
-    border:
-        1px solid #DCE4EA !important;
-
-    border-top-width:3px !important;
+    border-top-width:4px !important;
 
     border-radius:11px !important;
 
-    background:#FFFFFF !important;
+    background:#fff !important;
 
     overflow:visible !important;
 
     box-shadow:
-        0 2px 8px rgba(25,45,60,.055) !important;
-
-    transition:
-        transform .15s ease,
-        box-shadow .15s ease;
+        0 3px 11px rgba(25,50,70,.07) !important;
 }
 
-.sidebar-kpi .summary-card:hover{
-    transform:translateY(-1px);
+/* ======================================================
+   SIDE CARD
+   ====================================================== */
 
-    box-shadow:
-        0 4px 13px rgba(25,45,60,.10) !important;
+.side-card{
+    background:#fff;
+
+    border:1px solid var(--line);
+
+    border-radius:11px;
+
+    padding:11px;
+
+    margin-bottom:10px;
 }
 
+.side-title{
+    margin-bottom:7px;
 
-/* =========================================================
-   5. TIÊU ĐỀ KPI
-   ========================================================= */
+    font-size:11px;
 
-.sidebar-kpi .summary-head{
+    font-weight:800;
+
+    text-transform:uppercase;
+
+    letter-spacing:.35px;
+
+    color:#4c5b68;
+}
+
+.side-card select,
+.search-row input{
     width:100%;
 
-    min-height:17px;
+    height:37px;
 
+    border:1px solid #cfd8df;
+
+    border-radius:8px;
+
+    padding:0 9px;
+
+    background:#fff;
+
+    color:#1d2a35;
+
+    outline:none;
+}
+
+.search-row{
     display:flex;
-
-    align-items:flex-start;
 
     gap:6px;
-
-    margin:0 !important;
-
-    color:#344654 !important;
-
-    font-size:10.5px !important;
-
-    line-height:15px !important;
-
-    font-weight:800 !important;
-
-    white-space:normal !important;
-
-    overflow:visible !important;
-
-    text-overflow:clip !important;
-
-    overflow-wrap:anywhere;
 }
 
-.sidebar-kpi .summary-head i{
-    flex:0 0 auto;
-
-    margin-top:2px;
-
-    font-size:10px !important;
+.search-row input{
+    min-width:0;
 }
 
+.search-row button{
+    width:38px;
 
-/* =========================================================
-   6. SỐ KPI
-   ========================================================= */
+    flex:0 0 38px;
 
-.sidebar-kpi .summary-main{
+    border:0;
+
+    border-radius:8px;
+
+    background:#155eef;
+
+    color:#fff;
+
+    cursor:pointer;
+}
+
+.side-note{
+    font-size:11px;
+
+    line-height:1.5;
+
+    color:#667481;
+}
+
+.side-note p{
+    margin:4px 0;
+}
+
+.side-button{
     width:100%;
 
-    height:auto !important;
-    min-height:0 !important;
+    height:38px;
 
-    display:flex;
+    margin-bottom:8px;
 
-    align-items:baseline;
+    border:0;
 
-    gap:5px;
+    border-radius:9px;
 
-    margin:
-        5px 0 5px !important;
+    background:#155eef;
+
+    color:#fff;
+
+    font-weight:700;
+
+    cursor:pointer;
 }
 
-.sidebar-kpi .summary-main span{
-    color:#17212B !important;
+.side-button.secondary{
+    background:#fff;
 
-    font-size:24px !important;
+    color:#334155;
 
-    line-height:27px !important;
-
-    font-weight:850 !important;
-
-    white-space:nowrap;
+    border:1px solid #cfd8df;
 }
 
-.sidebar-kpi .summary-main small{
-    color:#697887 !important;
-
-    font-size:8.5px !important;
-
-    line-height:13px !important;
-
-    font-weight:600 !important;
-
-    white-space:normal !important;
-}
-
-
-/* =========================================================
-   7. THÔNG TIN PHỤ KPI
-   ========================================================= */
-
-.sidebar-kpi .summary-grid{
-    width:100%;
-
-    min-height:0 !important;
-
-    display:flex;
-
-    flex-direction:column;
-
-    gap:3px !important;
-
-    margin:0 !important;
-
-    color:#5D6C78 !important;
-
-    font-size:9px !important;
-
-    line-height:13px !important;
-
-    overflow:visible !important;
-}
-
-.sidebar-kpi .summary-grid span{
-    width:100%;
-
-    min-height:13px;
-
-    display:block;
-
-    white-space:normal !important;
-
-    overflow:visible !important;
-
-    text-overflow:clip !important;
-
-    overflow-wrap:anywhere;
-}
-
-.sidebar-kpi .summary-grid b{
-    color:#263743 !important;
-
-    font-size:9.2px !important;
-
-    font-weight:800 !important;
-}
-
-
-/* KPI tiêu đề dài */
-
-.sidebar-kpi .card-phun .summary-head,
-.sidebar-kpi .card-drug .summary-head{
-    font-size:9.5px !important;
-
-    line-height:13px !important;
-}
-
-
-/* =========================================================
-   8. MÀU KPI
-   ========================================================= */
-
-.card-dtlcp{
-    border-top-color:#D32F2F !important;
-}
-
-.card-cgc{
-    border-top-color:#369447 !important;
-}
-
-.card-vdnc{
-    border-top-color:#3478D4 !important;
-}
-
-.card-dai{
-    border-top-color:#7040B5 !important;
-}
-
-.card-phun{
-    border-top-color:#1597A3 !important;
-}
-
-.card-ksgm{
-    border-top-color:#80604F !important;
-}
-
-.card-drug{
-    border-top-color:#2878A8 !important;
-}
-
-
-/* =========================================================
-   9. BẢN ĐỒ
-   ========================================================= */
+/* ======================================================
+   BẢN ĐỒ
+   ====================================================== */
 
 .main-map{
     position:relative;
 
     min-width:0;
-    min-height:0;
+
+    background:#EAF0F3 !important;
 
     overflow:hidden;
-
-    background:#EDF2F5 !important;
 }
 
 #map{
     width:100%;
+
     height:100%;
+
+    min-height:0 !important;
+
+    background:#edf1f3;
 }
 
+.leaflet-container{
+    font-family:
+        Inter,
+        Segoe UI,
+        Roboto,
+        Arial,
+        sans-serif;
+}
 
-/* =========================================================
-   10. TOOLBAR BẢN ĐỒ
-   ========================================================= */
+/* Làm nền bản đồ dịu hơn */
+
+.leaflet-tile{
+    filter:
+        grayscale(18%)
+        brightness(104%)
+        contrast(91%) !important;
+}
+
+/* ======================================================
+   MAP TOOLBAR
+   ====================================================== */
 
 .map-toolbar{
-    top:10px !important;
-    right:10px !important;
+    position:absolute;
+
+    z-index:1000;
+
+    left:12px;
+    right:12px;
+    top:12px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:10px;
+
+    pointer-events:none;
+}
+
+.map-title-live{
+    max-width:calc(100% - 190px);
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:2px;
+
+    padding:8px 11px;
+
+    border-radius:10px;
+
+    background:rgba(255,255,255,.94);
+
+    box-shadow:
+        0 4px 14px rgba(20,35,50,.14);
+
+    pointer-events:auto;
+}
+
+.map-title-live strong{
+    font-size:13px;
+}
+
+.map-title-live span{
+    font-size:9px;
+
+    color:#6c7884;
 }
 
 .map-actions{
     display:flex;
 
-    align-items:center;
+    gap:5px;
 
-    gap:4px;
+    padding:4px;
 
-    padding:4px !important;
+    border-radius:10px;
 
-    border:
-        1px solid rgba(40,65,85,.12) !important;
+    border:1px solid rgba(35,65,85,.10) !important;
 
-    border-radius:10px !important;
-
-    background:
-        rgba(255,255,255,.96) !important;
+    background:rgba(255,255,255,.97) !important;
 
     box-shadow:
-        0 4px 14px rgba(20,35,50,.12) !important;
+        0 4px 14px rgba(20,35,50,.13) !important;
+
+    pointer-events:auto;
 }
 
 .map-action{
     width:34px !important;
+
     height:32px !important;
+
+    border:0;
 
     border-radius:7px !important;
 
-    background:#FFFFFF !important;
+    background:#fff;
 
-    color:#456073 !important;
+    color:#53616e;
+
+    cursor:pointer;
 }
 
-.map-action:hover{
-    background:#EFF6FA !important;
-
-    color:#174A6E !important;
-}
-
+.map-action:hover,
 .map-action.active{
-    background:#1D6FA5 !important;
+    background:#1E6FA8 !important;
 
-    color:#FFFFFF !important;
+    color:#fff;
 }
 
+.map-action.loading{
+    opacity:.55;
 
-/* =========================================================
-   11. ZOOM
-   ========================================================= */
-
-.leaflet-top.leaflet-left{
-    top:10px !important;
-    left:10px !important;
+    cursor:wait;
 }
+
+/* ======================================================
+   LEAFLET CONTROLS
+   ====================================================== */
 
 .leaflet-control-zoom{
-    border:0 !important;
-
-    border-radius:9px !important;
-
-    overflow:hidden;
+    border:0!important;
 
     box-shadow:
-        0 3px 12px rgba(20,35,50,.13) !important;
+        0 3px 12px rgba(20,35,50,.16)!important;
 }
 
 .leaflet-control-zoom a{
-    width:34px !important;
-    height:34px !important;
+    border:0!important;
 
-    line-height:34px !important;
-
-    background:#FFFFFF !important;
-
-    color:#344E60 !important;
-
-    border:0 !important;
+    color:#334155!important;
 }
 
-.leaflet-control-zoom a:hover{
-    background:#F1F6F9 !important;
+.leaflet-control-scale-line{
+    background:rgba(255,255,255,.9)!important;
+
+    border:1px solid #64748b!important;
+
+    color:#334155!important;
+
+    font-size:10px!important;
 }
 
-
-/* =========================================================
-   12. TÊN XÃ TRÊN BẢN ĐỒ
-   ========================================================= */
+/* ======================================================
+   TÊN XÃ
+   ====================================================== */
 
 .map-label-wrap{
     background:transparent !important;
@@ -938,15 +641,17 @@ button,input,select{font:inherit}
 .map-label{
     display:inline-block;
 
-    padding:0 !important;
+    max-width:140px;
 
-    background:transparent !important;
+    padding:0 !important;
 
     border:0 !important;
 
-    box-shadow:none !important;
+    border-radius:0 !important;
 
-    color:#334955 !important;
+    background:transparent !important;
+
+    color:#334A59 !important;
 
     font-size:9px !important;
 
@@ -954,250 +659,204 @@ button,input,select{font:inherit}
 
     font-weight:600 !important;
 
-    white-space:nowrap;
+    white-space:nowrap !important;
+
+    box-shadow:none !important;
 
     pointer-events:none !important;
 
     text-shadow:
-        -1px -1px 0 #fff,
-         1px -1px 0 #fff,
-        -1px  1px 0 #fff,
-         1px  1px 0 #fff;
+        -1px -1px 0 rgba(255,255,255,.95),
+         1px -1px 0 rgba(255,255,255,.95),
+        -1px  1px 0 rgba(255,255,255,.95),
+         1px  1px 0 rgba(255,255,255,.95) !important;
 }
 
+/* ======================================================
+   VIỀN NGOÀI TỈNH
+   ====================================================== */
 
-/* =========================================================
-   13. PANEL PHẢI
-   ========================================================= */
+.province-emphasis{
+    pointer-events:none !important;
+}
+
+/* ======================================================
+   LEGEND
+   ====================================================== */
+
+.legend{
+    width:205px !important;
+
+    max-width:205px !important;
+
+    padding:10px 11px !important;
+
+    border:1px solid #D8E2E8 !important;
+
+    border-radius:10px !important;
+
+    background:rgba(255,255,255,.97) !important;
+
+    box-shadow:
+        0 5px 16px rgba(20,40,55,.13) !important;
+
+    font-size:9px !important;
+
+    line-height:1.35;
+}
+
+.legend-title{
+    margin-bottom:3px;
+
+    color:#203F55 !important;
+
+    font-size:11px !important;
+
+    font-weight:900 !important;
+}
+
+.legend-method{
+    margin-bottom:8px;
+
+    color:#788592;
+
+    font-size:8.5px;
+
+    line-height:1.3;
+}
+
+.legend-subtitle{
+    margin:6px 0 5px;
+
+    color:#334155;
+
+    font-weight:800;
+}
+
+.legend-row{
+    display:flex;
+
+    align-items:center;
+
+    min-height:19px;
+
+    gap:7px;
+}
+
+.legend-row i{
+    width:18px;
+
+    height:12px;
+
+    flex:0 0 18px;
+
+    border:1px solid rgba(0,0,0,.10);
+
+    border-radius:3px;
+}
+
+.legend-divider{
+    height:1px;
+
+    margin:7px 0;
+
+    background:#e3e7eb;
+}
+
+.legend-red-dot{
+    width:8px!important;
+
+    height:8px!important;
+
+    flex:0 0 8px!important;
+
+    border-radius:50%;
+
+    background:#E00000;
+
+    border:2px solid #fff!important;
+
+    box-shadow:
+        0 0 0 1px #E00000;
+}
+
+.legend-no-data{
+    width:18px;
+
+    height:12px;
+
+    flex:0 0 18px;
+
+    border-radius:3px;
+
+    background:#DCE3E8;
+
+    border:1px solid #AAB5BD;
+}
+
+/* ======================================================
+   RIGHT PANEL
+   ====================================================== */
 
 .panel{
-    min-width:0;
-    min-height:0;
+    background:#fff !important;
 
-    height:100%;
+    border-left:1px solid #D6E1E8 !important;
 
-    background:#FFFFFF !important;
-
-    border-left:
-        1px solid #D7E1E7 !important;
-
-    overflow:hidden;
+    overflow:auto;
 }
 
-
-/* Đầu panel */
-
 .panel-head{
-    height:76px !important;
-
-    padding:
-        13px 14px 11px !important;
+    padding:13px 14px 12px !important;
 
     background:
         linear-gradient(
             180deg,
-            #F7FAFC 0%,
-            #FFFFFF 100%
+            #F8FBFD,
+            #FFFFFF
         ) !important;
 
-    border-bottom:
-        1px solid #E0E7EC !important;
+    border-bottom:1px solid #DCE5EA !important;
 }
 
 .panel-kicker{
     display:block;
 
-    margin-bottom:4px !important;
+    margin-bottom:5px !important;
 
-    color:#718392 !important;
+    color:#708492 !important;
 
     font-size:8px !important;
 
-    line-height:11px;
+    line-height:11px !important;
 
-    font-weight:800 !important;
+    font-weight:850 !important;
 
-    letter-spacing:.7px;
+    letter-spacing:.75px !important;
 }
 
 .panel h2{
-    margin:0 !important;
+    margin:0;
 
-    color:#18384F !important;
+    color:#163B57 !important;
 
-    font-size:17px !important;
+    font-size:20px !important;
 
-    line-height:21px !important;
+    line-height:24px !important;
 
-    font-weight:800 !important;
-
-    white-space:normal !important;
-
-    overflow:visible !important;
-
-    text-overflow:clip !important;
+    font-weight:900 !important;
 }
-
-
-/* =========================================================
-   14. NỘI DUNG PANEL
-   ========================================================= */
 
 #info-panel{
-    width:100%;
-
-    height:
-        calc(100% - 76px) !important;
-
-    padding:
-        12px !important;
-
-    overflow-y:auto;
-
-    overflow-x:hidden;
-
-    scrollbar-width:thin;
-
-    scrollbar-color:
-        #B8C6D0 transparent;
+    padding:14px;
 }
 
-
-/* Tên xã */
-
-.info-block{
-    margin-bottom:12px !important;
-}
-
-.info-district{
-    color:#173B56 !important;
-
-    font-size:17px !important;
-
-    line-height:21px !important;
-
-    font-weight:800 !important;
-}
-
-.info-layer{
-    margin-top:3px !important;
-
-    color:#788794 !important;
-
-    font-size:9px !important;
-
-    line-height:13px !important;
-}
-
-
-/* =========================================================
-   15. CÁC NHÓM THÔNG TIN
-   ========================================================= */
-
-.info-section{
-    margin-bottom:10px !important;
-
-    padding:0 0 9px !important;
-
-    border-bottom:
-        1px solid #E5EBEF !important;
-}
-
-.info-section:last-child{
-    border-bottom:0 !important;
-}
-
-.info-section-title{
-    margin:
-        0 0 6px !important;
-
-    padding-left:8px;
-
-    color:#294B61 !important;
-
-    font-size:10.5px !important;
-
-    line-height:15px !important;
-
-    font-weight:800 !important;
-
-    border-left:
-        3px solid #5C8AA5;
-}
-
-
-/* =========================================================
-   16. BẢNG THÔNG TIN
-   ========================================================= */
-
-.info-table{
-    width:100%;
-
-    margin:0 !important;
-
-    overflow:hidden;
-
-    border:
-        1px solid #E1E7EB !important;
-
-    border-radius:8px !important;
-
-    background:#FFFFFF;
-}
-
-.info-row{
-    min-height:28px !important;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:space-between;
-
-    gap:8px;
-
-    padding:
-        6px 8px !important;
-
-    border-bottom:
-        1px solid #EDF0F2 !important;
-
-    font-size:9px !important;
-
-    line-height:13px !important;
-}
-
-.info-row:last-child{
-    border-bottom:0;
-}
-
-.info-row span{
-    min-width:0;
-
-    color:#71808D !important;
-
-    white-space:normal !important;
-}
-
-.info-row b{
-    min-width:0;
-
-    color:#263844 !important;
-
-    text-align:right;
-
-    white-space:normal !important;
-
-    overflow-wrap:anywhere;
-}
-
-
-/* =========================================================
-   17. PANEL TRỐNG
-   ========================================================= */
+/* ======================================================
+   PANEL NỘI DUNG
+   ====================================================== */
 
 .empty-panel{
-    min-height:190px !important;
+    min-height:180px;
 
     display:flex;
 
@@ -1207,165 +866,205 @@ button,input,select{font:inherit}
 
     justify-content:center;
 
-    margin:
-        18px 2px !important;
-
-    padding:
-        24px 14px !important;
-
-    border:
-        1px dashed #D4DFE6 !important;
-
-    border-radius:11px !important;
-
-    background:#FAFCFD !important;
-
     text-align:center;
 
-    color:#7C8A95 !important;
+    color:#7a8792;
+
+    font-size:12px;
 }
 
 .empty-panel i{
-    margin-bottom:9px;
-
-    color:#9BAAB5;
+    margin-bottom:10px;
 
     font-size:22px;
+
+    color:#a6b1ba;
 }
 
-.empty-panel p{
-    max-width:210px;
-
-    margin:0;
-
-    font-size:10px;
-
-    line-height:1.55;
+.info-block{
+    margin-bottom:13px !important;
 }
 
+.info-district{
+    color:#173C58 !important;
 
-/* =========================================================
-   18. LEGEND
-   ========================================================= */
+    font-size:19px !important;
 
-.legend{
-    width:205px !important;
+    line-height:23px !important;
 
-    max-width:205px !important;
-
-    padding:
-        10px 11px !important;
-
-    background:
-        rgba(255,255,255,.96) !important;
-
-    border:
-        1px solid #D9E2E8 !important;
-
-    border-radius:10px !important;
-
-    box-shadow:
-        0 5px 16px rgba(20,35,50,.12) !important;
-
-    color:#31424F !important;
-
-    font-size:9px !important;
-
-    line-height:1.35 !important;
+    font-weight:900 !important;
 }
 
-.legend-title{
-    font-size:11px !important;
+.info-layer{
+    margin-top:3px !important;
+
+    color:#7A8B97 !important;
+
+    font-size:10px !important;
+
+    line-height:14px !important;
+}
+
+/* ======================================================
+   CÁC NHÓM THÔNG TIN
+   ====================================================== */
+
+.info-section{
+    margin-bottom:10px !important;
+
+    padding:0 0 10px !important;
+
+    border-bottom:1px solid #E5EBEF !important;
+}
+
+.info-section-title{
+    margin:0 0 6px !important;
+
+    padding-left:8px !important;
+
+    color:#2B4D63 !important;
+
+    font-size:12px !important;
+
+    line-height:16px !important;
+
+    font-weight:900 !important;
+
+    border-left:3px solid #4D86A8 !important;
+}
+
+/* ======================================================
+   DÒNG SỐ LIỆU
+   ====================================================== */
+
+.info-table{
+    margin-top:12px;
+
+    border:1px solid #e0e6eb;
+
+    border-radius:10px;
+
+    overflow:hidden;
+}
+
+.info-row{
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:flex-start;
+
+    min-height:30px !important;
+
+    padding:7px 9px !important;
+
+    gap:10px !important;
+
+    border-bottom:1px solid #E7EBEF;
+
+    font-size:10.5px !important;
+
+    line-height:14px !important;
+}
+
+.info-row:last-child{
+    border-bottom:0;
+}
+
+.info-row span{
+    flex:1 1 45%;
+
+    color:#657783 !important;
+
+    white-space:normal !important;
+
+    overflow-wrap:anywhere;
+}
+
+.info-row b{
+    flex:1 1 55%;
+
+    color:#203847 !important;
+
+    font-size:10.5px !important;
 
     font-weight:800 !important;
 
-    color:#233E50 !important;
+    text-align:right !important;
+
+    white-space:normal !important;
+
+    overflow-wrap:anywhere;
 }
 
-.legend-method{
-    margin-bottom:5px !important;
+/* ======================================================
+   MAP EXPORT TITLE
+   ====================================================== */
 
-    color:#82909A !important;
+.map-export-title{
+    margin-left:38px;
 
-    font-size:8px !important;
+    margin-top:2px;
+
+    padding:8px 10px;
+
+    border-radius:9px;
+
+    background:rgba(255,255,255,.95);
+
+    box-shadow:
+        0 3px 12px rgba(20,35,50,.12);
+
+    pointer-events:none;
 }
 
-.legend-row{
-    min-height:18px !important;
+.map-export-title div{
+    font-size:12px;
 
-    gap:6px !important;
+    font-weight:800;
 }
 
-.legend-row i{
-    width:17px !important;
-    height:12px !important;
+.map-export-title span{
+    display:block;
 
-    flex:0 0 17px !important;
+    margin-top:2px;
 
-    border-radius:3px !important;
+    font-size:8px;
+
+    color:#778491;
 }
 
-.legend-no-data{
-    width:17px !important;
-    height:12px !important;
+/* ======================================================
+   FULLSCREEN
+   ====================================================== */
 
-    flex:0 0 17px !important;
+.main-map:fullscreen{
+    width:100vw;
 
-    border-radius:3px !important;
+    height:100vh;
 }
 
-
-/* =========================================================
-   19. THANH CUỘN
-   ========================================================= */
-
-.sidebar::-webkit-scrollbar,
-#info-panel::-webkit-scrollbar{
-    width:5px;
+.main-map:fullscreen #map{
+    height:100vh;
 }
 
-.sidebar::-webkit-scrollbar-track,
-#info-panel::-webkit-scrollbar-track{
-    background:transparent;
+/* ======================================================
+   EXPORT
+   ====================================================== */
+
+.export-hide{
+    display:none!important;
 }
 
-.sidebar::-webkit-scrollbar-thumb,
-#info-panel::-webkit-scrollbar-thumb{
-    background:#B8C5CE;
+/* ======================================================
+   RESPONSIVE
+   ====================================================== */
 
-    border-radius:8px;
-}
+@media(max-width:1400px){
 
-.sidebar::-webkit-scrollbar-thumb:hover,
-#info-panel::-webkit-scrollbar-thumb:hover{
-    background:#9DADB8;
-}
-
-
-/* =========================================================
-   20. RESPONSIVE
-   ========================================================= */
-
-@media(max-width:1100px){
-
-    .header{
+    .dashboard{
         grid-template-columns:
-            235px
-            minmax(300px,1fr)
-            330px !important;
-
-        gap:10px !important;
-
-        padding:
-            8px 12px !important;
-    }
-
-    .header h1{
-        font-size:18px !important;
-    }
-
-    .header-layer select{
-        width:175px !important;
+            repeat(4,minmax(0,1fr));
     }
 
     .webgis{
@@ -1376,34 +1075,41 @@ button,input,select{font:inherit}
     }
 }
 
+@media(max-width:1100px){
+
+    .webgis{
+        grid-template-columns:
+            220px
+            minmax(0,1fr)
+            220px !important;
+    }
+
+    .header h1{
+        font-size:19px !important;
+    }
+
+    .dashboard{
+        grid-template-columns:
+            repeat(4,minmax(0,1fr));
+    }
+}
 
 @media(max-width:700px){
 
     .header{
+        min-height:70px !important;
+
         height:auto !important;
 
-        min-height:90px !important;
+        flex-direction:column;
 
-        grid-template-columns:1fr !important;
-
-        gap:7px !important;
-
-        padding:
-            9px 12px !important;
+        align-items:flex-start;
     }
 
     .header h1{
+        font-size:18px !important;
+
         text-align:left;
-
-        white-space:normal;
-
-        font-size:17px !important;
-    }
-
-    .header-controls{
-        justify-content:flex-start;
-
-        flex-wrap:wrap;
     }
 
     .webgis{
@@ -1413,53 +1119,20 @@ button,input,select{font:inherit}
     }
 
     .sidebar{
-        order:1;
-
-        height:auto;
-
-        max-height:420px;
+        max-height:430px;
     }
 
     .main-map{
-        order:2;
-
         height:600px;
 
         min-height:600px;
     }
 
     .panel{
-        order:3;
-
         height:500px;
     }
 
-    .sidebar-kpi .summary-card{
-        min-height:0 !important;
-
-        height:auto !important;
-    }
-}
-
-
-@media(max-width:500px){
-
-    .sidebar-kpi{
-        gap:7px !important;
-    }
-
-    .map-actions{
-        gap:2px;
-    }
-
-    .map-action{
-        width:32px !important;
-        height:30px !important;
-    }
-
-    .legend{
-        width:185px !important;
-
-        max-width:185px !important;
+    .dashboard{
+        grid-template-columns:1fr;
     }
 }
