@@ -928,3 +928,58 @@ button,input,select{font:inherit}
     color:#087396;
     background:#d9f0f5;
 }
+/* ================================
+   TIÊU ĐỀ PANEL
+   ================================ */
+
+.panel-kicker{
+    display:flex;
+    align-items:center;
+    gap:7px;
+
+    color:#5f7382;
+    font-size:10px;
+    font-weight:850;
+    letter-spacing:.65px;
+    line-height:16px;
+}
+
+
+/* Ô chứa icon */
+
+.panel-kicker-icon{
+    width:24px;
+    height:24px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    flex:0 0 24px;
+
+    border-radius:7px;
+
+    background:#e5f0f6;
+    color:#17658b;
+
+    box-shadow:0 1px 3px rgba(20,45,65,.08);
+}
+
+.panel-kicker-icon i{
+    font-size:11px;
+}
+
+
+/* Tên xã */
+
+.panel h2{
+    margin:6px 0 0;
+
+    color:#173b56;
+
+    font-size:21px;
+    line-height:25px;
+
+    font-weight:900;
+    letter-spacing:-.2px;
+}
