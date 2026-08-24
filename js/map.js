@@ -1082,10 +1082,13 @@ function hasPanelData(type, row) {
             <div class="info-section">
 
                 <div class="info-section-title info-title-dtlcp">
+
     <span class="panel-section-icon">
-        <i class="fa-solid fa-pig"></i>
+        <i class="fa-solid fa-piggy-bank"></i>
     </span>
+
     <span>Dịch tả lợn Châu Phi</span>
+
 </div>
 
                 ${infoRows(dtlcpRows)}
