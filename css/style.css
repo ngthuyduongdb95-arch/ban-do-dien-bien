@@ -40,7 +40,7 @@ button,input,select{font:inherit}
 /* ================= MAIN 3-COLUMN LAYOUT ================= */
 .webgis{
   display:grid;
-  grid-template-columns:205px minmax(0,1fr) 315px;
+  grid-template-columns:205px minmax(0,1fr) 270px;
   width:100%;
   height:calc(100vh - 74px);
   min-height:0;
@@ -988,4 +988,33 @@ button,input,select{font:inherit}
 
     font-weight:900;
     letter-spacing:-.2px;
+}
+/* ================================
+   PANEL PHẢI - CHỮ DỄ ĐỌC
+================================ */
+
+.panel-kicker {
+    font-size: 11px;
+}
+
+#panel-title {
+    font-size: 21px;
+    font-weight: 850;
+}
+
+.info-section-title {
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.info-row {
+    font-size: 12px;
+}
+
+.info-row span {
+    font-size: 12px;
+}
+
+.info-row b {
+    font-size: 12px;
 }
