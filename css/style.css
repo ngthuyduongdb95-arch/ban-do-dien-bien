@@ -39,11 +39,16 @@ button,input,select{font:inherit}
 
 /* ================= MAIN 3-COLUMN LAYOUT ================= */
 .webgis{
-  display:grid;
-  grid-template-columns:205px minmax(0,1fr) 270px;
-  width:100%;
-  height:calc(100vh - 74px);
-  min-height:0;
+    width:100%;
+    display:grid;
+
+    grid-template-columns:
+        290px
+        minmax(0,1fr)
+        290px;
+
+    height:calc(100vh - 70px);
+    min-height:0;
 }
 
 /* ================= KPI SIDEBAR ================= */
