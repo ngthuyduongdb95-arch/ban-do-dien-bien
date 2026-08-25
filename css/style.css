@@ -43,7 +43,7 @@ button,input,select{font:inherit}
     display:grid;
 
     grid-template-columns:
-        290px
+        270px
         minmax(0,1fr)
         290px;
 
