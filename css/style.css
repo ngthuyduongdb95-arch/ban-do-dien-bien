@@ -1018,3 +1018,278 @@ button,input,select{font:inherit}
 .info-row b {
     font-size: 12px;
 }
+/* =========================================================
+   KPI SIDEBAR - GIAO DIỆN MỚI
+========================================================= */
+
+.sidebar{
+  min-width:0;
+  padding:10px 9px;
+  background:#f7f9fa;
+  border-right:1px solid var(--line);
+  overflow-y:auto;
+  overflow-x:hidden;
+}
+
+.sidebar-kpi{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  padding:2px 2px 12px;
+}
+
+
+/* =========================
+   CARD KPI
+========================= */
+
+.summary-card{
+  width:100%;
+  min-width:0;
+  min-height:100px;
+  height:100px;
+
+  padding:8px 9px;
+
+  border:1px solid #dfe5ea;
+  border-radius:11px;
+
+  background:#fff;
+
+  box-shadow:0 2px 8px rgba(20,35,50,.06);
+
+  overflow:visible;
+  box-sizing:border-box;
+
+  transition:
+    box-shadow .2s ease,
+    transform .2s ease;
+}
+
+.summary-card:hover{
+  box-shadow:0 5px 14px rgba(20,35,50,.11);
+  transform:translateY(-1px);
+}
+
+
+/* =========================
+   TIÊU ĐỀ KPI
+========================= */
+
+.summary-head{
+  display:flex;
+  align-items:center;
+  gap:7px;
+
+  min-height:25px;
+
+  margin:0;
+  padding:5px 7px;
+
+  border-radius:7px;
+  border-left:3px solid currentColor;
+
+  font-size:12px;
+  line-height:15px;
+  font-weight:900;
+
+  white-space:normal;
+  overflow:visible;
+
+  box-sizing:border-box;
+}
+
+.summary-head i{
+  flex:0 0 auto;
+  margin:0;
+
+  font-size:13px;
+}
+
+
+/* =========================
+   SỐ KPI
+========================= */
+
+.summary-main{
+  display:flex;
+  align-items:baseline;
+  flex-wrap:wrap;
+
+  gap:4px 5px;
+
+  margin:5px 0 4px;
+}
+
+.summary-main span{
+  font-size:25px;
+  line-height:28px;
+
+  font-weight:900;
+
+  white-space:nowrap;
+  color:#101820;
+}
+
+.summary-main small{
+  font-size:10px;
+  line-height:13px;
+
+  color:#687582;
+
+  white-space:normal;
+}
+
+
+/* =========================
+   THÔNG TIN PHỤ
+========================= */
+
+.summary-grid{
+  display:flex;
+  flex-direction:column;
+
+  gap:2px;
+
+  font-size:10px;
+  line-height:14px;
+
+  color:#687582;
+}
+
+.summary-grid span{
+  display:block;
+
+  white-space:normal;
+  overflow:visible;
+
+  text-overflow:clip;
+  overflow-wrap:anywhere;
+}
+
+.summary-grid b{
+  color:#27343f;
+  font-weight:850;
+}
+
+
+/* =========================================================
+   MÀU TỪNG KPI
+========================================================= */
+
+
+/* 🔴 DỊCH TẢ LỢN CHÂU PHI */
+
+.card-dtlcp{
+  border-top:3px solid #e53935;
+}
+
+.card-dtlcp .summary-head{
+  color:#c62828;
+  background:#fff0f0;
+}
+
+
+/* 🟢 CÚM GIA CẦM */
+
+.card-cgc{
+  border-top:3px solid #2e7d32;
+}
+
+.card-cgc .summary-head{
+  color:#137333;
+  background:#edf8ef;
+}
+
+
+/* 🔵 VIÊM DA NỔI CỤC */
+
+.card-vdnc{
+  border-top:3px solid #1976d2;
+}
+
+.card-vdnc .summary-head{
+  color:#1769e0;
+  background:#eef5ff;
+}
+
+
+/* 🟣 BỆNH DẠI */
+
+.card-dai{
+  border-top:3px solid #6a35d1;
+}
+
+.card-dai .summary-head{
+  color:#6a1b9a;
+  background:#f7effb;
+}
+
+
+/* 🟦 THỰC HIỆN THÁNG TVSKTTĐ */
+
+.card-phun{
+  border-top:3px solid #1597a3;
+}
+
+.card-phun .summary-head{
+  color:#007c83;
+  background:#eaf8f8;
+}
+
+
+/* 🟠 KIỂM SOÁT GIẾT MỔ */
+
+.card-ksgm{
+  border-top:3px solid #ef8b16;
+}
+
+.card-ksgm .summary-head{
+  color:#e56f00;
+  background:#fff3e5;
+}
+
+
+/* 🔵 CƠ SỞ BUÔN BÁN THUỐC THÚ Y */
+
+.card-drug{
+  border-top:3px solid #1683c4;
+}
+
+.card-drug .summary-head{
+  color:#1769e0;
+  background:#eef5ff;
+}
+
+
+/* =========================================================
+   SỐ KPI ĐỒNG BỘ THEO MÀU
+========================================================= */
+
+.card-dtlcp .summary-main span{
+  color:#c62828;
+}
+
+.card-cgc .summary-main span{
+  color:#137333;
+}
+
+.card-vdnc .summary-main span{
+  color:#1769e0;
+}
+
+.card-dai .summary-main span{
+  color:#6a1b9a;
+}
+
+.card-phun .summary-main span{
+  color:#007c83;
+}
+
+.card-ksgm .summary-main span{
+  color:#e56f00;
+}
+
+.card-drug .summary-main span{
+  color:#1769e0;
+}
