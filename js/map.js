@@ -64,14 +64,7 @@ const layerConfig = {
         status: "DAI_Trạng thái",
         outbreak: "DAI_Ổ dịch",
         unit: "con",
-        colors: [  "#F5F5F5", // 0 - Không có
-    "#00B4D8", // 1 con
-    "#2ECC71", // 2 con
-    "#FFD60A", // 3 con
-    "#F77F00", // 4–5 con
-    "#E63946", // 6–10 con
-    "#800F0F"  // >10 con
-] },
+        colors: [  ""#C6E2FF","#8CC5FF","#5AA6FF","#2F7DF6","#1558D6","#0A2E7D"] },
     PHUN: {
         name: "Phun khử trùng",
         field: "PHUN_Vòng",
@@ -129,11 +122,10 @@ let satelliteLayer = null;
 
 function addBaseLayers() {
     streetLayer = L.tileLayer(
-    "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+    "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
     {
-        attribution: "&copy; OpenStreetMap & CARTO",
-        subdomains: "abcd",
-        maxZoom: 20
+        attribution: "&copy; OpenStreetMap contributors",
+        maxZoom: 19
     }
 ).addTo(map);
 
