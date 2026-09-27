@@ -462,7 +462,7 @@ function getDiseaseStyle(row) {
     return {
         fillColor: "#75b2fa",
         fillOpacity: 0.62,
-        color: "#FFFFFF",
+        color: "#75b2fa",
         weight: 0.85
     };
     }
