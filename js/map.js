@@ -460,7 +460,7 @@ function getDiseaseStyle(row) {
 
     if (value <= 0) {
     return {
-        fillColor: "#F5F5F5",
+        fillColor: "#5aa3fa",
         fillOpacity: 0.62,
         color: "#FFFFFF",
         weight: 0.85
