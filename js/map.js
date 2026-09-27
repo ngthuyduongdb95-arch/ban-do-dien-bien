@@ -121,11 +121,13 @@ let streetLayer = null;
 let satelliteLayer = null;
 
 function addBaseLayers() {
-    streetLayer = L.tileLayer(STREET_URL, {
-        maxZoom: 19,
-        attribution: "&copy; OpenStreetMap &copy; CARTO",
-        subdomains: "abcd"
-    });
+    streetLayer = L.tileLayer(
+    "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+        attribution: "&copy; OpenStreetMap contributors",
+        maxZoom: 19
+    }
+).addTo(map);
 
     satelliteLayer = L.tileLayer(SATELLITE_URL, {
         maxZoom: 19,
