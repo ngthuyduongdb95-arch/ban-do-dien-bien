@@ -65,14 +65,7 @@ const layerConfig = {
     outbreak: "DAI_Ổ dịch",
     unit: "con",
 
-    colors: [
-        "#E9D5FF",
-        "#D4B5FF",
-        "#9B5DE5",
-        "#8E5CF6",
-        "#6A35D1",
-        "#4A148C"
-    ]
+    colors: ["#C6E2FF","#8CC5FF","#5AA6FF","#2F7DF6","#1558D6","#0A2E7D"]
 },
     PHUN: {
         name: "Phun khử trùng",
