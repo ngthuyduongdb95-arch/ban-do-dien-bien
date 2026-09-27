@@ -459,12 +459,12 @@ function getDiseaseStyle(row) {
     const value = num(row?.[cfg.field]);
 
     if (value <= 0) {
-        return {
-            fillColor: cfg.colors[0],
-            fillOpacity: 0.62,
-            color: "#FFFFFF",
-            weight: 0.85
-        };
+    return {
+        fillColor: "#F5F5F5",
+        fillOpacity: 0.62,
+        color: "#FFFFFF",
+        weight: 0.85
+    };
     }
 
     const ranges = damageRanges;
@@ -1545,8 +1545,8 @@ function updateLegend() {
                 </div>
 
                 <div class="legend-row">
-                    <i style="background:${cfg.colors[0]}"></i>
-                    <span>Xã không có dịch</span>
+                    <i style="background:#F5F5F5"></i>
+<span>Xã không có dịch</span>
                 </div>
             `;
 
