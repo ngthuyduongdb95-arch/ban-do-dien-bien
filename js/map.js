@@ -460,7 +460,7 @@ function getDiseaseStyle(row) {
 
     if (value <= 0) {
     return {
-        fillColor: "#5aa3fa",
+        fillColor: "#75b2fa",
         fillOpacity: 0.62,
         color: "#FFFFFF",
         weight: 0.85
@@ -1545,7 +1545,7 @@ function updateLegend() {
                 </div>
 
                 <div class="legend-row">
-                    <i style="background:#F5F5F5"></i>
+                    <i style="background:"#75b2fa"></i>
 <span>Xã không có dịch</span>
                 </div>
             `;
