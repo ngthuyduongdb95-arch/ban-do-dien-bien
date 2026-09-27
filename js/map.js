@@ -458,7 +458,7 @@ function getDiseaseStyle(row) {
     const cfg = layerConfig[currentLayer];
     const value = num(row?.[cfg.field]);
 
-    iif (value <= 0) {
+    if (value <= 0) {
     return {
         fillColor: "#B8C7D9",
         fillOpacity: 0.75,
