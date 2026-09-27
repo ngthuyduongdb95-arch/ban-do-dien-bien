@@ -458,11 +458,11 @@ function getDiseaseStyle(row) {
     const cfg = layerConfig[currentLayer];
     const value = num(row?.[cfg.field]);
 
-    if (value <= 0) {
+    iif (value <= 0) {
     return {
-        fillColor: "#75b2fa",
-        fillOpacity: 0.62,
-        color: "#75b2fa",
+        fillColor: "#B8C7D9",
+        fillOpacity: 0.75,
+        color: "#FFFFFF",
         weight: 0.85
     };
     }
@@ -1545,9 +1545,9 @@ function updateLegend() {
                 </div>
 
                 <div class="legend-row">
-                    <i style="background:"#75b2fa"></i>
-<span>Xã không có dịch</span>
-                </div>
+    <i style="background:#B8C7D9"></i>
+    <span>Xã không có dịch</span>
+</div>
             `;
 
             if (ranges.length) {
