@@ -57,29 +57,22 @@ const layerConfig = {
         unit: "con",
         colors: ["#C6E2FF","#8CC5FF","#5AA6FF","#2F7DF6","#1558D6","#0A2E7D"]
     },
-   DAI:{
+   DAI: {
+    name: "Bệnh Dại",
+    field: "DAI_Chết",
+    death: "DAI_Tiêu hủy",
+    status: "DAI_Trạng thái",
+    outbreak: "DAI_Ổ dịch",
+    unit: "con",
 
-    field:"DAI_Chết",
-
-    title:"Bệnh Dại",
-
-    unit:"con",
-
-    color:[
-        "#FFFFFF",  // 0 - không có dịch
-        "#0077B6",  // 1-2 con
-        "#00A878",  // 3-4 con
-        "#FFCC00",  // 5-6 con
-        "#FF7A00"   // >6 con
-    ],
-
-    breaks:[
-        0,
-        2,
-        4,
-        6
+    colors: [
+        "#E9D5FF",
+        "#D4B5FF",
+        "#9B5DE5",
+        "#8E5CF6",
+        "#6A35D1",
+        "#4A148C"
     ]
-
 },
     PHUN: {
         name: "Phun khử trùng",
