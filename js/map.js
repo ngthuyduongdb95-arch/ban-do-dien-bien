@@ -64,7 +64,14 @@ const layerConfig = {
         status: "DAI_Trạng thái",
         outbreak: "DAI_Ổ dịch",
         unit: "con",
-        colors: [ "#FFE45E","#5AA6FF","#FFA21A","#FF6A1A","#E6392E","#B71C1C"] },
+        colors: [  "#F5F5F5", // 0 - Không có
+    "#00B4D8", // 1 con
+    "#2ECC71", // 2 con
+    "#FFD60A", // 3 con
+    "#F77F00", // 4–5 con
+    "#E63946", // 6–10 con
+    "#800F0F"  // >10 con
+] },
     PHUN: {
         name: "Phun khử trùng",
         field: "PHUN_Vòng",
