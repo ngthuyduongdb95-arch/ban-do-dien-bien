@@ -394,6 +394,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -544,40 +546,127 @@
 
     <div class="chart-scroll">
 
+        <!-- 1. DIỄN BIẾN -->
         <div class="chart-card">
             <div class="chart-title">
                 📈 Diễn biến dịch bệnh
             </div>
+
+            <div class="chart-toolbar">
+                <button class="chart-filter active" data-chart="trend" data-period="10d">
+                    10 ngày
+                </button>
+                <button class="chart-filter" data-chart="trend" data-period="month">
+                    Theo tháng
+                </button>
+            </div>
+
             <div class="chart-body">
-                Biểu đồ diễn biến
+                <canvas id="chartTrend"></canvas>
             </div>
         </div>
 
+
+        <!-- 2. THIỆT HẠI THEO XÃ -->
         <div class="chart-card">
             <div class="chart-title">
                 📊 Thiệt hại theo xã
             </div>
+
             <div class="chart-body">
-                Biểu đồ thiệt hại
+                <canvas id="chartDamageXa"></canvas>
             </div>
         </div>
 
-        <div class="chart-card">
-            <div class="chart-title">
-                📊 So sánh các năm
-            </div>
-            <div class="chart-body">
-                Biểu đồ so sánh năm
-            </div>
-        </div>
 
+        <!-- 3. CƠ CẤU LOÀI -->
         <div class="chart-card">
             <div class="chart-title">
                 🥧 Cơ cấu loài
             </div>
+
             <div class="chart-body">
-                Biểu đồ cơ cấu
+                <canvas id="chartSpecies"></canvas>
             </div>
+        </div>
+
+
+        <!-- 4. TIÊU HỦY THEO THÁNG - TOÀN TỈNH -->
+        <div class="chart-card">
+            <div class="chart-title">
+                📊 Tiêu hủy theo tháng – toàn tỉnh
+            </div>
+
+            <div class="chart-body">
+                <canvas id="chartDisposalMonth"></canvas>
+            </div>
+        </div>
+
+
+        <!-- 5. SO SÁNH CÙNG KỲ -->
+        <div class="chart-card comparison-card">
+
+            <div class="chart-title">
+                📋 So sánh cùng kỳ – tỉnh Điện Biên
+            </div>
+
+            <div class="comparison-subtitle">
+                Cùng kỳ từ 01/01 đến ngày cập nhật hiện tại
+            </div>
+
+            <div class="comparison-table-wrap">
+
+                <table class="comparison-table">
+
+                    <thead>
+                        <tr>
+                            <th>Chỉ tiêu so sánh</th>
+                            <th id="comparisonYearPrev">
+                                01/01–02/10/2025
+                            </th>
+                            <th id="comparisonYearCurrent">
+                                01/01–02/10/2026
+                            </th>
+                            <th>Thay đổi (%)</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>Số xã/phường có dịch</td>
+                            <td id="cmpXaPrev">–</td>
+                            <td id="cmpXaCurrent">–</td>
+                            <td id="cmpXaChange">–</td>
+                        </tr>
+
+                        <tr>
+                            <td>Số ổ dịch</td>
+                            <td id="cmpODPrev">–</td>
+                            <td id="cmpODCurrent">–</td>
+                            <td id="cmpODChange">–</td>
+                        </tr>
+
+                        <tr>
+                            <td>Số mắc bệnh</td>
+                            <td id="cmpMacPrev">–</td>
+                            <td id="cmpMacCurrent">–</td>
+                            <td id="cmpMacChange">–</td>
+                        </tr>
+
+                        <tr>
+                            <td>Tổng chết, tiêu hủy</td>
+                            <td id="cmpTieuHuyPrev">–</td>
+                            <td id="cmpTieuHuyCurrent">–</td>
+                            <td id="cmpTieuHuyChange">–</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
         </div>
 
     </div>
