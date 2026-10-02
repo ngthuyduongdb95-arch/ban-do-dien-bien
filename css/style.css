@@ -47,7 +47,7 @@ button,input,select{font:inherit}
         minmax(0,1fr)
         290px;
 
-    height:75vh;
+    height:calc(75vh - 18px);
     min-height:0;
 }
 
