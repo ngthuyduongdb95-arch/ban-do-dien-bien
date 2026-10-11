@@ -1,0 +1,165 @@
+
+document.addEventListener("DOMContentLoaded", function () {
+    const type = document.getElementById("reportType");
+    const year = document.getElementById("reportYear");
+    const month = document.getElementById("reportMonth");
+    const quarter = document.getElementById("reportQuarter");
+    const date = document.getElementById("reportDate");
+    const display = document.getElementById("reportPeriodDisplay");
+    const copyButton = document.getElementById("copyReportPeriod");
+
+    if (!type || !year || !month || !quarter || !date || !display) {
+        console.warn("Chưa có đầy đủ phần tử báo cáo trong index.html.");
+        return;
+    }
+
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const pad = n => String(n).padStart(2, "0");
+
+    function dateString(d) {
+        return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+    }
+
+    function localInputDate(d) {
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    }
+
+    function makeDate(y, m, d) {
+        return new Date(y, m - 1, d);
+    }
+
+    function endOfMonth(y, m) {
+        return new Date(y, m, 0).getDate();
+    }
+
+    // Khởi tạo danh sách năm
+    for (let y = currentYear - 5; y <= currentYear + 1; y++) {
+        const option = document.createElement("option");
+        option.value = y;
+        option.textContent = y;
+        year.appendChild(option);
+    }
+    year.value = currentYear;
+
+    // Khởi tạo danh sách tháng
+    for (let m = 1; m <= 12; m++) {
+        const option = document.createElement("option");
+        option.value = m;
+        option.textContent = `Tháng ${m}`;
+        month.appendChild(option);
+    }
+    month.value = today.getMonth() + 1;
+    date.value = localInputDate(today);
+
+    function getPeriod() {
+        const y = Number(year.value);
+        const m = Number(month.value);
+        const q = Number(quarter.value);
+        const selectedDate = date.value
+            ? new Date(date.value + "T12:00:00")
+            : today;
+
+        let start;
+        let end;
+
+        switch (type.value) {
+            case "KY4":
+                start = makeDate(y, m - 1, 25);
+                end = makeDate(y, m, 4);
+                break;
+
+            case "KY14":
+                start = makeDate(y, m, 5);
+                end = makeDate(y, m, 14);
+                break;
+
+            case "KY24":
+                start = makeDate(y, m, 15);
+                end = makeDate(y, m, 24);
+                break;
+
+            case "MONTH":
+                start = makeDate(y, m - 1, 15);
+                end = makeDate(y, m, 14);
+                break;
+
+            case "QUARTER": {
+                const firstMonth = (q - 1) * 3 + 1;
+                const lastMonth = firstMonth + 2;
+                start = makeDate(y, firstMonth - 1, 15);
+                end = makeDate(y, lastMonth, 14);
+                break;
+            }
+
+            case "YEAR":
+                start = makeDate(y - 1, 12, 15);
+                end = makeDate(y, 12, 14);
+                break;
+
+            case "YTD":
+                start = makeDate(y, 1, 1);
+                end = selectedDate;
+                break;
+
+            default:
+                start = makeDate(y, m, 1);
+                end = makeDate(y, m, endOfMonth(y, m));
+        }
+
+        const valid = start && end && start <= end;
+        return valid ? { start, end } : null;
+    }
+
+    function updatePeriod() {
+        const period = getPeriod();
+
+        if (!period) {
+            display.textContent = "Khoảng thời gian không hợp lệ.";
+            return;
+        }
+
+        display.textContent =
+            `Thời gian báo cáo: ${dateString(period.start)} đến ${dateString(period.end)}`;
+    }
+
+    [type, year, month, quarter, date].forEach(element => {
+        element.addEventListener("change", updatePeriod);
+    });
+
+    if (copyButton) {
+        copyButton.addEventListener("click", async function () {
+            const period = getPeriod();
+            if (!period) return;
+
+            const text =
+                `${dateString(period.start)} đến ${dateString(period.end)}`;
+
+            try {
+                await navigator.clipboard.writeText(text);
+                copyButton.textContent = "Đã sao chép!";
+                setTimeout(() => {
+                    copyButton.innerHTML =
+                        '<i class="fa-solid fa-copy"></i> Sao chép khoảng ngày';
+                }, 1500);
+            } catch (error) {
+                window.prompt("Sao chép khoảng thời gian này:", text);
+            }
+        });
+    }
+
+    // Chưa kết nối máy chủ tạo báo cáo Word.
+    const generateButton = document.getElementById("generateReport");
+    if (generateButton) {
+        generateButton.disabled = true;
+        generateButton.title =
+            "Cần kết nối dữ liệu lịch sử và chức năng tạo báo cáo Word.";
+    }
+
+    window.WEBGISReportPeriod = {
+        getPeriod,
+        formatDate: dateString
+    };
+
+    updatePeriod();
+});
