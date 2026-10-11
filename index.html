@@ -842,7 +842,7 @@ button,input,select{font:inherit}
 
 .panel-section-icon i {
     line-height: 1;
-}}
+}
 
 .panel-section-icon i{
     font-size:12px;
@@ -1525,7 +1525,25 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
         </button>
     </div>
 </header>
-
+<section class="report-section">
+    <h2>BÁO CÁO ĐỊNH KỲ</h2>
+    <div class="report-controls">
+        <label>
+            Từ ngày
+            <input type="date" id="reportStartDate">
+        </label>
+        <label>
+            Đến ngày
+            <input type="date" id="reportEndDate">
+        </label>
+        <button type="button" id="btnCreateReport">
+            <i class="fa-solid fa-file-lines"></i> Tạo báo cáo
+        </button>
+        <button type="button" id="btnPrintReport">
+            <i class="fa-solid fa-print"></i> In / lưu PDF
+        </button>
+    </div>
+</section>
 <div class="webgis">
     <aside class="sidebar" aria-label="Tổng quan số liệu">
         <div class="sidebar-kpi">
