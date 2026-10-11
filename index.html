@@ -427,9 +427,77 @@
             <i class="fa-solid fa-location-crosshairs"></i>
         </button>
     </div>
+
 </header>
 
+<!-- KHU VỰC BÁO CÁO ĐỊNH KỲ -->
+<section id="reportSection" class="report-section">
+    <div class="report-heading">
+        <i class="fa-solid fa-file-lines"></i>
+        <h2>BÁO CÁO TÌNH HÌNH DỊCH BỆNH ĐỘNG VẬT</h2>
+    </div>
+
+    <div class="report-controls">
+        <div class="report-field">
+            <label for="reportType">Loại báo cáo</label>
+            <select id="reportType">
+                <option value="KY4">Kỳ 4 ngày</option>
+                <option value="KY14">Kỳ 14 ngày</option>
+                <option value="KY24">Kỳ 24 ngày</option>
+                <option value="MONTH">Báo cáo tháng</option>
+                <option value="QUARTER">Báo cáo quý</option>
+                <option value="YEAR">Báo cáo năm</option>
+                <option value="YTD">Từ đầu năm đến ngày chọn</option>
+            </select>
+        </div>
+
+        <div class="report-field">
+            <label for="reportYear">Năm báo cáo</label>
+            <select id="reportYear"></select>
+        </div>
+
+        <div class="report-field">
+            <label for="reportMonth">Tháng báo cáo</label>
+            <select id="reportMonth"></select>
+        </div>
+
+        <div class="report-field">
+            <label for="reportQuarter">Quý báo cáo</label>
+            <select id="reportQuarter">
+                <option value="1">Quý I</option>
+                <option value="2">Quý II</option>
+                <option value="3">Quý III</option>
+                <option value="4">Quý IV</option>
+            </select>
+        </div>
+
+        <div class="report-field">
+            <label for="reportDate">Ngày kết thúc</label>
+            <input type="date" id="reportDate">
+        </div>
+    </div>
+
+    <div id="reportPeriodDisplay" class="report-period">
+        Khoảng thời gian báo cáo sẽ hiển thị tại đây.
+    </div>
+
+    <div class="report-actions">
+        <button id="copyReportPeriod" type="button">
+            <i class="fa-solid fa-copy"></i> Sao chép khoảng ngày
+        </button>
+
+        <button id="generateReport" type="button" disabled>
+            <i class="fa-solid fa-file-word"></i> Tạo báo cáo Word
+        </button>
+    </div>
+
+    <p class="report-note">
+        Chức năng xuất Word cần được kết nối với hệ thống xử lý và dữ liệu lịch sử.
+    </p>
+</section>
+
 <div class="webgis">
+
     <aside class="sidebar" aria-label="Tổng quan số liệu">
         <div class="sidebar-kpi">
             <div class="summary-card card-dtlcp">
