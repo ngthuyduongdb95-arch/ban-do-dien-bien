@@ -1793,5 +1793,86 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
 <script src="js/dashboard.js"></script>
 <script src="js/map.js"></script>
 <script src="js/app.js"></script>
+    <script>
+document.addEventListener("DOMContentLoaded", function () {
+    const start = document.getElementById("reportStartDate");
+    const end = document.getElementById("reportEndDate");
+    const createBtn = document.getElementById("btnCreateReport");
+    const printBtn = document.getElementById("btnPrintReport");
+
+    if (printBtn) {
+        printBtn.addEventListener("click", function () {
+            window.print();
+        });
+    }
+
+    if (createBtn) {
+        createBtn.addEventListener("click", function () {
+            const rows = typeof window.getRows === "function"
+                ? window.getRows()
+                : [];
+
+            if (!rows.length) {
+                alert("Chưa tải được dữ liệu Google Sheets.");
+                return;
+            }
+
+            const from = start?.value || "";
+            const to = end?.value || "";
+
+            if (from && to && from > to) {
+                alert("Ngày bắt đầu không được sau ngày kết thúc.");
+                return;
+            }
+
+            const report = window.open("", "_blank");
+            if (!report) {
+                alert("Trình duyệt đã chặn cửa sổ báo cáo. Hãy cho phép cửa sổ bật lên.");
+                return;
+            }
+
+            const escapeHtml = value => String(value ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;");
+
+            const columns = Object.keys(rows[0]);
+
+            report.document.write(`
+                <!DOCTYPE html>
+                <html lang="vi">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Báo cáo định kỳ - WEBGIS Điện Biên</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 25px; color: #222; }
+                        h2, p { text-align: center; }
+                        table { border-collapse: collapse; width: 100%; font-size: 11px; }
+                        th, td { border: 1px solid #bbb; padding: 5px; text-align: left; }
+                        th { background: #eaf1f8; }
+                        @media print { body { margin: 10mm; } }
+                    </style>
+                </head>
+                <body>
+                    <h2>BÁO CÁO DỮ LIỆU QUẢN LÝ THÚ Y</h2>
+                    <p>Tỉnh Điện Biên</p>
+                    <p>Kỳ báo cáo: ${escapeHtml(from || "Chưa chọn")} đến ${escapeHtml(to || "Chưa chọn")}</p>
+                    <p>Số dòng dữ liệu: ${rows.length}</p>
+                    <table>
+                        <thead><tr>${columns.map(c => `<th>${escapeHtml(c)}</th>`).join("")}</tr></thead>
+                        <tbody>
+                            ${rows.map(row => `<tr>${columns.map(c => `<td>${escapeHtml(row[c])}</td>`).join("")}</tr>`).join("")}
+                        </tbody>
+                    </table>
+                    <script>window.onload = function () { window.focus(); }<\/script>
+                </body>
+                </html>
+            `);
+            report.document.close();
+        });
+    }
+});
+</script>
 </body>
 </html>
