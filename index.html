@@ -1493,6 +1493,40 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
  .chart-scroll { height:290px; }
 }
 
+
+/* Màn hình vừa: thu gọn khoảng cách */
+@media (max-width: 1100px) {
+    .report-section {
+        gap: 14px;
+        padding: 12px;
+    }
+
+    .report-controls {
+        gap: 8px;
+    }
+
+    .report-controls input[type="date"] {
+        width: 135px;
+        min-width: 125px;
+    }
+
+    .report-controls button {
+        padding: 0 10px;
+    }
+}
+
+/* Màn hình nhỏ: cho phép cuộn ngang để không vỡ bố cục */
+@media (max-width: 760px) {
+    .report-section {
+        justify-content: flex-start;
+        overflow-x: auto;
+    }
+
+    .report-controls {
+        flex: 0 0 auto;
+    }
+}
+
 </style>
 </head>
 <body>
