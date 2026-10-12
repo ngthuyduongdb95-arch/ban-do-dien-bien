@@ -10,6 +10,19 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+// Dự phòng khi CDN chính không tải được Chart.js
+(function(){
+  function loadFallback(){
+    if(window.Chart) return;
+    var s=document.createElement('script');
+    s.src='https://unpkg.com/chart.js@4.4.4/dist/chart.umd.min.js';
+    s.onerror=function(){console.error('Không tải được Chart.js từ cả hai CDN.');};
+    document.head.appendChild(s);
+  }
+  if(!window.Chart) window.addEventListener('load',function(){ if(!window.Chart) loadFallback(); });
+})();
+</script>
 
     <style>
 :root{
@@ -1466,14 +1479,14 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
 }
 .panel-head { border-radius:9px 9px 0 0; }
 .chart-section {
-  height:auto; min-height:250px; overflow:visible; margin-top:4px;
-  padding:10px 12px 16px; background:#f7f8fa;
+  display:block !important; width:100%; height:auto; min-height:340px; overflow:visible; margin-top:8px;
+  padding:10px 12px 16px; background:#f7f8fa; box-sizing:border-box;
 }
 .chart-section::before {
   content:'BIỂU ĐỒ VÀ BẢNG SỐ LIỆU'; display:block; font-weight:800;
   font-size:15px; margin:0 0 8px 2px; color:#17212b;
 }
-.chart-scroll { height:310px; min-height:280px; overflow-x:auto; overflow-y:hidden; }
+.chart-scroll { display:flex !important; width:100%; height:330px; min-height:330px; overflow-x:auto; overflow-y:hidden; align-items:stretch; }
 @media (max-width:1100px) {
  .sidebar-kpi { grid-template-columns:repeat(4,minmax(0,1fr)); }
  .webgis { grid-template-columns:minmax(0,1.15fr) minmax(260px,.85fr); }
@@ -1611,7 +1624,7 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
 
 
 /* Biểu đồ: giữ thanh cuộn ngang như giao diện ban đầu */
-.chart-card { flex:0 0 420px; min-width:420px; }
+.chart-card { display:flex; flex-direction:column; flex:0 0 420px; min-width:420px; height:310px; min-height:310px; }
 .chart-card-head { display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:28px; }
 .chart-card-head .chart-title { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; }
 .chart-download { flex:0 0 auto; border:1px solid #d6e0e8; border-radius:5px; padding:3px 7px; background:#f5f8fb; color:#2457a7; font-size:10px; line-height:1.2; cursor:pointer; }
@@ -1620,8 +1633,8 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
 .chart-filter { border:1px solid #d6e0e8; background:#fff; color:#536273; border-radius:5px; padding:4px 8px; font-size:10px; cursor:pointer; }
 .chart-filter.active { background:#2457a7; color:#fff; border-color:#2457a7; }
 .chart-legend-note { font-size:10px; color:#687785; line-height:1.3; min-height:15px; padding:0 2px 4px; }
-.chart-card:not(.comparison-card) .chart-body { height:calc(100% - 78px); min-height:175px; padding:4px; box-sizing:border-box; }
-.chart-card:not(.comparison-card) .chart-body canvas { width:100% !important; height:100% !important; }
+.chart-card:not(.comparison-card) .chart-body { position:relative; flex:1 1 auto; height:220px; min-height:220px; padding:4px; box-sizing:border-box; }
+.chart-card:not(.comparison-card) .chart-body canvas { display:block !important; width:100% !important; height:100% !important; max-width:100%; }
 .comparison-card { flex-basis:520px; min-width:520px; }
 .comparison-card .comparison-table-wrap { max-height:220px; overflow:auto; }
 @media (max-width:760px) { .chart-card { flex-basis:340px; min-width:340px; } .comparison-card { flex-basis:420px; min-width:420px; } }
@@ -1669,7 +1682,7 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
             <input type="date" id="reportEndDate">
         </label>
         <button type="button" id="btnCreateReport">
-            <i class="fa-solid fa-file-lines"></i> Tạo báo cáo
+            <i class="fa-solid fa-file-word"></i> Tải báo cáo Word (.docx)
         </button>
         <button type="button" id="btnPrintReport">
             <i class="fa-solid fa-print"></i> In / lưu PDF
@@ -1819,9 +1832,9 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
     <div class="chart-card">
       <div class="chart-card-head">
         <div class="chart-title">🥧 Cơ cấu loài</div>
-        <button class="chart-download" type="button" data-download-chart="chartSpecies" title="Tải biểu đồ PNG" aria-label="Tải biểu đồ cơ cấu loài">↓ Tải</button>
+        <button class="chart-download" type="button" data-download-chart="chartSpecies" title="Tải biểu đồ PNG" aria-label="Tải biểu đồ trạng thái dịch">↓ Tải</button>
       </div>
-      <div class="chart-legend-note" id="speciesNote">Cơ cấu số con theo loài vật nuôi trong dữ liệu nguồn</div>
+      <div class="chart-legend-note" id="speciesNote">Cơ cấu trạng thái dịch tại các xã/phường</div>
       <div class="chart-body"><canvas id="chartSpecies"></canvas></div>
     </div>
 
@@ -1852,85 +1865,127 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
 <script src="js/dashboard.js"></script>
 <script src="js/map.js"></script>
 <script src="js/app.js"></script>
-    <script>
+    <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+<script>
 document.addEventListener("DOMContentLoaded", function () {
-    const start = document.getElementById("reportStartDate");
-    const end = document.getElementById("reportEndDate");
-    const createBtn = document.getElementById("btnCreateReport");
-    const printBtn = document.getElementById("btnPrintReport");
+  const startInput = document.getElementById("reportStartDate");
+  const endInput = document.getElementById("reportEndDate");
+  const createBtn = document.getElementById("btnCreateReport");
+  const printBtn = document.getElementById("btnPrintReport");
 
-    if (printBtn) {
-        printBtn.addEventListener("click", function () {
-            window.print();
-        });
+  const norm = v => String(v ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g,"d").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
+  const fmt = n => Number(n || 0).toLocaleString("vi-VN");
+  const pick = (row, candidates) => {
+    const keys = Object.keys(row || {});
+    for (const c of candidates) {
+      if (row[c] !== undefined && row[c] !== null && row[c] !== "") return row[c];
+      const hit = keys.find(k => norm(k) === norm(c));
+      if (hit && row[hit] !== undefined && row[hit] !== null && row[hit] !== "") return row[hit];
     }
+    return "";
+  };
+  const number = v => {
+    if (typeof v === "number") return Number.isFinite(v) ? v : 0;
+    const s = String(v ?? "").replace(/\s/g,"").replace(/\.(?=\d{3}(\D|$))/g,"").replace(/,/g,".").replace(/[^\d.-]/g,"");
+    const n = Number(s); return Number.isFinite(n) ? n : 0;
+  };
+  const parseDate = v => {
+    if (!v) return null;
+    if (v instanceof Date && !isNaN(v)) return v;
+    const s = String(v).trim();
+    let m = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
+    if (m) { const d = new Date(+m[3], +m[2]-1, +m[1]); return isNaN(d) ? null : d; }
+    m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (m) { const d = new Date(+m[1], +m[2]-1, +m[3]); return isNaN(d) ? null : d; }
+    const d = new Date(s); return isNaN(d) ? null : d;
+  };
+  const dateOf = row => parseDate(pick(row,["Ngày phát hiện","Ngày xảy ra","Ngày ghi nhận","Ngày cập nhật","Ngày báo cáo","Ngày","Thời gian","DTLCP_Ngày phát hiện","CGC_Ngày phát hiện","VDNC_Ngày phát hiện","DAI_Ngày phát hiện"]));
+  const layerName = () => {
+    const sel = document.getElementById("layerSelect");
+    return sel?.selectedOptions?.[0]?.textContent?.trim() || "Tình hình dịch bệnh động vật";
+  };
+  const layerCode = () => document.getElementById("layerSelect")?.value || "DTLCP";
+  const getRowsSafe = () => typeof window.getRows === "function" ? window.getRows().filter(Boolean) : (Array.isArray(window.sheetRows) ? window.sheetRows.filter(Boolean) : []);
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const dateText = d => d ? d.toLocaleDateString("vi-VN") : "chưa xác định";
 
-    if (createBtn) {
-        createBtn.addEventListener("click", function () {
-            const rows = typeof window.getRows === "function"
-                ? window.getRows()
-                : [];
+  function summarize(rows, code) {
+    const cfg = {
+      DTLCP:{name:"Dịch tả lợn Châu Phi", cases:["DTLCP_Mắc","DTLCP_Mắc bệnh","DTLCP_Chết","Số lợn mắc bệnh"], dead:["DTLCP_Chết","Số chết"], culled:["DTLCP_Tiêu hủy","DTLCP_Tiêu huỷ","Số tiêu hủy","Số tiêu huỷ"], weight:["DTLCP_Kg","DTLCP_Khối lượng tiêu hủy","Khối lượng tiêu hủy","Khối lượng tiêu huỷ"]},
+      CGC:{name:"Cúm gia cầm", cases:["CGC_Mắc","CGC_Mắc bệnh","Số gia cầm mắc bệnh"], dead:["CGC_Chết"], culled:["CGC_Tiêu hủy","CGC_Tiêu huỷ","Số gia cầm tiêu hủy"], weight:["CGC_Kg","CGC_Khối lượng tiêu hủy","Khối lượng tiêu hủy"]},
+      VDNC:{name:"Viêm da nổi cục", cases:["VDNC_Mắc","VDNC_Mắc bệnh","Số trâu bò mắc bệnh"], dead:["VDNC_Chết"], culled:["VDNC_Tiêu hủy","VDNC_Tiêu huỷ"], weight:["VDNC_Kg","VDNC_Khối lượng tiêu hủy","Khối lượng tiêu hủy"]},
+      DAI:{name:"Bệnh Dại", cases:["DAI_Mắc","DAI_Chết","Số động vật mắc bệnh"], dead:["DAI_Chết"], culled:["DAI_Tiêu hủy","DAI_Tiêu huỷ"], weight:["DAI_Kg","Khối lượng tiêu hủy"]}
+    }[code] || {name:layerName(),cases:["Số mắc","Số lượng"],dead:["Số chết"],culled:["Số tiêu hủy","Số tiêu huỷ"],weight:["Khối lượng tiêu hủy","Khối lượng tiêu huỷ"]};
+    const communeKeys = ["Tên xã","Tên xã/phường","Xã/phường","Địa bàn","Tên địa bàn","Xa","Phường"];
+    const villageKeys = ["Thôn/bản","Tên thôn/bản","Thôn bản","Bản"];
+    const householdKeys = ["Số hộ","Hộ chăn nuôi","Tên hộ","Chủ hộ"];
+    const unique = keys => new Set(rows.map(r=>String(pick(r,keys)||"").trim()).filter(Boolean));
+    const sum = keys => rows.reduce((a,r)=>a+number(pick(r,keys)),0);
+    return {name:cfg.name, rows:rows.length, communes:unique(communeKeys).size, villages:unique(villageKeys).size, households:unique(householdKeys).size,
+      cases:sum(cfg.cases), dead:sum(cfg.dead), culled:sum(cfg.culled), weight:sum(cfg.weight)};
+  }
 
-            if (!rows.length) {
-                alert("Chưa tải được dữ liệu Google Sheets.");
-                return;
-            }
+  if (printBtn) printBtn.addEventListener("click", () => window.print());
+  if (!createBtn) return;
+  createBtn.addEventListener("click", async () => {
+    const allRows = getRowsSafe();
+    if (!allRows.length) { alert("Chưa tải được dữ liệu Google Sheets."); return; }
+    const fromText = startInput?.value || "";
+    const toText = endInput?.value || "";
+    if (fromText && toText && fromText > toText) { alert("Ngày bắt đầu không được sau ngày kết thúc."); return; }
+    if (!window.docx) { alert("Chưa tải được thư viện tạo Word. Kiểm tra kết nối Internet rồi thử lại."); return; }
+    const from = fromText ? parseDate(fromText) : null;
+    const to = toText ? parseDate(toText) : null;
+    const rows = allRows.filter(r => {
+      const d = dateOf(r);
+      if (!from && !to) return true;
+      if (!d) return false;
+      return (!from || d >= from) && (!to || d <= new Date(to.getFullYear(),to.getMonth(),to.getDate(),23,59,59,999));
+    });
+    if (!rows.length) { alert("Không có bản ghi phù hợp khoảng ngày đã chọn. Nếu dữ liệu nguồn không có cột ngày, hãy để trống khoảng ngày."); return; }
 
-            const from = start?.value || "";
-            const to = end?.value || "";
+    const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle } = window.docx;
+    const code = layerCode();
+    const stats = summarize(rows, code);
+    const range = fromText || toText ? `từ ngày ${from ? dateText(from) : "đầu dữ liệu"} đến ngày ${to ? dateText(to) : "cuối dữ liệu"}` : "toàn bộ dữ liệu hiện có";
+    const today = new Date();
+    const dateStamp = today.toLocaleDateString("vi-VN");
+    const p = (text, opts={}) => new Paragraph({ children:[new TextRun({text, font:"Times New Roman", size:opts.size||26, bold:!!opts.bold, italics:!!opts.italics})], alignment:opts.align, spacing:{after:opts.after ?? 140, line:360}, indent:opts.indent?{firstLine:560}:undefined, heading:opts.heading });
+    const title = text => new Paragraph({children:[new TextRun({text,font:"Times New Roman",bold:true,size:30})],alignment:AlignmentType.CENTER,spacing:{after:120}});
+    const heading = text => new Paragraph({children:[new TextRun({text,font:"Times New Roman",bold:true,size:26})],spacing:{before:180,after:100}});
+    const body = [];
+    body.push(new Paragraph({children:[new TextRun({text:"SỞ NÔNG NGHIỆP VÀ MÔI TRƯỜNG TỈNH ĐIỆN BIÊN",font:"Times New Roman",bold:true,size:22})],alignment:AlignmentType.CENTER,spacing:{after:60}}));
+    body.push(new Paragraph({children:[new TextRun({text:"CHI CỤC NÔNG NGHIỆP",font:"Times New Roman",bold:true,size:22})],alignment:AlignmentType.CENTER,spacing:{after:220}}));
+    body.push(title("BÁO CÁO"));
+    body.push(new Paragraph({children:[new TextRun({text:`Tình hình ${stats.name.toLowerCase()} trên địa bàn tỉnh Điện Biên`,font:"Times New Roman",bold:true,size:28})],alignment:AlignmentType.CENTER,spacing:{after:80}}));
+    body.push(new Paragraph({children:[new TextRun({text:`Kỳ báo cáo ${range}`,font:"Times New Roman",size:24,italics:true})],alignment:AlignmentType.CENTER,spacing:{after:280}}));
+    body.push(heading("1. Tình hình dịch bệnh"));
+    body.push(p(`Theo dữ liệu hiện có trên hệ thống WEBGIS, trong kỳ báo cáo ${range}, dữ liệu lớp ${stats.name} gồm ${fmt(stats.rows)} bản ghi. Thông tin địa bàn ghi nhận tại ${fmt(stats.communes)} xã, phường${stats.villages ? ` và ${fmt(stats.villages)} thôn, bản` : ""}${stats.households ? `, liên quan ${fmt(stats.households)} hộ chăn nuôi` : ""}.` ,{indent:true}));
+    const countParts=[];
+    if (stats.cases) countParts.push(`${fmt(stats.cases)} con mắc bệnh`);
+    if (stats.dead) countParts.push(`${fmt(stats.dead)} con chết`);
+    if (stats.culled) countParts.push(`${fmt(stats.culled)} con tiêu hủy`);
+    if (stats.weight) countParts.push(`khối lượng chết, tiêu hủy ${fmt(stats.weight)} kg`);
+    body.push(p(countParts.length ? `Về thiệt hại, số liệu tổng hợp ghi nhận ${countParts.join(", ")}.` : "Các chỉ tiêu về số mắc, chết, tiêu hủy và khối lượng chưa được xác định từ các trường dữ liệu có sẵn; cần đối chiếu với biểu mẫu/báo cáo chuyên môn trước khi phát hành.",{indent:true}));
+    body.push(heading("2. Nhận xét"));
+    body.push(p(`Số liệu trong báo cáo được tổng hợp từ dữ liệu đang có trên hệ thống WEBGIS tại thời điểm lập báo cáo. ${stats.communes ? `Có ${fmt(stats.communes)} xã, phường được ghi nhận trong dữ liệu lọc.` : "Chưa xác định được số xã, phường từ trường tên địa bàn trong dữ liệu."} Báo cáo này phản ánh các trường thông tin đã được hệ thống nhận diện; các chỉ tiêu chưa có trường dữ liệu tương ứng không được tự suy diễn.`,{indent:true}));
+    body.push(heading("3. Nhiệm vụ trọng tâm thời gian tới"));
+    body.push(p("Tiếp tục theo dõi, giám sát chặt chẽ tình hình dịch bệnh trên đàn vật nuôi; kịp thời phát hiện, xác minh và xử lý ổ dịch phát sinh theo quy định. Phối hợp với UBND các xã, phường tăng cường tuyên truyền, hướng dẫn người chăn nuôi thực hiện vệ sinh, tiêu độc khử trùng, chăn nuôi an toàn sinh học và khai báo khi vật nuôi có biểu hiện mắc bệnh, chết bất thường.",{indent:true}));
+    body.push(p("Rà soát, cập nhật đầy đủ ngày phát sinh, địa bàn, số hộ, số mắc, số chết, số tiêu hủy và khối lượng thiệt hại trên hệ thống; đối chiếu số liệu với báo cáo chuyên môn và phụ lục kèm theo trước khi trình ký, ban hành.",{indent:true}));
+    body.push(new Paragraph({children:[new TextRun({text:`Điện Biên, ngày ${today.getDate()} tháng ${today.getMonth()+1} năm ${today.getFullYear()}`,font:"Times New Roman",size:24,italics:true})],alignment:AlignmentType.RIGHT,spacing:{before:300,after:100}}));
+    body.push(new Paragraph({children:[new TextRun({text:"NGƯỜI LẬP BÁO CÁO",font:"Times New Roman",bold:true,size:24})],alignment:AlignmentType.RIGHT,spacing:{after:900}}));
+    body.push(new Paragraph({children:[new TextRun({text:"(Ký, ghi rõ họ tên)",font:"Times New Roman",size:22,italics:true})],alignment:AlignmentType.RIGHT}));
 
-            if (from && to && from > to) {
-                alert("Ngày bắt đầu không được sau ngày kết thúc.");
-                return;
-            }
-
-            const report = window.open("", "_blank");
-            if (!report) {
-                alert("Trình duyệt đã chặn cửa sổ báo cáo. Hãy cho phép cửa sổ bật lên.");
-                return;
-            }
-
-            const escapeHtml = value => String(value ?? "")
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;");
-
-            const columns = Object.keys(rows[0]);
-
-            report.document.write(`
-                <!DOCTYPE html>
-                <html lang="vi">
-                <head>
-                    <meta charset="UTF-8">
-                    <title>Báo cáo định kỳ - WEBGIS Điện Biên</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; margin: 25px; color: #222; }
-                        h2, p { text-align: center; }
-                        table { border-collapse: collapse; width: 100%; font-size: 11px; }
-                        th, td { border: 1px solid #bbb; padding: 5px; text-align: left; }
-                        th { background: #eaf1f8; }
-                        @media print { body { margin: 10mm; } }
-                    </style>
-                </head>
-                <body>
-                    <h2>BÁO CÁO DỮ LIỆU QUẢN LÝ THÚ Y</h2>
-                    <p>Tỉnh Điện Biên</p>
-                    <p>Kỳ báo cáo: ${escapeHtml(from || "Chưa chọn")} đến ${escapeHtml(to || "Chưa chọn")}</p>
-                    <p>Số dòng dữ liệu: ${rows.length}</p>
-                    <table>
-                        <thead><tr>${columns.map(c => `<th>${escapeHtml(c)}</th>`).join("")}</tr></thead>
-                        <tbody>
-                            ${rows.map(row => `<tr>${columns.map(c => `<td>${escapeHtml(row[c])}</td>`).join("")}</tr>`).join("")}
-                        </tbody>
-                    </table>
-                    <script>window.onload = function () { window.focus(); }<\/script>
-                </body>
-                </html>
-            `);
-            report.document.close();
-        });
-    }
+    try {
+      const doc = new Document({sections:[{properties:{page:{size:{width:11906,height:16838},margin:{top:1440,right:1440,bottom:1440,left:1701}}},children:body}]});
+      const blob = await Packer.toBlob(doc);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const safeLayer = norm(stats.name).replace(/\s+/g,"_") || "bao_cao";
+      a.href=url; a.download=`Bao_cao_${safeLayer}_${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,"0")}-${String(today.getDate()).padStart(2,"0")}.docx`;
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1500);
+    } catch (e) { console.error("Lỗi tạo báo cáo Word:",e); alert("Không tạo được file Word. Mở F12 > Console để xem lỗi."); }
+  });
 });
 </script>
 
@@ -1939,26 +1994,37 @@ document.addEventListener("DOMContentLoaded", function () {
   "use strict";
   let trendChart = null, damageChart = null, speciesChart = null, trendPeriod = "10d";
   const diseaseConfig = {
-    DTLCP: { label:"Dịch tả lợn Châu Phi", prefix:"DTLCP", caseKeys:["DTLCP_Mắc","DTLCP_Mắc bệnh","DTLCP_Chết"], deathKeys:["DTLCP_Chết"], culledKeys:["DTLCP_Tiêu hủy"], dateKeys:["DTLCP_Ngày phát hiện","DTLCP_Ngày xảy ra","Ngày phát hiện","Ngày ghi nhận","Ngày cập nhật"] },
-    CGC: { label:"Cúm gia cầm", prefix:"CGC", caseKeys:["CGC_Mắc","CGC_Mắc bệnh","CGC_Chết"], deathKeys:["CGC_Chết"], culledKeys:["CGC_Tiêu hủy"], dateKeys:["CGC_Ngày phát hiện","CGC_Ngày xảy ra","Ngày phát hiện","Ngày ghi nhận","Ngày cập nhật"] },
-    VDNC: { label:"Viêm da nổi cục", prefix:"VDNC", caseKeys:["VDNC_Mắc"], deathKeys:["VDNC_Chết"], culledKeys:["VDNC_Tiêu hủy"], dateKeys:["VDNC_Ngày phát hiện","VDNC_Ngày xảy ra","Ngày phát hiện","Ngày ghi nhận","Ngày cập nhật"] },
-    DAI: { label:"Bệnh Dại", prefix:"DAI", caseKeys:["DAI_Mắc","DAI_Chết"], deathKeys:["DAI_Chết"], culledKeys:["DAI_Tiêu hủy"], dateKeys:["DAI_Ngày phát hiện","DAI_Ngày xảy ra","Ngày phát hiện","Ngày ghi nhận","Ngày cập nhật"] }
+    DTLCP: { label:"Dịch tả lợn Châu Phi", prefix:"DTLCP", caseKeys:["DTLCP_Ổ dịch"], deathKeys:["DTLCP_Chết"], culledKeys:["DTLCP_Chết"], dateKeys:["DTLCP_Ngày cuối","DTLCP_Ngày phát hiện","DTLCP_Ngày xảy ra","Ngày phát hiện","Ngày ghi nhận","Ngày cập nhật"], statusKeys:["DTLCP_Trạng thái"] },
+    CGC: { label:"Cúm gia cầm", prefix:"CGC", caseKeys:["CGC_Ổ dịch"], deathKeys:["CGC_Chết"], culledKeys:["CGC_Chết"], dateKeys:["CGC_Ngày cuối","CGC_Ngày phát hiện","CGC_Ngày xảy ra","Ngày phát hiện","Ngày ghi nhận","Ngày cập nhật"], statusKeys:["CGC_Trạng thái"] },
+    VDNC: { label:"Viêm da nổi cục", prefix:"VDNC", caseKeys:["VDNC_Ổ dịch"], deathKeys:["VDNC_Mắc"], culledKeys:["VDNC_Mắc"], dateKeys:["VDNC_Ngày cuối","VDNC_Ngày phát hiện","VDNC_Ngày xảy ra","Ngày phát hiện","Ngày ghi nhận","Ngày cập nhật"], statusKeys:["VDNC_Trạng thái"] },
+    DAI: { label:"Bệnh Dại", prefix:"DAI", caseKeys:["DAI_Ổ dịch"], deathKeys:["DAI_Mắc"], culledKeys:["DAI_Mắc"], dateKeys:["DAI_Ngày cuối","DAI_Ngày phát hiện","DAI_Ngày xảy ra","Ngày phát hiện","Ngày ghi nhận","Ngày cập nhật"], statusKeys:["DAI_Trạng thái"] }
   };
   function rows(){ try { if(typeof window.getRows === "function") { const r=window.getRows(); if(Array.isArray(r)) return r; } } catch(e){} return Array.isArray(window.sheetRows) ? window.sheetRows : (window.sheetData ? Object.values(window.sheetData) : []); }
   function num(v){ if(v===null||v===undefined||v==="") return 0; if(typeof v==="number") return Number.isFinite(v)?v:0; let s=String(v).trim().replace(/[^0-9,.-]/g,""); if(s.includes(".")&&s.includes(",")) s=s.replace(/\./g,"").replace(",","."); else if(s.includes(",")) s=s.replace(",","."); const n=Number(s); return Number.isFinite(n)?n:0; }
   function pick(row, keys){ for(const k of keys){ if(Object.prototype.hasOwnProperty.call(row,k) && row[k]!=="" && row[k]!==null && row[k]!==undefined) return num(row[k]); } return null; }
   function commune(row){ return row["Tên xã"]||row["Tên xã/phường"]||row.TEN_XA||row.TENXA||row.NAME||row.Name||row.name||"Chưa rõ xã"; }
-  function dateOf(row,cfg){ for(const k of cfg.dateKeys){ const raw=row[k]; if(raw){ const d=new Date(raw); if(!isNaN(d.getTime())) return d; const m=String(raw).match(/(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})/); if(m){ const x=new Date(+m[3],+m[2]-1,+m[1]); if(!isNaN(x)) return x; } } } return null; }
+  function dateOf(row,cfg){
+    for(const k of cfg.dateKeys){
+      const raw=row[k]; if(raw===undefined || raw===null || String(raw).trim()==="") continue;
+      if(raw instanceof Date && !isNaN(raw.getTime())) return raw;
+      const s=String(raw).trim();
+      let m=s.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})/);
+      if(m){ const x=new Date(+m[3],+m[2]-1,+m[1]); if(!isNaN(x.getTime())) return x; }
+      m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+      if(m){ const x=new Date(+m[1],+m[2]-1,+m[3]); if(!isNaN(x.getTime())) return x; }
+      const d=new Date(s); if(!isNaN(d.getTime())) return d;
+    }
+    return null;
+  }
   function selected(){ const el=document.getElementById("layerSelect"); return el && diseaseConfig[el.value] ? el.value : "DTLCP"; }
   function inCurrentYearToReport(row, cfg, data){
-    const d = dateOf(row, cfg);
-    if(!d) return false;
-    // Ngày báo cáo = ngày mới nhất có trong dữ liệu phù hợp; nếu không xác định được thì dùng hôm nay.
-    const allDates = data.map(r => dateOf(r, cfg)).filter(Boolean);
-    const reportDate = allDates.length ? new Date(Math.max(...allDates.map(x => x.getTime()))) : new Date();
-    const start = new Date(reportDate.getFullYear(), 0, 1); start.setHours(0,0,0,0);
-    const end = new Date(reportDate.getFullYear(), reportDate.getMonth(), reportDate.getDate()); end.setHours(23,59,59,999);
-    return d >= start && d <= end;
+    const d = dateOf(row, cfg); if(!d) return false;
+    const allDates=[];
+    data.forEach(r=>{ const x=dateOf(r,cfg); if(x) allDates.push(x.getTime()); });
+    const reportDate = allDates.length ? new Date(Math.max(...allDates)) : new Date();
+    const start = new Date(reportDate.getFullYear(),0,1); start.setHours(0,0,0,0);
+    const end = new Date(reportDate.getFullYear(),reportDate.getMonth(),reportDate.getDate()); end.setHours(23,59,59,999);
+    return d.getTime()>=start.getTime() && d.getTime()<=end.getTime();
   }
   function updateTrend(){
     const cfg=diseaseConfig[selected()], data=rows(), note=document.getElementById("trendNote");
@@ -1967,7 +2033,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const trendCanvas=document.getElementById("chartTrend");
     if(trendChart) { trendChart.destroy(); trendChart=null; }
     if(trendCanvas && window.Chart && window.Chart.getChart(trendCanvas)) window.Chart.getChart(trendCanvas).destroy();
-    const now=new Date(); let labels=[], values=[];
+    const now=dated.length ? new Date(Math.max(...dated.map(o=>o.d.getTime()))) : new Date(); let labels=[], values=[];
     if(dated.length){
       const buckets=new Map();
       if(trendPeriod==="10d"){
@@ -1991,8 +2057,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const key=selected(), cfg=diseaseConfig[key], data=rows(), map=new Map();
     // Với VDNC biểu diễn số con mắc bệnh; các lớp bệnh còn lại chỉ biểu diễn số con tiêu hủy.
     const isVDNC = key === "VDNC";
-    const valueKeys = isVDNC ? cfg.caseKeys : cfg.culledKeys;
-    const chartLabel = isVDNC ? "Số con mắc bệnh" : "Số con tiêu hủy";
+    const valueKeys = cfg.deathKeys;
+    const chartLabel = (key === "VDNC" || key === "DAI") ? "Số con mắc bệnh" : "Số con chết";
     data.forEach(r=>{
       // Biểu đồ thiệt hại chỉ tính lũy kế từ 01/01 đến ngày báo cáo.
       if(!inCurrentYearToReport(r,cfg,data)) return;
@@ -2004,7 +2070,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const labels=Array.from(map.keys());
     const values=labels.map(name=>map.get(name));
     const note=document.getElementById("damageNote");
-    if(note) note.textContent=cfg.label+" · "+chartLabel.toLowerCase()+" theo xã/phường";
+    if(note) note.textContent=cfg.label+" · "+chartLabel.toLowerCase()+" theo xã/phường (theo trường dữ liệu tổng hợp)";
     const canvas=document.getElementById("chartDamageXa");
     if(damageChart) { damageChart.destroy(); damageChart=null; }
     if(canvas && window.Chart && window.Chart.getChart(canvas)) window.Chart.getChart(canvas).destroy();
@@ -2018,18 +2084,12 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   function updateSpecies(){
     const data=rows(), totals=new Map(), cfg=diseaseConfig[selected()];
-    const speciesKeys=["Loài","loài","Loài vật nuôi","Loại vật nuôi","Loại gia súc, gia cầm","Đối tượng vật nuôi","Vật nuôi","Tên loài","LOAI","LOAI_VAT_NUOI","TEN_LOAI","species"];
-    const countKeys=["Số con","Số lượng","Tổng số con","Số mắc","Số con mắc","Số con tiêu hủy","Số chết","SoCon","SO_CON","SO_LUONG","TongSoCon"];
-    let found=false;
+    const statusKeys=cfg ? cfg.statusKeys : [];
     data.forEach(r=>{
-      // Cơ cấu loài cùng kỳ lũy kế từ đầu năm đến ngày báo cáo.
-      if(cfg && !inCurrentYearToReport(r,cfg,data)) return;
-      let species=null;
-      for(const k of speciesKeys){ if(r[k]!==undefined && r[k]!==null && String(r[k]).trim()){ species=String(r[k]).trim(); break; } }
-      if(!species) return;
-      let count=pick(r,countKeys);
-      if(count===null) count=1;
-      totals.set(species,(totals.get(species)||0)+count); found=true;
+      const raw=statusKeys.map(k=>r[k]).find(v=>v!==undefined && v!==null && String(v).trim()!=="");
+      if(raw===undefined || raw===null) return;
+      const status=String(raw).trim();
+      totals.set(status,(totals.get(status)||0)+1);
     });
     const note=document.getElementById("speciesNote");
     const canvas=document.getElementById("chartSpecies");
@@ -2037,13 +2097,13 @@ document.addEventListener("DOMContentLoaded", function () {
     if(canvas && window.Chart && window.Chart.getChart(canvas)) window.Chart.getChart(canvas).destroy();
     if(!canvas || !window.Chart) return;
     const labels=Array.from(totals.keys()), values=labels.map(k=>totals.get(k));
-    if(!found || !labels.length){
-      if(note) note.textContent="Chưa tìm thấy trường loài vật nuôi trong dữ liệu nguồn; cần có cột Loài/Loại vật nuôi để tính cơ cấu.";
-      speciesChart=new Chart(canvas,{type:"pie",data:{labels:["Chưa có dữ liệu loài"],datasets:[{data:[1],backgroundColor:["#d9e0e7"]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}}}});
+    if(!labels.length){
+      if(note) note.textContent="Chưa có trường trạng thái dịch có dữ liệu cho lớp đang chọn.";
+      speciesChart=new Chart(canvas,{type:"pie",data:{labels:["Chưa có dữ liệu trạng thái"],datasets:[{data:[1],backgroundColor:["#d9e0e7"]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}}}});
       return;
     }
-    if(note) note.textContent="Cơ cấu theo trường loài vật nuôi có trong dữ liệu nguồn";
-    speciesChart=new Chart(canvas,{type:"pie",data:{labels,datasets:[{label:"Số con",data:values,backgroundColor:["#477fd1","#e6a23c","#59a14f","#e15759","#af7aa1","#76b7b2","#f28e2b","#9c755f","#bab0ab"],borderColor:"#ffffff",borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:10,padding:8,font:{size:9}}},tooltip:{callbacks:{label:(ctx)=>{const total=ctx.dataset.data.reduce((a,b)=>a+Number(b||0),0);const v=Number(ctx.raw||0);return ctx.label+": "+v.toLocaleString("vi-VN")+" ("+(total?((v/total)*100).toFixed(1):"0.0")+"%)";}}}}}});
+    if(note) note.textContent="Cơ cấu số xã/phường theo trạng thái dịch: "+cfg.label;
+    speciesChart=new Chart(canvas,{type:"pie",data:{labels,datasets:[{label:"Số xã/phường",data:values,backgroundColor:["#477fd1","#e6a23c","#59a14f","#e15759","#af7aa1","#76b7b2","#f28e2b","#9c755f","#bab0ab"],borderColor:"#ffffff",borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:10,padding:8,font:{size:9}}},tooltip:{callbacks:{label:(ctx)=>{const total=ctx.dataset.data.reduce((a,b)=>a+Number(b||0),0);const v=Number(ctx.raw||0);return ctx.label+": "+v.toLocaleString("vi-VN")+" xã/phường ("+(total?((v/total)*100).toFixed(1):"0.0")+"%)";}}}}}});
   }
   function refresh(){ updateTrend(); updateDamage(); updateSpecies(); }
   document.addEventListener("DOMContentLoaded",function(){
@@ -2054,7 +2114,13 @@ document.addEventListener("DOMContentLoaded", function () {
     refresh();
     window.addEventListener("resize",function(){ if(trendChart) trendChart.resize(); if(damageChart) damageChart.resize(); if(speciesChart) speciesChart.resize(); });
     // Một số bản tải dữ liệu hoàn tất sau DOMContentLoaded.
-    let attempts=0; const timer=setInterval(function(){ attempts++; if(rows().length || attempts>=12){ clearInterval(timer); refresh(); } },1000);
+    let attempts=0; const timer=setInterval(function(){
+      attempts++;
+      // Dữ liệu Google Sheets có thể tải chậm; thử lại tối đa 60 giây.
+      if(rows().length){ clearInterval(timer); refresh(); }
+      else if(attempts>=60){ clearInterval(timer); refresh(); console.warn('WEBGIS biểu đồ: chưa nhận được dữ liệu từ getRows()/sheetRows.'); }
+    },1000);
+    ['sheets:data-loaded','sheetDataLoaded','dataLoaded','webgis:data-ready'].forEach(evt=>window.addEventListener(evt,refresh));
   });
 })();
 </script>
