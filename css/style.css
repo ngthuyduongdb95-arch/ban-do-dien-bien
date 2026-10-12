@@ -1520,3 +1520,132 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
     background: #173f7b;
     border-color: #173f7b;
 }
+
+/* ===== BÁO CÁO ĐỊNH KỲ - GIAO DIỆN MỚI ===== */
+.report-section {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    margin: 12px 16px;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, #ffffff 0%, #f4f8ff 100%);
+    border: 1px solid #d8e4f2;
+    border-left: 5px solid #1d4ed8;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(30, 64, 175, 0.07);
+    flex-wrap: nowrap;
+    overflow-x: auto;
+}
+
+.report-section h2 {
+    margin: 0;
+    color: #173f7b;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.report-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+}
+
+.report-controls label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: #475569;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.report-controls input {
+    width: 150px;
+    height: 38px;
+    padding: 0 10px;
+    color: #1e293b;
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+    font: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.report-controls input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.report-controls button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 38px;
+    padding: 0 15px;
+    border: 1px solid #1d4ed8;
+    border-radius: 7px;
+    background: #1d4ed8;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(29, 78, 216, 0.15);
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.report-controls button:hover {
+    background: #1e40af;
+    box-shadow: 0 4px 10px rgba(29, 78, 216, 0.2);
+    transform: translateY(-1px);
+}
+
+.report-controls button:active {
+    transform: translateY(0);
+}
+
+/* Nút in PDF có màu trung tính để phân biệt thao tác */
+.report-controls #btnPrintReport {
+    color: #1e40af;
+    background: #fff;
+    border-color: #bfcee3;
+    box-shadow: none;
+}
+
+.report-controls #btnPrintReport:hover {
+    background: #edf4ff;
+    border-color: #2563eb;
+}
+
+/* Màn hình nhỏ: cho phép cuộn ngang, không làm vỡ hàng */
+@media (max-width: 900px) {
+    .report-section {
+        gap: 14px;
+        margin: 10px;
+        padding: 12px;
+    }
+
+    .report-section h2 {
+        font-size: 15px;
+    }
+
+    .report-controls {
+        gap: 8px;
+    }
+
+    .report-controls input {
+        width: 130px;
+    }
+
+    .report-controls button {
+        padding: 0 10px;
+    }
+}
