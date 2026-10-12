@@ -115,9 +115,16 @@
             borderWidth: 1
         }));
 
-        if (dashboardCharts.xa) dashboardCharts.xa.destroy();
+        if (dashboardCharts.xa) {
+    dashboardCharts.xa.destroy();
+}
 
-        dashboardCharts.xa = new window.Chart(canvasXa, {
+const oldChartXa = window.Chart.getChart(canvasXa);
+if (oldChartXa) {
+    oldChartXa.destroy();
+}
+
+dashboardCharts.xa = new window.Chart(canvasXa, {
             type: "bar",
             data: {
                 labels,
@@ -157,9 +164,16 @@
             )
         );
 
-        if (dashboardCharts.benh) dashboardCharts.benh.destroy();
+        if (dashboardCharts.benh) {
+    dashboardCharts.benh.destroy();
+}
 
-        dashboardCharts.benh = new window.Chart(canvasBenh, {
+const oldChartBenh = window.Chart.getChart(canvasBenh);
+if (oldChartBenh) {
+    oldChartBenh.destroy();
+}
+
+dashboardCharts.benh = new window.Chart(canvasBenh, {
             type: "bar",
             data: {
                 labels: diseases.map(disease => disease.label),
@@ -319,7 +333,6 @@
             setText(
                 "sideOverviewKg",
                 stat.dtlcpKg + stat.cgcKg );            
-
         }
     }; 
     window.dashboard = dashboard;
