@@ -166,22 +166,16 @@ function normalizeMapName(value) {
 }
 
 function getRows() {
+    // Chỉ đọc sheetData trực tiếp. Không gọi window.getRows() tại đây:
+    // trong một số phiên bản window.getRows trỏ ngược lại hàm này, gây đệ quy vô hạn.
     try {
         if (typeof sheetData !== "undefined" && sheetData && typeof sheetData === "object") {
+            if (Array.isArray(sheetData)) return sheetData;
             const rows = Object.values(sheetData);
             if (rows.length) return rows;
         }
     } catch (error) {
         console.warn("MAP: không đọc được sheetData", error);
-    }
-
-    if (typeof window.getRows === "function") {
-        try {
-            const rows = window.getRows();
-            if (Array.isArray(rows)) return rows;
-        } catch (error) {
-            console.warn("MAP: getRows() lỗi", error);
-        }
     }
     return [];
 }
