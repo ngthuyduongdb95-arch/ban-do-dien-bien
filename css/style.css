@@ -1590,4 +1590,94 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
     }
 }
 
+/* ===== REPORT BAR: GỌN, ĐẸP, CÙNG MỘT HÀNG ===== */
+.report-section {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 24px;
+    margin: 10px 12px;
+    padding: 14px 18px;
+    background: #fff;
+    border: 1px solid #dce5ef;
+    border-left: 4px solid #2457a7;
+    border-radius: 10px;
+    box-shadow: 0 3px 12px rgba(23, 63, 123, .07);
+    overflow-x: auto;
+}
+
+.report-section h2 {
+    flex: 0 0 auto;
+    margin: 0 !important;
+    color: #173f7b;
+    font-size: 16px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.report-controls {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    flex: 1 0 auto;
+    flex-wrap: nowrap !important;
+    gap: 12px;
+    margin: 0;
+}
+
+.report-controls label {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 7px;
+    margin: 0;
+    color: #526274;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.report-controls input {
+    width: 145px;
+    height: 38px;
+    padding: 0 9px;
+    border: 1px solid #cbd7e4;
+    border-radius: 7px;
+    background: #f9fbfd;
+    color: #24364b;
+}
+
+.report-controls button {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    flex: 0 0 auto;
+    height: 38px;
+    padding: 0 13px;
+    border: 1px solid #2457a7;
+    border-radius: 7px;
+    background: #2457a7;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.report-controls button:hover {
+    background: #173f7b;
+}
+
+.report-controls #btnPrintReport {
+    background: #fff;
+    color: #2457a7;
+    border-color: #cbd7e4;
+}
+
+.report-controls #btnPrintReport:hover {
+    background: #edf4fc;
+}
+
 
