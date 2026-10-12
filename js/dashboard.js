@@ -79,6 +79,116 @@
         if (el) el.textContent = value;
     }
 
+    // ================= BIỂU ĐỒ DASHBOARD =================
+    const dashboardCharts = {};
+
+    function renderDashboardCharts(rows) {
+        if (typeof window.Chart === "undefined") return;
+
+        const canvasXa = document.getElementById("chartDamageXa");
+        const canvasBenh = document.getElementById("chartSpecies");
+
+        if (!canvasXa || !canvasBenh || !Array.isArray(rows)) return;
+
+        const diseases = [
+            { label: "DTLCP", field: "DTLCP_Chết" },
+            { label: "Cúm gia cầm", field: "CGC_Chết" },
+            { label: "VDNC", field: "VDNC_Chết" },
+            { label: "Dại", field: "DAI_Chết" }
+        ];
+
+        // Xác định tên xã từ các trường tên thường gặp.
+        const getCommuneName = row =>
+            row["Tên xã/phường"] ||
+            row["Tên xã"] ||
+            row["Xã"] ||
+            row["Xa"] ||
+            row["TEN_XA"] ||
+            row["TENXA"] ||
+            "Chưa xác định";
+
+        const labels = rows.map(getCommuneName);
+
+        const communeDatasets = diseases.map(disease => ({
+            label: disease.label,
+            data: rows.map(row => numberValue(row[disease.field])),
+            borderWidth: 1
+        }));
+
+        if (dashboardCharts.xa) dashboardCharts.xa.destroy();
+
+        dashboardCharts.xa = new window.Chart(canvasXa, {
+            type: "bar",
+            data: {
+                labels,
+                datasets: communeDatasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: "bottom" }
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                        ticks: {
+                            autoSkip: true,
+                            maxRotation: 60,
+                            minRotation: 0
+                        }
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: "Số con chết ghi nhận"
+                        }
+                    }
+                }
+            }
+        });
+
+        const totals = diseases.map(disease =>
+            rows.reduce(
+                (sum, row) => sum + numberValue(row[disease.field]),
+                0
+            )
+        );
+
+        if (dashboardCharts.benh) dashboardCharts.benh.destroy();
+
+        dashboardCharts.benh = new window.Chart(canvasBenh, {
+            type: "bar",
+            data: {
+                labels: diseases.map(disease => disease.label),
+                datasets: [{
+                    label: "Số con chết ghi nhận",
+                    data: totals,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: "y",
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: "Số con chết ghi nhận"
+                        }
+                    }
+                }
+            }
+        });
+    }
+
     const dashboard = {
         update() {
             const rows = getRows();
@@ -211,7 +321,7 @@
                 stat.dtlcpKg + stat.cgcKg
             );
         }
-    };
+    }; renderDashboardCharts(rows);
 
     window.dashboard = dashboard;
 
