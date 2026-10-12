@@ -1494,29 +1494,111 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
 }
 
 
-/* Màn hình vừa: thu gọn khoảng cách */
-@media (max-width: 1100px) {
+
+/* ================================
+   BÁO CÁO ĐỊNH KỲ
+   ================================ */
+.report-section {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin: 8px 12px;
+    padding: 12px 16px;
+    background: #fff;
+    border: 1px solid #dce3e8;
+    border-left: 4px solid #2457a7;
+    border-radius: 9px;
+    box-sizing: border-box;
+}
+
+.report-section h2 {
+    flex: 0 0 auto;
+    margin: 0;
+    color: #173f7b;
+    font-size: 15px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.report-controls {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    min-width: 0;
+}
+
+.report-controls label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: #526274;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.report-controls input[type="date"] {
+    width: 150px;
+    height: 36px;
+    padding: 0 8px;
+    border: 1px solid #cbd7e4;
+    border-radius: 6px;
+    background: #f9fbfd;
+    color: #26384a;
+    box-sizing: border-box;
+}
+
+.report-controls button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 36px;
+    padding: 0 13px;
+    border: 1px solid #2457a7;
+    border-radius: 6px;
+    background: #2457a7;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.report-controls button:hover {
+    background: #173f7b;
+}
+
+.report-controls #btnPrintReport {
+    background: #fff;
+    color: #2457a7;
+    border-color: #cbd7e4;
+}
+
+.report-controls #btnPrintReport:hover {
+    background: #edf4fc;
+}
+
+@media (max-width: 760px) {
     .report-section {
-        gap: 14px;
-        padding: 12px;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 10px;
+        margin: 8px;
     }
 
     .report-controls {
-        gap: 8px;
+        width: 100%;
     }
 
-    .report-controls input[type="date"] {
-        width: 135px;
-        min-width: 125px;
-    }
-
-    .report-controls button {
-        padding: 0 10px;
+    .report-controls label {
+        flex-wrap: wrap;
     }
 }
 
-/* Màn hình nhỏ: cho phép cuộn ngang để không vỡ bố cục */
-@media (max-width: 760px) {
     .report-section {
         justify-content: flex-start;
         overflow-x: auto;
