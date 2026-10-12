@@ -319,8 +319,7 @@
             setText(
                 "sideOverviewKg",
                 stat.dtlcpKg + stat.cgcKg );            
-renderDashboardCharts(rows);
-            
+
         }
     }; 
     window.dashboard = dashboard;
