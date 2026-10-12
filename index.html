@@ -1609,6 +1609,22 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
     }
 }
 
+
+/* Biểu đồ: giữ thanh cuộn ngang như giao diện ban đầu */
+.chart-card { flex:0 0 420px; min-width:420px; }
+.chart-card-head { display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:28px; }
+.chart-card-head .chart-title { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; }
+.chart-download { flex:0 0 auto; border:1px solid #d6e0e8; border-radius:5px; padding:3px 7px; background:#f5f8fb; color:#2457a7; font-size:10px; line-height:1.2; cursor:pointer; }
+.chart-download:hover { background:#e8f0fb; border-color:#9ab8e4; }
+.chart-toolbar { display:flex; gap:5px; padding:3px 0 5px; }
+.chart-filter { border:1px solid #d6e0e8; background:#fff; color:#536273; border-radius:5px; padding:4px 8px; font-size:10px; cursor:pointer; }
+.chart-filter.active { background:#2457a7; color:#fff; border-color:#2457a7; }
+.chart-legend-note { font-size:10px; color:#687785; line-height:1.3; min-height:15px; padding:0 2px 4px; }
+.chart-card:not(.comparison-card) .chart-body { height:calc(100% - 78px); min-height:175px; padding:4px; box-sizing:border-box; }
+.chart-card:not(.comparison-card) .chart-body canvas { width:100% !important; height:100% !important; }
+.comparison-card { flex-basis:520px; min-width:520px; }
+.comparison-card .comparison-table-wrap { max-height:220px; overflow:auto; }
+@media (max-width:760px) { .chart-card { flex-basis:340px; min-width:340px; } .comparison-card { flex-basis:420px; min-width:420px; } }
 </style>
 </head>
 <body>
@@ -1773,135 +1789,62 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
 </div>
 
 <!-- ================= KHU VỰC BIỂU ĐỒ ================= -->
-<section class="chart-section">
-
-    <div class="chart-scroll">
-
-        <!-- 1. DIỄN BIẾN -->
-        <div class="chart-card">
-            <div class="chart-title">
-                📈 Diễn biến dịch bệnh
-            </div>
-
-            <div class="chart-toolbar">
-                <button class="chart-filter active" data-chart="trend" data-period="10d">
-                    10 ngày
-                </button>
-                <button class="chart-filter" data-chart="trend" data-period="month">
-                    Theo tháng
-                </button>
-            </div>
-
-            <div class="chart-body">
-                <canvas id="chartTrend"></canvas>
-            </div>
-        </div>
-
-
-        <!-- 2. THIỆT HẠI THEO XÃ -->
-        <div class="chart-card">
-            <div class="chart-title">
-                📊 Thiệt hại theo xã
-            </div>
-
-            <div class="chart-body">
-                <canvas id="chartDamageXa"></canvas>
-            </div>
-        </div>
-
-
-        <!-- 3. CƠ CẤU LOÀI -->
-        <div class="chart-card">
-            <div class="chart-title">
-                🥧 Cơ cấu loài
-            </div>
-
-            <div class="chart-body">
-                <canvas id="chartSpecies"></canvas>
-            </div>
-        </div>
-
-
-        <!-- 4. TIÊU HỦY THEO THÁNG - TOÀN TỈNH -->
-        <div class="chart-card">
-            <div class="chart-title">
-                📊 Tiêu hủy theo tháng – toàn tỉnh
-            </div>
-
-            <div class="chart-body">
-                <canvas id="chartDisposalMonth"></canvas>
-            </div>
-        </div>
-
-
-        <!-- 5. SO SÁNH CÙNG KỲ -->
-        <div class="chart-card comparison-card">
-
-            <div class="chart-title">
-                📋 So sánh cùng kỳ – tỉnh Điện Biên
-            </div>
-
-            <div class="comparison-subtitle">
-                Cùng kỳ từ 01/01 đến ngày cập nhật hiện tại
-            </div>
-
-            <div class="comparison-table-wrap">
-
-                <table class="comparison-table">
-
-                    <thead>
-                        <tr>
-                            <th>Chỉ tiêu so sánh</th>
-                            <th id="comparisonYearPrev">
-                                01/01–02/10/2025
-                            </th>
-                            <th id="comparisonYearCurrent">
-                                01/01–02/10/2026
-                            </th>
-                            <th>Thay đổi (%)</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-
-                        <tr>
-                            <td>Số xã/phường có dịch</td>
-                            <td id="cmpXaPrev">–</td>
-                            <td id="cmpXaCurrent">–</td>
-                            <td id="cmpXaChange">–</td>
-                        </tr>
-
-                        <tr>
-                            <td>Số ổ dịch</td>
-                            <td id="cmpODPrev">–</td>
-                            <td id="cmpODCurrent">–</td>
-                            <td id="cmpODChange">–</td>
-                        </tr>
-
-                        <tr>
-                            <td>Số mắc bệnh</td>
-                            <td id="cmpMacPrev">–</td>
-                            <td id="cmpMacCurrent">–</td>
-                            <td id="cmpMacChange">–</td>
-                        </tr>
-
-                        <tr>
-                            <td>Tổng chết, tiêu hủy</td>
-                            <td id="cmpTieuHuyPrev">–</td>
-                            <td id="cmpTieuHuyCurrent">–</td>
-                            <td id="cmpTieuHuyChange">–</td>
-                        </tr>
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </div>
-
+<section class="chart-section" id="chartSection">
+  <div class="chart-scroll">
+    <!-- 1. DIỄN BIẾN DỊCH BỆNH -->
+    <div class="chart-card">
+      <div class="chart-card-head">
+        <div class="chart-title">📈 Diễn biến dịch bệnh</div>
+        <button class="chart-download" type="button" data-download-chart="chartTrend" title="Tải biểu đồ PNG" aria-label="Tải biểu đồ diễn biến">↓ Tải</button>
+      </div>
+      <div class="chart-toolbar" aria-label="Chọn khoảng thời gian">
+        <button class="chart-filter active" type="button" data-period="10d">10 ngày</button>
+        <button class="chart-filter" type="button" data-period="month">Theo tháng</button>
+      </div>
+      <div class="chart-legend-note" id="trendNote">Số liệu theo lớp bệnh đang chọn</div>
+      <div class="chart-body"><canvas id="chartTrend"></canvas></div>
     </div>
 
+    <!-- 2. THIỆT HẠI THEO XÃ VÀ LOẠI HÌNH -->
+    <div class="chart-card">
+      <div class="chart-card-head">
+        <div class="chart-title">📊 Thiệt hại theo xã/phường</div>
+        <button class="chart-download" type="button" data-download-chart="chartDamageXa" title="Tải biểu đồ PNG" aria-label="Tải biểu đồ thiệt hại">↓ Tải</button>
+      </div>
+      <div class="chart-legend-note" id="damageNote">Số con tiêu hủy theo xã/phường</div>
+      <div class="chart-body"><canvas id="chartDamageXa"></canvas></div>
+    </div>
+
+    <!-- 3. CƠ CẤU LOÀI -->
+    <div class="chart-card">
+      <div class="chart-card-head">
+        <div class="chart-title">🥧 Cơ cấu loài</div>
+        <button class="chart-download" type="button" data-download-chart="chartSpecies" title="Tải biểu đồ PNG" aria-label="Tải biểu đồ cơ cấu loài">↓ Tải</button>
+      </div>
+      <div class="chart-legend-note" id="speciesNote">Cơ cấu số con theo loài vật nuôi trong dữ liệu nguồn</div>
+      <div class="chart-body"><canvas id="chartSpecies"></canvas></div>
+    </div>
+
+    <!-- 4. BẢNG SO SÁNH GIỮ NGUYÊN -->
+    <div class="chart-card comparison-card">
+      <div class="chart-card-head">
+        <div class="chart-title">📋 So sánh cùng kỳ – tỉnh Điện Biên</div>
+        <button class="chart-download" type="button" id="btnDownloadComparison" title="Tải bảng so sánh CSV" aria-label="Tải bảng so sánh">↓ Tải</button>
+      </div>
+      <div class="comparison-subtitle">Cùng kỳ từ 01/01 đến ngày cập nhật hiện tại</div>
+      <div class="comparison-table-wrap">
+        <table class="comparison-table">
+          <thead><tr><th>Chỉ tiêu so sánh</th><th id="comparisonYearPrev">01/01–02/10/2025</th><th id="comparisonYearCurrent">01/01–02/10/2026</th><th>Thay đổi (%)</th></tr></thead>
+          <tbody>
+            <tr><td>Số xã/phường có dịch</td><td id="cmpXaPrev">–</td><td id="cmpXaCurrent">–</td><td id="cmpXaChange">–</td></tr>
+            <tr><td>Số ổ dịch</td><td id="cmpODPrev">–</td><td id="cmpODCurrent">–</td><td id="cmpODChange">–</td></tr>
+            <tr><td>Số mắc bệnh</td><td id="cmpMacPrev">–</td><td id="cmpMacCurrent">–</td><td id="cmpMacChange">–</td></tr>
+            <tr><td>Tổng chết, tiêu hủy</td><td id="cmpTieuHuyPrev">–</td><td id="cmpTieuHuyCurrent">–</td><td id="cmpTieuHuyChange">–</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </section>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -1989,6 +1932,111 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
+</script>
+
+<script>
+(function () {
+  "use strict";
+  let trendChart = null, damageChart = null, speciesChart = null, trendPeriod = "10d";
+  const diseaseConfig = {
+    DTLCP: { label:"Dịch tả lợn Châu Phi", prefix:"DTLCP", caseKeys:["DTLCP_Mắc","DTLCP_Mắc bệnh","DTLCP_Chết"], deathKeys:["DTLCP_Chết"], culledKeys:["DTLCP_Tiêu hủy"], dateKeys:["DTLCP_Ngày phát hiện","DTLCP_Ngày xảy ra","Ngày phát hiện","Ngày ghi nhận","Ngày cập nhật"] },
+    CGC: { label:"Cúm gia cầm", prefix:"CGC", caseKeys:["CGC_Mắc","CGC_Mắc bệnh","CGC_Chết"], deathKeys:["CGC_Chết"], culledKeys:["CGC_Tiêu hủy"], dateKeys:["CGC_Ngày phát hiện","CGC_Ngày xảy ra","Ngày phát hiện","Ngày ghi nhận","Ngày cập nhật"] },
+    VDNC: { label:"Viêm da nổi cục", prefix:"VDNC", caseKeys:["VDNC_Mắc"], deathKeys:["VDNC_Chết"], culledKeys:["VDNC_Tiêu hủy"], dateKeys:["VDNC_Ngày phát hiện","VDNC_Ngày xảy ra","Ngày phát hiện","Ngày ghi nhận","Ngày cập nhật"] },
+    DAI: { label:"Bệnh Dại", prefix:"DAI", caseKeys:["DAI_Mắc","DAI_Chết"], deathKeys:["DAI_Chết"], culledKeys:["DAI_Tiêu hủy"], dateKeys:["DAI_Ngày phát hiện","DAI_Ngày xảy ra","Ngày phát hiện","Ngày ghi nhận","Ngày cập nhật"] }
+  };
+  function rows(){ try { if(typeof window.getRows === "function") { const r=window.getRows(); if(Array.isArray(r)) return r; } } catch(e){} return Array.isArray(window.sheetRows) ? window.sheetRows : (window.sheetData ? Object.values(window.sheetData) : []); }
+  function num(v){ if(v===null||v===undefined||v==="") return 0; if(typeof v==="number") return Number.isFinite(v)?v:0; let s=String(v).trim().replace(/[^0-9,.-]/g,""); if(s.includes(".")&&s.includes(",")) s=s.replace(/\./g,"").replace(",","."); else if(s.includes(",")) s=s.replace(",","."); const n=Number(s); return Number.isFinite(n)?n:0; }
+  function pick(row, keys){ for(const k of keys){ if(Object.prototype.hasOwnProperty.call(row,k) && row[k]!=="" && row[k]!==null && row[k]!==undefined) return num(row[k]); } return null; }
+  function commune(row){ return row["Tên xã"]||row["Tên xã/phường"]||row.TEN_XA||row.TENXA||row.NAME||row.Name||row.name||"Chưa rõ xã"; }
+  function dateOf(row,cfg){ for(const k of cfg.dateKeys){ const raw=row[k]; if(raw){ const d=new Date(raw); if(!isNaN(d.getTime())) return d; const m=String(raw).match(/(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})/); if(m){ const x=new Date(+m[3],+m[2]-1,+m[1]); if(!isNaN(x)) return x; } } } return null; }
+  function selected(){ const el=document.getElementById("layerSelect"); return el && diseaseConfig[el.value] ? el.value : "DTLCP"; }
+  function updateTrend(){
+    const cfg=diseaseConfig[selected()], data=rows(), note=document.getElementById("trendNote");
+    const dated=[];
+    data.forEach(r=>{ const d=dateOf(r,cfg); if(!d) return; let v=pick(r,cfg.caseKeys); if(v===null) v=pick(r,[cfg.prefix+"_Ổ dịch"]); if(v===null) return; dated.push({d,v}); });
+    if(trendChart) trendChart.destroy();
+    const now=new Date(); let labels=[], values=[];
+    if(dated.length){
+      const buckets=new Map();
+      if(trendPeriod==="10d"){
+        const start=new Date(now); start.setHours(0,0,0,0); start.setDate(start.getDate()-9);
+        for(let i=0;i<10;i++){ const d=new Date(start); d.setDate(start.getDate()+i); const key=d.toISOString().slice(0,10); buckets.set(key,0); labels.push(d.toLocaleDateString("vi-VN",{day:"2-digit",month:"2-digit"})); }
+        dated.forEach(o=>{ const key=new Date(o.d.getFullYear(),o.d.getMonth(),o.d.getDate()).toISOString().slice(0,10); if(buckets.has(key)) buckets.set(key,buckets.get(key)+o.v); });
+      } else {
+        for(let i=11;i>=0;i--){ const d=new Date(now.getFullYear(),now.getMonth()-i,1); const key=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"); buckets.set(key,0); labels.push(d.toLocaleDateString("vi-VN",{month:"short",year:"2-digit"})); }
+        dated.forEach(o=>{ const key=o.d.getFullYear()+"-"+String(o.d.getMonth()+1).padStart(2,"0"); if(buckets.has(key)) buckets.set(key,buckets.get(key)+o.v); });
+      }
+      values=Array.from(buckets.values());
+      if(note) note.textContent=""+cfg.label+" · tổng hợp từ các bản ghi có ngày trong dữ liệu nguồn";
+    } else {
+      labels=["Chưa có dữ liệu ngày"] ; values=[0];
+      if(note) note.textContent="Nguồn dữ liệu hiện chưa có trường ngày/chuỗi lịch sử phù hợp; biểu đồ không tự tạo số liệu.";
+    }
+    const canvas=document.getElementById("chartTrend"); if(!canvas || !window.Chart) return;
+    trendChart=new Chart(canvas,{type:"line",data:{labels,datasets:[{label:cfg.label, data:values, borderColor:"#e53935", backgroundColor:"rgba(229,57,53,.14)", fill:true, tension:.2, pointRadius:2, borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:10,font:{size:9}}},tooltip:{mode:"index",intersect:false}},scales:{x:{ticks:{maxRotation:45,minRotation:0,font:{size:9}},grid:{display:false}},y:{beginAtZero:true,ticks:{precision:0,font:{size:9}}}}}});
+  }
+  function updateDamage(){
+    const key=selected(), cfg=diseaseConfig[key], data=rows(), map=new Map();
+    // Với VDNC biểu diễn số con mắc bệnh; các lớp bệnh còn lại chỉ biểu diễn số con tiêu hủy.
+    const isVDNC = key === "VDNC";
+    const valueKeys = isVDNC ? cfg.caseKeys : cfg.culledKeys;
+    const chartLabel = isVDNC ? "Số con mắc bệnh" : "Số con tiêu hủy";
+    data.forEach(r=>{
+      const name=commune(r);
+      const v=pick(r,valueKeys);
+      if(v===null) return;
+      map.set(name,(map.get(name)||0)+v);
+    });
+    const labels=Array.from(map.keys());
+    const values=labels.map(name=>map.get(name));
+    const note=document.getElementById("damageNote");
+    if(note) note.textContent=cfg.label+" · "+chartLabel.toLowerCase()+" theo xã/phường";
+    if(damageChart) damageChart.destroy();
+    const canvas=document.getElementById("chartDamageXa"); if(!canvas || !window.Chart) return;
+    if(!labels.length){
+      damageChart=new Chart(canvas,{type:"bar",data:{labels:["Chưa có dữ liệu phù hợp"],datasets:[{label:chartLabel,data:[0],backgroundColor:"#477fd1"}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,ticks:{precision:0}}}}});
+      if(note) note.textContent=cfg.label+" · chưa tìm thấy trường số liệu phù hợp trong dữ liệu nguồn";
+      return;
+    }
+    damageChart=new Chart(canvas,{type:"bar",data:{labels,datasets:[{label:chartLabel,data:values,backgroundColor:"#477fd1",borderRadius:3,maxBarThickness:34}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:10,font:{size:9}}},tooltip:{callbacks:{label:(ctx)=>chartLabel+": "+Number(ctx.raw||0).toLocaleString("vi-VN")+" con"}}},scales:{x:{ticks:{autoSkip:false,maxRotation:65,minRotation:45,font:{size:8}},grid:{display:false}},y:{beginAtZero:true,title:{display:true,text:"Số con"},ticks:{precision:0,font:{size:9}}}}}});
+  }
+  function updateSpecies(){
+    const data=rows(), totals=new Map();
+    const speciesKeys=["Loài","loài","Loài vật nuôi","Loại vật nuôi","Loại gia súc, gia cầm","Đối tượng vật nuôi","Vật nuôi","Tên loài","LOAI","LOAI_VAT_NUOI","TEN_LOAI","species"];
+    const countKeys=["Số con","Số lượng","Tổng số con","Số mắc","Số con mắc","Số con tiêu hủy","Số chết","SoCon","SO_CON","SO_LUONG","TongSoCon"];
+    let found=false;
+    data.forEach(r=>{
+      let species=null;
+      for(const k of speciesKeys){ if(r[k]!==undefined && r[k]!==null && String(r[k]).trim()){ species=String(r[k]).trim(); break; } }
+      if(!species) return;
+      let count=pick(r,countKeys);
+      if(count===null) count=1;
+      totals.set(species,(totals.get(species)||0)+count); found=true;
+    });
+    const note=document.getElementById("speciesNote");
+    if(speciesChart) speciesChart.destroy();
+    const canvas=document.getElementById("chartSpecies"); if(!canvas || !window.Chart) return;
+    const labels=Array.from(totals.keys()), values=labels.map(k=>totals.get(k));
+    if(!found || !labels.length){
+      if(note) note.textContent="Chưa tìm thấy trường loài vật nuôi trong dữ liệu nguồn; cần có cột Loài/Loại vật nuôi để tính cơ cấu.";
+      speciesChart=new Chart(canvas,{type:"pie",data:{labels:["Chưa có dữ liệu loài"],datasets:[{data:[1],backgroundColor:["#d9e0e7"]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}}}});
+      return;
+    }
+    if(note) note.textContent="Cơ cấu theo trường loài vật nuôi có trong dữ liệu nguồn";
+    speciesChart=new Chart(canvas,{type:"pie",data:{labels,datasets:[{label:"Số con",data:values,backgroundColor:["#477fd1","#e6a23c","#59a14f","#e15759","#af7aa1","#76b7b2","#f28e2b","#9c755f","#bab0ab"],borderColor:"#ffffff",borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:10,padding:8,font:{size:9}}},tooltip:{callbacks:{label:(ctx)=>{const total=ctx.dataset.data.reduce((a,b)=>a+Number(b||0),0);const v=Number(ctx.raw||0);return ctx.label+": "+v.toLocaleString("vi-VN")+" ("+(total?((v/total)*100).toFixed(1):"0.0")+"%)";}}}}}});
+  }
+  function refresh(){ updateTrend(); updateDamage(); updateSpecies(); }
+  document.addEventListener("DOMContentLoaded",function(){
+    document.querySelectorAll(".chart-filter[data-period]").forEach(b=>b.addEventListener("click",function(){ trendPeriod=this.dataset.period; document.querySelectorAll(".chart-filter[data-period]").forEach(x=>x.classList.toggle("active",x===this)); updateTrend(); }));
+    const layer=document.getElementById("layerSelect"); if(layer) layer.addEventListener("change",refresh);
+    document.querySelectorAll("[data-download-chart]").forEach(b=>b.addEventListener("click",function(){ const id=this.dataset.downloadChart, canvas=document.getElementById(id); if(!canvas) return; const a=document.createElement("a"); a.href=canvas.toDataURL("image/png"); a.download=id+"_"+selected()+".png"; a.click(); }));
+    const csvBtn=document.getElementById("btnDownloadComparison"); if(csvBtn) csvBtn.addEventListener("click",function(){ const table=document.querySelector(".comparison-table"); if(!table) return; const csv=Array.from(table.rows).map(row=>Array.from(row.cells).map(c=>'"'+c.innerText.replace(/"/g,'""')+'"').join(",")).join("\r\n"); const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8;"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download="so-sanh-cung-ky.csv"; a.click(); URL.revokeObjectURL(url); });
+    refresh();
+    window.addEventListener("resize",function(){ if(trendChart) trendChart.resize(); if(damageChart) damageChart.resize(); if(speciesChart) speciesChart.resize(); });
+    // Một số bản tải dữ liệu hoàn tất sau DOMContentLoaded.
+    let attempts=0; const timer=setInterval(function(){ attempts++; if(rows().length || attempts>=12){ clearInterval(timer); refresh(); } },1000);
+  });
+})();
 </script>
 </body>
 </html>
