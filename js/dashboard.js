@@ -318,11 +318,11 @@
             );
             setText(
                 "sideOverviewKg",
-                stat.dtlcpKg + stat.cgcKg
-            );
+                stat.dtlcpKg + stat.cgcKg );            
+renderDashboardCharts(rows);
+            
         }
-    }; renderDashboardCharts(rows);
-
+    }; 
     window.dashboard = dashboard;
 
     window.updateDashboard = function () {
