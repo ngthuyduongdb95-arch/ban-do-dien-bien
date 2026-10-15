@@ -2095,55 +2095,55 @@ document.addEventListener("DOMContentLoaded", function () {
     body.push(headerLeft, headerRight, title("BÁO CÁO"));
     body.push(new Paragraph({children:[new TextRun({text:reportTitle,font:"Times New Roman",bold:true,size:28})],alignment:AlignmentType.CENTER,spacing:{after:100}}));
     body.push(new Paragraph({children:[new TextRun({text:periodLine,font:"Times New Roman",size:24,italics:true})],alignment:AlignmentType.CENTER,spacing:{after:280}}));
-    body.push(heading(isMonth ? "1. Tình hình dịch bệnh" : "1. Tình hình dịch bệnh động vật (số liệu trong kỳ báo cáo)"));
-    body.push(p(`Trong kỳ, dữ liệu WEBGIS ghi nhận ${fmt(totalRecords)} bản ghi dịch bệnh; tổng hợp theo từng bệnh như sau:`,{indent:true}));
+    body.push(heading(isMonth ? "1. Tình hình dịch bệnh" : "1. Tình hình dịch bệnh động vật (số liệu từ kỳ báo cáo)"));
     diseaseStats.forEach(item => {
-      const parts=[];
-      if (Number(item.cases||0)) parts.push(`${fmt(item.cases)} con mắc bệnh`);
-      if (Number(item.deadCull||0)) parts.push(`${fmt(item.deadCull)} con chết/tiêu hủy (nguồn đang gộp chung)`);
-      const placeParts=[];
-      if (Number(item.householdCount||0)) placeParts.push(`${fmt(item.householdCount)} hộ`);
-      if (Number(item.villageCount||0)) placeParts.push(`${fmt(item.villageCount)} thôn, bản`);
-      if (Number(item.communeCount||0)) placeParts.push(`${fmt(item.communeCount)} xã, phường`);
-      let sentence = `${item.name || item.code}: ghi nhận ${fmt(item.records)} bản ghi`;
-      if (placeParts.length) sentence += ` tại ${placeParts.join(", ")}`;
-      if (parts.length) sentence += `, ${parts.join(", ")}`;
+      const householdCount = Number(item.householdCount || 0);
+      const villageCount = Number(item.villageCount || 0);
+      const communeCount = Number(item.communeCount || 0);
+      const locationText = householdCount && villageCount && communeCount
+        ? `tại ${fmt(householdCount)} hộ thuộc ${fmt(villageCount)} thôn, bản của ${fmt(communeCount)} xã, phường`
+        : householdCount && villageCount
+          ? `tại ${fmt(householdCount)} hộ thuộc ${fmt(villageCount)} thôn, bản`
+          : villageCount && communeCount
+            ? `tại ${fmt(villageCount)} thôn, bản thuộc ${fmt(communeCount)} xã, phường`
+            : communeCount ? `tại ${fmt(communeCount)} xã, phường` : "";
+      const animal = item.code === "DTLCP" ? "lợn" : item.code === "CGC" ? "gia cầm" : item.code === "VDNC" ? "trâu, bò" : "động vật";
+      let sentence = `${item.name || item.code}: trong kỳ dịch bệnh xảy ra`;
+      if (locationText) sentence += ` ${locationText}`;
+      if (Number(item.cases || 0)) sentence += ` với tổng số ${animal} mắc bệnh ${fmt(item.cases)} con`;
+      if (Number(item.deadCull || 0)) sentence += `${Number(item.cases || 0) ? "; " : " với tổng số "}${animal} chết, tiêu hủy ${fmt(item.deadCull)} con`;
       sentence += ".";
-      body.push(p(sentence,{indent:true}));
+      body.push(p(sentence, {indent:true}));
     });
-    body.push(p(`Tổng số địa bàn ghi nhận trong dữ liệu: ${fmt(totals.communeCount ?? totals.communes ?? 0)} xã, phường; ${fmt(totals.villageCount ?? totals.villages ?? 0)} thôn, bản; ${fmt(totals.householdCount ?? totals.households ?? 0)} hộ (nếu các chỉ tiêu này được API trả về). Số liệu được tổng hợp từ sheet GIS_DICH_BENH_NGAY theo khoảng ngày đã chọn, không phụ thuộc lớp bản đồ đang chọn. Chỉ tiêu chết/tiêu hủy trình bày gộp khi dữ liệu nguồn chưa tách riêng; cần đối chiếu báo cáo chuyên môn và phụ lục trước khi trình ký.`,{indent:true}));
     if (isMonth) {
-      body.push(heading("2. Công tác phòng, chống dịch bệnh đã và đang triển khai"));
+      body.push(heading("Nhận định tình hình dịch"));
+      body.push(p("Tiếp tục theo dõi chặt chẽ diễn biến dịch bệnh trên đàn vật nuôi, chủ động triển khai các biện pháp phòng, chống dịch theo quy định.", {indent:true}));
+      body.push(heading("2. Công tác phòng chống dịch bệnh đã và đang triển khai"));
       body.push(heading("2.1. Tham mưu, chỉ đạo"));
-      body.push(p("Tiếp tục căn cứ tình hình dịch bệnh và văn bản chỉ đạo của cấp trên để tham mưu kịp thời các văn bản chỉ đạo công tác phòng, chống dịch bệnh động vật.",{indent:true}));
+      body.push(p("Tham mưu kịp thời các văn bản chỉ đạo công tác phòng, chống dịch bệnh động vật theo tình hình thực tế và chỉ đạo của cấp có thẩm quyền.", {indent:true}));
       body.push(heading("2.2. Giám sát dịch bệnh"));
-      body.push(p("Phối hợp với UBND các xã, phường theo dõi, giám sát diễn biến dịch bệnh trên đàn vật nuôi, nhất là tại ổ dịch, ổ dịch cũ và khu vực nguy cơ cao; phát hiện, xử lý kịp thời, hạn chế dịch bệnh lây lan.",{indent:true}));
+      body.push(p("Phối hợp với UBND các xã, phường theo dõi, giám sát tình hình dịch bệnh trên đàn vật nuôi; tổ chức lấy mẫu, gửi xét nghiệm và hướng dẫn xử lý khi phát sinh dịch bệnh.", {indent:true}));
       body.push(heading("2.3. Công tác tiêm phòng vắc xin, vệ sinh tiêu độc khử trùng"));
-      body.push(p("Cập nhật kết quả tiêm phòng, vệ sinh tiêu độc khử trùng theo số liệu chuyên môn và phụ lục kèm theo; không tự suy diễn các chỉ tiêu chưa có dữ liệu trên WEBGIS.",{indent:true}));
       body.push(heading("2.4. Kiểm dịch động vật, sản phẩm động vật"));
-      body.push(p("Tổng hợp kết quả kiểm dịch vận chuyển động vật, sản phẩm động vật theo sổ theo dõi và hồ sơ nghiệp vụ trong tháng.",{indent:true}));
       body.push(heading("2.5. Kiểm soát giết mổ, kiểm tra vệ sinh thú y và an toàn thực phẩm"));
-      body.push(p("Tổng hợp kết quả kiểm soát giết mổ, kiểm tra vệ sinh thú y và an toàn thực phẩm đối với sản phẩm có nguồn gốc động vật theo hồ sơ chuyên môn trong tháng.",{indent:true}));
       body.push(heading("2.6. Quản lý thuốc thú y"));
-      body.push(p("Tổng hợp kết quả cấp, gia hạn chứng chỉ hành nghề thú y và giấy chứng nhận đủ điều kiện buôn bán thuốc thú y theo sổ theo dõi thực tế.",{indent:true}));
       body.push(heading("2.7. Thực hiện thủ tục hành chính"));
-      body.push(p("Tổng hợp số lượng và kết quả giải quyết thủ tục hành chính lĩnh vực thú y theo hồ sơ thực tế; không tự điền số liệu khi chưa có nguồn dữ liệu.",{indent:true}));
       body.push(heading("3. Kế hoạch nhiệm vụ tháng tiếp theo"));
+      body.push(p("Tiếp tục bám sát tình hình dịch bệnh, tham mưu kịp thời công tác phòng, chống dịch; phối hợp với UBND các xã, phường giám sát, lấy mẫu, xử lý ổ dịch và thực hiện các nhiệm vụ chuyên môn về thú y.", {indent:true}));
     } else {
       body.push(heading("2. Công tác phòng, chống dịch đã và đang thực hiện"));
       body.push(heading("a. Tham mưu, chỉ đạo"));
-      body.push(p("Phối hợp với các xã, phường triển khai biện pháp phòng, chống dịch bệnh theo quy định; tham mưu ban hành văn bản chỉ đạo trên cơ sở tình hình thực tế và chỉ đạo của cấp có thẩm quyền.",{indent:true}));
+      body.push(p("Phối hợp với các xã, phường triển khai các biện pháp phòng, chống dịch bệnh động vật theo quy định.", {indent:true}));
       body.push(heading("b. Giám sát dịch bệnh"));
-      body.push(p("Tiếp tục theo dõi, giám sát chặt chẽ tình hình dịch bệnh trên đàn vật nuôi, tập trung tại ổ dịch, ổ dịch cũ và khu vực nguy cơ cao; tổ chức lấy mẫu, xét nghiệm khi có chỉ định chuyên môn.",{indent:true}));
+      body.push(p("Theo dõi, giám sát tình hình dịch bệnh trên đàn vật nuôi, tập trung tại ổ dịch, ổ dịch cũ và khu vực nguy cơ cao; phát hiện, xử lý kịp thời khi có dịch bệnh phát sinh.", {indent:true}));
       body.push(heading("c. Công tác tiêm phòng vắc xin, vệ sinh tiêu độc khử trùng"));
-      body.push(p("Cập nhật tiến độ tiêm phòng và vệ sinh tiêu độc khử trùng theo báo cáo chuyên môn của các xã, phường; các chỉ tiêu chưa được ghi nhận trên hệ thống cần bổ sung từ phụ lục nghiệp vụ.",{indent:true}));
       body.push(heading("3. Kế hoạch kỳ tiếp theo"));
       body.push(heading("3.1. UBND các xã, phường"));
+      body.push(p("Tăng cường kiểm tra, giám sát tình hình dịch bệnh trên đàn vật nuôi, đặc biệt bệnh DTLCP, VDNC và CGC; chủ động phát hiện, khoanh vùng, xử lý ổ dịch. Đẩy mạnh vệ sinh, tiêu độc khử trùng, chăn nuôi an toàn sinh học; quản lý việc mua bán, vận chuyển động vật và sản phẩm động vật.", {indent:true}));
+      body.push(heading("3.2. Chi cục Nông nghiệp"));
+      body.push(p("Tiếp tục bám sát tình hình dịch bệnh; phối hợp với UBND các xã, phường giám sát, lấy mẫu, hướng dẫn xử lý và tổng hợp, báo cáo tình hình dịch bệnh theo quy định.", {indent:true}));
     }
-    body.push(p("Tăng cường kiểm tra, giám sát tình hình dịch bệnh trên đàn vật nuôi; chủ động phát hiện, khoanh vùng, xử lý ổ dịch phát sinh. Đẩy mạnh vệ sinh, tiêu độc khử trùng, chăn nuôi an toàn sinh học; quản lý việc mua bán, vận chuyển động vật và sản phẩm động vật, không để dịch bệnh lây lan diện rộng.",{indent:true}));
-    if (!isMonth) body.push(heading("3.2. Chi cục Nông nghiệp"));
-    body.push(p("Tiếp tục bám sát tình hình dịch bệnh, phối hợp với UBND các xã, phường giám sát, lấy mẫu, hướng dẫn xử lý; tổng hợp, cập nhật và báo cáo số liệu đúng thời hạn. Đối chiếu số liệu WEBGIS với hồ sơ chuyên môn trước khi phát hành báo cáo chính thức.",{indent:true}));
-    body.push(p(isMonth ? `Trên đây là báo cáo kết quả thực hiện công tác thú y ${reportPeriodTitle} của Phòng Thú y./.` : `Trên đây là báo cáo tình hình dịch bệnh động vật trên địa bàn tỉnh Điện Biên từ ${dateText(from)} đến ${dateText(to)}./.`,{indent:true}));
+    body.push(p(isMonth ? `Trên đây là báo cáo kết quả thực hiện công tác thú y ${reportPeriodTitle} của Phòng Thú y./.` : `Trên đây là báo cáo tình hình dịch bệnh động vật trên địa bàn tỉnh Điện Biên từ ${dateText(from)} đến ${dateText(to)}./.`, {indent:true}));
     body.push(new Paragraph({children:[new TextRun({text:"Nơi nhận: \n- Văn phòng Chi cục;\n- Lưu: VT, TY.",font:"Times New Roman",size:22,italics:true})],spacing:{before:300,after:100}}));
     body.push(new Paragraph({children:[new TextRun({text:"TRƯỞNG PHÒNG",font:"Times New Roman",bold:true,size:24})],alignment:AlignmentType.RIGHT,spacing:{after:900}}));
     body.push(new Paragraph({children:[new TextRun({text:"Phạm Thị Loan",font:"Times New Roman",size:22})],alignment:AlignmentType.RIGHT}));
