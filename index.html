@@ -1839,7 +1839,7 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
     <div class="chart-card">
       <div class="chart-card-head">
         <div class="chart-title">📈 Diễn biến dịch bệnh</div>
-        <button class="chart-download" type="button" data-download-chart="chartTrend" title="Tải biểu đồ PNG" aria-label="Tải biểu đồ diễn biến">↓ Tải</button>
+        <button class="chart-download" type="button" data-download-chart="chartTrend" title="Tải biểu đồ Word" aria-label="Tải biểu đồ diễn biến dạng Word">↓ Word</button>
       </div>
       <div class="chart-toolbar" aria-label="Chọn khoảng thời gian">
         <button class="chart-filter active" type="button" data-period="10d">10 ngày</button>
@@ -1853,7 +1853,7 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
     <div class="chart-card">
       <div class="chart-card-head">
         <div class="chart-title">📊 Thiệt hại theo xã/phường</div>
-        <button class="chart-download" type="button" data-download-chart="chartDamageXa" title="Tải biểu đồ PNG" aria-label="Tải biểu đồ thiệt hại">↓ Tải</button>
+        <button class="chart-download" type="button" data-download-chart="chartDamageXa" title="Tải biểu đồ Word" aria-label="Tải biểu đồ thiệt hại dạng Word">↓ Word</button>
       </div>
       <div class="chart-legend-note" id="damageNote">Số con tiêu hủy theo xã/phường</div>
       <div class="chart-body"><canvas id="chartDamageXa"></canvas></div>
@@ -1863,7 +1863,7 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
     <div class="chart-card comparison-card">
       <div class="chart-card-head">
         <div class="chart-title">📋 So sánh cùng kỳ – tỉnh Điện Biên</div>
-        <button class="chart-download" type="button" id="btnDownloadComparison" title="Tải bảng so sánh CSV" aria-label="Tải bảng so sánh">↓ Tải</button>
+        <button class="chart-download" type="button" id="btnDownloadComparison" title="Tải bảng so sánh Word" aria-label="Tải bảng so sánh dạng Word">↓ Word</button>
       </div>
       <div class="comparison-subtitle">Cùng kỳ từ 01/01 đến ngày cập nhật hiện tại</div>
       <div class="comparison-table-wrap">
@@ -2182,8 +2182,8 @@ document.addEventListener("DOMContentLoaded", function () {
     if(!trendCanvas || !window.Chart) return;
     const amountLabel=(key==="VDNC" || key==="DAI")?"Số con mắc":"Số con chết/tiêu hủy";
     trendChart=new Chart(trendCanvas,{
-      type:"bar",
-      data:{labels,datasets:[{label:amountLabel+" – "+cfg.label,data:values,backgroundColor:"rgba(229,57,53,.72)",borderColor:"#e53935",borderWidth:1,borderRadius:3}]},
+      type:"line",
+      data:{labels,datasets:[{label:amountLabel+" – "+cfg.label,data:values,borderColor:"#e53935",backgroundColor:"rgba(229,57,53,.12)",borderWidth:2,pointRadius:3,pointHoverRadius:5,pointBackgroundColor:"#e53935",pointBorderColor:"#ffffff",pointBorderWidth:1,fill:true,tension:0.25}]},
       options:{
         responsive:true,maintainAspectRatio:false,
         plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:10,font:{size:9}}},
@@ -2253,8 +2253,33 @@ document.addEventListener("DOMContentLoaded", function () {
   document.addEventListener("DOMContentLoaded",function(){
     document.querySelectorAll(".chart-filter[data-period]").forEach(b=>b.addEventListener("click",function(){ trendPeriod="10d"; document.querySelectorAll(".chart-filter[data-period]").forEach(x=>x.classList.toggle("active",x===this)); updateTrend(); }));
     const layer=document.getElementById("layerSelect"); if(layer) layer.addEventListener("change",refresh);
-    document.querySelectorAll("[data-download-chart]").forEach(b=>b.addEventListener("click",function(){ const id=this.dataset.downloadChart, canvas=document.getElementById(id); if(!canvas) return; const a=document.createElement("a"); a.href=canvas.toDataURL("image/png"); a.download=id+"_"+selected()+".png"; a.click(); }));
-    const csvBtn=document.getElementById("btnDownloadComparison"); if(csvBtn) csvBtn.addEventListener("click",function(){ const table=document.querySelector(".comparison-table"); if(!table) return; const csv=Array.from(table.rows).map(row=>Array.from(row.cells).map(c=>'"'+c.innerText.replace(/"/g,'""')+'"').join(",")).join("\r\n"); const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8;"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download="so-sanh-cung-ky.csv"; a.click(); URL.revokeObjectURL(url); });
+    function downloadWordDocument(filename, title, bodyHtml){
+      const html='<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:Arial,sans-serif;color:#222}h1{font-size:18pt;text-align:center}h2{font-size:14pt}p{font-size:10pt}table{border-collapse:collapse;width:100%;font-size:10pt}th,td{border:1px solid #777;padding:5px;text-align:left}th{background:#e8eef5}img{max-width:100%;height:auto}</style></head><body><h1>'+escapeHtml(title)+'</h1>'+bodyHtml+'</body></html>';
+      const blob=new Blob(['\ufeff',html],{type:'application/msword;charset=utf-8'});
+      const url=URL.createObjectURL(blob), a=document.createElement('a'); a.href=url; a.download=filename+'.doc'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1500);
+    }
+    function escapeHtml(value){return String(value??'').replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));}
+    document.querySelectorAll("[data-download-chart]").forEach(b=>b.addEventListener("click",function(){
+      const id=this.dataset.downloadChart, canvas=document.getElementById(id); if(!canvas) return;
+      const card=this.closest('.chart-card'), title=card?.querySelector('.chart-title')?.innerText||'Biểu đồ';
+      const note=card?.querySelector('.chart-legend-note')?.innerText||'';
+      let body='<p><b>Bệnh/lớp dữ liệu:</b> '+escapeHtml(selected())+'</p>';
+      if(note) body+='<p>'+escapeHtml(note)+'</p>';
+      body+='<p style="text-align:center"><img src="'+canvas.toDataURL('image/png')+'" alt="'+escapeHtml(title)+'"></p>';
+      const chart=window.Chart&&window.Chart.getChart(canvas);
+      if(chart){
+        const labels=chart.data.labels||[], datasets=chart.data.datasets||[];
+        body+='<h2>Số liệu biểu đồ</h2><table><thead><tr><th>Kỳ/Xã, phường</th>'+datasets.map(ds=>'<th>'+escapeHtml(ds.label||'Số liệu')+'</th>').join('')+'</tr></thead><tbody>';
+        labels.forEach((label,i)=>{body+='<tr><td>'+escapeHtml(label)+'</td>'+datasets.map(ds=>'<td>'+escapeHtml(ds.data?.[i]??'')+'</td>').join('')+'</tr>';});
+        body+='</tbody></table>';
+      }
+      downloadWordDocument(id+'_'+selected(),title,body);
+    }));
+    const comparisonBtn=document.getElementById("btnDownloadComparison");
+    if(comparisonBtn) comparisonBtn.addEventListener("click",function(){
+      const table=document.querySelector(".comparison-table"); if(!table) return;
+      downloadWordDocument("so-sanh-cung-ky","So sánh cùng kỳ – tỉnh Điện Biên",'<table>'+table.innerHTML+'</table>');
+    });
     refresh();
     window.addEventListener("resize",function(){ if(trendChart) trendChart.resize(); if(damageChart) damageChart.resize();  });
     // Một số bản tải dữ liệu hoàn tất sau DOMContentLoaded.
