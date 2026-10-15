@@ -106,7 +106,20 @@ function initMap() {
         maxWidth: 120
     }).addTo(map);
 
-    addBaseLayers();
+    
+function addBaseLayers() {
+    streetLayer = L.tileLayer(STREET_URL, {
+        subdomains: "abcd",
+        maxZoom: 20,
+        attribution: "&copy; OpenStreetMap contributors &copy; CARTO"
+    }).addTo(map);
+
+    satelliteLayer = L.tileLayer(SATELLITE_URL, {
+        maxZoom: 19,
+        attribution: "Tiles &copy; Esri"
+    });
+}
+;
     addProvinceEmphasis();
     map.createPane("diseaseMarkers");
     map.getPane("diseaseMarkers").style.zIndex = 640;
