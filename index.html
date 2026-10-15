@@ -1971,6 +1971,38 @@ document.addEventListener("DOMContentLoaded", function () {
   yearInput?.addEventListener("change", () => setReportPeriod(true));
   setReportPeriod();
 
+  async function editReportDraft(initialText) {
+    return new Promise(resolve => {
+      const overlay = document.createElement("div");
+      overlay.id = "webgisReportDraftOverlay";
+      overlay.style.cssText = "position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:18px;";
+      const panel = document.createElement("div");
+      panel.style.cssText = "background:#fff;color:#222;width:min(1000px,96vw);height:min(88vh,900px);display:flex;flex-direction:column;border-radius:12px;box-shadow:0 12px 40px #0004;padding:18px;gap:10px;";
+      const title = document.createElement("h2");
+      title.textContent = "Dự thảo báo cáo – xem và chỉnh sửa trước khi xuất Word";
+      title.style.cssText = "font-size:19px;margin:0;";
+      const note = document.createElement("p");
+      note.textContent = "Áp dụng cho báo cáo kỳ 10 ngày, tháng, quý và năm. Số liệu dịch bệnh được lấy từ API theo khoảng ngày đã chọn; các mục hoạt động chưa có nguồn dữ liệu kết nối được đánh dấu “...” để bạn bổ sung, kiểm tra trước khi xuất Word.";
+      note.style.cssText = "font-size:13px;line-height:1.5;margin:0;color:#555;";
+      const area = document.createElement("textarea");
+      area.value = initialText;
+      area.setAttribute("aria-label", "Nội dung dự thảo báo cáo");
+      area.style.cssText = "flex:1;width:100%;resize:vertical;box-sizing:border-box;font:15px/1.55 'Times New Roman',serif;padding:12px;border:1px solid #bbb;border-radius:6px;white-space:pre-wrap;";
+      const actions = document.createElement("div");
+      actions.style.cssText = "display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;";
+      const cancel = document.createElement("button"); cancel.type="button"; cancel.textContent="Hủy";
+      const exportBtn = document.createElement("button"); exportBtn.type="button"; exportBtn.textContent="Xác nhận và xuất Word";
+      [cancel,exportBtn].forEach(b=>b.style.cssText="padding:10px 16px;border:0;border-radius:6px;cursor:pointer;font-weight:600;");
+      exportBtn.style.background="#176b3a"; exportBtn.style.color="#fff"; cancel.style.background="#e8e8e8";
+      actions.append(cancel,exportBtn); panel.append(title,note,area,actions); overlay.append(panel); document.body.append(overlay);
+      const close = value => { overlay.remove(); resolve(value); };
+      cancel.addEventListener("click",()=>close(null));
+      exportBtn.addEventListener("click",()=>close(area.value));
+      overlay.addEventListener("click",e=>{if(e.target===overlay) close(null);});
+      area.focus();
+    });
+  }
+
   const norm = v => String(v ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g,"d").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
   const fmt = n => Number(n || 0).toLocaleString("vi-VN");
   const pick = (row, candidates) => {
@@ -2090,6 +2122,8 @@ document.addEventListener("DOMContentLoaded", function () {
       ? `Kết quả thực hiện công tác thú y ${reportPeriodTitle}`
       : `Tình hình dịch bệnh động vật trên địa bàn tỉnh Điện Biên\ntừ ${dateText(from)} đến ${dateText(to)}`;
     const periodLine = isMonth ? `Kỳ báo cáo: ${reportPeriodTitle}` : `Số liệu từ ${dateText(from)} đến ${dateText(to)}`;
+    const nextPeriodLabel = reportKind === "period" ? "kỳ tiếp theo" : reportKind === "month" ? "tháng tiếp theo" : reportKind === "quarter" ? "quý tiếp theo" : "năm tiếp theo";
+    const activitySectionTitle = reportKind === "period" ? "2. Công tác phòng, chống dịch và hoạt động thú y trong kỳ" : "2. Kết quả thực hiện công tác thú y";
     const headerLeft = new Paragraph({children:[new TextRun({text:"CHI CỤC NÔNG NGHIỆP TỈNH ĐIỆN BIÊN\nPHÒNG THÚ Y\nSố:       /BC-TY",font:"Times New Roman",bold:true,size:22})],alignment:AlignmentType.CENTER,spacing:{after:160}});
     const headerRight = new Paragraph({children:[new TextRun({text:"CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\nĐộc lập - Tự do - Hạnh phúc\nĐiện Biên, ngày "+today.getDate()+" tháng "+(today.getMonth()+1)+" năm "+today.getFullYear(),font:"Times New Roman",bold:true,size:22})],alignment:AlignmentType.CENTER,spacing:{after:260}});
     body.push(headerLeft, headerRight, title("BÁO CÁO"));
@@ -2124,12 +2158,17 @@ document.addEventListener("DOMContentLoaded", function () {
       body.push(heading("2.2. Giám sát dịch bệnh"));
       body.push(p("Phối hợp với UBND các xã, phường theo dõi, giám sát tình hình dịch bệnh trên đàn vật nuôi; tổ chức lấy mẫu, gửi xét nghiệm và hướng dẫn xử lý khi phát sinh dịch bệnh.", {indent:true}));
       body.push(heading("2.3. Công tác tiêm phòng vắc xin, vệ sinh tiêu độc khử trùng"));
+      body.push(p("Tiếp tục phối hợp, hướng dẫn UBND các xã, phường tổ chức tiêm phòng vắc xin cho đàn vật nuôi theo kế hoạch; theo dõi tiến độ, tổng hợp kết quả tiêm phòng và rà soát nhu cầu vắc xin. Triển khai vệ sinh, tiêu độc, khử trùng môi trường chăn nuôi, tập trung tại khu vực có dịch, ổ dịch cũ và địa bàn nguy cơ cao.", {indent:true}));
       body.push(heading("2.4. Kiểm dịch động vật, sản phẩm động vật"));
+      body.push(p("Thực hiện kiểm dịch vận chuyển động vật, sản phẩm động vật theo quy định; hướng dẫn tổ chức, cá nhân thực hiện đầy đủ hồ sơ, thủ tục kiểm dịch và tăng cường kiểm tra, kiểm soát động vật, sản phẩm động vật vận chuyển vào địa bàn tỉnh.", {indent:true}));
       body.push(heading("2.5. Kiểm soát giết mổ, kiểm tra vệ sinh thú y và an toàn thực phẩm"));
+      body.push(p("Phối hợp với các cơ quan, đơn vị và UBND các xã, phường kiểm tra, kiểm soát hoạt động giết mổ động vật; giám sát vệ sinh thú y tại cơ sở giết mổ, sơ chế, bảo quản sản phẩm động vật, góp phần bảo đảm an toàn thực phẩm.", {indent:true}));
       body.push(heading("2.6. Quản lý thuốc thú y"));
+      body.push(p("Thực hiện quản lý hoạt động kinh doanh thuốc thú y; hướng dẫn tổ chức, cá nhân chấp hành quy định về điều kiện buôn bán thuốc thú y, hành nghề thú y, nguồn gốc và chất lượng thuốc thú y.", {indent:true}));
       body.push(heading("2.7. Thực hiện thủ tục hành chính"));
-      body.push(heading("3. Kế hoạch nhiệm vụ tháng tiếp theo"));
-      body.push(p("Tiếp tục bám sát tình hình dịch bệnh, tham mưu kịp thời công tác phòng, chống dịch; phối hợp với UBND các xã, phường giám sát, lấy mẫu, xử lý ổ dịch và thực hiện các nhiệm vụ chuyên môn về thú y.", {indent:true}));
+      body.push(p("Tiếp nhận, giải quyết các thủ tục hành chính thuộc lĩnh vực thú y theo thẩm quyền, bảo đảm đúng trình tự, thủ tục và thời hạn quy định.", {indent:true}));
+      body.push(heading(`3. Kế hoạch nhiệm vụ ${nextPeriodLabel}`));
+      body.push(p("Tiếp tục bám sát tình hình dịch bệnh, tham mưu kịp thời công tác phòng, chống dịch; phối hợp với UBND các xã, phường giám sát, lấy mẫu, xử lý ổ dịch; đôn đốc tiêm phòng vắc xin, vệ sinh tiêu độc khử trùng và thực hiện các nhiệm vụ kiểm dịch, kiểm soát giết mổ, kiểm tra vệ sinh thú y, quản lý thuốc thú y theo quy định.", {indent:true}));
     } else {
       body.push(heading("2. Công tác phòng, chống dịch đã và đang thực hiện"));
       body.push(heading("a. Tham mưu, chỉ đạo"));
@@ -2143,10 +2182,55 @@ document.addEventListener("DOMContentLoaded", function () {
       body.push(heading("3.2. Chi cục Nông nghiệp"));
       body.push(p("Tiếp tục bám sát tình hình dịch bệnh; phối hợp với UBND các xã, phường giám sát, lấy mẫu, hướng dẫn xử lý và tổng hợp, báo cáo tình hình dịch bệnh theo quy định.", {indent:true}));
     }
-    body.push(p(isMonth ? `Trên đây là báo cáo kết quả thực hiện công tác thú y ${reportPeriodTitle} của Phòng Thú y./.` : `Trên đây là báo cáo tình hình dịch bệnh động vật trên địa bàn tỉnh Điện Biên từ ${dateText(from)} đến ${dateText(to)}./.`, {indent:true}));
+    body.push(p(isMonth ? `Trên đây là báo cáo kết quả thực hiện công tác thú y ${reportPeriodTitle} của Phòng Thú y./.` : `Trên đây là báo cáo tình hình dịch bệnh động vật và hoạt động thú y trên địa bàn tỉnh Điện Biên từ ${dateText(from)} đến ${dateText(to)}./.`, {indent:true}));
     body.push(new Paragraph({children:[new TextRun({text:"Nơi nhận: \n- Văn phòng Chi cục;\n- Lưu: VT, TY.",font:"Times New Roman",size:22,italics:true})],spacing:{before:300,after:100}}));
     body.push(new Paragraph({children:[new TextRun({text:"TRƯỞNG PHÒNG",font:"Times New Roman",bold:true,size:24})],alignment:AlignmentType.RIGHT,spacing:{after:900}}));
     body.push(new Paragraph({children:[new TextRun({text:"Phạm Thị Loan",font:"Times New Roman",size:22})],alignment:AlignmentType.RIGHT}));
+
+    // Dự thảo dùng chung cho kỳ 10 ngày, tháng, quý và năm. Chỉ tự điền số liệu thực tế có trong API;
+    // các mục hoạt động chưa có nguồn dữ liệu kết nối được để người dùng bổ sung/xác nhận.
+    const draftLines = [];
+    draftLines.push(isMonth ? `BÁO CÁO KẾT QUẢ THỰC HIỆN CÔNG TÁC THÚ Y ${reportPeriodTitle.toUpperCase()}` : `BÁO CÁO TÌNH HÌNH DỊCH BỆNH VÀ HOẠT ĐỘNG THÚ Y ${range.toUpperCase()}`);
+    draftLines.push("", isMonth ? "1. Tình hình dịch bệnh" : "1. Tình hình dịch bệnh động vật");
+    if (diseaseStats.length) {
+      diseaseStats.forEach(item => {
+        const householdCount = Number(item.householdCount || 0);
+        const villageCount = Number(item.villageCount || 0);
+        const communeCount = Number(item.communeCount || 0);
+        const locationText = householdCount && villageCount && communeCount
+          ? `tại ${fmt(householdCount)} hộ thuộc ${fmt(villageCount)} thôn, bản của ${fmt(communeCount)} xã, phường`
+          : householdCount && villageCount ? `tại ${fmt(householdCount)} hộ thuộc ${fmt(villageCount)} thôn, bản`
+          : villageCount && communeCount ? `tại ${fmt(villageCount)} thôn, bản thuộc ${fmt(communeCount)} xã, phường`
+          : communeCount ? `tại ${fmt(communeCount)} xã, phường` : "";
+        const animal = item.code === "DTLCP" ? "lợn" : item.code === "CGC" ? "gia cầm" : item.code === "VDNC" ? "trâu, bò" : "động vật";
+        let sentence = `${item.name || item.code}: trong kỳ dịch bệnh xảy ra`;
+        if (locationText) sentence += ` ${locationText}`;
+        if (Number(item.cases || 0)) sentence += ` với tổng số ${animal} mắc bệnh ${fmt(item.cases)} con`;
+        if (Number(item.deadCull || 0)) sentence += `${Number(item.cases || 0) ? "; " : " với tổng số "}${animal} chết, tiêu hủy ${fmt(item.deadCull)} con`;
+        sentence += ".";
+        draftLines.push(sentence);
+      });
+    } else {
+      draftLines.push("Không có bản ghi dịch bệnh trong khoảng thời gian đã chọn.");
+    }
+    draftLines.push("", "Nhận định tình hình dịch", "...");
+    draftLines.push("", activitySectionTitle, "2.1. Tham mưu, chỉ đạo", "...", "2.2. Giám sát dịch bệnh", "...");
+    draftLines.push("2.3. Công tác tiêm phòng vắc xin", "Số liệu/kết quả thực hiện: ...", "2.4. Vệ sinh, tiêu độc khử trùng", "Số liệu/kết quả thực hiện: ...");
+    draftLines.push("2.5. Kiểm dịch động vật, sản phẩm động vật", "Số liệu/kết quả thực hiện: ...", "2.6. Kiểm soát giết mổ, kiểm tra vệ sinh thú y và an toàn thực phẩm", "Số liệu/kết quả thực hiện: ...");
+    draftLines.push("2.7. Quản lý thuốc thú y và hành nghề thú y", "Số liệu/kết quả thực hiện: ...", "2.8. Thực hiện thủ tục hành chính", "Số liệu/kết quả thực hiện: ...", "2.9. Công tác chuyên môn khác", "Số liệu/kết quả thực hiện: ...");
+    draftLines.push("", `3. Kế hoạch nhiệm vụ ${nextPeriodLabel}`, "3.1. UBND các xã, phường", "...", "3.2. Chi cục Nông nghiệp", "...");
+    const draftText = await editReportDraft(draftLines.join("\n"));
+    if (draftText === null) return;
+    const draftParagraphs = draftText.split(/\r?\n/).map(line => {
+      const text = line.trim();
+      if (!text) return p("", {after:80});
+      const isHeading = /^(?:\d+(?:\.\d+)*\.?\s|[a-z]\.\s|Nhận định tình hình dịch$)/i.test(text);
+      return isHeading ? heading(text) : p(text, {indent:true});
+    });
+    // Giữ nguyên phần đầu trang và phần ký báo cáo theo mẫu; thay nội dung bằng bản đã duyệt.
+    const fixedHeader = body.slice(0, 5);
+    const fixedFooter = body.slice(-4);
+    body.splice(0, body.length, ...fixedHeader, ...draftParagraphs, ...fixedFooter);
 
     try {
       const doc = new Document({sections:[{properties:{page:{size:{width:11906,height:16838},margin:{top:1440,right:1440,bottom:1440,left:1701}}},children:body}]});
