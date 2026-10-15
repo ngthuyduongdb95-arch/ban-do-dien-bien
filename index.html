@@ -2131,13 +2131,32 @@ document.addEventListener("DOMContentLoaded", function () {
       .replace(/đ/g,"d").replace(/Đ/g,"D").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
   }
   function firstValue(row, keys){
+    const usable = v => v !== "" && v !== null && v !== undefined;
     for(const k of keys){
-      if(Object.prototype.hasOwnProperty.call(row,k) && row[k] !== "" && row[k] !== null && row[k] !== undefined) return row[k];
+      if(Object.prototype.hasOwnProperty.call(row,k) && usable(row[k])) return row[k];
     }
     const wanted = keys.map(normText);
     const actual = Object.keys(row);
     for(let i=0;i<actual.length;i++){
-      if(wanted.includes(normText(actual[i])) && row[actual[i]] !== "" && row[actual[i]] !== null && row[actual[i]] !== undefined) return row[actual[i]];
+      if(wanted.includes(normText(actual[i])) && usable(row[actual[i]])) return row[actual[i]];
+    }
+    return null;
+  }
+  // Fallback for source-sheet headers that contain extra words or punctuation.
+  function fuzzyValue(row, kind){
+    const entries = Object.entries(row || {}).filter(([k,v]) => v !== "" && v !== null && v !== undefined);
+    const normalized = entries.map(([k,v]) => [normText(k),v,k]);
+    if(kind === "date"){
+      const hit = normalized.find(([k]) => k === "ngay" || k.startsWith("ngay ") || k.includes(" ngay ") || k.endsWith(" ngay"));
+      return hit ? hit[1] : null;
+    }
+    if(kind === "case"){
+      const hit = normalized.find(([k]) => (k.includes("mac") || k.includes("ca mac")) && !k.includes("ngay") && !k.includes("ty le"));
+      return hit ? hit[1] : null;
+    }
+    if(kind === "death"){
+      const hit = normalized.find(([k]) => (k.includes("chet") || k.includes("tieu huy")) && !k.includes("ngay"));
+      return hit ? hit[1] : null;
     }
     return null;
   }
@@ -2164,12 +2183,11 @@ document.addEventListener("DOMContentLoaded", function () {
     return isNaN(d.getTime()) ? null : new Date(d.getFullYear(),d.getMonth(),d.getDate());
   }
   function trendValue(row, key){
-    // API sheet headers are expected to include "Mắc" and "Chết / tiêu hủy".
-    // Use disease-specific indicator; do not substitute another indicator silently.
     const keys = key === "VDNC"
-      ? ["Mắc","Số mắc (con)","Số mắc","Số con mắc","Ca mắc"]
-      : ["Chết / tiêu hủy","Chết/tiêu hủy","Số chết, tiêu hủy","Số con chết/tiêu hủy","Chết","Tiêu hủy"];
-    const v = firstValue(row, keys);
+      ? ["Mắc","Số mắc (con)","Số mắc","Số con mắc","Ca mắc","Số con mắc bệnh"]
+      : ["Chết / tiêu hủy","Chết/tiêu hủy","Số chết, tiêu hủy","Số con chết/tiêu hủy","Số con chết, tiêu hủy","Chết","Tiêu hủy"];
+    let v = firstValue(row, keys);
+    if(v === null) v = fuzzyValue(row, key === "VDNC" ? "case" : "death");
     return v === null ? null : num(v);
   }
   async function loadTrendRows(){
@@ -2221,7 +2239,8 @@ document.addEventListener("DOMContentLoaded", function () {
     trendRows.forEach(row => {
       if(trendDiseaseKey(row) !== key) return;
       matchedDisease++;
-      const dateRaw = firstValue(row, ["Ngày","Ngày ghi nhận","Ngày phát hiện","Ngày xảy ra","Ngày tiêu hủy","Ngày chết/tiêu hủy","Ngày chết, tiêu hủy","Ngày cập nhật"]);
+      let dateRaw = firstValue(row, ["Ngày","Ngày ghi nhận","Ngày phát hiện","Ngày xảy ra","Ngày tiêu hủy","Ngày chết/tiêu hủy","Ngày chết, tiêu hủy","Ngày cập nhật","Ngày xảy ra ổ dịch","Ngày bắt đầu"]);
+      if(dateRaw === null) dateRaw = fuzzyValue(row, "date");
       const date = parseTrendDate(dateRaw);
       const value = trendValue(row,key);
       if(!date || value === null || !Number.isFinite(value)) { skipped++; return; }
@@ -2247,7 +2266,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if(note){
       note.textContent = bucketKeys.length
         ? `${cfg.label} · ${metric} theo kỳ 10 ngày (01–10, 11–20, 21–cuối tháng); đã cộng các bản ghi trong từng kỳ${skipped ? ` · ${skipped} bản ghi thiếu ngày/chỉ tiêu bị bỏ qua` : ""}.`
-        : `${cfg.label}: API có ${trendRows.length} bản ghi${matchedDisease ? `, trong đó ${matchedDisease} bản ghi khớp tên bệnh` : ", nhưng chưa khớp tên bệnh"}; chưa tìm thấy dữ liệu có ngày và chỉ tiêu phù hợp trong GIS_DICH_BENH_NGAY.`;
+        : `${cfg.label}: API có ${trendRows.length} bản ghi${matchedDisease ? `, trong đó ${matchedDisease} bản ghi khớp tên bệnh` : ", nhưng chưa khớp tên bệnh"}; chưa tìm thấy dữ liệu có ngày và chỉ tiêu phù hợp. Các cột API mẫu: ${Object.keys(trendRows.find(r => trendDiseaseKey(r) === key) || trendRows[0] || {}).join(" | ") || "không xác định"}.`;
     }
     if(!trendCanvas || !window.Chart) return;
     const colors = {DTLCP:"#e53935",CGC:"#2e7d32",VDNC:"#1976d2",DAI:"#6a35d1"};
