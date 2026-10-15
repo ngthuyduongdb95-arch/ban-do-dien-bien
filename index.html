@@ -2046,18 +2046,26 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!reportData || reportData.success !== true) {
         throw new Error(reportData?.error || "API không trả về success: true");
       }
+      // Nếu API chỉ trả dữ liệu sheet thông thường (GIS_TONGHOP/data) thì nhánh type=report
+      // chưa được tích hợp hoặc chưa triển khai phiên bản mới.
+      if (!Array.isArray(reportData.diseases)) {
+        throw new Error("API hiện chưa trả về danh sách diseases của báo cáo. Hãy thêm nhánh type=report vào doGet(e), lưu Apps Script và Deploy > Manage deployments > Edit > New version.");
+      }
     } catch (err) {
       console.error("Lỗi lấy số liệu API báo cáo:", err);
-      alert("Không lấy được số liệu báo cáo từ API. Kiểm tra URL Web App, quyền truy cập và triển khai Apps Script. Chi tiết: " + (err.message || err));
+      alert("Không lấy được dữ liệu báo cáo. " + (err.message || err));
       return;
     }
 
     // Báo cáo tổng hợp phải bao quát mọi bệnh có dữ liệu, không phụ thuộc lớp bản đồ đang chọn.
-    const diseaseStats = (Array.isArray(reportData.diseases) ? reportData.diseases : [])
+    const diseaseStats = reportData.diseases
       .filter(item => Number(item.records || 0) > 0)
       .sort((a,b) => String(a.code || "").localeCompare(String(b.code || ""), "vi"));
     if (!diseaseStats.length) {
-      alert("Không có bản ghi dịch bệnh trong khoảng ngày đã chọn.");
+      const diagnostics = reportData.debug
+        ? "\nChẩn đoán API: " + JSON.stringify(reportData.debug)
+        : "";
+      alert("API đã chạy nhưng không tìm thấy bản ghi có ngày nằm trong khoảng " + fromText + " đến " + toText + ". Có thể cột ngày trong GIS_DICH_BENH_NGAY không đúng định dạng/cột mà API đang đọc, hoặc dữ liệu chi tiết chưa được cập nhật. Nếu tiếp tục gặp lỗi, gửi ảnh thông báo này và hàng tiêu đề của sheet GIS_DICH_BENH_NGAY để xác định đúng cột ngày." + diagnostics);
       return;
     }
 
