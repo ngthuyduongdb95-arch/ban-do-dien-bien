@@ -1892,8 +1892,43 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
 <script src="js/dashboard.js"></script>
 <script src="js/map.js"></script>
 <script src="js/app.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/docx@9.11.0/dist/index.umd.cjs"></script>
-<script src="https://cdn.jsdelivr.net/npm/docx@9.11.0/dist/charts.umd.cjs"></script>
+<!-- Tải thư viện tạo Word theo nhiều CDN dự phòng; biểu đồ Word dùng ChartRun của docx/charts -->
+<script>
+(function(){
+  function loadOne(urls, globalName, done){
+    let i=0;
+    function attempt(){
+      if(i>=urls.length){ console.error('Không tải được thư viện:',globalName,urls); done(false); return; }
+      const url=urls[i++], script=document.createElement('script');
+      script.src=url; script.async=false;
+      script.onload=function(){
+        if(window[globalName]) done(true);
+        else { console.warn('Đã tải tệp nhưng không thấy global',globalName,url); attempt(); }
+      };
+      script.onerror=function(){ console.warn('CDN lỗi, thử nguồn tiếp theo:',url); attempt(); };
+      document.head.appendChild(script);
+    }
+    attempt();
+  }
+  const v='9.11.0';
+  loadOne([
+    `https://cdn.jsdelivr.net/npm/docx@${v}/dist/index.umd.cjs`,
+    `https://unpkg.com/docx@${v}/dist/index.umd.cjs`,
+    `https://cdn.jsdelivr.net/npm/docx@9.10.0/dist/index.umd.cjs`,
+    `https://unpkg.com/docx@9.10.0/dist/index.umd.cjs`
+  ],'docx',function(ok){
+    if(!ok){ window.__docxLibraryError='Không tải được thư viện docx từ các CDN dự phòng.'; return; }
+    loadOne([
+      `https://cdn.jsdelivr.net/npm/docx@${v}/dist/charts.umd.cjs`,
+      `https://unpkg.com/docx@${v}/dist/charts.umd.cjs`,
+      'https://cdn.jsdelivr.net/npm/docx@9.10.0/dist/charts.umd.cjs',
+      'https://unpkg.com/docx@9.10.0/dist/charts.umd.cjs'
+    ],'docxCharts',function(chartOk){
+      if(!chartOk) window.__docxLibraryError='Không tải được thư viện biểu đồ Word (docx/charts).';
+    });
+  });
+})();
+</script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   const startInput = document.getElementById("reportStartDate");
@@ -1996,7 +2031,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const fromText = startInput?.value || "";
     const toText = endInput?.value || "";
     if (fromText && toText && fromText > toText) { alert("Ngày bắt đầu không được sau ngày kết thúc."); return; }
-    if (!window.docx) { alert("Chưa tải được thư viện tạo Word. Kiểm tra kết nối Internet rồi thử lại."); return; }
+    if (!window.docx) { alert("Chưa tải được thư viện tạo Word. Hãy kiểm tra kết nối Internet hoặc quyền truy cập jsdelivr.net / unpkg.com rồi tải lại trang (Ctrl+F5)."); return; }
     const from = fromText ? parseDate(fromText) : null;
     const to = toText ? parseDate(toText) : null;
     const rows = allRows.filter(r => {
@@ -2381,7 +2416,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const canvas=document.getElementById(id);
       const chart=canvas && window.Chart ? window.Chart.getChart(canvas) : null;
       if(!chart){ alert("Biểu đồ chưa có dữ liệu để tải. Vui lòng chờ biểu đồ hiển thị rồi thử lại."); return; }
-      if(!window.docx || !window.docxCharts || !window.docxCharts.ChartRun){ alert("Chưa tải được thư viện tạo biểu đồ Word. Hãy kiểm tra kết nối Internet rồi thử lại."); return; }
+      if(!window.docx || !window.docxCharts || !window.docxCharts.ChartRun){ alert((window.__docxLibraryError || "Chưa tải được thư viện tạo biểu đồ Word.")+" Kiểm tra kết nối Internet/quyền truy cập CDN rồi tải lại trang bằng Ctrl+F5."); return; }
       const {Document,Paragraph,TextRun,Packer,AlignmentType}=window.docx;
       const {ChartRun}=window.docxCharts;
       const diseaseSelect=document.getElementById("trendDiseaseSelect");
@@ -2405,8 +2440,49 @@ document.addEventListener("DOMContentLoaded", function () {
         a.href=url; a.download=safe+".docx"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),2000);
       }catch(err){ console.error("Lỗi xuất biểu đồ Word có thể chỉnh sửa:",err); alert("Không tạo được biểu đồ Word. Mở F12 > Console để xem lỗi."); }
     }));
+    async function loadComparisonData(){
+      const ids=["cmpXaPrev","cmpXaCurrent","cmpXaChange","cmpODPrev","cmpODCurrent","cmpODChange","cmpMacPrev","cmpMacCurrent","cmpMacChange","cmpTieuHuyPrev","cmpTieuHuyCurrent","cmpTieuHuyChange"];
+      const put=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+      const normCmp=v=>String(v??"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/đ/g,"d").replace(/[^a-z0-9]/g,"");
+      const valCmp=(r,names)=>{const ks=Object.keys(r||{});for(const n of names){if(r[n]!==undefined&&r[n]!==null&&r[n]!=="")return r[n];const k=ks.find(x=>normCmp(x)===normCmp(n));if(k&&r[k]!==undefined&&r[k]!==null&&r[k]!=="")return r[k];}return "";};
+      const dateCmp=v=>{if(!v)return null;if(v instanceof Date&&!isNaN(v))return v;let m=String(v).trim().match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);if(m)return new Date(+m[3],+m[2]-1,+m[1]);m=String(v).trim().match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);if(m)return new Date(+m[1],+m[2]-1,+m[3]);const d=new Date(v);return isNaN(d)?null:d;};
+      const numberCmp=v=>{if(typeof v==="number")return Number.isFinite(v)?v:0;let x=String(v??"").trim().replace(/\.(?=\d{3}(\D|$))/g,"").replace(/,/g,".").replace(/[^\d.-]/g,"");const n=Number(x);return Number.isFinite(n)?n:0;};
+      const fmtCmp=n=>Number(n||0).toLocaleString("vi-VN");
+      const now=new Date(), yr=now.getFullYear(), endPrev=new Date(yr-1,now.getMonth(),now.getDate());
+      const fmtDate=d=>`${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}`;
+      put("comparisonYearPrev",`01/01–${fmtDate(endPrev)}/${yr-1}`);put("comparisonYearCurrent",`01/01–${fmtDate(now)}/${yr}`);
+      const setErr=msg=>ids.forEach(id=>put(id,msg));
+      try{
+        const res=await fetch("https://script.google.com/macros/s/AKfycbyeHRUePa7E0GqBdQVHqLzb0NLkiNneysEoaGcZhnHOad-il1fv4LKI5pmpVOF0n4s6/exec?type=trend",{cache:"no-store"});
+        if(!res.ok)throw new Error("HTTP "+res.status);
+        const payload=await res.json();const data=Array.isArray(payload)?payload:(Array.isArray(payload.data)?payload.data:[]);
+        if(!data.length)throw new Error("API không trả về bản ghi");
+        const summarizePeriod=(year)=>{
+          const from=new Date(year,0,1), to=new Date(year,now.getMonth(),now.getDate());
+          const rows=data.map(r=>({r,d:dateCmp(valCmp(r,["Ngày","Ngày ghi nhận","Ngày phát hiện","Ngày xảy ra"]))})).filter(x=>x.d&&x.d>=from&&x.d<=to);
+          const communes=new Set(), outbreaks=new Set();let cases=0,dead=0;
+          rows.forEach(({r,d})=>{
+            const disease=String(valCmp(r,["Tên bệnh","Bệnh","Mã bệnh"])).trim();
+            const commune=String(valCmp(r,["Xã","Xã/phường","Tên xã","Tên xã/phường"])).trim();
+            const village=String(valCmp(r,["Thôn/bản","Thôn bản","Tên thôn/bản"])).trim();
+            const house=String(valCmp(r,["Tên hộ","Hộ chăn nuôi","Chủ hộ"])).trim();
+            const indicator=normCmp(valCmp(r,["Chỉ tiêu","Ten chi tieu"]));
+            const amount=numberCmp(valCmp(r,["Số con theo chỉ tiêu","Số con","Số lượng","Giá trị"]));
+            if(commune)communes.add(commune);
+            if(disease||commune||village||house)outbreaks.add([disease,d.toISOString().slice(0,10),commune,village,house].join("|"));
+            if(indicator.includes("mac")||indicator.includes("ca benh"))cases+=amount;
+            if(indicator.includes("chet")||indicator.includes("tieu huy")||indicator.includes("tieuhuy"))dead+=amount;
+          });
+          return {communes:communes.size,outbreaks:outbreaks.size,cases,dead};
+        };
+        const prev=summarizePeriod(yr-1),cur=summarizePeriod(yr);
+        const write=(key,a,b)=>{put(key+"Prev",fmtCmp(a));put(key+"Current",fmtCmp(b));put(key+"Change",a===0?(b===0?"0%":"—"):((b-a)/a*100).toLocaleString("vi-VN",{maximumFractionDigits:1})+"%");};
+        write("cmpXa",prev.communes,cur.communes);write("cmpOD",prev.outbreaks,cur.outbreaks);write("cmpMac",prev.cases,cur.cases);write("cmpTieuHuy",prev.dead,cur.dead);
+      }catch(err){console.warn("Không tải được bảng so sánh cùng kỳ:",err);setErr("Chưa tải được");const sub=document.querySelector(".comparison-subtitle");if(sub)sub.textContent="Không tải được dữ liệu so sánh; kiểm tra kết nối API và thử tải lại trang.";}
+    }
     const csvBtn=document.getElementById("btnDownloadComparison"); if(csvBtn) csvBtn.addEventListener("click",function(){ const table=document.querySelector(".comparison-table"); if(!table) return; const csv=Array.from(table.rows).map(row=>Array.from(row.cells).map(c=>'"'+c.innerText.replace(/"/g,'""')+'"').join(",")).join("\r\n"); const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8;"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download="so-sanh-cung-ky.csv"; a.click(); URL.revokeObjectURL(url); });
     refresh();
+    loadComparisonData();
     loadTrendRows();
     window.addEventListener("resize",function(){ if(trendChart) trendChart.resize(); if(damageChart) damageChart.resize();  });
     // Một số bản tải dữ liệu hoàn tất sau DOMContentLoaded.
