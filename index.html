@@ -2026,25 +2026,55 @@ document.addEventListener("DOMContentLoaded", function () {
   if (printBtn) printBtn.addEventListener("click", () => window.print());
   if (!createBtn) return;
   createBtn.addEventListener("click", async () => {
-    const allRows = getRowsSafe();
-    if (!allRows.length) { alert("Chưa tải được dữ liệu Google Sheets."); return; }
     const fromText = startInput?.value || "";
     const toText = endInput?.value || "";
-    if (fromText && toText && fromText > toText) { alert("Ngày bắt đầu không được sau ngày kết thúc."); return; }
+    if (!fromText || !toText) { alert("Vui lòng chọn cả ngày bắt đầu và ngày kết thúc."); return; }
+    if (fromText > toText) { alert("Ngày bắt đầu không được sau ngày kết thúc."); return; }
     if (!window.docx) { alert("Chưa tải được thư viện tạo Word. Hãy kiểm tra kết nối Internet hoặc quyền truy cập jsdelivr.net / unpkg.com rồi tải lại trang (Ctrl+F5)."); return; }
-    const from = fromText ? parseDate(fromText) : null;
-    const to = toText ? parseDate(toText) : null;
-    const rows = allRows.filter(r => {
-      const d = dateOf(r);
-      if (!from && !to) return true;
-      if (!d) return false;
-      return (!from || d >= from) && (!to || d <= new Date(to.getFullYear(),to.getMonth(),to.getDate(),23,59,59,999));
-    });
-    if (!rows.length) { alert("Không có bản ghi phù hợp khoảng ngày đã chọn. Nếu dữ liệu nguồn không có cột ngày, hãy để trống khoảng ngày."); return; }
+
+    // Lấy số liệu báo cáo từ API chi tiết theo đúng khoảng ngày đã chọn.
+    // Không phụ thuộc lớp bản đồ đang tải trong GIS_TONGHOP.
+    const REPORT_API_URL = "https://script.google.com/macros/s/AKfycbyeHRUePa7E0GqBdQVHqLzb0NLkiNneysEoaGcZhnHOad-il1fv4LKI5pmpVOF0n4s6/exec";
+    let reportData;
+    try {
+      const apiUrl = REPORT_API_URL
+        + "?type=report&from=" + encodeURIComponent(fromText)
+        + "&to=" + encodeURIComponent(toText);
+      const response = await fetch(apiUrl, { method: "GET", cache: "no-store" });
+      if (!response.ok) throw new Error("HTTP " + response.status);
+      reportData = await response.json();
+      if (!reportData || reportData.success !== true) {
+        throw new Error(reportData?.error || "API không trả về success: true");
+      }
+    } catch (err) {
+      console.error("Lỗi lấy số liệu API báo cáo:", err);
+      alert("Không lấy được số liệu báo cáo từ API. Kiểm tra URL Web App, quyền truy cập và triển khai Apps Script. Chi tiết: " + (err.message || err));
+      return;
+    }
+
+    const code = layerCode();
+    const diseaseStats = (Array.isArray(reportData.diseases) ? reportData.diseases : [])
+      .find(item => String(item.code || "").toUpperCase() === String(code).toUpperCase());
+    if (!diseaseStats || Number(diseaseStats.records || 0) === 0) {
+      alert("Không có bản ghi bệnh phù hợp trong khoảng ngày đã chọn cho lớp dữ liệu đang chọn.");
+      return;
+    }
 
     const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle } = window.docx;
-    const code = layerCode();
-    const stats = summarize(rows, code);
+    const from = parseDate(fromText);
+    const to = parseDate(toText);
+    // API phân loại chỉ tiêu chết/tiêu hủy chung; không tách riêng khi nguồn không có hai chỉ tiêu độc lập.
+    const stats = {
+      name: diseaseStats.name || layerName(),
+      rows: Number(diseaseStats.records || 0),
+      communes: Number(diseaseStats.communeCount || 0),
+      villages: Number(diseaseStats.villageCount || 0),
+      households: Number(diseaseStats.householdCount || 0),
+      cases: Number(diseaseStats.cases || 0),
+      dead: 0,
+      culled: Number(diseaseStats.deadCull || 0),
+      weight: 0
+    };
     const range = fromText || toText ? `từ ngày ${from ? dateText(from) : "đầu dữ liệu"} đến ngày ${to ? dateText(to) : "cuối dữ liệu"}` : "toàn bộ dữ liệu hiện có";
     const today = new Date();
     const dateStamp = today.toLocaleDateString("vi-VN");
@@ -2071,10 +2101,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const countParts=[];
     if (stats.cases) countParts.push(`${fmt(stats.cases)} con mắc bệnh`);
     if (stats.dead) countParts.push(`${fmt(stats.dead)} con chết`);
-    if (stats.culled) countParts.push(`${fmt(stats.culled)} con tiêu hủy`);
+    if (stats.culled) countParts.push(`${fmt(stats.culled)} con chết/tiêu hủy (chỉ tiêu nguồn đang gộp chung)`);
     if (stats.weight) countParts.push(`khối lượng chết, tiêu hủy ${fmt(stats.weight)} kg`);
     body.push(p(countParts.length ? `Số liệu thiệt hại ghi nhận ${countParts.join(", ")}.` : "Các chỉ tiêu chi tiết về số mắc, chết, tiêu hủy và khối lượng cần được đối chiếu, bổ sung từ hồ sơ chuyên môn trước khi phát hành.",{indent:true}));
-    body.push(p("Số liệu trong báo cáo được tổng hợp theo lớp dữ liệu đang chọn trên hệ thống WEBGIS; cần đối chiếu với báo cáo chi tiết của các xã, phường và phụ lục chuyên môn trước khi trình ký.",{indent:true}));
+    body.push(p("Số liệu trong báo cáo được lấy từ API báo cáo, tổng hợp theo sheet GIS_DICH_BENH_NGAY trong khoảng ngày đã chọn và theo lớp bệnh đang chọn; cần đối chiếu với báo cáo chi tiết của các xã, phường và phụ lục chuyên môn trước khi trình ký. Chỉ tiêu chết/tiêu hủy được trình bày gộp nếu dữ liệu nguồn chưa tách riêng.",{indent:true}));
     if (isMonth) {
       body.push(heading("2. Công tác phòng, chống dịch bệnh đã và đang triển khai"));
       body.push(heading("2.1. Tham mưu, chỉ đạo"));
