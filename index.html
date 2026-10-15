@@ -1883,8 +1883,18 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="js/sheets.js"></script>
 <script src="js/dashboard.js"></script>
+<script>
+// Khai báo hàm dùng chung trước khi map.js khởi chạy.
+window.escapeHtml = window.escapeHtml || function(value) {
+  return String(value == null ? "" : value).replace(/[&<>"']/g, function(ch) {
+    return {"&":"&amp;", "<":"&lt;", ">":"&gt;", "\"":"&quot;", "'":"&#39;"}[ch];
+  });
+};
+</script>
 <script src="js/map.js"></script>
 <script src="js/app.js"></script>
+
+
     <script src="https://cdn.jsdelivr.net/npm/docx@9.11.0/dist/index.umd.cjs"></script>
     <script src="https://cdn.jsdelivr.net/npm/docx@9.11.0/dist/charts.umd.cjs"></script>
 <script>
