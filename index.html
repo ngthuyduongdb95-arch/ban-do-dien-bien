@@ -2183,11 +2183,23 @@ document.addEventListener("DOMContentLoaded", function () {
     return isNaN(d.getTime()) ? null : new Date(d.getFullYear(),d.getMonth(),d.getDate());
   }
   function trendValue(row, key){
-    const keys = key === "VDNC"
+    // API GIS_DICH_BENH_NGAY đang trả về chỉ tiêu dưới dạng hai cột:
+    // "Số con theo chỉ tiêu" (giá trị số) và "Chỉ tiêu" (loại số liệu).
+    const indicator = normText(firstValue(row, ["Chỉ tiêu", "Chi tieu", "Tên chỉ tiêu", "Loai chi tieu"]));
+    const wantsCase = key === "VDNC";
+    if(indicator){
+      const isCase = indicator.includes("mac") || indicator.includes("ca benh") || indicator.includes("so con mac");
+      const isDeath = indicator.includes("chet") || indicator.includes("tieu huy") || indicator.includes("chet tieu huy");
+      if(wantsCase && !isCase) return null;
+      if(!wantsCase && !isDeath) return null;
+      const amount = firstValue(row, ["Số con theo chỉ tiêu", "So con theo chi tieu", "Số con", "Giá trị", "Gia tri", "Số lượng", "So luong"]);
+      return amount === null ? null : num(amount);
+    }
+    const keys = wantsCase
       ? ["Mắc","Số mắc (con)","Số mắc","Số con mắc","Ca mắc","Số con mắc bệnh"]
       : ["Chết / tiêu hủy","Chết/tiêu hủy","Số chết, tiêu hủy","Số con chết/tiêu hủy","Số con chết, tiêu hủy","Chết","Tiêu hủy"];
     let v = firstValue(row, keys);
-    if(v === null) v = fuzzyValue(row, key === "VDNC" ? "case" : "death");
+    if(v === null) v = fuzzyValue(row, wantsCase ? "case" : "death");
     return v === null ? null : num(v);
   }
   async function loadTrendRows(){
