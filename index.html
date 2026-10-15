@@ -1632,6 +1632,7 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
 .chart-toolbar { display:flex; gap:5px; padding:3px 0 5px; }
 .chart-filter { border:1px solid #d6e0e8; background:#fff; color:#536273; border-radius:5px; padding:4px 8px; font-size:10px; cursor:pointer; }
 .chart-filter.active { background:#2457a7; color:#fff; border-color:#2457a7; }
+.chart-toolbar select.chart-filter { min-height:25px; font-size:10px; }
 .chart-legend-note { font-size:10px; color:#687785; line-height:1.3; min-height:15px; padding:0 2px 4px; }
 .chart-card:not(.comparison-card) .chart-body { position:relative; flex:1 1 auto; height:220px; min-height:220px; padding:4px; box-sizing:border-box; }
 .chart-card:not(.comparison-card) .chart-body canvas { display:block !important; width:100% !important; height:100% !important; max-width:100%; }
@@ -1841,11 +1842,16 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
         <div class="chart-title">📈 Diễn biến dịch bệnh</div>
         <button class="chart-download" type="button" data-download-chart="chartTrend" title="Tải biểu đồ PNG" aria-label="Tải biểu đồ diễn biến">↓ Tải</button>
       </div>
-      <div class="chart-toolbar" aria-label="Chọn khoảng thời gian">
-        <button class="chart-filter active" type="button" data-period="10d">10 ngày</button>
-        <button class="chart-filter" type="button" data-period="month">Theo tháng</button>
+      <div class="chart-toolbar" aria-label="Chọn bệnh diễn biến">
+        <label for="trendDiseaseSelect" style="font-size:10px;color:#536273;align-self:center;">Chọn bệnh:</label>
+        <select id="trendDiseaseSelect" class="chart-filter" style="cursor:pointer;max-width:220px;">
+          <option value="DTLCP">Dịch tả lợn Châu Phi</option>
+          <option value="CGC">Cúm gia cầm</option>
+          <option value="VDNC">Viêm da nổi cục</option>
+          <option value="DAI">Bệnh dại</option>
+        </select>
       </div>
-      <div class="chart-legend-note" id="trendNote">Số liệu theo lớp bệnh đang chọn</div>
+      <div class="chart-legend-note" id="trendNote">Đang tải dữ liệu diễn biến theo ngày…</div>
       <div class="chart-body"><canvas id="chartTrend"></canvas></div>
     </div>
 
@@ -2115,81 +2121,153 @@ document.addEventListener("DOMContentLoaded", function () {
     const end = new Date(reportDate.getFullYear(),reportDate.getMonth(),reportDate.getDate()); end.setHours(23,59,59,999);
     return d.getTime()>=start.getTime() && d.getTime()<=end.getTime();
   }
-  function updateTrend(){
-    const key=selected(), cfg=diseaseConfig[key], data=rows(), note=document.getElementById("trendNote");
-    const dated=[];
-    // Tổng hợp số phát sinh theo kỳ 10 ngày từ đầu năm đến ngày mới nhất có dữ liệu.
-    // DTLCP/CGC: dùng số chết/tiêu hủy theo trường dữ liệu hiện có; VDNC/DAI: dùng số mắc.
-    data.forEach(r=>{
-      const d=dateOf(r,cfg); if(!d) return;
-      let v=pick(r,cfg.culledKeys);
-      if(v===null && (key==="VDNC" || key==="DAI")) v=pick(r,cfg.deathKeys);
-      if(v===null) return;
-      const day=new Date(d); day.setHours(0,0,0,0);
-      dated.push({d:day,v});
-    });
+  const TREND_API_URL = "https://script.google.com/macros/s/AKfycbyeHRUePa7E0GqBdQVHqLzb0NLkiNneysEoaGcZhnHOad-il1fv4LKI5pmpVOF0n4s6/exec?type=trend";
+  let trendRows = [];
+  let trendLoadStarted = false;
+  let trendLoadError = "";
 
-    const trendCanvas=document.getElementById("chartTrend");
+  function normText(v){
+    return String(v == null ? "" : v).normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+      .replace(/đ/g,"d").replace(/Đ/g,"D").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
+  }
+  function firstValue(row, keys){
+    for(const k of keys){
+      if(Object.prototype.hasOwnProperty.call(row,k) && row[k] !== "" && row[k] !== null && row[k] !== undefined) return row[k];
+    }
+    const wanted = keys.map(normText);
+    const actual = Object.keys(row);
+    for(let i=0;i<actual.length;i++){
+      if(wanted.includes(normText(actual[i])) && row[actual[i]] !== "" && row[actual[i]] !== null && row[actual[i]] !== undefined) return row[actual[i]];
+    }
+    return null;
+  }
+  function trendDiseaseKey(row){
+    const raw = firstValue(row, ["Bệnh","Ten benh","Tên bệnh","Loai benh","Loại bệnh","Disease","Ma benh","Mã bệnh"]);
+    const n = normText(raw);
+    if(n.includes("dtlcp") || n.includes("dich ta lon chau phi") || n.includes("lon chau phi")) return "DTLCP";
+    if(n === "cgc" || n.includes("cum gia cam") || n.includes("cum gia cam")) return "CGC";
+    if(n.includes("vdnc") || n.includes("viem da noi cuc")) return "VDNC";
+    if(n === "dai" || n.includes("benh dai") || n === "rabies") return "DAI";
+    return "";
+  }
+  function parseTrendDate(raw){
+    if(raw instanceof Date && !isNaN(raw.getTime())) {
+      const d = new Date(raw.getFullYear(),raw.getMonth(),raw.getDate()); d.setHours(0,0,0,0); return d;
+    }
+    if(raw === null || raw === undefined || String(raw).trim() === "") return null;
+    const s = String(raw).trim();
+    let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if(m){ const d = new Date(+m[1],+m[2]-1,+m[3]); return isNaN(d.getTime()) ? null : d; }
+    m = s.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})/);
+    if(m){ const d = new Date(+m[3],+m[2]-1,+m[1]); return isNaN(d.getTime()) ? null : d; }
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? null : new Date(d.getFullYear(),d.getMonth(),d.getDate());
+  }
+  function trendValue(row, key){
+    // API sheet headers are expected to include "Mắc" and "Chết / tiêu hủy".
+    // Use disease-specific indicator; do not substitute another indicator silently.
+    const keys = key === "VDNC"
+      ? ["Mắc","Số mắc (con)","Số mắc","Số con mắc","Ca mắc"]
+      : ["Chết / tiêu hủy","Chết/tiêu hủy","Số chết, tiêu hủy","Số con chết/tiêu hủy","Chết","Tiêu hủy"];
+    const v = firstValue(row, keys);
+    return v === null ? null : num(v);
+  }
+  async function loadTrendRows(){
+    if(trendLoadStarted) return;
+    trendLoadStarted = true;
+    const note = document.getElementById("trendNote");
+    try {
+      const response = await fetch(TREND_API_URL, { cache:"no-store" });
+      if(!response.ok) throw new Error("HTTP " + response.status);
+      const result = await response.json();
+      if(result && result.success === false) throw new Error(result.error || "API báo lỗi");
+      const list = Array.isArray(result) ? result : (result && Array.isArray(result.data) ? result.data : null);
+      if(!list) throw new Error("API không trả về mảng dữ liệu");
+      trendRows = list;
+      trendLoadError = "";
+      updateTrend();
+    } catch(err) {
+      trendLoadError = err && err.message ? err.message : String(err);
+      console.error("Không tải được dữ liệu biểu đồ theo ngày:", err);
+      if(note) note.textContent = "Không tải được dữ liệu biểu đồ từ API. Kiểm tra quyền truy cập/CORS và endpoint. (" + trendLoadError + ")";
+    }
+  }
+  function updateTrend(){
+    const selector = document.getElementById("trendDiseaseSelect");
+    const key = selector && selector.value ? selector.value : selected();
+    const cfg = diseaseConfig[key] || diseaseConfig.DTLCP;
+    const note = document.getElementById("trendNote");
+    const trendCanvas = document.getElementById("chartTrend");
     if(trendChart) { trendChart.destroy(); trendChart=null; }
     if(trendCanvas && window.Chart && window.Chart.getChart(trendCanvas)) window.Chart.getChart(trendCanvas).destroy();
 
-    let labels=[], values=[];
-    if(dated.length){
-      const latest=new Date(Math.max(...dated.map(o=>o.d.getTime())));
-      const year=2026;
-      const start=new Date(2026,0,1); start.setHours(0,0,0,0);
-      const buckets=new Map();
-      const bucketKey=d=>{
-        const day=d.getDate();
-        const part=day<=10 ? 1 : day<=20 ? 2 : 3;
-        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${part}`;
-      };
-      const bucketLabel=d=>{
-        const day=d.getDate();
-        const month=String(d.getMonth()+1).padStart(2,"0");
-        if(day===1) return `01–10/${month}`;
-        if(day===11) return `11–20/${month}`;
-        return `21–${String(new Date(d.getFullYear(),d.getMonth()+1,0).getDate()).padStart(2,"0")}/${month}`;
-      };
-
-      // Tạo đầy đủ các kỳ 01–10, 11–20, 21–cuối tháng từ 01/01 đến kỳ chứa ngày dữ liệu mới nhất.
-      for(let d=new Date(start); d<=latest; ){
-        const day=d.getDate();
-        const bucketStart=day<=10 ? 1 : day<=20 ? 11 : 21;
-        const periodStart=new Date(d.getFullYear(),d.getMonth(),bucketStart);
-        const k=bucketKey(periodStart);
-        if(!buckets.has(k)) buckets.set(k,{label:bucketLabel(periodStart),value:0,start:periodStart});
-        if(day<=10) d=new Date(d.getFullYear(),d.getMonth(),11);
-        else if(day<=20) d=new Date(d.getFullYear(),d.getMonth(),21);
-        else d=new Date(d.getFullYear(),d.getMonth()+1,1);
+    if(!trendRows.length){
+      if(note && !trendLoadError) note.textContent = "Đang tải dữ liệu diễn biến theo ngày…";
+      if(trendCanvas && window.Chart){
+        trendChart = new Chart(trendCanvas, {
+          type:"line",
+          data:{labels:[],datasets:[{label:"Chưa có dữ liệu",data:[],borderColor:"#64748b",backgroundColor:"rgba(100,116,139,.12)",tension:.2,pointRadius:3}]},
+          options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
+        });
       }
-
-      dated.forEach(o=>{
-        if(o.d.getFullYear()!==2026 || o.d<start || o.d>latest) return;
-        const k=bucketKey(o.d);
-        if(buckets.has(k)) buckets.get(k).value+=o.v;
-      });
-      const bucketList=Array.from(buckets.values());
-      labels=bucketList.map(b=>b.label);
-      values=bucketList.map(b=>b.value);
-      const amountLabel=(key==="VDNC" || key==="DAI")?"số con mắc bệnh":"số con chết/tiêu hủy";
-      if(note) note.textContent=`${cfg.label} · ${amountLabel} theo từng kỳ 10 ngày từ 01/01/2026 đến ${latest.toLocaleDateString("vi-VN")}`;
-    } else {
-      labels=["Chưa có dữ liệu ngày"]; values=[0];
-      if(note) note.textContent="Chưa có dữ liệu ngày và số con phù hợp để tổng hợp biểu đồ từ 01/01/2026.";
+      return;
     }
 
+    const daily = new Map();
+    let skipped = 0;
+    trendRows.forEach(row => {
+      if(trendDiseaseKey(row) !== key) return;
+      const dateRaw = firstValue(row, ["Ngày","Ngày ghi nhận","Ngày phát hiện","Ngày xảy ra","Ngày tiêu hủy","Ngày chết/tiêu hủy","Ngày chết, tiêu hủy","Ngày cập nhật"]);
+      const date = parseTrendDate(dateRaw);
+      const value = trendValue(row,key);
+      if(!date || value === null || !Number.isFinite(value)) { skipped++; return; }
+      const iso = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;
+      daily.set(iso, (daily.get(iso)||0) + value);
+    });
+
+    const labels = Array.from(daily.keys()).sort();
+    const values = labels.map(d => daily.get(d));
+    const displayLabels = labels.map(s => {
+      const [y,m,d] = s.split("-");
+      return `${d}/${m}/${y}`;
+    });
+    const metric = key === "VDNC" ? "Số con mắc bệnh" : "Số con chết/tiêu hủy";
+    if(note){
+      note.textContent = labels.length
+        ? `${cfg.label} · ${metric} theo ngày; đã cộng các bản ghi cùng ngày${skipped ? ` · ${skipped} bản ghi thiếu ngày/chỉ tiêu bị bỏ qua` : ""}.`
+        : `${cfg.label}: chưa tìm thấy bản ghi có tên bệnh, ngày và chỉ tiêu phù hợp trong GIS_DICH_BENH_NGAY.`;
+    }
     if(!trendCanvas || !window.Chart) return;
-    const amountLabel=(key==="VDNC" || key==="DAI")?"Số con mắc":"Số con chết/tiêu hủy";
-    trendChart=new Chart(trendCanvas,{
-      type:"bar",
-      data:{labels,datasets:[{label:amountLabel+" – "+cfg.label,data:values,backgroundColor:"rgba(229,57,53,.72)",borderColor:"#e53935",borderWidth:1,borderRadius:3}]},
+    const colors = {DTLCP:"#e53935",CGC:"#2e7d32",VDNC:"#1976d2",DAI:"#6a35d1"};
+    const color = colors[key] || "#2457a7";
+    trendChart = new Chart(trendCanvas,{
+      type:"line",
+      data:{
+        labels:displayLabels,
+        datasets:[{
+          label:`${metric} – ${cfg.label}`,
+          data:values,
+          borderColor:color,
+          backgroundColor:color+"22",
+          borderWidth:2,
+          pointRadius:3,
+          pointHoverRadius:5,
+          pointBackgroundColor:color,
+          tension:.2,
+          fill:false,
+          spanGaps:false
+        }]
+      },
       options:{
-        responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:10,font:{size:9}}},
-          tooltip:{mode:"index",intersect:false}},
+        responsive:true,
+        maintainAspectRatio:false,
+        interaction:{mode:"index",intersect:false},
+        plugins:{
+          legend:{display:true,position:"bottom",labels:{boxWidth:10,font:{size:9}}},
+          tooltip:{callbacks:{label:ctx=>`${metric}: ${Number(ctx.raw||0).toLocaleString("vi-VN")} con`}}
+        },
         scales:{
-          x:{ticks:{autoSkip:false,maxRotation:65,minRotation:45,font:{size:8}},grid:{display:false}},
+          x:{ticks:{autoSkip:true,maxRotation:55,minRotation:0,font:{size:8}},grid:{display:false}},
           y:{beginAtZero:true,title:{display:true,text:"Số con"},ticks:{precision:0,font:{size:9}}}
         }
       }
@@ -2251,11 +2329,13 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   function refresh(){ updateTrend(); updateDamage(); }
   document.addEventListener("DOMContentLoaded",function(){
-    document.querySelectorAll(".chart-filter[data-period]").forEach(b=>b.addEventListener("click",function(){ trendPeriod="10d"; document.querySelectorAll(".chart-filter[data-period]").forEach(x=>x.classList.toggle("active",x===this)); updateTrend(); }));
-    const layer=document.getElementById("layerSelect"); if(layer) layer.addEventListener("change",refresh);
+    const trendDiseaseSelect=document.getElementById("trendDiseaseSelect");
+    if(trendDiseaseSelect) trendDiseaseSelect.addEventListener("change",updateTrend);
+    const layer=document.getElementById("layerSelect"); if(layer) layer.addEventListener("change",updateDamage);
     document.querySelectorAll("[data-download-chart]").forEach(b=>b.addEventListener("click",function(){ const id=this.dataset.downloadChart, canvas=document.getElementById(id); if(!canvas) return; const a=document.createElement("a"); a.href=canvas.toDataURL("image/png"); a.download=id+"_"+selected()+".png"; a.click(); }));
     const csvBtn=document.getElementById("btnDownloadComparison"); if(csvBtn) csvBtn.addEventListener("click",function(){ const table=document.querySelector(".comparison-table"); if(!table) return; const csv=Array.from(table.rows).map(row=>Array.from(row.cells).map(c=>'"'+c.innerText.replace(/"/g,'""')+'"').join(",")).join("\r\n"); const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8;"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download="so-sanh-cung-ky.csv"; a.click(); URL.revokeObjectURL(url); });
     refresh();
+    loadTrendRows();
     window.addEventListener("resize",function(){ if(trendChart) trendChart.resize(); if(damageChart) damageChart.resize();  });
     // Một số bản tải dữ liệu hoàn tất sau DOMContentLoaded.
     let attempts=0; const timer=setInterval(function(){
