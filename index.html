@@ -1639,66 +1639,7 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
 .comparison-card .comparison-table-wrap { max-height:220px; overflow:auto; }
 @media (max-width:760px) { .chart-card { flex-basis:340px; min-width:340px; } .comparison-card { flex-basis:420px; min-width:420px; } }
 
-/* Bố cục desktop: bản đồ kéo dài bên trái; thông tin gọn ở giữa; biểu đồ xếp dọc ngoài cùng bên phải */
-@media (min-width:761px) {
-  .webgis {
-    grid-template-columns:minmax(0,2.1fr) minmax(190px,.72fr) minmax(240px,.85fr) !important;
-    grid-template-rows:auto auto auto;
-    align-items:stretch;
-    gap:8px;
-  }
-  .sidebar { grid-column:1 / -1; grid-row:1; }
-  .main-map {
-    grid-column:1; grid-row:2 / 4; align-self:stretch;
-    height:auto; min-height:980px; min-width:0;
-  }
-  #map { width:100%; height:100%; min-height:980px; }
-  .panel {
-    grid-column:2; grid-row:2; align-self:start; width:100%; min-width:0;
-    min-height:0; max-height:340px; overflow-y:auto; overflow-x:hidden;
-  }
-  .chart-section {
-    grid-column:3; grid-row:2 / 4; align-self:stretch;
-    display:flex !important; flex-direction:column; width:100%; height:auto;
-    min-height:980px; min-width:0; margin:0; padding:8px;
-    overflow:hidden; border:1px solid var(--line); border-radius:9px;
-  }
-  .chart-section::before { flex:0 0 auto; font-size:13px; margin-bottom:6px; }
-  .chart-scroll {
-    display:flex !important; flex:1 1 auto; flex-direction:column !important;
-    width:100%; height:auto !important; min-height:0 !important; min-width:0;
-    gap:8px; padding:0 3px 3px; overflow-x:hidden !important; overflow-y:auto !important;
-  }
-  .chart-card, .chart-card:not(.comparison-card), .comparison-card {
-    flex:0 0 245px !important; width:100% !important; min-width:0 !important;
-    height:245px !important; min-height:245px !important; padding:8px;
-  }
-  .chart-card .chart-title { white-space:normal; font-size:11px; }
-  .chart-card:not(.comparison-card) .chart-body { height:170px; min-height:170px; }
-  .comparison-card .comparison-table-wrap { max-height:175px; }
-  .panel-head { padding:8px 6px; }
-  .panel-kicker { font-size:7px; letter-spacing:0; }
-  .panel h2 { font-size:12px; line-height:16px; }
-  #info-panel { padding:6px 5px 10px; }
-  .info-row { grid-template-columns:1fr; gap:3px; padding:5px; font-size:9px; }
-}
-@media (max-width:1100px) and (min-width:761px) {
-  .webgis { grid-template-columns:minmax(0,1.65fr) minmax(175px,.7fr) minmax(220px,.9fr) !important; }
-  .sidebar-kpi { grid-template-columns:repeat(4,minmax(0,1fr)); }
-}
-@media (max-width:760px) {
-  .webgis { display:flex !important; flex-direction:column; }
-  .sidebar { order:1; }
-  .main-map { order:2; width:100%; height:65vh; min-height:420px; }
-  #map { min-height:420px; }
-  .panel { order:3; width:100%; max-height:none; min-height:260px; }
-  .chart-section { order:4; display:block !important; width:100%; height:auto; min-height:0; }
-  .chart-scroll { display:flex !important; flex-direction:column !important; height:auto !important; min-height:0 !important; overflow:visible !important; }
-  .chart-card, .chart-card:not(.comparison-card), .comparison-card { flex:0 0 auto !important; width:100% !important; min-width:0 !important; height:270px !important; min-height:270px !important; }
-}
-
-
-/* Ảnh phong cảnh làm nền tiêu đề */
+/* Nền tiêu đề lấy từ index (2), giữ nguyên bố cục index (1) */
 .header{
   height:124px !important;
   min-height:124px;
@@ -1708,10 +1649,6 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
   border-bottom:3px solid #d7b66d !important;
   box-shadow:0 3px 12px rgba(10,25,40,.2) !important;
 }
-.header .agency-line1,.header .agency-line2,.header h1,.header .header-layer-label{color:#fff !important;text-shadow:0 1px 3px rgba(0,0,0,.65);}
-.header h1{font-size:clamp(16px,1.55vw,23px);white-space:normal;}
-.header .header-layer select,.header .header-icon-btn{box-shadow:0 1px 4px rgba(0,0,0,.18);}
-@media(max-width:700px){.header{height:auto !important;min-height:130px;padding:12px !important;background-position:center 88% !important}.header h1{font-size:16px}}
 </style>
 </head>
 <body>
@@ -1870,6 +1807,31 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
         <div id="map"></div>
     </main>
 
+    <aside class="panel">
+        <div class="panel-head">
+
+    <div class="panel-kicker">
+
+        <span class="panel-head-icon">
+            <i class="fa-solid fa-location-dot"></i>
+        </span>
+
+        <span>THÔNG TIN XÃ / PHƯỜNG</span>
+
+    </div>
+
+    <h2 id="panel-title">Chưa chọn xã/phường</h2>
+
+</div>
+        <div id="info-panel">
+            <div class="empty-panel">
+                <i class="fa-solid fa-arrow-pointer"></i>
+                <p>Nhấn vào một xã/phường trên bản đồ để xem toàn bộ thông tin.</p>
+            </div>
+        </div>
+        </aside>
+</div>
+
 <!-- ================= KHU VỰC BIỂU ĐỒ ================= -->
 <section class="chart-section" id="chartSection">
   <div class="chart-scroll">
@@ -1879,8 +1841,9 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
         <div class="chart-title">📈 Diễn biến dịch bệnh</div>
         <button class="chart-download" type="button" data-download-chart="chartTrend" title="Tải biểu đồ PNG" aria-label="Tải biểu đồ diễn biến">↓ Tải</button>
       </div>
-      <div class="chart-toolbar" aria-label="Khoảng thời gian biểu đồ">
-        <button class="chart-filter active" type="button" data-period="10d" aria-pressed="true"></button>
+      <div class="chart-toolbar" aria-label="Chọn khoảng thời gian">
+        <button class="chart-filter active" type="button" data-period="10d">10 ngày</button>
+        <button class="chart-filter" type="button" data-period="month">Theo tháng</button>
       </div>
       <div class="chart-legend-note" id="trendNote">Số liệu theo lớp bệnh đang chọn</div>
       <div class="chart-body"><canvas id="chartTrend"></canvas></div>
@@ -1917,33 +1880,6 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
     </div>
   </div>
 </section>
-
-    <aside class="panel">
-        <div class="panel-head">
-
-    <div class="panel-kicker">
-
-        <span class="panel-head-icon">
-            <i class="fa-solid fa-location-dot"></i>
-        </span>
-
-        <span>THÔNG TIN XÃ / PHƯỜNG</span>
-
-    </div>
-
-    <h2 id="panel-title">Chưa chọn xã/phường</h2>
-
-</div>
-        <div id="info-panel">
-            <div class="empty-panel">
-                <i class="fa-solid fa-arrow-pointer"></i>
-                <p>Nhấn vào một xã/phường trên bản đồ để xem toàn bộ thông tin.</p>
-            </div>
-        </div>
-        </aside>
-</div>
-
-
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="js/sheets.js"></script>
@@ -2313,14 +2249,14 @@ document.addEventListener("DOMContentLoaded", function () {
     if(note) note.textContent="Cơ cấu số xã/phường theo trạng thái dịch: "+cfg.label;
     speciesChart=new Chart(canvas,{type:"pie",data:{labels,datasets:[{label:"Số xã/phường",data:values,backgroundColor:["#477fd1","#e6a23c","#59a14f","#e15759","#af7aa1","#76b7b2","#f28e2b","#9c755f","#bab0ab"],borderColor:"#ffffff",borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:10,padding:8,font:{size:9}}},tooltip:{callbacks:{label:(ctx)=>{const total=ctx.dataset.data.reduce((a,b)=>a+Number(b||0),0);const v=Number(ctx.raw||0);return ctx.label+": "+v.toLocaleString("vi-VN")+" xã/phường ("+(total?((v/total)*100).toFixed(1):"0.0")+"%)";}}}}}});
   }
-  function refresh(){ updateTrend(); updateDamage(); updateSpecies(); }
+  function refresh(){ updateTrend(); updateDamage(); }
   document.addEventListener("DOMContentLoaded",function(){
     document.querySelectorAll(".chart-filter[data-period]").forEach(b=>b.addEventListener("click",function(){ trendPeriod="10d"; document.querySelectorAll(".chart-filter[data-period]").forEach(x=>x.classList.toggle("active",x===this)); updateTrend(); }));
     const layer=document.getElementById("layerSelect"); if(layer) layer.addEventListener("change",refresh);
     document.querySelectorAll("[data-download-chart]").forEach(b=>b.addEventListener("click",function(){ const id=this.dataset.downloadChart, canvas=document.getElementById(id); if(!canvas) return; const a=document.createElement("a"); a.href=canvas.toDataURL("image/png"); a.download=id+"_"+selected()+".png"; a.click(); }));
     const csvBtn=document.getElementById("btnDownloadComparison"); if(csvBtn) csvBtn.addEventListener("click",function(){ const table=document.querySelector(".comparison-table"); if(!table) return; const csv=Array.from(table.rows).map(row=>Array.from(row.cells).map(c=>'"'+c.innerText.replace(/"/g,'""')+'"').join(",")).join("\r\n"); const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8;"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download="so-sanh-cung-ky.csv"; a.click(); URL.revokeObjectURL(url); });
     refresh();
-    window.addEventListener("resize",function(){ if(trendChart) trendChart.resize(); if(damageChart) damageChart.resize(); if(speciesChart) speciesChart.resize(); });
+    window.addEventListener("resize",function(){ if(trendChart) trendChart.resize(); if(damageChart) damageChart.resize();  });
     // Một số bản tải dữ liệu hoàn tất sau DOMContentLoaded.
     let attempts=0; const timer=setInterval(function(){
       attempts++;
@@ -2332,6 +2268,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 })();
 </script>
+
 
 <style>
 /* Chân trang WEBGIS */
@@ -2367,6 +2304,7 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
   <div class="footer-bottom">© <span id="footerYear"></span> WEBGIS quản lý thú y tỉnh Điện Biên</div>
 </footer>
 <script>document.getElementById('footerYear').textContent=new Date().getFullYear();</script>
+
 
 </body>
 </html>
