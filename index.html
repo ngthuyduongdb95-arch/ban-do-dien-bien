@@ -1843,7 +1843,6 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
       </div>
       <div class="chart-toolbar" aria-label="Chọn khoảng thời gian">
         <button class="chart-filter active" type="button" data-period="10d">10 ngày</button>
-        <button class="chart-filter" type="button" data-period="month">Theo tháng</button>
       </div>
       <div class="chart-legend-note" id="trendNote">Số liệu theo lớp bệnh đang chọn</div>
       <div class="chart-body"><canvas id="chartTrend"></canvas></div>
@@ -1886,7 +1885,103 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
 <script src="js/dashboard.js"></script>
 <script src="js/map.js"></script>
 <script src="js/app.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+<script>
+/* WebGIS hardening: bản đồ dự phòng khi js/map.js hoặc đường dẫn GeoJSON bị lỗi.
+   Không thay thế bản đồ đang hoạt động; nếu bản đồ chính không có ranh giới thì dựng lại độc lập. */
+(function(){
+  'use strict';
+  if (!window.escapeHtml) window.escapeHtml = function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+  const norm = v => String(v==null?'':v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').toLowerCase().replace(/[^a-z0-9]/g,'');
+  const number = v => { if(typeof v==='number') return Number.isFinite(v)?v:0; let s=String(v==null?'':v).trim(); if(!s)return 0; s=s.replace(/\s/g,'').replace(/\.(?=\d{3}(\D|$))/g,'').replace(/,/g,'.').replace(/[^\d.-]/g,''); const n=Number(s); return Number.isFinite(n)?n:0; };
+  const first = (r,keys) => { for(const k of keys){if(r && r[k]!==undefined && r[k]!==null && String(r[k]).trim()!=='') return r[k];} const ks=Object.keys(r||{}); for(const k of keys){const found=ks.find(x=>norm(x)===norm(k)); if(found && r[found]!==undefined && r[found]!==null && String(r[found]).trim()!=='') return r[found];} return '';};
+  const commune = r => first(r,['Tên xã','Tên xã/phường','Xã/phường','Tên địa bàn','Địa bàn','Xa','Phường','TEN_XA','TENXA','NAME','Name','name']);
+  const getRows = () => { try { if(typeof window.getRows==='function'){const x=window.getRows();if(Array.isArray(x))return x.filter(Boolean);} }catch(e){} return Array.isArray(window.sheetRows)?window.sheetRows.filter(Boolean):[]; };
+  const featureName = f => {const p=f&&f.properties||{};return first(p,['TEN_XA','TENXA','TenXa','ten_xa','NAME_3','NAME_2','name','Name','Tên xã','Tên xã/phường','Xa','xa','commune','commune_name']);};
+  const featureId = f => {const p=f&&f.properties||{};return first(p,['ID_XA','MA_XA','MaXa','ma_xa','XA_ID','GID_3','GID_2','id','ID','OBJECTID','OBJECT_ID','code','Code']);};
+  const rowId = r => first(r,['ID_XA','Mã xã','MaXa','Mã xã/phường','MA_XA','XA_ID','ID']);
+  const valueFields = [
+    ['Dịch tả lợn Châu Phi',['DTLCP_Tiêu hủy','DTLCP_Tiêu huỷ','DTLCP_Chết','DTLCP_Mắc','DTLCP_Mắc bệnh']],
+    ['Cúm gia cầm',['CGC_Tiêu hủy','CGC_Tiêu huỷ','CGC_Chết','CGC_Mắc','CGC_Mắc bệnh']],
+    ['Viêm da nổi cục',['VDNC_Tiêu hủy','VDNC_Tiêu huỷ','VDNC_Chết','VDNC_Mắc','VDNC_Mắc bệnh']],
+    ['Bệnh Dại',['DAI_Tiêu hủy','DAI_Tiêu huỷ','DAI_Chết','DAI_Mắc','DAI_Mắc bệnh']],
+    ['Tiêm phòng',['Tỷ lệ tiêm phòng','Tiến độ tiêm phòng','Đã tiêm','Số tiêm','TIEN_DO_TIEM_PHONG']],
+    ['Vệ sinh, khử trùng',['Số hộ','Số vòng','Số hộ phun','Số lượt']],
+    ['Cơ sở giết mổ',['Số cơ sở','Cơ sở giết mổ','KSGM_Số cơ sở']],
+    ['Cơ sở thuốc thú y',['Số cơ sở thuốc thú y','CSBBTTY','Cơ sở buôn bán thuốc thú y']]
+  ];
+  function rowsForFeature(f, rows){
+    const fid=String(featureId(f)||'').trim(), fn=norm(featureName(f));
+    let matched=[];
+    if(fid) matched=rows.filter(r=>String(rowId(r)||'').trim()===fid);
+    if(!matched.length && fn) matched=rows.filter(r=>norm(commune(r))===fn);
+    return matched;
+  }
+  function hasData(r){return valueFields.some(([,keys])=>number(first(r,keys))>0);}
+  async function waitForRows(){for(let i=0;i<10;i++){const rs=getRows();if(rs.length)return rs;await new Promise(r=>setTimeout(r,700));}return getRows();}
+  function popupHtml(f, matched){
+    const name=featureName(f)||'Chưa rõ xã/phường';
+    let html='<div style="min-width:230px;max-width:330px"><b style="font-size:14px">'+window.escapeHtml(name)+'</b><hr style="margin:6px 0">';
+    if(!matched.length) return html+'<span>Chưa có bản ghi dữ liệu được ghép với địa bàn này.</span></div>';
+    const agg={};
+    valueFields.forEach(([label,keys])=>{let total=0,found=false;matched.forEach(r=>{const raw=first(r,keys);if(raw!=='' && raw!==null){total+=number(raw);found=true;}});if(found)agg[label]=total;});
+    if(Object.keys(agg).length) html+='<table style="border-collapse:collapse;width:100%;font-size:12px">'+Object.entries(agg).map(([k,v])=>'<tr><td style="padding:3px 8px 3px 0;border-bottom:1px solid #eee">'+window.escapeHtml(k)+'</td><td style="padding:3px 0;border-bottom:1px solid #eee;text-align:right"><b>'+v.toLocaleString('vi-VN')+'</b></td></tr>').join('')+'</table>';
+    const extras=Object.keys(matched[0]).filter(k=>/ngày|ngay|trạng thái|trang thai|ghi chú|ghi chu/i.test(k)).slice(0,6);
+    if(extras.length) html+='<div style="font-size:11px;color:#5b6570;margin-top:6px">'+extras.map(k=>'<div>'+window.escapeHtml(k)+': '+window.escapeHtml(matched[0][k])+'</div>').join('')+'</div>';
+    html+='<div style="font-size:10px;color:#7a858f;margin-top:6px">Số bản ghi ghép được: '+matched.length+'</div></div>'; return html;
+  }
+  function status(message, bad){let el=document.getElementById('mapStatus');if(!el){el=document.createElement('div');el.id='mapStatus';el.style.cssText='position:absolute;z-index:900;left:10px;bottom:10px;max-width:75%;padding:6px 9px;border-radius:6px;background:rgba(255,255,255,.94);font:11px/1.4 Arial;color:#394653;box-shadow:0 1px 5px #0002';const host=document.querySelector('.main-map');if(host){host.appendChild(el);}}if(el){el.textContent=message;el.style.color=bad?'#b42318':'#394653';}}
+  function loadLeaflet(){return new Promise(resolve=>{if(window.L)return resolve(true);const s=document.createElement('script');s.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';s.onload=()=>resolve(!!window.L);s.onerror=()=>resolve(false);document.head.appendChild(s);});}
+  async function loadGeoJSON(){
+    const urls=['data/dienbien_xa.geojson','./dienbien_xa.geojson','./data/dienbien_xa.json','https://raw.githubusercontent.com/ngthuyduongdb95-arch/ban-do-dien-bien/main/data/dienbien_xa.geojson','https://raw.githubusercontent.com/ngthuyduongdb95-arch/ban-do-dien-bien/main/dienbien_xa.geojson'];
+    let last=''; for(const url of urls){try{const res=await fetch(url,{cache:'no-store'});if(!res.ok){last=url+' (HTTP '+res.status+')';continue;}const data=await res.json();if(data&&(data.type==='FeatureCollection'||Array.isArray(data.features))&&data.features.length){return {data,url};}last=url+' (GeoJSON không có features)';}catch(e){last=url+' ('+e.message+')';}}
+    throw new Error('Không tải được GeoJSON địa giới xã. Đã thử: '+last);
+  }
+  async function init(){
+    const container=document.getElementById('map'); if(!container || window.__webgisFallbackStarted)return; window.__webgisFallbackStarted=true;
+    // Đợi app chính khởi tạo; nếu đã có ranh giới thì giữ nguyên.
+    await new Promise(r=>setTimeout(r,1800));
+    if(container.querySelector('.leaflet-overlay-pane svg path, .leaflet-overlay-pane canvas')) { status('Bản đồ chính đã tải lớp địa giới.'); return; }
+    const ok=await loadLeaflet();if(!ok){status('Không tải được Leaflet. Kiểm tra kết nối CDN.',true);return;}
+    let geo;try{geo=await loadGeoJSON();}catch(e){status(e.message,true);console.error(e);return;}
+    // Nếu mã chính đã khởi tạo Leaflet nhưng không tải được địa giới, thay riêng phần tử bản đồ để khôi phục sạch.
+    if(container._leaflet_id){const replacement=container.cloneNode(false);replacement.id='map';container.parentNode.replaceChild(replacement,container);}
+    const mapEl=document.getElementById('map');
+    const map=L.map(mapEl,{zoomControl:true,preferCanvas:true}).setView([21.5,103.15],8);
+    window.__webgisMapFallback=map;
+    const street=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'});
+    const satellite=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Tiles © Esri'});
+    street.addTo(map);
+    const style={color:'#536574',weight:1,opacity:.95,fillColor:'#dce7ed',fillOpacity:.14};
+    const rows=await waitForRows();
+    const geoLayer=L.geoJSON(geo.data,{style:()=>style,onEachFeature:(f,layer)=>{
+      const name=featureName(f)||'Chưa rõ xã/phường';
+      const matched=rowsForFeature(f,rows);
+      layer.bindPopup(popupHtml(f,matched));
+      layer.on('mouseover',()=>layer.setStyle({weight:2,color:'#155eef',fillColor:'#93c5fd',fillOpacity:.35}));
+      layer.on('mouseout',()=>geoLayer.resetStyle(layer));
+      if(matched.some(hasData)){
+        const center=layer.getBounds&&layer.getBounds().getCenter();
+        if(center){L.marker(center,{interactive:false,icon:L.divIcon({className:'map-label-wrap',html:'<span style="font:600 10px Arial;color:#17212b;text-shadow:-1px -1px 0 #fff,1px -1px 0 #fff,-1px 1px 0 #fff,1px 1px 0 #fff">'+window.escapeHtml(name)+'</span>',iconSize:[120,16],iconAnchor:[60,8]})}).addTo(map);L.circleMarker(center,{radius:4,color:'#fff',weight:1,fillColor:'#e53935',fillOpacity:.95}).addTo(map);}
+      }
+    }}).addTo(map);
+    if(geoLayer.getBounds().isValid())map.fitBounds(geoLayer.getBounds(),{padding:[12,12]});
+    const streetBtn=document.getElementById('btnStreet'), satBtn=document.getElementById('btnSatellite');
+    streetBtn?.addEventListener('click',()=>{map.removeLayer(satellite);street.addTo(map);streetBtn.classList.add('active');satBtn?.classList.remove('active');});
+    satBtn?.addEventListener('click',()=>{map.removeLayer(street);satellite.addTo(map);satBtn.classList.add('active');streetBtn?.classList.remove('active');});
+    document.getElementById('btnFullscreen')?.addEventListener('click',()=>{const host=document.querySelector('.main-map');if(!document.fullscreenElement)host?.requestFullscreen?.();else document.exitFullscreen?.();setTimeout(()=>map.invalidateSize(),250);});
+    document.getElementById('btnLocate')?.addEventListener('click',()=>{if(!navigator.geolocation){status('Trình duyệt không hỗ trợ định vị.',true);return;}navigator.geolocation.getCurrentPosition(p=>map.setView([p.coords.latitude,p.coords.longitude],12),()=>status('Không lấy được vị trí. Hãy cấp quyền định vị.',true));});
+    document.getElementById('btnExport')?.addEventListener('click',async()=>{try{if(!window.html2canvas)throw new Error('Chưa tải được thư viện xuất ảnh.');const canvas=await html2canvas(document.querySelector('.main-map'),{useCORS:true,backgroundColor:'#fff',scale:2});const a=document.createElement('a');a.download='ban-do-dien-bien.png';a.href=canvas.toDataURL('image/png');a.click();}catch(e){status('Không xuất được ảnh bản đồ: '+e.message,true);}});
+    status('Đã tải '+geo.data.features.length+' đơn vị địa giới từ '+geo.url+'. Số bản ghi bảng dữ liệu: '+rows.length+'.');
+    if(!rows.length)status('Đã tải địa giới, nhưng bảng Google Sheets chưa có dữ liệu hoặc chưa tải xong.');
+    window.addEventListener('resize',()=>map.invalidateSize());
+    setTimeout(()=>map.invalidateSize(),250);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+
+    <script src="https://cdn.jsdelivr.net/npm/docx@9.11.0/dist/index.umd.cjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docx@9.11.0/dist/charts.umd.cjs"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   const startInput = document.getElementById("reportStartDate");
@@ -1955,7 +2050,17 @@ document.addEventListener("DOMContentLoaded", function () {
     if (m) { const d = new Date(+m[1], +m[2]-1, +m[3]); return isNaN(d) ? null : d; }
     const d = new Date(s); return isNaN(d) ? null : d;
   };
-  const dateOf = row => parseDate(pick(row,["Ngày phát hiện","Ngày xảy ra","Ngày ghi nhận","Ngày cập nhật","Ngày báo cáo","Ngày","Thời gian","DTLCP_Ngày phát hiện","CGC_Ngày phát hiện","VDNC_Ngày phát hiện","DAI_Ngày phát hiện"]));
+  // Nhận diện cả cột ngày riêng của từng loại bệnh trong Google Sheets.
+  // Trước đây chỉ dò cột ngày chung/"Ngày phát hiện", nên dữ liệu có cột
+  // DTLCP_Ngày cuối, CGC_Ngày cuối... bị loại hết khi lọc kỳ báo cáo.
+  const dateOf = row => parseDate(pick(row,[
+    "Ngày phát hiện","Ngày xảy ra","Ngày ghi nhận","Ngày cập nhật","Ngày báo cáo","Ngày","Thời gian",
+    "DTLCP_Ngày phát hiện","DTLCP_Ngày xảy ra","DTLCP_Ngày cuối","DTLCP_Ngày cuối ghi nhận",
+    "CGC_Ngày phát hiện","CGC_Ngày xảy ra","CGC_Ngày cuối","CGC_Ngày cuối ghi nhận",
+    "VDNC_Ngày phát hiện","VDNC_Ngày xảy ra","VDNC_Ngày cuối","VDNC_Ngày cuối ghi nhận",
+    "DAI_Ngày phát hiện","DAI_Ngày xảy ra","DAI_Ngày cuối","DAI_Ngày cuối ghi nhận",
+    "Ngày cuối ghi nhận","Ngày cuối"
+  ]));
   const layerName = () => {
     const sel = document.getElementById("layerSelect");
     return sel?.selectedOptions?.[0]?.textContent?.trim() || "Tình hình dịch bệnh động vật";
@@ -1992,13 +2097,20 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!window.docx) { alert("Chưa tải được thư viện tạo Word. Kiểm tra kết nối Internet rồi thử lại."); return; }
     const from = fromText ? parseDate(fromText) : null;
     const to = toText ? parseDate(toText) : null;
+    const datedRows = allRows.filter(r => dateOf(r));
+    // Nếu nguồn hoàn toàn không có ngày đọc được, không giả vờ rằng không có dữ liệu.
+    // Báo rõ nguyên nhân để người dùng kiểm tra cột ngày, thay vì xuất báo cáo rỗng.
+    if ((from || to) && datedRows.length === 0) {
+      alert("Dữ liệu Google Sheets đã tải nhưng không tìm thấy cột ngày hợp lệ để lọc kỳ báo cáo. Kiểm tra tên/định dạng cột ngày trong bảng nguồn hoặc để trống khoảng ngày.");
+      return;
+    }
     const rows = allRows.filter(r => {
-      const d = dateOf(r);
       if (!from && !to) return true;
+      const d = dateOf(r);
       if (!d) return false;
       return (!from || d >= from) && (!to || d <= new Date(to.getFullYear(),to.getMonth(),to.getDate(),23,59,59,999));
     });
-    if (!rows.length) { alert("Không có bản ghi phù hợp khoảng ngày đã chọn. Nếu dữ liệu nguồn không có cột ngày, hãy để trống khoảng ngày."); return; }
+    if (!rows.length) { alert("Đã tải dữ liệu nhưng không có bản ghi nằm trong khoảng ngày đã chọn. Hãy kiểm tra lại kỳ báo cáo hoặc ngày ghi nhận trong Google Sheets."); return; }
 
     const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle } = window.docx;
     const code = layerCode();
@@ -2083,10 +2195,10 @@ document.addEventListener("DOMContentLoaded", function () {
   "use strict";
   let trendChart = null, damageChart = null, speciesChart = null, trendPeriod = "10d";
   const diseaseConfig = {
-    DTLCP: { label:"Dịch tả lợn Châu Phi", prefix:"DTLCP", caseKeys:["DTLCP_Ổ dịch"], deathKeys:["DTLCP_Chết"], culledKeys:["DTLCP_Chết"], dateKeys:["DTLCP_Ngày cuối","DTLCP_Ngày phát hiện","DTLCP_Ngày xảy ra","Ngày phát hiện","Ngày ghi nhận","Ngày cập nhật"], statusKeys:["DTLCP_Trạng thái"] },
-    CGC: { label:"Cúm gia cầm", prefix:"CGC", caseKeys:["CGC_Ổ dịch"], deathKeys:["CGC_Chết"], culledKeys:["CGC_Chết"], dateKeys:["CGC_Ngày cuối","CGC_Ngày phát hiện","CGC_Ngày xảy ra","Ngày phát hiện","Ngày ghi nhận","Ngày cập nhật"], statusKeys:["CGC_Trạng thái"] },
-    VDNC: { label:"Viêm da nổi cục", prefix:"VDNC", caseKeys:["VDNC_Ổ dịch"], deathKeys:["VDNC_Mắc"], culledKeys:["VDNC_Mắc"], dateKeys:["VDNC_Ngày cuối","VDNC_Ngày phát hiện","VDNC_Ngày xảy ra","Ngày phát hiện","Ngày ghi nhận","Ngày cập nhật"], statusKeys:["VDNC_Trạng thái"] },
-    DAI: { label:"Bệnh Dại", prefix:"DAI", caseKeys:["DAI_Ổ dịch"], deathKeys:["DAI_Mắc"], culledKeys:["DAI_Mắc"], dateKeys:["DAI_Ngày cuối","DAI_Ngày phát hiện","DAI_Ngày xảy ra","Ngày phát hiện","Ngày ghi nhận","Ngày cập nhật"], statusKeys:["DAI_Trạng thái"] }
+    DTLCP: { label:"Dịch tả lợn Châu Phi", prefix:"DTLCP", caseKeys:["DTLCP_Ổ dịch"], deathKeys:["DTLCP_Chết"], culledKeys:["DTLCP_Tiêu hủy","DTLCP_Tiêu huỷ","Số lợn tiêu hủy","Số lợn tiêu huỷ","Số tiêu hủy","Số tiêu huỷ","DTLCP_Chết"], dateKeys:["DTLCP_Ngày tiêu hủy","DTLCP_Ngày tiêu huỷ","Ngày tiêu hủy","Ngày tiêu huỷ","Ngày tiêu hủy lợn","Ngày tiêu huỷ lợn","DTLCP_Ngày phát hiện","DTLCP_Ngày xảy ra","Ngày phát hiện","Ngày xảy ra"], statusKeys:["DTLCP_Trạng thái"] },
+    CGC: { label:"Cúm gia cầm", prefix:"CGC", caseKeys:["CGC_Ổ dịch"], deathKeys:["CGC_Chết"], culledKeys:["CGC_Tiêu hủy","CGC_Tiêu huỷ","Số gia cầm tiêu hủy","Số gia cầm tiêu huỷ","Số tiêu hủy","Số tiêu huỷ","CGC_Chết"], dateKeys:["CGC_Ngày tiêu hủy","CGC_Ngày tiêu huỷ","Ngày tiêu hủy","Ngày tiêu huỷ","Ngày tiêu hủy gia cầm","Ngày tiêu huỷ gia cầm","CGC_Ngày phát hiện","CGC_Ngày xảy ra","Ngày phát hiện","Ngày xảy ra"], statusKeys:["CGC_Trạng thái"] },
+    VDNC: { label:"Viêm da nổi cục", prefix:"VDNC", caseKeys:["VDNC_Ổ dịch"], deathKeys:["VDNC_Mắc"], culledKeys:["VDNC_Tiêu hủy","VDNC_Tiêu huỷ","Số trâu bò tiêu hủy","Số trâu bò tiêu huỷ","Số tiêu hủy","Số tiêu huỷ","VDNC_Mắc"], dateKeys:["VDNC_Ngày tiêu hủy","VDNC_Ngày tiêu huỷ","Ngày tiêu hủy","Ngày tiêu huỷ","VDNC_Ngày phát hiện","VDNC_Ngày xảy ra","Ngày phát hiện","Ngày xảy ra"], statusKeys:["VDNC_Trạng thái"] },
+    DAI: { label:"Bệnh Dại", prefix:"DAI", caseKeys:["DAI_Ổ dịch"], deathKeys:["DAI_Mắc"], culledKeys:["DAI_Tiêu hủy","DAI_Tiêu huỷ","Số động vật tiêu hủy","Số động vật tiêu huỷ","Số tiêu hủy","Số tiêu huỷ","DAI_Mắc"], dateKeys:["DAI_Ngày tiêu hủy","DAI_Ngày tiêu huỷ","Ngày tiêu hủy","Ngày tiêu huỷ","DAI_Ngày phát hiện","DAI_Ngày xảy ra","Ngày phát hiện","Ngày xảy ra"], statusKeys:["DAI_Trạng thái"] }
   };
   function rows(){ try { if(typeof window.getRows === "function") { const r=window.getRows(); if(Array.isArray(r)) return r; } } catch(e){} return Array.isArray(window.sheetRows) ? window.sheetRows : (window.sheetData ? Object.values(window.sheetData) : []); }
   function num(v){ if(v===null||v===undefined||v==="") return 0; if(typeof v==="number") return Number.isFinite(v)?v:0; let s=String(v).trim().replace(/[^0-9,.-]/g,""); if(s.includes(".")&&s.includes(",")) s=s.replace(/\./g,"").replace(",","."); else if(s.includes(",")) s=s.replace(",","."); const n=Number(s); return Number.isFinite(n)?n:0; }
@@ -2118,8 +2230,8 @@ document.addEventListener("DOMContentLoaded", function () {
   function updateTrend(){
     const key=selected(), cfg=diseaseConfig[key], data=rows(), note=document.getElementById("trendNote");
     const dated=[];
-    // Tổng hợp số phát sinh theo kỳ 10 ngày từ đầu năm đến ngày mới nhất có dữ liệu.
-    // DTLCP/CGC: dùng số chết/tiêu hủy theo trường dữ liệu hiện có; VDNC/DAI: dùng số mắc.
+    // Biểu đồ diễn biến được nhóm theo NGÀY TIÊU HỦY; chỉ dùng ngày phát hiện/ngày xảy ra khi bản ghi không có cột ngày tiêu hủy.
+    // Lưu ý: nếu nguồn chỉ là số lũy kế theo xã, không thể suy ra phát sinh từng kỳ bằng cách cộng các dòng.
     data.forEach(r=>{
       const d=dateOf(r,cfg); if(!d) return;
       let v=pick(r,cfg.culledKeys);
@@ -2136,8 +2248,9 @@ document.addEventListener("DOMContentLoaded", function () {
     let labels=[], values=[];
     if(dated.length){
       const latest=new Date(Math.max(...dated.map(o=>o.d.getTime())));
-      const year=2026;
-      const start=new Date(2026,0,1); start.setHours(0,0,0,0);
+      // Chỉ tổng hợp dữ liệu trong năm có bản ghi mới nhất, tránh cộng lẫn các năm.
+      const year=latest.getFullYear();
+      const start=new Date(year,0,1); start.setHours(0,0,0,0);
       const buckets=new Map();
       const bucketKey=d=>{
         const day=d.getDate();
@@ -2165,7 +2278,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       dated.forEach(o=>{
-        if(o.d.getFullYear()!==2026 || o.d<start || o.d>latest) return;
+        if(o.d.getFullYear()!==year || o.d<start || o.d>latest) return;
         const k=bucketKey(o.d);
         if(buckets.has(k)) buckets.get(k).value+=o.v;
       });
@@ -2173,10 +2286,10 @@ document.addEventListener("DOMContentLoaded", function () {
       labels=bucketList.map(b=>b.label);
       values=bucketList.map(b=>b.value);
       const amountLabel=(key==="VDNC" || key==="DAI")?"số con mắc bệnh":"số con chết/tiêu hủy";
-      if(note) note.textContent=`${cfg.label} · ${amountLabel} theo từng kỳ 10 ngày từ 01/01/2026 đến ${latest.toLocaleDateString("vi-VN")}`;
+      if(note) note.textContent=`${cfg.label} · ${amountLabel} theo kỳ 10 ngày trong năm ${year}, ưu tiên ngày tiêu hủy; nếu bản ghi không có ngày tiêu hủy mới dùng ngày phát hiện/ngày xảy ra. Cần dữ liệu chi tiết từng ổ dịch để bảo đảm không cộng trùng.`;
     } else {
       labels=["Chưa có dữ liệu ngày"]; values=[0];
-      if(note) note.textContent="Chưa có dữ liệu ngày và số con phù hợp để tổng hợp biểu đồ từ 01/01/2026.";
+      if(note) note.textContent="Chưa có dữ liệu ngày và số con phù hợp để tổng hợp biểu đồ.";
     }
 
     if(!trendCanvas || !window.Chart) return;
@@ -2253,27 +2366,52 @@ document.addEventListener("DOMContentLoaded", function () {
   document.addEventListener("DOMContentLoaded",function(){
     document.querySelectorAll(".chart-filter[data-period]").forEach(b=>b.addEventListener("click",function(){ trendPeriod="10d"; document.querySelectorAll(".chart-filter[data-period]").forEach(x=>x.classList.toggle("active",x===this)); updateTrend(); }));
     const layer=document.getElementById("layerSelect"); if(layer) layer.addEventListener("change",refresh);
+    async function downloadEditableChartWord(filename, title, chart, note, diseaseName){
+      if(!window.docx || !window.docxCharts || !window.docxCharts.ChartRun){
+        alert("Chưa tải được thư viện tạo biểu đồ Word chỉnh sửa được. Kiểm tra kết nối Internet rồi thử lại."); return;
+      }
+      const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, AlignmentType } = window.docx;
+      const { ChartRun } = window.docxCharts;
+      const labels=(chart.data.labels||[]).map(x=>String(x??''));
+      const series=(chart.data.datasets||[]).map((ds,i)=>({
+        name:String(ds.label||('Số liệu '+(i+1))),
+        values:labels.map((_,j)=>{const v=Number(ds.data?.[j]);return Number.isFinite(v)?v:0;})
+      }));
+      const children=[];
+      children.push(new Paragraph({alignment:AlignmentType.CENTER,children:[new TextRun({text:title,bold:true,size:30,font:"Arial"})]}));
+      children.push(new Paragraph({children:[new TextRun({text:"Bệnh/lớp dữ liệu: "+diseaseName,font:"Arial",size:22})]}));
+      if(note) children.push(new Paragraph({children:[new TextRun({text:note,font:"Arial",size:20,italics:true})]}));
+      if(labels.length && series.length){
+        children.push(new Paragraph({children:[new ChartRun({type: chart.config?.type === 'line' ? 'line' : 'line',categories:labels,series,options:{title,legendPosition:'bottom',catAxisLabel:'Kỳ',valAxisLabel:'Số lượng',width: wideChartWidth(),height: wideChartHeight(),showLegend:series.length>1,markers:true}})]}));
+      } else {
+        children.push(new Paragraph({children:[new TextRun({text:"Biểu đồ chưa có dữ liệu để xuất.",font:"Arial",size:22})]}));
+      }
+      children.push(new Paragraph({children:[new TextRun({text:"Bảng số liệu dùng để chỉnh sửa biểu đồ",bold:true,font:"Arial",size:24})]}));
+      const cell=(text,bold=false)=>new TableCell({children:[new Paragraph({children:[new TextRun({text:String(text??''),bold,font:"Arial",size:20})]})]});
+      const rows=[new TableRow({children:[cell("Kỳ/Xã, phường",true),...series.map(x=>cell(x.name,true))]})];
+      labels.forEach((label,i)=>rows.push(new TableRow({children:[cell(label),...series.map(ds=>cell(ds.values[i]))]})));
+      children.push(new Table({rows,width:{size:100,type:WidthType.PERCENTAGE}}));
+      const doc=new Document({sections:[{children}]});
+      try {
+        const blob=await Packer.toBlob(doc), url=URL.createObjectURL(blob), a=document.createElement('a');
+        a.href=url; a.download=filename+'.docx'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),2000);
+      } catch(e){console.error('Lỗi xuất biểu đồ Word có thể chỉnh sửa:',e);alert('Không tạo được biểu đồ Word. Mở F12 > Console để xem lỗi.');}
+    }
+    function wideChartWidth(){return 9000000;}
+    function wideChartHeight(){return 4800000;}
     function downloadWordDocument(filename, title, bodyHtml){
-      const html='<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:Arial,sans-serif;color:#222}h1{font-size:18pt;text-align:center}h2{font-size:14pt}p{font-size:10pt}table{border-collapse:collapse;width:100%;font-size:10pt}th,td{border:1px solid #777;padding:5px;text-align:left}th{background:#e8eef5}img{max-width:100%;height:auto}</style></head><body><h1>'+escapeHtml(title)+'</h1>'+bodyHtml+'</body></html>';
+      const html='<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:Arial,sans-serif;color:#222}h1{font-size:18pt;text-align:center}h2{font-size:14pt}p{font-size:10pt}table{border-collapse:collapse;width:100%;font-size:10pt}th,td{border:1px solid #777;padding:5px;text-align:left}th{background:#e8eef5}</style></head><body><h1>'+escapeHtml(title)+'</h1>'+bodyHtml+'</body></html>';
       const blob=new Blob(['\ufeff',html],{type:'application/msword;charset=utf-8'});
       const url=URL.createObjectURL(blob), a=document.createElement('a'); a.href=url; a.download=filename+'.doc'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1500);
     }
     function escapeHtml(value){return String(value??'').replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));}
-    document.querySelectorAll("[data-download-chart]").forEach(b=>b.addEventListener("click",function(){
+    document.querySelectorAll("[data-download-chart]").forEach(b=>b.addEventListener("click",async function(){
       const id=this.dataset.downloadChart, canvas=document.getElementById(id); if(!canvas) return;
       const card=this.closest('.chart-card'), title=card?.querySelector('.chart-title')?.innerText||'Biểu đồ';
       const note=card?.querySelector('.chart-legend-note')?.innerText||'';
-      let body='<p><b>Bệnh/lớp dữ liệu:</b> '+escapeHtml(selected())+'</p>';
-      if(note) body+='<p>'+escapeHtml(note)+'</p>';
-      body+='<p style="text-align:center"><img src="'+canvas.toDataURL('image/png')+'" alt="'+escapeHtml(title)+'"></p>';
       const chart=window.Chart&&window.Chart.getChart(canvas);
-      if(chart){
-        const labels=chart.data.labels||[], datasets=chart.data.datasets||[];
-        body+='<h2>Số liệu biểu đồ</h2><table><thead><tr><th>Kỳ/Xã, phường</th>'+datasets.map(ds=>'<th>'+escapeHtml(ds.label||'Số liệu')+'</th>').join('')+'</tr></thead><tbody>';
-        labels.forEach((label,i)=>{body+='<tr><td>'+escapeHtml(label)+'</td>'+datasets.map(ds=>'<td>'+escapeHtml(ds.data?.[i]??'')+'</td>').join('')+'</tr>';});
-        body+='</tbody></table>';
-      }
-      downloadWordDocument(id+'_'+selected(),title,body);
+      if(!chart){alert('Biểu đồ chưa sẵn sàng để xuất.');return;}
+      await downloadEditableChartWord(id+'_'+selected(),title,chart,note,selected());
     }));
     const comparisonBtn=document.getElementById("btnDownloadComparison");
     if(comparisonBtn) comparisonBtn.addEventListener("click",function(){
