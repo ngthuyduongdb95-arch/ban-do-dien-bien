@@ -2052,29 +2052,20 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    const code = layerCode();
+    // Báo cáo tổng hợp phải bao quát mọi bệnh có dữ liệu, không phụ thuộc lớp bản đồ đang chọn.
     const diseaseStats = (Array.isArray(reportData.diseases) ? reportData.diseases : [])
-      .find(item => String(item.code || "").toUpperCase() === String(code).toUpperCase());
-    if (!diseaseStats || Number(diseaseStats.records || 0) === 0) {
-      alert("Không có bản ghi bệnh phù hợp trong khoảng ngày đã chọn cho lớp dữ liệu đang chọn.");
+      .filter(item => Number(item.records || 0) > 0)
+      .sort((a,b) => String(a.code || "").localeCompare(String(b.code || ""), "vi"));
+    if (!diseaseStats.length) {
+      alert("Không có bản ghi dịch bệnh trong khoảng ngày đã chọn.");
       return;
     }
 
     const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle } = window.docx;
     const from = parseDate(fromText);
     const to = parseDate(toText);
-    // API phân loại chỉ tiêu chết/tiêu hủy chung; không tách riêng khi nguồn không có hai chỉ tiêu độc lập.
-    const stats = {
-      name: diseaseStats.name || layerName(),
-      rows: Number(diseaseStats.records || 0),
-      communes: Number(diseaseStats.communeCount || 0),
-      villages: Number(diseaseStats.villageCount || 0),
-      households: Number(diseaseStats.householdCount || 0),
-      cases: Number(diseaseStats.cases || 0),
-      dead: 0,
-      culled: Number(diseaseStats.deadCull || 0),
-      weight: 0
-    };
+    const totals = reportData.totals || {};
+    const totalRecords = diseaseStats.reduce((sum,item)=>sum+Number(item.records||0),0);
     const range = fromText || toText ? `từ ngày ${from ? dateText(from) : "đầu dữ liệu"} đến ngày ${to ? dateText(to) : "cuối dữ liệu"}` : "toàn bộ dữ liệu hiện có";
     const today = new Date();
     const dateStamp = today.toLocaleDateString("vi-VN");
@@ -2096,15 +2087,23 @@ document.addEventListener("DOMContentLoaded", function () {
     body.push(headerLeft, headerRight, title("BÁO CÁO"));
     body.push(new Paragraph({children:[new TextRun({text:reportTitle,font:"Times New Roman",bold:true,size:28})],alignment:AlignmentType.CENTER,spacing:{after:100}}));
     body.push(new Paragraph({children:[new TextRun({text:periodLine,font:"Times New Roman",size:24,italics:true})],alignment:AlignmentType.CENTER,spacing:{after:280}}));
-    body.push(heading("1. Tình hình dịch bệnh"));
-    body.push(p(`${stats.name}: trong ${isMonth ? "tháng báo cáo" : "kỳ báo cáo"}, dữ liệu WEBGIS ghi nhận ${fmt(stats.rows)} bản ghi tại ${fmt(stats.communes)} xã, phường${stats.villages ? `, ${fmt(stats.villages)} thôn, bản` : ""}${stats.households ? `, liên quan ${fmt(stats.households)} hộ chăn nuôi` : ""}.`,{indent:true}));
-    const countParts=[];
-    if (stats.cases) countParts.push(`${fmt(stats.cases)} con mắc bệnh`);
-    if (stats.dead) countParts.push(`${fmt(stats.dead)} con chết`);
-    if (stats.culled) countParts.push(`${fmt(stats.culled)} con chết/tiêu hủy (chỉ tiêu nguồn đang gộp chung)`);
-    if (stats.weight) countParts.push(`khối lượng chết, tiêu hủy ${fmt(stats.weight)} kg`);
-    body.push(p(countParts.length ? `Số liệu thiệt hại ghi nhận ${countParts.join(", ")}.` : "Các chỉ tiêu chi tiết về số mắc, chết, tiêu hủy và khối lượng cần được đối chiếu, bổ sung từ hồ sơ chuyên môn trước khi phát hành.",{indent:true}));
-    body.push(p("Số liệu trong báo cáo được lấy từ API báo cáo, tổng hợp theo sheet GIS_DICH_BENH_NGAY trong khoảng ngày đã chọn và theo lớp bệnh đang chọn; cần đối chiếu với báo cáo chi tiết của các xã, phường và phụ lục chuyên môn trước khi trình ký. Chỉ tiêu chết/tiêu hủy được trình bày gộp nếu dữ liệu nguồn chưa tách riêng.",{indent:true}));
+    body.push(heading(isMonth ? "1. Tình hình dịch bệnh" : "1. Tình hình dịch bệnh động vật (số liệu trong kỳ báo cáo)"));
+    body.push(p(`Trong kỳ, dữ liệu WEBGIS ghi nhận ${fmt(totalRecords)} bản ghi dịch bệnh; tổng hợp theo từng bệnh như sau:`,{indent:true}));
+    diseaseStats.forEach(item => {
+      const parts=[];
+      if (Number(item.cases||0)) parts.push(`${fmt(item.cases)} con mắc bệnh`);
+      if (Number(item.deadCull||0)) parts.push(`${fmt(item.deadCull)} con chết/tiêu hủy (nguồn đang gộp chung)`);
+      const placeParts=[];
+      if (Number(item.householdCount||0)) placeParts.push(`${fmt(item.householdCount)} hộ`);
+      if (Number(item.villageCount||0)) placeParts.push(`${fmt(item.villageCount)} thôn, bản`);
+      if (Number(item.communeCount||0)) placeParts.push(`${fmt(item.communeCount)} xã, phường`);
+      let sentence = `${item.name || item.code}: ghi nhận ${fmt(item.records)} bản ghi`;
+      if (placeParts.length) sentence += ` tại ${placeParts.join(", ")}`;
+      if (parts.length) sentence += `, ${parts.join(", ")}`;
+      sentence += ".";
+      body.push(p(sentence,{indent:true}));
+    });
+    body.push(p(`Tổng số địa bàn ghi nhận trong dữ liệu: ${fmt(totals.communeCount ?? totals.communes ?? 0)} xã, phường; ${fmt(totals.villageCount ?? totals.villages ?? 0)} thôn, bản; ${fmt(totals.householdCount ?? totals.households ?? 0)} hộ (nếu các chỉ tiêu này được API trả về). Số liệu được tổng hợp từ sheet GIS_DICH_BENH_NGAY theo khoảng ngày đã chọn, không phụ thuộc lớp bản đồ đang chọn. Chỉ tiêu chết/tiêu hủy trình bày gộp khi dữ liệu nguồn chưa tách riêng; cần đối chiếu báo cáo chuyên môn và phụ lục trước khi trình ký.`,{indent:true}));
     if (isMonth) {
       body.push(heading("2. Công tác phòng, chống dịch bệnh đã và đang triển khai"));
       body.push(heading("2.1. Tham mưu, chỉ đạo"));
@@ -2113,11 +2112,15 @@ document.addEventListener("DOMContentLoaded", function () {
       body.push(p("Phối hợp với UBND các xã, phường theo dõi, giám sát diễn biến dịch bệnh trên đàn vật nuôi, nhất là tại ổ dịch, ổ dịch cũ và khu vực nguy cơ cao; phát hiện, xử lý kịp thời, hạn chế dịch bệnh lây lan.",{indent:true}));
       body.push(heading("2.3. Công tác tiêm phòng vắc xin, vệ sinh tiêu độc khử trùng"));
       body.push(p("Cập nhật kết quả tiêm phòng, vệ sinh tiêu độc khử trùng theo số liệu chuyên môn và phụ lục kèm theo; không tự suy diễn các chỉ tiêu chưa có dữ liệu trên WEBGIS.",{indent:true}));
-      body.push(heading("2.4. Kiểm dịch, kiểm soát giết mổ và quản lý thuốc thú y"));
-      body.push(p("Tiếp tục thực hiện nhiệm vụ kiểm dịch động vật, sản phẩm động vật; kiểm soát giết mổ, kiểm tra vệ sinh thú y, an toàn thực phẩm và quản lý thuốc thú y theo quy định. Kết quả chi tiết bổ sung theo hồ sơ nghiệp vụ trong tháng.",{indent:true}));
-      body.push(heading("2.5. Thực hiện thủ tục hành chính"));
-      body.push(p("Tổng hợp kết quả giải quyết thủ tục hành chính lĩnh vực thú y theo sổ theo dõi và hồ sơ thực tế của kỳ báo cáo.",{indent:true}));
-      body.push(heading("3. Kế hoạch, nhiệm vụ tháng tiếp theo"));
+      body.push(heading("2.4. Kiểm dịch động vật, sản phẩm động vật"));
+      body.push(p("Tổng hợp kết quả kiểm dịch vận chuyển động vật, sản phẩm động vật theo sổ theo dõi và hồ sơ nghiệp vụ trong tháng.",{indent:true}));
+      body.push(heading("2.5. Kiểm soát giết mổ, kiểm tra vệ sinh thú y và an toàn thực phẩm"));
+      body.push(p("Tổng hợp kết quả kiểm soát giết mổ, kiểm tra vệ sinh thú y và an toàn thực phẩm đối với sản phẩm có nguồn gốc động vật theo hồ sơ chuyên môn trong tháng.",{indent:true}));
+      body.push(heading("2.6. Quản lý thuốc thú y"));
+      body.push(p("Tổng hợp kết quả cấp, gia hạn chứng chỉ hành nghề thú y và giấy chứng nhận đủ điều kiện buôn bán thuốc thú y theo sổ theo dõi thực tế.",{indent:true}));
+      body.push(heading("2.7. Thực hiện thủ tục hành chính"));
+      body.push(p("Tổng hợp số lượng và kết quả giải quyết thủ tục hành chính lĩnh vực thú y theo hồ sơ thực tế; không tự điền số liệu khi chưa có nguồn dữ liệu.",{indent:true}));
+      body.push(heading("3. Kế hoạch nhiệm vụ tháng tiếp theo"));
     } else {
       body.push(heading("2. Công tác phòng, chống dịch đã và đang thực hiện"));
       body.push(heading("a. Tham mưu, chỉ đạo"));
@@ -2142,7 +2145,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const blob = await Packer.toBlob(doc);
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      const safeLayer = norm(stats.name).replace(/\s+/g,"_") || "bao_cao";
+      const safeLayer = "tong_hop";
       a.href=url; a.download=`Bao_cao_${reportKind}_${safeLayer}_${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,"0")}-${String(today.getDate()).padStart(2,"0")}.docx`;
       document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1500);
     } catch (e) { console.error("Lỗi tạo báo cáo Word:",e); alert("Không tạo được file Word. Mở F12 > Console để xem lỗi."); }
