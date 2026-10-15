@@ -1840,7 +1840,7 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
     <div class="chart-card">
       <div class="chart-card-head">
         <div class="chart-title">📈 Diễn biến dịch bệnh</div>
-        <button class="chart-download" type="button" data-download-chart="chartTrend" title="Tải biểu đồ PNG" aria-label="Tải biểu đồ diễn biến">↓ Tải</button>
+        <button class="chart-download" type="button" data-download-chart="chartTrend" title="Tải biểu đồ Word có thể chỉnh sửa" aria-label="Tải biểu đồ diễn biến dạng Word">↓ Tải Word</button>
       </div>
       <div class="chart-toolbar" aria-label="Chọn bệnh diễn biến">
         <label for="trendDiseaseSelect" style="font-size:10px;color:#536273;align-self:center;">Chọn bệnh:</label>
@@ -1859,7 +1859,7 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
     <div class="chart-card">
       <div class="chart-card-head">
         <div class="chart-title">📊 Thiệt hại theo xã/phường</div>
-        <button class="chart-download" type="button" data-download-chart="chartDamageXa" title="Tải biểu đồ PNG" aria-label="Tải biểu đồ thiệt hại">↓ Tải</button>
+        <button class="chart-download" type="button" data-download-chart="chartDamageXa" title="Tải biểu đồ Word có thể chỉnh sửa" aria-label="Tải biểu đồ thiệt hại dạng Word">↓ Tải Word</button>
       </div>
       <div class="chart-legend-note" id="damageNote">Số con tiêu hủy theo xã/phường</div>
       <div class="chart-body"><canvas id="chartDamageXa"></canvas></div>
@@ -1892,7 +1892,8 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
 <script src="js/dashboard.js"></script>
 <script src="js/map.js"></script>
 <script src="js/app.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docx@9.11.0/dist/index.umd.cjs"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@9.11.0/dist/charts.umd.cjs"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   const startInput = document.getElementById("reportStartDate");
@@ -2375,7 +2376,35 @@ document.addEventListener("DOMContentLoaded", function () {
     const trendDiseaseSelect=document.getElementById("trendDiseaseSelect");
     if(trendDiseaseSelect) trendDiseaseSelect.addEventListener("change",updateTrend);
     const layer=document.getElementById("layerSelect"); if(layer) layer.addEventListener("change",updateDamage);
-    document.querySelectorAll("[data-download-chart]").forEach(b=>b.addEventListener("click",function(){ const id=this.dataset.downloadChart, canvas=document.getElementById(id); if(!canvas) return; const a=document.createElement("a"); a.href=canvas.toDataURL("image/png"); a.download=id+"_"+selected()+".png"; a.click(); }));
+    document.querySelectorAll("[data-download-chart]").forEach(b=>b.addEventListener("click",async function(){
+      const id=this.dataset.downloadChart;
+      const canvas=document.getElementById(id);
+      const chart=canvas && window.Chart ? window.Chart.getChart(canvas) : null;
+      if(!chart){ alert("Biểu đồ chưa có dữ liệu để tải. Vui lòng chờ biểu đồ hiển thị rồi thử lại."); return; }
+      if(!window.docx || !window.docxCharts || !window.docxCharts.ChartRun){ alert("Chưa tải được thư viện tạo biểu đồ Word. Hãy kiểm tra kết nối Internet rồi thử lại."); return; }
+      const {Document,Paragraph,TextRun,Packer,AlignmentType}=window.docx;
+      const {ChartRun}=window.docxCharts;
+      const diseaseSelect=document.getElementById("trendDiseaseSelect");
+      const diseaseName=diseaseSelect && id==="chartTrend" ? diseaseSelect.options[diseaseSelect.selectedIndex].text : "";
+      const chartTitle=id==="chartTrend" ? ("Diễn biến dịch bệnh – "+diseaseName) : (id==="chartDamageXa" ? "Thiệt hại theo xã" : "Biểu đồ WebGIS");
+      const labels=(chart.data.labels||[]).map(v=>String(v));
+      const chartType=chart.config.type==="line" ? "line" : (chart.config.type==="pie" || chart.config.type==="doughnut" ? chart.config.type : "column");
+      const series=(chart.data.datasets||[]).map((ds,i)=>({name:String(ds.label||("Số liệu "+(i+1))),values:(ds.data||[]).map(v=>{ if(v===null||v===undefined||v==="") return 0; if(typeof v==="object") return Number(v.y||0); const n=Number(String(v).replace(/,/g,"")); return Number.isFinite(n)?n:0; })})).filter(ds=>ds.values.length);
+      if(!labels.length || !series.length){ alert("Biểu đồ chưa có dữ liệu hợp lệ để xuất Word."); return; }
+      const metricNote=id==="chartTrend" ? (diseaseSelect && diseaseSelect.value==="VDNC" ? "Chỉ tiêu: số con mắc bệnh; tổng hợp theo kỳ 10 ngày (01–10, 11–20, 21–cuối tháng)." : "Chỉ tiêu: số con chết/tiêu hủy; tổng hợp theo kỳ 10 ngày (01–10, 11–20, 21–cuối tháng).") : "Nguồn: dữ liệu đang hiển thị trên WebGIS.";
+      try{
+        const doc=new Document({sections:[{children:[
+          new Paragraph({alignment:AlignmentType.CENTER,children:[new TextRun({text:chartTitle,bold:true,size:30,font:"Times New Roman"})],spacing:{after:180}}),
+          new Paragraph({children:[new TextRun({text:metricNote,size:22,font:"Times New Roman"})],spacing:{after:180}}),
+          new Paragraph({children:[new ChartRun({type:chartType,title:chartTitle,categories:labels,series,options:{markers:true,showLegend:series.length>1}})]}),
+          new Paragraph({children:[new TextRun({text:"Lưu ý: Chọn biểu đồ trong Word để chỉnh sửa; dùng chuột phải → Chỉnh sửa dữ liệu để thay đổi số liệu và đường biểu diễn.",size:20,font:"Times New Roman",italics:true})],spacing:{before:180}})
+        ]}]});
+        const blob=await Packer.toBlob(doc);
+        const url=URL.createObjectURL(blob); const a=document.createElement("a");
+        const safe=(chartTitle||id).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^A-Za-z0-9_-]+/g,"_");
+        a.href=url; a.download=safe+".docx"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),2000);
+      }catch(err){ console.error("Lỗi xuất biểu đồ Word có thể chỉnh sửa:",err); alert("Không tạo được biểu đồ Word. Mở F12 > Console để xem lỗi."); }
+    }));
     const csvBtn=document.getElementById("btnDownloadComparison"); if(csvBtn) csvBtn.addEventListener("click",function(){ const table=document.querySelector(".comparison-table"); if(!table) return; const csv=Array.from(table.rows).map(row=>Array.from(row.cells).map(c=>'"'+c.innerText.replace(/"/g,'""')+'"').join(",")).join("\r\n"); const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8;"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download="so-sanh-cung-ky.csv"; a.click(); URL.revokeObjectURL(url); });
     refresh();
     loadTrendRows();
