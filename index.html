@@ -2034,7 +2034,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Lấy số liệu báo cáo từ API chi tiết theo đúng khoảng ngày đã chọn.
     // Không phụ thuộc lớp bản đồ đang tải trong GIS_TONGHOP.
-    const REPORT_API_URL = "https://script.google.com/macros/s/AKfycbyeHRUePa7E0GqBdQVHqLzb0NLkiNneysEoaGcZhnHOad-il1fv4LKI5pmpVOF0n4s6/exec";
+    const REPORT_API_URL = "https://script.google.com/macros/s/AKfycbyRuJ9Wfv4HtWjMRT2Hox2-mOhBVRjyqLaHhpQjohPEkfHWNyjM004KgO3o7_4nRJtj/exec";
     let reportData;
     try {
       const apiUrl = REPORT_API_URL
@@ -2198,7 +2198,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const end = new Date(reportDate.getFullYear(),reportDate.getMonth(),reportDate.getDate()); end.setHours(23,59,59,999);
     return d.getTime()>=start.getTime() && d.getTime()<=end.getTime();
   }
-  const TREND_API_URL = "https://script.google.com/macros/s/AKfycbyeHRUePa7E0GqBdQVHqLzb0NLkiNneysEoaGcZhnHOad-il1fv4LKI5pmpVOF0n4s6/exec?type=trend";
+  const TREND_API_URL = "https://script.google.com/macros/s/AKfycbyRuJ9Wfv4HtWjMRT2Hox2-mOhBVRjyqLaHhpQjohPEkfHWNyjM004KgO3o7_4nRJtj/exec?type=trend";
   let trendRows = [];
   let trendLoadStarted = false;
   let trendLoadError = "";
@@ -2494,7 +2494,7 @@ document.addEventListener("DOMContentLoaded", function () {
       put("comparisonYearPrev",`01/01–${fmtDate(endPrev)}/${yr-1}`);put("comparisonYearCurrent",`01/01–${fmtDate(now)}/${yr}`);
       const setErr=msg=>ids.forEach(id=>put(id,msg));
       try{
-        const res=await fetch("https://script.google.com/macros/s/AKfycbyeHRUePa7E0GqBdQVHqLzb0NLkiNneysEoaGcZhnHOad-il1fv4LKI5pmpVOF0n4s6/exec?type=trend",{cache:"no-store"});
+        const res=await fetch("https://script.google.com/macros/s/AKfycbyRuJ9Wfv4HtWjMRT2Hox2-mOhBVRjyqLaHhpQjohPEkfHWNyjM004KgO3o7_4nRJtj/exec?type=trend",{cache:"no-store"});
         if(!res.ok)throw new Error("HTTP "+res.status);
         const payload=await res.json();const data=Array.isArray(payload)?payload:(Array.isArray(payload.data)?payload.data:[]);
         if(!data.length)throw new Error("API không trả về bản ghi");
