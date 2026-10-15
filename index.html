@@ -2213,29 +2213,41 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    const daily = new Map();
+    // Gom dữ liệu theo từng kỳ 10 ngày trong tháng: ngày 1–10, 11–20, 21–cuối tháng.
+    // Cộng các bản ghi cùng bệnh trong cùng kỳ để biểu đồ vẫn thể hiện xu hướng lịch sử.
+    const tenDay = new Map();
     let skipped = 0;
+    let matchedDisease = 0;
     trendRows.forEach(row => {
       if(trendDiseaseKey(row) !== key) return;
+      matchedDisease++;
       const dateRaw = firstValue(row, ["Ngày","Ngày ghi nhận","Ngày phát hiện","Ngày xảy ra","Ngày tiêu hủy","Ngày chết/tiêu hủy","Ngày chết, tiêu hủy","Ngày cập nhật"]);
       const date = parseTrendDate(dateRaw);
       const value = trendValue(row,key);
       if(!date || value === null || !Number.isFinite(value)) { skipped++; return; }
-      const iso = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;
-      daily.set(iso, (daily.get(iso)||0) + value);
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1;
+      const day = date.getDate();
+      const period = day <= 10 ? 1 : (day <= 20 ? 2 : 3);
+      const bucketKey = `${year}-${String(month).padStart(2,"0")}-${period}`;
+      const monthDays = new Date(year, month, 0).getDate();
+      const fromDay = period === 1 ? 1 : (period === 2 ? 11 : 21);
+      const toDay = period === 1 ? 10 : (period === 2 ? 20 : monthDays);
+      if(!tenDay.has(bucketKey)) tenDay.set(bucketKey, {value:0, year, month, period, fromDay, toDay});
+      tenDay.get(bucketKey).value += value;
     });
 
-    const labels = Array.from(daily.keys()).sort();
-    const values = labels.map(d => daily.get(d));
-    const displayLabels = labels.map(s => {
-      const [y,m,d] = s.split("-");
-      return `${d}/${m}/${y}`;
+    const bucketKeys = Array.from(tenDay.keys()).sort();
+    const values = bucketKeys.map(k => tenDay.get(k).value);
+    const displayLabels = bucketKeys.map(k => {
+      const b = tenDay.get(k);
+      return `${String(b.fromDay).padStart(2,"0")}-${String(b.toDay).padStart(2,"0")}/${String(b.month).padStart(2,"0")}/${b.year}`;
     });
     const metric = key === "VDNC" ? "Số con mắc bệnh" : "Số con chết/tiêu hủy";
     if(note){
-      note.textContent = labels.length
-        ? `${cfg.label} · ${metric} theo ngày; đã cộng các bản ghi cùng ngày${skipped ? ` · ${skipped} bản ghi thiếu ngày/chỉ tiêu bị bỏ qua` : ""}.`
-        : `${cfg.label}: chưa tìm thấy bản ghi có tên bệnh, ngày và chỉ tiêu phù hợp trong GIS_DICH_BENH_NGAY.`;
+      note.textContent = bucketKeys.length
+        ? `${cfg.label} · ${metric} theo kỳ 10 ngày (01–10, 11–20, 21–cuối tháng); đã cộng các bản ghi trong từng kỳ${skipped ? ` · ${skipped} bản ghi thiếu ngày/chỉ tiêu bị bỏ qua` : ""}.`
+        : `${cfg.label}: API có ${trendRows.length} bản ghi${matchedDisease ? `, trong đó ${matchedDisease} bản ghi khớp tên bệnh` : ", nhưng chưa khớp tên bệnh"}; chưa tìm thấy dữ liệu có ngày và chỉ tiêu phù hợp trong GIS_DICH_BENH_NGAY.`;
     }
     if(!trendCanvas || !window.Chart) return;
     const colors = {DTLCP:"#e53935",CGC:"#2e7d32",VDNC:"#1976d2",DAI:"#6a35d1"};
