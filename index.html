@@ -1462,12 +1462,51 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
   border:1px solid var(--line); border-radius:9px; background:#fff;
 }
 .sidebar-kpi {
-  display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:7px; padding:0;
+  display:grid; grid-template-columns:repeat(8,minmax(0,1fr)); gap:7px; padding:0; align-items:stretch;
 }
 .summary-card { padding:8px; border-radius:7px; box-shadow:none; }
-.summary-head { font-size:10px; line-height:1.25; }
-.summary-main span { font-size:21px; }
-.summary-grid { font-size:9px; }
+.card-vaccine-kpi {
+  border:1px solid #c9dced; border-top:3px solid #1976d2; min-width:0;
+  background:linear-gradient(180deg,#f5faff 0%,#ffffff 75%);
+}
+.card-vaccine-kpi .summary-head {
+  display:flex; align-items:center; gap:6px; min-height:28px; margin-bottom:7px;
+  padding:5px 6px; border-radius:6px; background:#eaf3ff; color:#174f91;
+  font-size:12px; letter-spacing:.15px; line-height:1.25;
+}
+.card-vaccine-kpi .summary-head i { font-size:14px; }
+.vaccine-kpi-compact {
+  display:grid; grid-template-columns:1fr; gap:0; margin-top:0;
+  font-size:11px; line-height:1.45; color:#687582;
+}
+.vaccine-kpi-compact > div {
+  min-width:0; padding:5px 2px; border:0; border-top:1px solid #e7edf2; border-radius:0;
+  border-left:0; background:transparent; box-shadow:none;
+}
+.vaccine-kpi-compact > div:first-child { border-top:0; padding-top:0; }
+.vaccine-kpi-compact > div {
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  padding:5px 2px; border-top:1px solid #e7edf2;
+}
+.vaccine-kpi-compact > div:first-child { border-top:0; padding-top:2px; }
+.vaccine-kpi-compact > div > b {
+  display:block; flex:1 1 auto; font-size:11px; font-weight:750; margin:0; color:#687582;
+  line-height:1.35; white-space:normal;
+}
+.vaccine-kpi-compact span {
+  display:block; flex:0 0 auto; padding:0; border:0; font-size:10px; line-height:1.4; color:#687582;
+}
+.vaccine-kpi-compact strong {
+  display:block; text-align:right; white-space:nowrap; color:#27343f;
+  font-size:10px; font-weight:800; font-variant-numeric:tabular-nums;
+  background:transparent; border-radius:0; padding:0;
+}
+.summary-head { font-size:11px; line-height:1.3; }
+.summary-main span { font-size:23px; }
+.summary-main small { font-size:10px; }
+.summary-grid { font-size:10px; }
+.summary-grid span { line-height:1.45; }
+.summary-grid b { font-size:10px; }
 .main-map {
   grid-column:1; grid-row:2; height: min(56vw, 480px); min-height:360px;
   border:1px solid var(--line); border-radius:9px; overflow:hidden;
@@ -1489,6 +1528,7 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
 .chart-scroll { display:flex !important; width:100%; height:330px; min-height:330px; overflow-x:auto; overflow-y:hidden; align-items:stretch; }
 @media (max-width:1100px) {
  .sidebar-kpi { grid-template-columns:repeat(4,minmax(0,1fr)); }
+ .card-vaccine-kpi { grid-column:span 2; }
  .webgis { grid-template-columns:minmax(0,1.15fr) minmax(260px,.85fr); }
 }
 @media (max-width:760px) {
@@ -1499,6 +1539,7 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
  .webgis { display:flex; flex-direction:column; padding:0 8px; }
  .sidebar { order:1; }
  .sidebar-kpi { grid-template-columns:repeat(2,minmax(0,1fr)); }
+ .card-vaccine-kpi { grid-column:1/-1; }
  .main-map { order:2; height:65vh; min-height:420px; }
  #map { min-height:420px; }
  .panel { order:3; width:100%; max-height:none; min-height:260px; }
@@ -1651,6 +1692,175 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
   box-shadow:0 3px 12px rgba(10,25,40,.2) !important;
 }
 </style>
+
+<style id="layout-kpi-final-adjustment">
+/* Bố cục: 5 KPI một hàng; phun phòng, KSGM và thuốc thú y xếp dọc bên phải panel */
+@media (min-width: 1101px) {
+  .webgis {
+    display:grid !important;
+    grid-template-columns:minmax(0,1.35fr) minmax(230px,.72fr) 164px !important;
+    grid-template-rows:auto auto !important;
+    column-gap:8px !important; row-gap:8px !important;
+  }
+  .sidebar { grid-column:1 / -1 !important; grid-row:1 !important; }
+  .sidebar-kpi {
+    display:grid !important; grid-template-columns:repeat(5,minmax(0,1fr)) !important;
+    grid-auto-flow:row !important; gap:8px !important;
+  }
+  .main-map { grid-column:1 !important; grid-row:2 !important; min-width:0 !important; }
+  .panel { grid-column:2 !important; grid-row:2 !important; min-width:0 !important; }
+  .side-kpi-mini {
+    grid-column:3 !important; grid-row:2 !important;
+    display:flex !important; flex-direction:column !important; gap:8px !important;
+    min-width:0 !important; width:100% !important; align-self:start !important;
+  }
+  .sidebar-kpi > .summary-card { width:100% !important; height:124px !important; min-height:124px !important; box-sizing:border-box !important; }
+  .sidebar-kpi > .summary-card .summary-head { min-height:28px !important; }
+  .side-kpi-mini .summary-card { width:100% !important; min-height:90px !important; }
+}
+@media (min-width:761px) and (max-width:1100px) {
+  .webgis { grid-template-columns:minmax(0,1.2fr) minmax(210px,.8fr) 140px !important; }
+  .sidebar-kpi { grid-template-columns:repeat(5,minmax(0,1fr)) !important; }
+  .side-kpi-mini { grid-column:3 !important; grid-row:2 !important; display:flex !important; flex-direction:column !important; }
+}
+@media (max-width:760px) {
+  .webgis { display:flex !important; flex-direction:column !important; }
+  .sidebar-kpi { display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr)) !important; }
+  .side-kpi-mini { display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr)) !important; }
+  .side-kpi-title { grid-column:1/-1; }
+}
+</style>
+<style id="equal-size-side-kpi-cards">
+/* Ba thẻ KPI xếp dọc dùng cùng chiều cao với các thẻ KPI hàng trên */
+@media (min-width: 1101px) {
+  .webgis {
+    grid-template-columns: minmax(0,1.35fr) minmax(200px,.72fr) minmax(0,calc((100vw - 72px) / 5)) !important;
+  }
+}
+@media (min-width: 761px) and (max-width: 1100px) {
+  .webgis {
+    grid-template-columns: minmax(0,1.2fr) minmax(180px,.8fr) minmax(0,calc((100vw - 72px) / 5)) !important;
+  }
+}
+@media (min-width: 761px) {
+  .side-kpi-mini {
+    align-items: stretch !important;
+    gap: 8px !important;
+  }
+  .side-kpi-mini > .summary-card {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: 124px !important;
+    min-height: 124px !important;
+    max-height: 124px !important;
+    flex: 0 0 124px !important;
+    padding: 8px !important;
+    overflow: hidden !important;
+  }
+  .side-kpi-mini > .summary-card .summary-head {
+    min-height: 28px !important;
+    line-height: 1.3 !important;
+  }
+  .side-kpi-mini > .summary-card .summary-main {
+    margin-top: 4px !important;
+    margin-bottom: 4px !important;
+  }
+  .side-kpi-mini > .summary-card .summary-main span {
+    font-size: 23px !important;
+    line-height: 25px !important;
+  }
+  .side-kpi-mini > .summary-card .summary-grid {
+    font-size: 10px !important;
+    line-height: 1.4 !important;
+  }
+}
+@media (max-width: 760px) {
+  .side-kpi-mini > .summary-card {
+    min-height: 124px !important;
+    box-sizing: border-box !important;
+  }
+}
+</style>
+
+<style id="final-kpi-equal-width-panel-height">
+/* Đồng bộ chiều rộng: mỗi KPI ngang rộng bằng mỗi KPI trong cột dọc */
+@media (min-width: 761px) {
+  .webgis {
+    grid-template-columns:
+      minmax(0, 1.2fr)
+      minmax(185px, .8fr)
+      minmax(0, calc(20% - 10px)) !important;
+    grid-template-rows: auto minmax(480px, auto) !important;
+    align-items: stretch !important;
+  }
+  .sidebar { grid-column: 1 / -1 !important; grid-row: 1 !important; min-width: 0 !important; }
+  .sidebar-kpi {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    align-items: stretch !important;
+  }
+  .sidebar-kpi > .summary-card {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    height: 124px !important;
+    min-height: 124px !important;
+  }
+  .main-map {
+    grid-column: 1 !important; grid-row: 2 !important;
+    width: 100% !important; height: 480px !important; min-width: 0 !important;
+  }
+  .panel {
+    grid-column: 2 !important; grid-row: 2 !important;
+    width: 100% !important; height: 480px !important;
+    min-width: 0 !important; min-height: 480px !important; max-height: 480px !important;
+    box-sizing: border-box !important;
+  }
+  .side-kpi-mini {
+    grid-column: 3 !important; grid-row: 2 !important;
+    display: flex !important; flex-direction: column !important;
+    align-self: stretch !important; align-items: stretch !important;
+    width: 100% !important; height: 480px !important;
+    min-width: 0 !important; min-height: 480px !important; max-height: 480px !important;
+    box-sizing: border-box !important; padding: 7px !important; gap: 8px !important;
+    overflow: hidden !important;
+  }
+  /* Ba thẻ chia đều toàn bộ chiều cao của panel, tính cả tiêu đề nhóm và khoảng cách */
+  .side-kpi-mini > .summary-card {
+    flex: 1 1 0 !important;
+    width: 100% !important; height: auto !important;
+    min-height: 0 !important; max-height: none !important;
+    box-sizing: border-box !important; padding: 8px !important;
+    overflow: hidden !important;
+  }
+  .side-kpi-mini > .side-kpi-title {
+    flex: 0 0 auto !important;
+    margin: 0 !important; padding: 1px 1px 3px !important;
+    font-size: 9px !important; line-height: 1.25 !important;
+  }
+}
+@media (min-width: 761px) and (max-width: 1100px) {
+  .webgis {
+    grid-template-columns:
+      minmax(0, 1.05fr)
+      minmax(175px, .8fr)
+      minmax(0, calc(20% - 10px)) !important;
+  }
+}
+</style>
+
+
+<style id="webgisExcelExportStyles">
+  .summary-head{display:flex;align-items:center;gap:6px;}
+  .summary-head>b{min-width:0;flex:1;}
+  .kpi-download{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;gap:4px;border:1px solid rgba(255,255,255,.35);border-radius:6px;background:rgba(255,255,255,.14);color:inherit;padding:4px 7px;font-size:11px;line-height:1.15;font-weight:700;cursor:pointer;white-space:nowrap;}
+  .kpi-download:hover{background:rgba(255,255,255,.26);}
+  .kpi-download:disabled,#btnDownloadAllKpi:disabled{opacity:.6;cursor:wait;}
+  #btnDownloadAllKpi{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:0;border-radius:8px;padding:10px 14px;background:#176b45;color:#fff;font-weight:700;cursor:pointer;box-shadow:0 2px 5px #0001;}
+  #btnDownloadAllKpi:hover{background:#105737;}
+  @media(max-width:760px){.kpi-download{font-size:10px;padding:4px 5px}.kpi-download i{display:none}#btnDownloadAllKpi{width:100%;}}
+</style>
+<script id="webgisSheetJSLoader" src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'"></script>
+
 </head>
 <body>
 <header class="header">
@@ -1719,6 +1929,9 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
         <button type="button" id="btnPrintReport">
             <i class="fa-solid fa-print"></i> In / lưu PDF
         </button>
+        <button type="button" id="btnDownloadAllKpi" title="Tải bảng tổng hợp theo khoảng ngày đã chọn">
+            <i class="fa-solid fa-file-excel"></i> Bảng số liệu tổng hợp (Excel)
+        </button>
     </div>
 </section>
 <div class="webgis">
@@ -1759,31 +1972,24 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
                 <div class="summary-main"><span id="dbDAIDang">0</span><small>xã đang có dịch</small></div>
                 <div class="summary-grid">
                     <span>Xã có dịch (lũy kế) <b id="dbDAIXa">0</b></span>
-                    <span>Chết <b id="dbDAIChet">0</b></span>
-                    <span>Tiêu hủy <b id="dbDAITieuHuy">0</b></span>
+                    <span>Chết, tiêu hủy <b id="dbDAITieuHuy">0</b></span>
+                    <span hidden id="dbDAIChet"></span>
                 </div>
             </div>
 
-            <div class="summary-card card-phun">
-                <div class="summary-head"><i class="fa-solid fa-spray-can-sparkles"></i><b>THỰC HIỆN THÁNG TVSKTTĐ</b></div>
-                <div class="summary-main"><span id="dbPhunXa">0</span><small>xã</small></div>
-                <div class="summary-grid">
-                    <span>Số hộ <b id="dbPhunHo">0</b></span>
-                    <span>Số vòng <b id="dbPhunVong">0</b></span>
-                </div>
-            </div>
 
-            <div class="summary-card card-ksgm">
-                <div class="summary-head"><i class="fa-solid fa-warehouse"></i><b>KSGM</b></div>
-                <div class="summary-main"><span id="dbKSGMXa">0</span><small>xã triển khai</small></div>
-                <div class="summary-grid">
-                    <span>Số cơ sở <b id="dbKSGMCoSo">0</b></span>
+            <div class="summary-card card-vaccine-kpi" aria-label="KPI tiêm phòng">
+                <div class="summary-head"><i class="fa-solid fa-syringe"></i><b>TIÊM PHÒNG</b></div>
+                <div class="summary-grid vaccine-kpi-compact">
+                    <span>Định kỳ đợt 1 <b id="kpiTpd1Done">—/45 xã hoàn thành</b></span>
+                    <span>Định kỳ đợt 2 <b id="kpiTpd2Done">—/45 xã hoàn thành</b></span>
+                    <span class="vaccine-rabies-line">Bệnh Dại <b id="kpiDaiDone">—% tổng đàn</b><em id="kpiDaiStartedVisible">Đang triển khai: — xã</em></span>
+                    <span>Viêm da nổi cục <b id="kpiVdncDone">—/45 xã hoàn thành</b></span>
+                    <span hidden id="kpiTpd1Plan">—</span><span hidden id="kpiTpd1Rate">—</span>
+                    <span hidden id="kpiTpd2Started">—/45</span><span hidden id="kpiTpd2Rate">—</span>
+                    <span hidden id="kpiDaiStarted">—/45</span><span hidden id="kpiDaiRate">—</span>
+                    <span hidden id="kpiVdncStarted">—/45</span><span hidden id="kpiVdncRate">—</span>
                 </div>
-            </div>
-
-            <div class="summary-card card-drug">
-                <div class="summary-head"><i class="fa-solid fa-pills"></i><b>THUỐC THÚ Y</b></div>
-                <div class="summary-main"><span id="dbCSBBTTY">0</span><small>cơ sở</small></div>
             </div>
         </div>
     </aside>
@@ -1831,6 +2037,33 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
             </div>
         </div>
         </aside>
+    <aside class="side-kpi-mini" aria-label="KPI hoạt động chuyên ngành">
+            <div class="summary-card card-phun">
+                <div class="summary-head"><i class="fa-solid fa-spray-can-sparkles"></i><b>THỰC HIỆN THÁNG TVSKTTĐ</b></div>
+                <div class="summary-main"><span id="dbPhunXa">0</span><small>xã triển khai</small></div>
+                <div class="summary-grid phun-rounds">
+                    <span>Đợt 1 <b id="dbPhunDot1">—</b></span>
+                    <span>Đợt 2 <b id="dbPhunDot2">—</b></span>
+                    <span hidden id="dbPhunHo">—</span><span hidden id="dbPhunVong">—</span>
+                </div>
+            </div>
+
+
+        <div class="side-kpi-title">HOẠT ĐỘNG CHUYÊN NGÀNH</div>
+            <div class="summary-card card-ksgm">
+                <div class="summary-head"><i class="fa-solid fa-warehouse"></i><b>KSGM</b></div>
+                <div class="summary-main"><span id="dbKSGMXa">0</span><small>xã triển khai</small></div>
+                <div class="summary-grid">
+                    <span>Số cơ sở <b id="dbKSGMCoSo">0</b></span>
+                </div>
+            </div>
+
+            <div class="summary-card card-drug">
+                <div class="summary-head"><i class="fa-solid fa-pills"></i><b>THUỐC THÚ Y</b></div>
+                <div class="summary-main"><span id="dbCSBBTTY">0</span><small>cơ sở</small></div>
+            </div>
+
+    </aside>
 </div>
 
 <!-- ================= KHU VỰC BIỂU ĐỒ ================= -->
@@ -1982,7 +2215,7 @@ document.addEventListener("DOMContentLoaded", function () {
       title.textContent = "Dự thảo báo cáo – xem và chỉnh sửa trước khi xuất Word";
       title.style.cssText = "font-size:19px;margin:0;";
       const note = document.createElement("p");
-      note.textContent = "Áp dụng cho báo cáo kỳ 10 ngày, tháng, quý và năm. Số liệu dịch bệnh được lấy từ API theo khoảng ngày đã chọn; các mục hoạt động chưa có nguồn dữ liệu kết nối được đánh dấu “...” để bạn bổ sung, kiểm tra trước khi xuất Word.";
+      note.textContent = "Áp dụng cho báo cáo kỳ 10 ngày, tháng, quý và năm. Số liệu dịch bệnh được lấy từ API theo khoảng ngày đã chọn; các mục hoạt động chưa có nguồn dữ liệu kết nối, gồm KPI tiêm phòng định kỳ đợt 1, đợt 2, bệnh Dại và Viêm da nổi cục, được đánh dấu “...” để bạn bổ sung, kiểm tra trước khi xuất Word.";
       note.style.cssText = "font-size:13px;line-height:1.5;margin:0;color:#555;";
       const area = document.createElement("textarea");
       area.value = initialText;
@@ -2154,21 +2387,42 @@ document.addEventListener("DOMContentLoaded", function () {
       body.push(p("Tiếp tục theo dõi chặt chẽ diễn biến dịch bệnh trên đàn vật nuôi, chủ động triển khai các biện pháp phòng, chống dịch theo quy định.", {indent:true}));
       body.push(heading("2. Công tác phòng chống dịch bệnh đã và đang triển khai"));
       body.push(heading("2.1. Tham mưu, chỉ đạo"));
-      body.push(p("Tham mưu kịp thời các văn bản chỉ đạo công tác phòng, chống dịch bệnh động vật theo tình hình thực tế và chỉ đạo của cấp có thẩm quyền.", {indent:true}));
+      body.push(p("Tiếp tục căn cứ tình hình dịch bệnh trên địa bàn và văn bản chỉ đạo của Chính phủ, Bộ Nông nghiệp và Môi trường, Cục Chăn nuôi và Thú y để tham mưu kịp thời các văn bản chỉ đạo phòng chống dịch bệnh động vật.", {indent:true}));
       body.push(heading("2.2. Giám sát dịch bệnh"));
-      body.push(p("Phối hợp với UBND các xã, phường theo dõi, giám sát tình hình dịch bệnh trên đàn vật nuôi; tổ chức lấy mẫu, gửi xét nghiệm và hướng dẫn xử lý khi phát sinh dịch bệnh.", {indent:true}));
-      body.push(heading("2.3. Công tác tiêm phòng vắc xin, vệ sinh tiêu độc khử trùng"));
-      body.push(p("Tiếp tục phối hợp, hướng dẫn UBND các xã, phường tổ chức tiêm phòng vắc xin cho đàn vật nuôi theo kế hoạch; theo dõi tiến độ, tổng hợp kết quả tiêm phòng và rà soát nhu cầu vắc xin. Triển khai vệ sinh, tiêu độc, khử trùng môi trường chăn nuôi, tập trung tại khu vực có dịch, ổ dịch cũ và địa bàn nguy cơ cao.", {indent:true}));
-      body.push(heading("2.4. Kiểm dịch động vật, sản phẩm động vật"));
-      body.push(p("Thực hiện kiểm dịch vận chuyển động vật, sản phẩm động vật theo quy định; hướng dẫn tổ chức, cá nhân thực hiện đầy đủ hồ sơ, thủ tục kiểm dịch và tăng cường kiểm tra, kiểm soát động vật, sản phẩm động vật vận chuyển vào địa bàn tỉnh.", {indent:true}));
-      body.push(heading("2.5. Kiểm soát giết mổ, kiểm tra vệ sinh thú y và an toàn thực phẩm"));
-      body.push(p("Phối hợp với các cơ quan, đơn vị và UBND các xã, phường kiểm tra, kiểm soát hoạt động giết mổ động vật; giám sát vệ sinh thú y tại cơ sở giết mổ, sơ chế, bảo quản sản phẩm động vật, góp phần bảo đảm an toàn thực phẩm.", {indent:true}));
-      body.push(heading("2.6. Quản lý thuốc thú y"));
-      body.push(p("Thực hiện quản lý hoạt động kinh doanh thuốc thú y; hướng dẫn tổ chức, cá nhân chấp hành quy định về điều kiện buôn bán thuốc thú y, hành nghề thú y, nguồn gốc và chất lượng thuốc thú y.", {indent:true}));
-      body.push(heading("2.7. Thực hiện thủ tục hành chính"));
-      body.push(p("Tiếp nhận, giải quyết các thủ tục hành chính thuộc lĩnh vực thú y theo thẩm quyền, bảo đảm đúng trình tự, thủ tục và thời hạn quy định.", {indent:true}));
+      body.push(p("Phòng phối hợp với UBND các xã, phường, cơ quan, tổ chức có liên quan tiếp tục theo dõi, giám sát chặt chẽ diễn biến hình dịch bệnh trên đàn vật nuôi đặc biệt tại các ổ dịch, ổ dịch cũ, khu vực nguy cơ cao, nhằm phát hiện, xử lý kịp thời, hạn chế tối đa dịch bệnh lây lan ra diện rộng.", {indent:true}));
+      body.push(heading("2.3. Công tác tiêm phòng vắc xin"));
+      body.push(p("Tiêm phòng định kỳ đợt 1: .../45 xã hoàn thành; số lượng đã tiêm .../... con/liều, đạt ...% kế hoạch.", {indent:true}));
+      body.push(p("Tiêm phòng định kỳ đợt 2: .../45 xã đã triển khai, .../45 xã hoàn thành; số lượng đã tiêm .../... con/liều, đạt ...% kế hoạch.", {indent:true}));
+      body.push(p("Tiêm phòng bệnh Dại: .../45 xã đã triển khai, .../45 xã hoàn thành; số lượng đã tiêm .../... con, đạt ...% kế hoạch.", {indent:true}));
+      body.push(p("Tiêm phòng bệnh Viêm da nổi cục: .../45 xã đã triển khai, .../45 xã hoàn thành; số lượng đã tiêm .../... con, đạt ...% kế hoạch.", {indent:true}));
+      body.push(heading("2.4. Vệ sinh, tiêu độc khử trùng"));
+      body.push(p("Triển khai vệ sinh, tiêu độc, khử trùng môi trường chăn nuôi theo kế hoạch. Đến thời điểm báo cáo, .../45 xã, phường đã và đang triển khai; ... xã, phường đã hoàn thành ... vòng phun; các xã còn lại đang thực hiện vòng ... . Khối lượng hóa chất sử dụng ...; diện tích/khu vực được vệ sinh, khử trùng ... .", {indent:true}));
+      body.push(heading("2.5. Kiểm dịch động vật, sản phẩm động vật"));
+      body.push(heading("a. Kiểm dịch động vật, sản phẩm động vật xuất tỉnh"));
+      body.push(p("Trong tháng, Chi cục đã thực hiện kiểm dịch động vật ra khỏi địa bàn tỉnh với tổng số ... con ... được vận chuyển đến tỉnh ..., các lô hàng trên đảm bảo điều kiện vệ sinh thú y, an toàn thực phẩm.", {indent:true}));
+      body.push(heading("b. Kiểm soát động vật, sản phẩm động vật nhập tỉnh"));
+      body.push(p("Trên địa bàn tỉnh hiện nay chưa có chốt kiểm dịch cố định nên không kiểm soát được số lượng động vật, sản phẩm động vật nhập vào tỉnh. Căn cứ theo số liệu báo cáo của cơ quan quản lý chuyên ngành thú y các tỉnh đã thực hiện kiểm dịch vận chuyển động vật, sản phẩm động vật vào địa bàn tỉnh Điện Biên, trong tháng đã nhập ...", {indent:true}));
+      body.push(heading("2.6. Kiểm soát giết mổ, kiểm tra vệ sinh thú y và an toàn thực phẩm"));
+      body.push(heading("c. Kiểm soát giết mổ"));
+      body.push(p("Trung tâm dịch vụ các xã, phường thực hiện kiểm soát giết mổ; trong tháng thực hiện kiểm soát giết mổ được ... con gia súc, gia cầm. Trong đó ... con lợn; ... con trâu, bò và ... con gia cầm. Luỹ kế từ đầu năm đến nay kết quả kiểm soát giết mổ được tổng số ... con gia súc gia cầm. Trong đó ... con lợn; ... con trâu, bò; ... con gia cầm và ... con dê; không có trường hợp vi phạm phải xử lý.", {indent:true}));
+      body.push(heading("2.7. Quản lý thuốc thú y và hành nghề thú y"));
+      body.push(p("Trong tháng phòng Thú y thực hiện cấp, gia hạn ... chứng chỉ hành nghề thú y; cấp, gia hạn ... giấy chứng nhận đủ điều kiện buôn bán thuốc thú y.", {indent:true}));
+      body.push(heading("2.8. Thực hiện thủ tục hành chính"));
+      body.push(p("Trong tháng đã thực hiện tổng số ... thủ tục hành chính; trong đó cấp ... hồ sơ giấy chứng nhận kiểm dịch vận chuyển động vật ra khỏi địa bàn tỉnh, ... chứng chỉ hành nghề thú y, ... giấy chứng nhận đủ điều kiện buôn bán thuốc thú y.", {indent:true}));
+      body.push(heading("2.9. Công tác chuyên môn khác"));
+      body.push(p("Duy trì thực hiện quy chế phối hợp với cơ quan y tế cùng cấp theo Thông tư liên tịch số 16/2013/TTLT ngày 27/5/2013 của Bộ Y tế và Bộ Nông nghiệp và Môi trường về hướng dẫn phối hợp phòng, chống bệnh lây truyền từ động vật sang người.", {indent:true}));
+      body.push(p("Thực hiện rà soát số lượng vắc xin Viêm da nổi cục đã đăng ký sử dụng năm ... của các xã, phường. Phối hợp tham mưu các thủ tục mua vắc xin Viêm da nổi cục để tiêm phòng cho đàn bò trên địa bàn tỉnh năm ... .", {indent:true}));
+      body.push(p("Tổ chức thực hiện lấy mẫu giám sát vệ sinh thú y, an toàn thực phẩm đối với sản phẩm động vật sử dụng làm thực phẩm đợt ... năm ... theo kế hoạch số ... của Chi cục Nông nghiệp.", {indent:true}));
+      body.push(p("Phối hợp thực hiện lấy mẫu giám sát bệnh Viêm da nổi cục vòng ... trên địa bàn tỉnh theo kế hoạch số ... của Chi cục Nông nghiệp.", {indent:true}));
       body.push(heading(`3. Kế hoạch nhiệm vụ ${nextPeriodLabel}`));
-      body.push(p("Tiếp tục bám sát tình hình dịch bệnh, tham mưu kịp thời công tác phòng, chống dịch; phối hợp với UBND các xã, phường giám sát, lấy mẫu, xử lý ổ dịch; đôn đốc tiêm phòng vắc xin, vệ sinh tiêu độc khử trùng và thực hiện các nhiệm vụ kiểm dịch, kiểm soát giết mổ, kiểm tra vệ sinh thú y, quản lý thuốc thú y theo quy định.", {indent:true}));
+      body.push(p("Tiếp tục bám sát tình hình dịch bệnh trên địa bàn và các văn bản chỉ đạo của Trung ương để chủ động tham mưu kịp thời cho Sở Nông nghiệp và Môi trường, UBND tỉnh về chỉ đạo công tác phòng, chống dịch bệnh động vật.", {indent:true}));
+      body.push(p("Phối hợp với UBND các xã, phường và các đơn vị chức năng tăng cường công tác phòng, chống dịch bệnh trên đàn vật nuôi, giám sát, lấy mẫu, gửi xét nghiệm nhằm phát hiện sớm, xử lý kịp thời đặc biệt đối với các bệnh nguy hiểm như bệnh: DTLCP, Cúm gia cầm, Dại…hạn chế tối đa dịch bệnh lây lan ra diện rộng; tăng cường kiểm soát động vật, sản phẩm động vật nhập vào địa bàn, phát hiện và xử lý nghiêm theo quy định các trường hợp vi phạm.", {indent:true}));
+      body.push(p("Tiếp tục thực hiện các nhiệm vụ chuyên môn về kiểm dịch vận chuyển, kiểm tra vệ sinh thú y, an toàn thực phẩm, quản lý thuốc thú y.", {indent:true}));
+      body.push(p("Phối hợp với các xã, phường, các đơn vị chức năng tăng cường kiểm soát động vật, sản phẩm động vật nhập vào địa bàn, phát hiện và xử lý nghiêm theo quy định các trường hợp vi phạm.", {indent:true}));
+      body.push(p("Duy trì thực hiện quy chế phối hợp với cơ quan y tế cùng cấp theo Thông tư liên tịch số 16/2013/TTLT ngày 27/5/2013 của Bộ Y tế và Bộ Nông nghiệp và Môi trường về hướng dẫn phối hợp phòng, chống bệnh lây truyền từ động vật sang người.", {indent:true}));
+      body.push(p("Thực hiện rà soát số lượng vắc xin Viêm da nổi cục đã đăng ký sử dụng năm " + selectedYear + " của các xã, phường. Phối hợp tham mưu các thủ tục mua vắc xin Viêm da nổi cục để tiêm phòng cho đàn bò trên địa bàn tỉnh năm " + selectedYear + ".", {indent:true}));
+      body.push(p("Tổ chức thực hiện lấy mẫu giám sát vệ sinh thú y, an toàn thực phẩm đối với sản phẩm động vật sử dụng làm thực phẩm đợt II năm " + selectedYear + " theo kế hoạch số .../KH-CCNN ngày ... của Chi cục Nông nghiệp.", {indent:true}));
+      body.push(p("Phối hợp thực hiện lấy mẫu giám sát bệnh Viêm da nổi cục vòng 2 trên địa bàn tỉnh theo kế hoạch số .../KH-CCNN ngày ... của Chi cục Nông nghiệp.", {indent:true}));
     } else {
       body.push(heading("2. Công tác phòng, chống dịch đã và đang thực hiện"));
       body.push(heading("a. Tham mưu, chỉ đạo"));
@@ -2189,37 +2443,55 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Dự thảo dùng chung cho kỳ 10 ngày, tháng, quý và năm. Chỉ tự điền số liệu thực tế có trong API;
     // các mục hoạt động chưa có nguồn dữ liệu kết nối được để người dùng bổ sung/xác nhận.
-    const draftLines = [];
-    draftLines.push(isMonth ? `BÁO CÁO KẾT QUẢ THỰC HIỆN CÔNG TÁC THÚ Y ${reportPeriodTitle.toUpperCase()}` : `BÁO CÁO TÌNH HÌNH DỊCH BỆNH VÀ HOẠT ĐỘNG THÚ Y ${range.toUpperCase()}`);
-    draftLines.push("", isMonth ? "1. Tình hình dịch bệnh" : "1. Tình hình dịch bệnh động vật");
-    if (diseaseStats.length) {
-      diseaseStats.forEach(item => {
-        const householdCount = Number(item.householdCount || 0);
-        const villageCount = Number(item.villageCount || 0);
-        const communeCount = Number(item.communeCount || 0);
-        const locationText = householdCount && villageCount && communeCount
-          ? `tại ${fmt(householdCount)} hộ thuộc ${fmt(villageCount)} thôn, bản của ${fmt(communeCount)} xã, phường`
-          : householdCount && villageCount ? `tại ${fmt(householdCount)} hộ thuộc ${fmt(villageCount)} thôn, bản`
-          : villageCount && communeCount ? `tại ${fmt(villageCount)} thôn, bản thuộc ${fmt(communeCount)} xã, phường`
-          : communeCount ? `tại ${fmt(communeCount)} xã, phường` : "";
-        const animal = item.code === "DTLCP" ? "lợn" : item.code === "CGC" ? "gia cầm" : item.code === "VDNC" ? "trâu, bò" : "động vật";
-        let sentence = `${item.name || item.code}: trong kỳ dịch bệnh xảy ra`;
-        if (locationText) sentence += ` ${locationText}`;
-        if (Number(item.cases || 0)) sentence += ` với tổng số ${animal} mắc bệnh ${fmt(item.cases)} con`;
-        if (Number(item.deadCull || 0)) sentence += `${Number(item.cases || 0) ? "; " : " với tổng số "}${animal} chết, tiêu hủy ${fmt(item.deadCull)} con`;
-        sentence += ".";
-        draftLines.push(sentence);
-      });
-    } else {
-      draftLines.push("Không có bản ghi dịch bệnh trong khoảng thời gian đã chọn.");
+    // Nội dung nền lấy nguyên văn từ 02 mẫu Word đã cung cấp. Chỉ phần diễn biến dịch bệnh
+    // được thay bằng số liệu API; các hoạt động khác giữ nguyên mẫu, không tự suy diễn số liệu.
+    const monthTemplate = ["1. Tình hình dịch bệnh", "Bệnh Dại: phát hiện 01 trường hợp chó nghi dại cắn người trên địa bàn Điện Biên Phủ; Phòng đã phối hợp với Trung tâm dịch vụ tổng hợp phường giám sát, lấy mẫu, gửi xét nghiệm; kết quả kết quả mẫu dương tính với vi rút Dại. Đồng thời, thông báo và phối hợp với cơ quan y tế tuyên truyền, vận động, hướng dẫn người bị chó dại cào, cắn đến cơ sở y tế để điều trị dự phòng.", "Bệnh Dịch tả lợn Châu phi: từ ngày 15/7/2025 đến ngày 15/8/2026 xảy ra tại 693 hộ thuộc 186 thôn, bản của 25 xã, phường với 2.478 con lợn mắc bệnh và chết, trọng lượng tiêu huỷ 129.259kg; Luỹ kế từ đầu năm đến nay, dịch bệnh xảy ra tại 3.182 hộ thuộc 531 thôn, bản của 34 xã, phường tổng lợn chết, tiêu hủy 13.365 con, trọng lượng tiêu huỷ là 696.087 kg, đến thời điểm hiện tại có 11/34 xã đã qua 21 ngày không phát sinh lợn mắc bệnh.", "Nhận định tình hình dịch: Nguy cơ dịch bệnh tiếp tục phát sinh trong thời gian tới là rất cao do vi rút DTLCP đã lưu hành khắp nơi, trên địa bàn tỉnh chăn nuôi nhỏ lẻ chiếm trên 95%, khó áp dụng các biện pháp an toàn sinh học; vi rút DTLCP lưu hành trên địa bàn tỉnh chủ yếu là vi rút tái tổ hợp genotyp I/II trong khi hiện nay vắc xin DTLCP chỉ có tác dùng với vi rút DTLCP chủng genotyp II.", "Bệnh Cúm gia cầm (CGC): Trong tháng dịch bệnh xảy ra tại 02 hộ thuộc 02 thôn, bản của 02 xã, phường với tổng 1.877 con gia cầm mắc bệnh và chết, trọng lượng tiêu huỷ 4.175 kg. Luỹ kế từ đầu năm đến nay, dịch bệnh xảy ra tại 14 hộ thuộc 10 thôn, bản của 05 xã, phường (Thanh Yên, Thanh Nưa, Nậm Nèn, Mươngg Thanh, Tủa Chùa) với tổng gia cầm chết, tiêu hủy là 17.848 con, trọng lượng tiêu huỷ 21.329 kg. Đến thời điểm hiện tại có 03/05 xã đã qua 21 ngày không phát sinh gia cầm mắc bệnh.", "Bệnh Viêm da nổi cục (VDNC): Trong tháng dịch, bệnh xảy ra tại 15 hộ thuộc 09 thôn, bản của 04 xã, phường với tổng số 27 con bò, bê mắc bệnh; trong đó 03 con bò, bê chết, tiêu hủy, trọng lượng tiêu huỷ là 245 kg. Luỹ kế từ đầu năm đến nay, dịch bệnh xảy ra tại 46 hộ thuộc 16 thôn, bản của 04 xã, phường (Sam Mứn, Núa Ngam, Mường Nhà, Điện Biên Phủ) với tổng gia súc mắc bệnh là 90 con bò, bê; trong đó 06 con bò, bê chết, tiêu hủy, trọng lượng tiêu huỷ 433 kg.", "2. Công tác phòng chống dịch bệnh đã và đang triển khai", "2.1. Tham mưu, chỉ đạo", "Tiếp tục căn cứ tình hình dịch bệnh trên địa bàn và văn bản chỉ đạo của Chính phủ, Bộ Nông nghiệp và Môi trường, Cục Chăn nuôi và Thú y để tham mưu kịp thời các văn bản chỉ đạo phòng chống dịch bệnh động vật.", "2.2. Giám sát dịch bệnh", "Phòng phối hợp với UBND các xã, phường, cơ quan, tổ chức có liên quan tiếp tục theo dõi, giám sát chặt chẽ diễn biến hình dịch bệnh trên đàn vật nuôi đặc biệt tại các ổ dịch, ổ dịch cũ, khu vực nguy cơ cao, nhằm phát hiện, xử lý kịp thời, hạn chế tối đa dịch bệnh lây lan ra diện rộng; trong tháng đã tiếp nhận và gửi 07 mẫu bệnh phẩm xét nghiệm vi rút gây bệnh DTLCP, 01 mẫu bệnh phẩm xét nghiệm vi rút gây bệnh Dại, 01 mẫu bệnh phẩm xét nghiệm vi rút gây bệnh Cúm gia cầm H5N1; 01 mẫu bênh phẩm xét nghiệm vi rút gây bệnh VDNC (trong đó 06 mẫu dương tính với vi rút DTLCP, 01 mẫu dương tính với vi rút gây bệnh Dại, 01 mẫu dương tính với vi rút cúm gia cầm H5N1, 01 mẫu dương tính với vi rút cúm VDNC).", "Phối hợp với Chi cục Chăn nuôi và Thú y vùng I thực hiện lấy mẫu giám sát bệnh Viêm da nổi cục vòng 1 với tổng số 28 mẫu của 28 con trâu, bò thuộc 04 thôn, bản trên địa bàn phường Điện Biên Phủ và xã Mường Phăng; hiện đang chờ kết quả xét nghiệm", "2.3. Công tác tiêm phòng vắc xin", "Tiêm phòng vắc xin dại: trên địa bàn tỉnh hiện nay có 27/45 xã đã và đang thực hiện tiêm phòng vắc xin dại với tổng số vắc xin tiêm được là 28.037 liều, đạt 29,17 % so với tổng đàn; Trong đó: 20/45 xã, phường đã triển khai xong tiêm phòng, tỉ lệ tiêm phòng đạt từ 43,89% - 88,34% so với tổng đàn; 7/45 xã, phường đang triển khai thực hiện.", "Tiêm phòng các loại vắc xin từ nguồn vốn hỗ trợ nông nghiệp của tỉnh: 45/45 xã phường đã và đang triển khai tiêm phòng cho đàn gia súc, gia cầm với tổng số vắc xin đã tiêm được trên toàn tỉnh đến thời điểm báo cáo là 415.797 liều, đạt 96,5% so với kế hoạch; Trong đó: 36/45 xã, phường đã hoàn thành công tác tiêm phòng vắc xin định kỳ đợt 1 đạt 100% theo kế hoạch; 09/45 xã đang triển khai tiêm phòng theo kế hoạch.", "2.4. Thực hiện tháng tổng vệ sinh, tiêu độc, khử trùng", "Tính đến thời điểm báo cáo, 27/45 xã, phường đã và đang triển khai thực hiện. Trong đó 23/45 xã, phường thực hiện phun xong vòng 4 vòng phun; xã Mường Lạn, Mường Chà và Tủa Chùa đang thực hiện phun vòng 3/4; xã Tủa Thàng đang thực hiện phun vòng 1.", "2.5. Kiểm dịch động vật, sản phẩm động vật, kiểm soát giết mổ, quản lý thuốc thú y, vệ sinh thú y, an toàn thực phẩm", "a. Kiểm dịch động vật, sản phẩm động vật xuất tỉnh", "Trong tháng, Chi cục đã thực hiện kiểm dịch động vật ra khỏi địa bàn tỉnh với tổng số 635 con lợn được vận chuyển đến tỉnh Phú Thọ, các lô hàng trên đảm bảo điều kiện vệ sinh thú y, an toàn thực phẩm.", "b. Kiểm soát động vật, sản phẩm động vật nhập tỉnh", "Trên địa bàn tỉnh hiện nay chưa có chốt kiểm dịch cố định nên không kiểm soát được số lượng động vật, sản phẩm động vật nhập vào tỉnh. Căn cứ theo số liệu báo cáo của cơ quan quản lý chuyên ngành thú y các tỉnh đã thực hiện kiểm dịch vận chuyển động vật, sản phẩm động vật vào địa bàn tỉnh Điện Biên, trong tháng đã nhập 2.100con gia cầm, 83 con lợn, 137 con trâu, bò, 1.895 kg thịt lợn, 2.826 kg thịt gia cầm, 11.908 kg sản phẩm động vật khác làm thực phẩm chủ yếu xuất phát từ các tỉnh Hà Nội, Nghệ An.", "c. Kiểm soát giết mổ", "Trung tâm dịch vụ các xã, phường thực hiện kiểm soát giết mổ; trong tháng thực hiện kiểm soát giết mổ được 6.650 con gia súc, gia cầm; trong 5.645 con lợn; 687 con trâu, bò và 318 con gia cầm. Luỹ kế từ đầu năm đến nay kết quả kiểm soát giết mổ được tổng số 40.591 con gia súc gia cầm. Trong đó 21.360 con lợn; 2.636 con trâu, bò; 16.476 con gia cầm và 119 con dê; không có trường hợp vi phạm phải xử lý.", "2.6. Quản lý thuốc thú y", "Trong tháng phòng Thú y thực hiện cấp, gia hạn 02 chứng chỉ hành nghề thú y; cấp, gia hạn 01 giấy chứng nhận đủ điều kiện buôn bán thuốc thú y.", "2.7. Thực hiện thủ tục hành chính", "Trong tháng đã thực hiện tổng số 08 thủ tục hành chính; trong đó cấp 05 hồ sơ giấy chứng nhận kiểm dịch vận chuyển động vật ra khỏi địa bàn tỉnh), 02 chứng chỉ hành nghề thú y, 01 giấy chứng nhận đủ điều kiện buôn bán thuốc thú y.", "3. Kế hoạch nhiệm vụ tháng 9 năm 2026", "Tiếp tục bám sát tình hình dịch bệnh trên địa bàn và các văn bản chỉ đạo của Trung ương để chủ động tham mưu kịp thời cho Sở Nông nghiệp và Môi trường, UBND tỉnh về chỉ đạo công tác phòng, chống dịch bệnh động vật.", "Phối hợp với UBND các xã, phường và các đơn vị chức năng tăng cường công tác phòng, chống dịch bệnh trên đàn vật nuôi, giám sát, lấy mẫu, gửi xét nghiệm nhằm phát hiện sớm, xử lý kịp thời đặc biệt đối với các bệnh nguy hiểm như bệnh: DTLCP, Cúm gia cầm, Dại…hạn chế tối đa dịch bệnh lây lan ra diện rộng; tăng cường kiểm soát động vật, sản phẩm động vật nhập vào địa bàn, phát hiện và xử lý nghiêm theo quy định các trường hợp vi phạm.", "Tiếp tục thực hiện các nhiệm vụ chuyên môn về kiểm dịch vận chuyển, kiểm tra vệ sinh thú y, an toàn thực phẩm, quản lý thuốc thú y.", "Phối hợp với các xã, phường, các đơn vị chức năng tăng cường kiểm soát động vật, sản phẩm động vật nhập vào địa bàn, phát hiện và xử lý nghiêm theo quy định các trường hợp vi phạm.", "Duy trì thực hiện quy chế phối hợp với cơ quan y tế cùng cấp theo Thông tư liên tịch số 16/2013/TTLT ngày 27/5/2013 của Bộ Y tế và Bộ Nông nghiệp và Môi trường về hướng dẫn phối hợp phòng, chống bệnh lây truyền từ động vật sang người.", "Thực hiện rà soát số lượng vắc xin Viêm da nổi cục đã đăng ký sử dụng năm 2026 của các xã, phương. Phối hợp tham mưu các thủ tục mua vắc xin Viêm da nổi cục để tiêm phòng cho đàn bò trên địa bàn tỉnh năm 2026.", "Tổ chức thực hiện lấy mẫu giám sát vệ sinh thú y, an toàn thực phẩm đối với sản phẩm động vật sử dụng làm thực phẩm đợt II năm 2026 theo kế hoạch số 404/KH-CCNN ngày 25/6/2026 của Chi cục Nông nghiệp.", "Phối hợp thực hiện lấy mẫu giám sát bệnh Viêm da nổi cục vòng 2 trên địa bàn tỉnh theo kế hoạch số 487/KH-CCNN ngày 05/8/2026 của Chi cục Nông nghiệp.", "Trên đây là báo cáo kết quả thực hiện công tác thú y tháng 8 năm 2026 của Phòng Thú y./."];
+    const periodTemplate = ["1. Tình hình dịch bệnh động vật (số liệu từ 05/9/2026 đến 14/9/2026)", "Bệnh Dịch tả lợn Châu Phi (DTLCP): trong kỳ dịch bệnh xảy ra tại 118 hộ chăn nuôi ở 54 thôn bản, thuộc 20 xã, phường. Số lợn mắc bệnh đã tiêu huỷ 338 con, giảm 27% so với kỳ báo cáo trước, trọng lượng chết và tiêu huỷ 17.478 kg, giảm 31,84% so với kỳ báo cáo trước. Lũy kế từ 01/01/2026 đến nay dịch bệnh xảy ra tại 3.522 hộ chăn nuôi ở 562 thôn bản, thuộc 34 xã, phường với tổng số lợn mắc bệnh và tiêu hủy trên địa bàn tỉnh là 14.697 con, tổng trọng lượng 763.817 kg. Đến thời điểm hiện tại, 16 xã đã qua 21 ngày không phát sinh dịch bệnh, trong đó có 06 xã (Pa Ham, Mường Ảng, Tìa Dình, Búng Lao, Chà Tở và Nà Bủng) đã công bố hết dịch. (Chi tiết theo phụ lục 01 đính kèm).", "Bệnh Cúm gia cầm (CGC): Trong kỳ, không phát sinh ổ dịch nào. Luỹ kế từ 08/5/2026 đến nay, bệnh CGC xảy ra tại 16 hộ gia đình thuộc 10 thôn, bản của 05 xã, phường (Mường Thanh, Nậm Nèn, Tủa Chùa, Thanh Nưa và Thanh Yên). Tổng số gia cầm chết và tiêu huỷ 18.064 con, trọng lượng 21.718 kg, tiêu huỷ 4,6 kg trứng gia cầm các loại. Đến thời điểm hiện tại, 05/05 xã đã qua 21 ngày không phát sinh dịch bệnh.", "Bệnh Viêm da nổi cục (VDCN): Trong kỳ, bệnh dịch xảy ra tại 01 hộ thuộc bản Na Vai, xã Sam Mứn với 01 con bò, đã chết. Luỹ kế từ 26/5/2026 đến nay, bệnh VDNC xảy ra tại 44 hộ gia đình thuộc 14 thôn, bản tại 03 xã, phường (Núa Ngam, Sam Mứn và Điện Biên Phủ) với tổng số trâu bò mắc bệnh 92 con, chết 06 con.", "2. Công tác phòng, chống dịch đã và đang thực hiện", "a. Tham mưu, chỉ đạo", "Chi cục thường xuyên phối hợp với các xã, phường tổ chức triển khai các biện pháp phòng, chống dịch bệnh theo quy định của Luật Thú y, thông tư hướng dẫn thi hành Luật, các văn bản chỉ đạo của Chính phủ, Bộ Nông nghiệp và Môi trường, UBND tỉnh, hướng dẫn, chỉ đạo của Sở Nông nghiệp và Môi trường; tăng cường kiểm tra giám sát dịch bệnh tại cơ sở nhằm phát hiện và tham mưu xử lý các ổ dịch kịp thời khi có phát sinh.", "Trong kỳ, tham mưu để Sở Nông nghiệp và Môi trường ban hành 05 văn bản, cụ thể:", "- Công văn số 6256/SNNMT-CCNN ngày 09/9/2026 Ban hành công văn triển khai Tháng tổng vệ sinh, khử trùng, tiêu độc môi trường và khẩn trương tiêm phòng vắc xin cho đàn vật nuôi đợt 2 năm 2026", "- Công văn số 6257/SNNMT-CCNN ngày 09/9/2026 V/v tăng cường kiểm soát giết mổ, kiểm tra vệ sinh thú y đảm bảo an toàn thực phẩm đối với sản phẩm có nguồn gốc động vật cung cấp cho các trường học", "- Báo cáo số 6358/BC-SNNMT ngày 13/9/2026 Tình hình thiệt hại và nhu cầu kinh phí hỗ trợ sản xuất nông nghiệp do thiên tai, dịch bệnh trên động vật trên địa bàn tỉnh Điện Biên", "- Báo cáo số 6411/BC-SNNMT ngày 14/9/2026 Tình hình thiệt hại và nhu cầu kinh phí hỗ trợ sản xuất nông nghiệp do thiên tai, dịch bệnh trên động vật trên địa bàn tỉnh Điện Biên (bản đổi lại)", "- Công văn số 6409/SMMNT-CCNN ngày 14/9/2026 Ban hành Báo cáo tổng kết thi hành Luật Thú y năm 2015 và Luật Chăn nuôi năm 2018 trên địa bàn tỉnh", "Trong kỳ, tham mưu để Chi cục Nông nghiệp ban hành 02 văn bản, cụ thể:", "- Kế hoạch số 564/KH-CCNN ngày 08/9/2026 Lấy mẫu giám sát sau tiêm vắc xin phòng bệnh Lở mồm long móng trên địa bàn xã Núa Ngam và xã Sáng Nhè", "- Kế hoạch số 561/KH-CCNN ngày 08/9/2026 Kiểm tra thực hiện công tác tiêm phòng vắc xin và phòng, chống dịch bệnh gia súc, gia cầm trên địa bàn các xã Nà Hỳ, Nà Bủng, Si Pa Phìn", "b. Giám sát dịch bệnh", "Phối hợp với UBND các xã, phường tiếp tục tổ chức theo dõi, giám sát chặt chẽ diễn biến hình dịch bệnh trên đàn vật nuôi đặc biệt tại các ổ dịch, ổ dịch cũ, khu vực nguy cơ cao, nhằm phát hiện, xử lý kịp thời, hạn chế tối đa dịch bệnh lây lan ra diện rộng", "Thực hiện lấy mẫu giám sát sau tiêm vắc xin phòng bệnh Lở mồm long móng trên địa bàn xã Núa Ngam", "Trong kỳ đã thực hiện tiếp nhận và gửi 04 mẫu xét nghiệm. Trong đó 04 mẫu xét nghiệm bệnh DTLCP, kết quả 04/04 mẫu xét nghiệm dương tính với vi rút DTLCP chủng gennotyp tái tổ hợp I+II.", "c. Công tác tiêm phòng vắc xin, vệ sinh tiêu độc khử trùng", "Tiêm phòng vắc xin dại: 33/45 xã đã và đang thực hiện tiêm phòng vắc xin dại. Trong đó: 27/33 xã đã hoàn thành công tác tiêm phòng vắc xin dại, tỉ lệ tiêm phòng đạt 43,89% - 90,74% so với tổng đàn; 06/33 xã, phường đang triển khai thực hiện. Tổng số vắc xin đã tiêm toàn tỉnh 40.899 liều, đạt 42,55 % so với tổng đàn. (chi tiết tại phụ lục 03 đính kèm)", "Tiêm phòng các loại vắc xin LMLM, cúm gia cầm, Tụ huyết trùng trâu, bò, dịch tả lợn, nhiệt thán: 45/45 xã phường đã và đang triển khai tiêm phòng cho đàn gia súc, gia cầm. Trong đó:44/45 xã đã hoàn thành công tác tiêm phòng vắc xin định kỳ đợt 1; xã Sam Mứn đang triển khai tiêm phòng, đạt 98,2% KH. Tổng số vắc xin đã tiêm toàn tỉnh 430.520 liều, đạt 99,9% so với kế hoạch. (chi tiết tại phụ lục 05 đính kèm)", "Triển khai tháng tổng vệ sinh, tiêu độc, khử trùng môi trường chăn nuôi đợt 1 năm 2026: tính đến thời điểm báo cáo, 29/45 xã, phường đã và đang triển khai thực hiện. Trong đó 25/29 xã, phường thực hiện phun xong vòng 4/4 và đang hoàn thiện chứng từ; xã Chà Tở đang thực hiện phun vòng 4; xã Tủa Thàng và Mường Toong đang thực hiện phun vòng 2; xã Thanh An đang thực hiện phun vòng 1. (Chi tiết tại phụ lục 04 đính kèm)", "3. Kế hoạch kỳ tiếp theo", "3.1. UBND các xã, phường", "Tăng cường công tác kiểm tra, giám sát chặt chẽ tình hình dịch bệnh trên đàn vật nuôi, đặc biệt bệnh DTLCP, VDNC và CGC nhằm kịp thời phát hiện các dấu hiệu bất thường, ca bệnh nghi ngờ hoặc ổ dịch mới phát sinh. Qua đó, chủ động tham mưu triển khai các biện pháp xử lý, khoanh vùng, dập dịch hiệu quả, hạn chế tối đa dịch bệnh lây lan ra diện rộng, góp phần bảo vệ phát triển đàn đàn vật nuôi.", "Đối với xã đang có bệnh dịch DTLCP và CGC: chủ động bố trí kinh phí, vật tư, hóa chất để triển khai quyết liệt các giải pháp để xử lý dứt điểm các ổ dịch đang xảy ra trên địa bàn, hạn chế tối đa dịch bệnh lây lan diện rộng.", "Đối với xã đang có dịch hoặc phát hiện gia súc nghi mắc bệnh VDNC, khẩn trương rà soát, thống kê đàn gia súc mắc bệnh, nghi mắc bệnh; tổ chức khoanh vùng, xử lý ổ dịch, quản lý chặt chẽ việc mua bán, vận chuyển gia súc trong vùng dịch; truyên truyền hướng dẫn người chăn nuôi nuôi cách ly, chăm sóc, điều trị triệu chứng gia súc mắc bệnh; có biện pháp ngăn chặn, tiêu diệt động vật trung gian truyền bệnh (ruồi, muỗi, ve, mòng…)", "Tổ chức thực hiện trình tự, thủ tục hỗ trợ cơ sở sản xuất bị thiệt hại do dịch bệnh động vật; hàng tháng tổ chức thẩm định ít nhất một lần đối với hồ sơ đề nghị hỗ trợ được tiếp nhận trong tháng đó theo quy định.", "Ban hành kế hoạch, bố trí kinh phí mua hóa chất, vật tư, dụng cụ và tổ chức thực hiện “Tháng tổng vệ sinh, khử trùng, tiêu độc môi trường đợt 1 năm 2026”;", "Hoàn thiện chứng từ tiêm phòng các loại vắc xin từ nguồn vốn hỗ trợ nông nghiệp của tỉnh đợt 1 năm 2026gửi về Chi cục Nông nghiệp.", "Tổ chức triển khai tiêm phòng vắc xin Dại cho chó, mèo nuôi trên địa bàn; trong đó, các xã khu vực ổ dịch, khu vực II, khu vực III bố trí kinh phí hỗ trợ tiêm phòng vắc xin Dại cho chó, mèo nuôi trên địa bàn.", "Tiếp tục hướng dẫn các biện pháp chăn nuôi an toàn sinh học, vệ sinh tiêu độc khử trùng chuồng trại, không giấu dịch, không bán chạy động vật mắc bệnh. Phối hợp với cơ quan chuyên môn thú y thực hiện lấy mẫu xét nghiệm khi có động vật ốm, chết bất thường; xử lý ổ dịch kịp thời theo đúng quy trình, không để lây lan diện rộng.", "Kiểm tra, giám sát việc buôn bán, vận chuyển động vật và sản phẩm động vật trên địa bàn, nhằm phát hiện, ngăn chặn kịp thời và xử lý nghiêm các trường hợp buôn bán, vận chuyển, giết mổ động mắc bệnh, vứt xác lợn ra ngoài môi trường làm lây lan dịch bệnh và ô nhiễm môi trường.", "3.2. Chi cục Nông nghiệp", "Bám sát tình hình dịch bệnh trên địa bàn, các chỉ đạo của Chính phủ, Bộ Nông nghiệp và Môi trường, Cục Chăn nuôi và Thú y để chủ động tham mưu cho Sở Nông nghiệp và Môi trường, UBND tỉnh các văn bản chỉ đạo về phòng, chống dịch bệnh động vật.", "Tham mưu thực hiện các thủ tục mua vắc xin cho 45 xã, phường thực hiện tiêm phòng vắc xin VDNC cho đàn vật nuôi.", "Tiếp tục thực hiện hế hoạch lấy mẫu giám sát sau tiêm vắc xin LMLM trên đàn gia súc tại xã Núa Ngam và Sáng Nhè.", "Phối hợp với UBND các xã, phường tăng cường theo dõi, giám sát, phát hiện, lấy mẫu, chẩn đoán nhằm phát hiện sớm, xử lý kịp thời các ổ dịch bệnh nguy hiểm hạn chế tối đa dịch bệnh lây lan ra diện rộng; định kỳ báo cáo tình hình dịch bệnh và kết quả triển khai về Sở Nông nghiệp và Môi trường theo quy định.", "Phối hợp với các đơn vị liên quan thông tin, tuyên truyền, hướng dẫn người chăn nuôi các biện pháp phòng, chống dịch bệnh động vật và thủy sản trên địa bàn tỉnh. Duy trì thực hiện báo cáo cập nhật dịch bệnh động vật trên hệ thống phần mềm Vahis.", "Trên đây là báo cáo Tình hình dịch bệnh động vật trên địa bàn tỉnh Điện Biên từ 05/9/2026 đến 14/9/2026./."];
+    function reportDiseaseSentence(item, monthly) {
+      const code = String(item.code || "").toUpperCase();
+      const name = item.name || ({DTLCP:"Bệnh Dịch tả lợn Châu Phi",CGC:"Bệnh Cúm gia cầm (CGC)",VDNC:"Bệnh Viêm da nổi cục (VDNC)",DAI:"Bệnh Dại"}[code] || code);
+      const animal = code === "DTLCP" ? "lợn" : code === "CGC" ? "gia cầm" : code === "VDNC" ? "trâu, bò" : "động vật";
+      const h = Number(item.householdCount || 0), v = Number(item.villageCount || 0), c = Number(item.communeCount || 0);
+      const cases = Number(item.cases || 0), deadCull = Number(item.deadCull || 0);
+      const weight = Number(item.weightKg ?? item.weight ?? item.totalWeight ?? 0);
+      let text = name + ": " + (monthly ? "trong tháng" : "trong kỳ") + " dịch bệnh xảy ra";
+      if (h || v || c) {
+        if (h && v && c) text += " tại " + fmt(h) + " hộ thuộc " + fmt(v) + " thôn, bản của " + fmt(c) + " xã, phường";
+        else if (h && v) text += " tại " + fmt(h) + " hộ thuộc " + fmt(v) + " thôn, bản";
+        else if (v && c) text += " tại " + fmt(v) + " thôn, bản thuộc " + fmt(c) + " xã, phường";
+        else if (c) text += " tại " + fmt(c) + " xã, phường";
+        else if (h) text += " tại " + fmt(h) + " hộ";
+      }
+      if (cases) text += " với tổng số " + animal + " mắc bệnh " + fmt(cases) + " con";
+      if (deadCull) text += (cases ? "; " : " với tổng số ") + animal + " chết, tiêu hủy " + fmt(deadCull) + " con";
+      if (weight) text += ", trọng lượng tiêu hủy " + fmt(weight) + " kg";
+      return text + ".";
     }
-    draftLines.push("", "Nhận định tình hình dịch", "...");
-    draftLines.push("", activitySectionTitle, "2.1. Tham mưu, chỉ đạo", "...", "2.2. Giám sát dịch bệnh", "...");
-    draftLines.push("2.3. Công tác tiêm phòng vắc xin", "Số liệu/kết quả thực hiện: ...", "2.4. Vệ sinh, tiêu độc khử trùng", "Số liệu/kết quả thực hiện: ...");
-    draftLines.push("2.5. Kiểm dịch động vật, sản phẩm động vật", "Số liệu/kết quả thực hiện: ...", "2.6. Kiểm soát giết mổ, kiểm tra vệ sinh thú y và an toàn thực phẩm", "Số liệu/kết quả thực hiện: ...");
-    draftLines.push("2.7. Quản lý thuốc thú y và hành nghề thú y", "Số liệu/kết quả thực hiện: ...", "2.8. Thực hiện thủ tục hành chính", "Số liệu/kết quả thực hiện: ...", "2.9. Công tác chuyên môn khác", "Số liệu/kết quả thực hiện: ...");
-    draftLines.push("", `3. Kế hoạch nhiệm vụ ${nextPeriodLabel}`, "3.1. UBND các xã, phường", "...", "3.2. Chi cục Nông nghiệp", "...");
-    const draftText = await editReportDraft(draftLines.join("\n"));
+    const byCode = Object.fromEntries(diseaseStats.map(item => [String(item.code || "").toUpperCase(), item]));
+    const draftLines = [];
+    if (reportKind === "month" || reportKind === "quarter" || reportKind === "year") {
+      const template = monthTemplate.slice();
+      draftLines.push(template[0]);
+      if (byCode.DAI) draftLines.push(reportDiseaseSentence(byCode.DAI, true));
+      if (byCode.DTLCP) draftLines.push(reportDiseaseSentence(byCode.DTLCP, true));
+      if (!diseaseStats.length) draftLines.push("Không có bản ghi dịch bệnh trong khoảng thời gian đã chọn.");
+      draftLines.push(template[3]); // Nhận định tình hình dịch: nguyên văn mẫu
+      if (byCode.CGC) draftLines.push(reportDiseaseSentence(byCode.CGC, true));
+      if (byCode.VDNC) draftLines.push(reportDiseaseSentence(byCode.VDNC, true));
+      const monthPlan = to ? new Date(to.getFullYear(), to.getMonth()+1, 1) : new Date();
+      draftLines.push(...template.slice(6, -1).map(line => /^3\\. Kế hoạch nhiệm vụ tháng \\d+ năm \\d+$/i.test(line) ? "3. Kế hoạch nhiệm vụ tháng " + (monthPlan.getMonth()+1) + " năm " + monthPlan.getFullYear() : line));
+      draftLines.push("Trên đây là báo cáo kết quả thực hiện công tác thú y " + reportPeriodTitle + " của Phòng Thú y./.");
+    } else {
+      const template = periodTemplate.slice();
+      draftLines.push(template[0].replace(/\\(số liệu từ .*?\\)/i, "(số liệu từ " + dateText(from) + " đến " + dateText(to) + ")"));
+      for (const code of ["DTLCP","CGC","VDNC"]) {
+        if (byCode[code]) draftLines.push(reportDiseaseSentence(byCode[code], false));
+      }
+      if (!diseaseStats.length) draftLines.push("Không có bản ghi dịch bệnh trong khoảng thời gian đã chọn.");
+      draftLines.push(...template.slice(4, -1));
+      draftLines.push("Trên đây là báo cáo Tình hình dịch bệnh động vật trên địa bàn tỉnh Điện Biên từ " + dateText(from) + " đến " + dateText(to) + "./.");
+    }
+    const draftText = await editReportDraft(draftLines.join("\\n"));
     if (draftText === null) return;
     const draftParagraphs = draftText.split(/\r?\n/).map(line => {
       const text = line.trim();
@@ -2633,6 +2905,60 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
 .site-footer .footer-brand{font-weight:800;font-size:12px;color:#fff;}
 .site-footer .footer-bottom{border-top:1px solid rgba(255,255,255,.18);margin:10px auto 0;padding-top:8px;text-align:center;font-size:10px;color:#cbd8df;}
 @media(max-width:700px){.site-footer{padding:14px 13px 9px}.site-footer-inner{grid-template-columns:1fr;gap:10px}.site-footer p{font-size:11px}}
+
+/* =========================================================
+   BỐ CỤC KPI TỐI ƯU: 4 BỆNH + TIÊM PHÒNG + PHUN PHÒNG Ở HÀNG TRÊN;
+   KSGM VÀ THUỐC THÚ Y Ở CỘT PHẢI CẠNH PANEL
+========================================================= */
+@media (min-width: 761px) {
+  .webgis {
+    display:grid !important;
+    grid-template-columns:minmax(0,1.35fr) minmax(155px,.58fr) minmax(240px,1fr) !important;
+    grid-template-rows:auto minmax(360px,1fr) !important;
+    gap:8px !important;
+    height:auto !important;
+    min-height:0 !important;
+    padding:0 12px !important;
+    align-items:stretch;
+  }
+  .sidebar { grid-column:1 / -1 !important; grid-row:1 !important; min-width:0; }
+  .sidebar-kpi { grid-template-columns:repeat(5,minmax(0,1fr)) !important; gap:8px !important; }
+  .sidebar-kpi > .summary-card { min-width:0; height:124px !important; min-height:124px !important; }
+  .card-vaccine-kpi { grid-column:auto !important; }
+  .main-map { grid-column:1 !important; grid-row:2 !important; min-width:0; height:480px !important; }
+  .panel { grid-column:2 !important; grid-row:2 !important; min-width:0; width:auto !important; max-height:480px !important; min-height:360px !important; }
+  .side-kpi-mini {
+    grid-column:3 !important; grid-row:2 !important; display:flex; flex-direction:column; gap:8px;
+    width:100% !important; min-width:0; padding:0; border:0; border-radius:0; background:transparent;
+    align-self:stretch; box-sizing:border-box;
+  }
+  .side-kpi-title { font-size:9px; line-height:1.3; font-weight:800; color:#657381; letter-spacing:.35px; padding:2px 1px 4px; }
+  .side-kpi-mini .summary-card { width:100% !important; height:124px !important; min-height:124px !important; padding:8px !important; box-sizing:border-box !important; flex:0 0 124px; }
+  .side-kpi-mini .summary-head { font-size:10px !important; line-height:1.25; gap:4px; margin-bottom:7px; }
+  .side-kpi-mini .summary-head b { white-space:normal; }
+  .side-kpi-mini .summary-main span { font-size:22px !important; }
+  .side-kpi-mini .summary-main small, .side-kpi-mini .summary-grid, .side-kpi-mini .summary-grid b { font-size:10px !important; }
+}
+@media (min-width: 1100px) {
+  .webgis { grid-template-columns:minmax(0,1.35fr) minmax(165px,.58fr) minmax(250px,1fr) !important; }
+}
+@media (max-width: 1100px) and (min-width: 761px) {
+  .webgis { grid-template-columns:minmax(0,1.15fr) minmax(150px,.52fr) minmax(220px,1fr) !important; }
+  .sidebar-kpi .summary-head { font-size:10px !important; }
+  .sidebar-kpi .summary-grid span { font-size:9px !important; }
+  .vaccine-kpi-compact { font-size:9px !important; }
+  .vaccine-kpi-compact span, .vaccine-kpi-compact strong, .vaccine-kpi-compact > div > b { font-size:9px !important; }
+}
+@media (max-width:760px) {
+  .webgis { display:flex !important; flex-direction:column !important; height:auto !important; }
+  .sidebar-kpi { display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr)) !important; }
+  .card-vaccine-kpi { grid-column:1/-1 !important; }
+  .side-kpi-mini { order:4; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; padding:8px; border:1px solid var(--line); border-radius:9px; background:#fff; }
+  .side-kpi-title { grid-column:1/-1; font-size:10px; font-weight:800; color:#657381; }
+  .main-map { order:2; width:100%; height:65vh !important; min-height:420px; }
+  .panel { order:3; width:100%; max-height:none !important; min-height:260px; }
+}
+
 </style>
 <footer class="site-footer" role="contentinfo">
   <div class="site-footer-inner">
@@ -2658,6 +2984,692 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
 </footer>
 <script>document.getElementById('footerYear').textContent=new Date().getFullYear();</script>
 
+
+
+<script>
+/* Đồng bộ kích thước cột hoạt động với panel xã/phường và chỉ hiển thị số liệu tiêm Dại khi có nguồn. */
+(function(){
+  function syncWebgisLayout(){
+    const webgis=document.querySelector('.webgis');
+    const side=document.querySelector('.side-kpi-mini');
+    if(!webgis||!side) return;
+    // Xóa các giá trị inline cũ gây đẩy cột KPI sang khu vực bản đồ.
+    webgis.style.removeProperty('grid-template-columns');
+    side.style.removeProperty('height');
+  }
+  function syncRabiesKpi(){
+    const rate=document.getElementById('kpiDaiRate');
+    const started=document.getElementById('kpiDaiStarted');
+    const done=document.getElementById('kpiDaiDone');
+    const startedOut=document.getElementById('kpiDaiStartedVisible');
+    if(!done||!startedOut) return;
+    const rateText=(rate?.textContent||'').trim();
+    const startedText=(started?.textContent||'').trim();
+    const validRate=rateText && rateText!=='—' && rateText!=='-';
+    const validStarted=startedText && startedText!=='—/45' && startedText!=='—' && startedText!=='-';
+    if(validRate) done.textContent=/%|tổng đàn/i.test(rateText)?rateText:(rateText+'% tổng đàn');
+    else if(!done.textContent || done.textContent==='—/45 xã hoàn thành') done.textContent='—% tổng đàn';
+    if(validStarted){
+      const m=startedText.match(/^\s*(\d+)/);
+      startedOut.textContent='Đang triển khai: '+(m?m[1]:startedText)+' xã';
+    }else startedOut.textContent='Đang triển khai: — xã';
+  }
+  window.addEventListener('resize',syncWebgisLayout);
+  window.addEventListener('load',function(){syncWebgisLayout();syncRabiesKpi();});
+  document.addEventListener('DOMContentLoaded',function(){
+    syncWebgisLayout();syncRabiesKpi();
+    if(window.ResizeObserver){
+      const ro=new ResizeObserver(syncWebgisLayout);
+      ['.panel','.sidebar-kpi'].forEach(sel=>{const el=document.querySelector(sel);if(el)ro.observe(el);});
+    }
+    const observer=new MutationObserver(syncRabiesKpi);
+    ['kpiDaiRate','kpiDaiStarted','kpiDaiDone'].forEach(id=>{const el=document.getElementById(id);if(el)observer.observe(el,{childList:true,subtree:true,characterData:true});});
+  });
+})();
+</script>
+
+
+<script id="webgisExcelExportPatch">
+(function(){
+  'use strict';
+  const API_URL='https://script.google.com/macros/s/AKfycbyRuJ9Wfv4HtWjMRT2Hox2-mOhBVRjyqLaHhpQjohPEkfHWNyjM004KgO3o7_4nRJtj/exec';
+  const CARD_NAMES={
+    'card-dtlcp':'DTLCP','card-cgc':'CGC','card-vdnc':'VDNC','card-dai':'Dại',
+    'card-vaccine-kpi':'Tiêm phòng','card-phun':'Phun phòng / TVSKTTĐ','card-ksgm':'KSGM','card-drug':'Thuốc thú y'
+  };
+  const $=id=>document.getElementById(id);
+  const clean=s=>String(s??'').replace(/\s+/g,' ').trim();
+  const dateLabel=v=>{if(!v)return '';const p=v.split('-');return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:v;};
+  function saveRows(rows, filename, sheetName='SoLieu'){
+    if(!rows||!rows.length){alert('Không có dữ liệu để xuất.');return;}
+    if(window.XLSX && window.XLSX.utils){
+      const ws=window.XLSX.utils.aoa_to_sheet(rows);
+      ws['!cols']=Array.from({length:Math.max(...rows.map(r=>r.length))},(_,i)=>({wch:Math.min(42,Math.max(14,...rows.map(r=>String(r[i]??'').length+2)))}));
+      const wb=window.XLSX.utils.book_new();
+      window.XLSX.utils.book_append_sheet(wb,ws,sheetName.slice(0,31));
+      window.XLSX.writeFile(wb,filename.replace(/\.csv$/i,'.xlsx'));
+    }else{
+      const csv=rows.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');
+      const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+      const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename.replace(/\.xlsx$/i,'.csv');document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
+    }
+  }
+  function cardRows(card){
+    const title=clean(card.querySelector('.summary-head b')?.textContent)||'KPI';
+    const rows=[['Nhóm KPI',title],['Thời điểm xuất',new Date().toLocaleString('vi-VN')]];
+    const main=card.querySelector('.summary-main');
+    if(main){rows.push([clean(main.querySelector('small')?.textContent)||'Chỉ tiêu chính',clean(main.querySelector('span')?.textContent)]);}
+    card.querySelectorAll('.summary-grid > span:not([hidden])').forEach(span=>{
+      const label=clean(Array.from(span.childNodes).filter(n=>n.nodeType===Node.TEXT_NODE).map(n=>n.textContent).join(' '))||clean(span.textContent.replace(span.querySelector('b')?.textContent||'',''));
+      const value=clean(span.querySelector('b')?.textContent)||clean(span.textContent);
+      rows.push([label,value]);
+    });
+    rows.push(['Ghi chú','Số liệu KPI hiển thị tại thời điểm tải; không nhất thiết được lọc theo khoảng ngày báo cáo.']);
+    return rows;
+  }
+  const norm = v => String(v ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+  function getField(row, candidates){
+    if(!row || typeof row!=='object') return undefined;
+    const keys=Object.keys(row);
+    for(const c of candidates){
+      if(row[c]!==undefined && row[c]!==null && row[c]!=='') return row[c];
+      const hit=keys.find(k=>norm(k)===norm(c));
+      if(hit && row[hit]!==undefined && row[hit]!==null && row[hit]!=='') return row[hit];
+    }
+    return undefined;
+  }
+  function numVal(v){
+    if(v===null||v===undefined||v==='') return null;
+    if(typeof v==='number') return Number.isFinite(v)?v:null;
+    let x=String(v).trim().replace(/\s/g,'').replace(/[^\d,.-]/g,'');
+    if(!x) return null;
+    if(x.includes('.')&&x.includes(',')) x=x.replace(/\./g,'').replace(',','.');
+    else if((x.match(/\./g)||[]).length>1) x=x.replace(/\./g,'');
+    else if(x.includes(',')&&!x.includes('.')) x=x.replace(',','.');
+    const n=Number(x); return Number.isFinite(n)?n:null;
+  }
+  function parseISODate(v){
+    if(!v) return null;
+    if(v instanceof Date && !isNaN(v)) return new Date(v.getFullYear(),v.getMonth(),v.getDate());
+    const x=String(v).trim(); let m=x.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if(m) return new Date(+m[1],+m[2]-1,+m[3]);
+    m=x.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})/);
+    if(m) return new Date(+m[3],+m[2]-1,+m[1]);
+    const d=new Date(x); return isNaN(d)?null:new Date(d.getFullYear(),d.getMonth(),d.getDate());
+  }
+  function iso(v){return parseISODate(v)?.toISOString().slice(0,10)||'';}
+  function diseaseCode(row){
+    const raw=norm(getField(row,['Bệnh','Tên bệnh','Mã bệnh','Loại bệnh','Disease','Disease code','Ma benh'])||'');
+    if(raw.includes('dtlcp')||raw.includes('dich ta lon chau phi')||raw.includes('lon chau phi')) return 'DTLCP';
+    if(raw==='cgc'||raw.includes('cum gia cam')) return 'CGC';
+    if(raw.includes('vdnc')||raw.includes('viem da noi cuc')) return 'VDNC';
+    if(raw==='dai'||raw.includes('benh dai')||raw==='rabies') return 'DAI';
+    const ks=Object.keys(row||{}).map(norm).join('|');
+    for(const c of ['DTLCP','CGC','VDNC','DAI']) if(ks.includes(norm(c))) return c;
+    return '';
+  }
+  function rowDate(row, code){
+    return parseISODate(getField(row,[
+      'Ngày phát hiện','Ngày xảy ra','Ngày ghi nhận','Ngày cập nhật','Ngày báo cáo','Ngày','Thời gian','Ngày thống kê','Date',
+      code+'_Ngày phát hiện',code+'_Ngày xảy ra',code+'_Ngày ghi nhận',code+'_Ngày'
+    ]));
+  }
+  function arrayFromApi(obj){
+    if(Array.isArray(obj)) return obj;
+    if(obj && Array.isArray(obj.data)) return obj.data;
+    if(obj && Array.isArray(obj.rows)) return obj.rows;
+    if(obj && Array.isArray(obj.records)) return obj.records;
+    return [];
+  }
+  async function fetchOptional(url){
+    try{const res=await fetch(url,{method:'GET',cache:'no-store'}); if(!res.ok) throw new Error('HTTP '+res.status); return await res.json();}
+    catch(e){console.warn('Không tải được nguồn bảng phụ lục:',url,e); return null;}
+  }
+  function diseaseSummary(report, code){
+    const list=report&&Array.isArray(report.diseases)?report.diseases:[];
+    return list.find(x=>String(x.code||'').toUpperCase()===code)||list.find(x=>diseaseCode(x)===code)||null;
+  }
+  function sumVal(obj, keys){
+    const v=getField(obj,keys); const n=numVal(v); return n===null?'':n;
+  }
+  function metric(obj, keys){
+    if(!obj) return '';
+    const v=getField(obj,keys); const n=numVal(v); return n===null?'':n;
+  }
+  function isInRange(d, from, to){return !!d && d>=parseISODate(from) && d<=parseISODate(to);}
+  function getRowsFor(code, allRows, from, to){
+    const a=parseISODate(from),b=parseISODate(to);
+    return allRows.filter(r=>{
+      if(diseaseCode(r)!==code) return false;
+      const d=rowDate(r,code); return d&&a&&b&&d>=a&&d<=b;
+    });
+  }
+  function buildCommuneGroups(rows, code){
+    const groups=new Map();
+    const communeKeys=['Tên xã có bệnh','Tên xã/phường','Tên xã','Xã/phường','Xã','Địa bàn','Tên địa bàn','TEN_XA','TENXA','Commune','Name'];
+    const villageKeys=['Tên thôn/bản','Thôn/bản','Thôn bản','Tên thôn','Bản','Village'];
+    const householdKeys=['Tên hộ','Hộ chăn nuôi','Chủ hộ','Tên chủ hộ','Household'];
+    const indicatorKeys=['Chỉ tiêu','Tên chỉ tiêu','Loại chỉ tiêu','Ten chi tieu','Indicator'];
+    const amountKeys=['Số con theo chỉ tiêu','Số con','Số lượng','Giá trị','Số mắc','Số chết','Số tiêu hủy','Số tiêu huỷ','Amount','Value'];
+    const weightKeys=[code+'_Kg',code+'_Khối lượng tiêu hủy',code+'_Khối lượng tiêu huỷ','Khối lượng tiêu hủy (kg)','Khối lượng tiêu huỷ (kg)','Trọng lượng tiêu hủy (kg)','Khối lượng tiêu hủy','Khối lượng tiêu huỷ','Trọng lượng tiêu hủy','Khối lượng (kg)','Weight (kg)','Kg'];
+    for(const r of rows){
+      const commune=String(getField(r,communeKeys)||'').trim(); if(!commune) continue;
+      if(!groups.has(commune)) groups.set(commune,{commune,villages:new Set(),households:new Set(),cases:0,deadCull:0,weight:0,hasCases:false,hasDead:false,hasWeight:false,notes:new Set()});
+      const g=groups.get(commune);
+      const village=String(getField(r,villageKeys)||'').trim(); if(village)g.villages.add(village);
+      const household=String(getField(r,householdKeys)||'').trim(); if(household)g.households.add(household);
+      const note=String(getField(r,['Ghi chú','Ghi chu','Trạng thái','Tình trạng'])||'').trim();if(note)g.notes.add(note);
+      const indicator=norm(getField(r,indicatorKeys)||'');
+      const amount=numVal(getField(r,amountKeys));
+      const explicitWeight=numVal(getField(r,weightKeys));
+      if(explicitWeight!==null){g.weight+=explicitWeight;g.hasWeight=true;}
+      if(indicator && amount!==null){
+        if(indicator.includes('khoi luong')||indicator.includes('trong luong')||indicator.includes('kg')){if(explicitWeight===null){g.weight+=amount;g.hasWeight=true;}}
+        else if(indicator.includes('chet')||indicator.includes('tieu huy')||indicator.includes('tieuhuy')){g.deadCull+=amount;g.hasDead=true;}
+        else if(indicator.includes('mac')||indicator.includes('ca benh')||indicator.includes('so con benh')){g.cases+=amount;g.hasCases=true;}
+      } else {
+        const caseV=numVal(getField(r,[code+'_Mắc',code+'_Mắc bệnh',code+'_Số mắc','Số con mắc bệnh','Số lượng mắc bệnh','Số mắc']));
+        const deadV=numVal(getField(r,[code+'_Chết',code+'_Tiêu hủy',code+'_Tiêu huỷ','Số con chết/tiêu hủy','Số con chết, tiêu hủy','Số chết','Số tiêu hủy','Số tiêu huỷ']));
+        const weightV=numVal(getField(r,weightKeys));
+        if(caseV!==null){g.cases+=caseV;g.hasCases=true;}
+        if(deadV!==null){g.deadCull+=deadV;g.hasDead=true;}
+        if(weightV!==null){g.weight+=weightV;g.hasWeight=true;}
+      }
+    }
+    return groups;
+  }
+  function groupCount(groups, field){let n=0; for(const g of groups.values()) n+=g[field].size; return n;}
+  function groupsSummary(groups){
+    let cases=0,deadCull=0,weight=0,hasCases=false,hasDead=false,hasWeight=false;
+    for(const g of groups.values()){if(g.hasCases){cases+=g.cases;hasCases=true;}if(g.hasDead){deadCull+=g.deadCull;hasDead=true;}if(g.hasWeight){weight+=g.weight;hasWeight=true;}}
+    return {cases:hasCases?cases:'',deadCull:hasDead?deadCull:'',weightKg:hasWeight?weight:'',villageCount:groupCount(groups,'villages'),householdCount:groupCount(groups,'households'),communeCount:groups.size};
+  }
+  function animalMetric(summary, g){
+    if(g){if(g.hasCases&&g.cases!==0)return g.cases;if(g.hasDead)return g.deadCull;if(g.hasCases)return g.cases;return '';}
+    if(summary){const cases=metric(summary,['cases','totalCases']);if(cases!==''&&Number(cases)!==0)return cases;const dead=metric(summary,['deadCull','dead_cull']);if(dead!=='')return dead;return cases;}
+    return '';
+  }
+  function weightMetric(summary,g){
+    if(g&&g.hasWeight)return g.weight;
+    return metric(summary,['weightKg','weight','totalWeight','total_weight','Khối lượng tiêu hủy']);
+  }
+  function addMerge(ws,sr,sc,er,ec){ws['!merges'].push({s:{r:sr,c:sc},e:{r:er,c:ec}});}
+  function borderedStyle(){return {top:{style:'thin',color:{rgb:'333333'}},bottom:{style:'thin',color:{rgb:'333333'}},left:{style:'thin',color:{rgb:'333333'}},right:{style:'thin',color:{rgb:'333333'}}};}
+  function createStyledSheet(aoa, name, widths, titleCols, headerRows, totalRowIndexes){
+    const ws=window.XLSX.utils.aoa_to_sheet(aoa);
+    const cols=aoa.reduce((m,r)=>Math.max(m,r.length),0);
+    ws['!cols']=widths.map(w=>({wch:w}));
+    ws['!rows']=aoa.map((_,i)=>({hpt:i===0?24:(i===1?20:(i===2?7:((headerRows||[]).includes(i)?38:20)))}));
+    ws['!merges']=ws['!merges']||[];
+    const base={font:{name:'Times New Roman',sz:11,color:{rgb:'000000'}},alignment:{vertical:'center',wrapText:true},border:borderedStyle()};
+    const lastRow=aoa.length, lastCol=Math.max(0,cols-1);
+    // Add blank cells in the table area so the borders and merged header appearance survive in Excel.
+    for(let r=0;r<lastRow;r++) for(let c=0;c<cols;c++){
+      const addr=window.XLSX.utils.encode_cell({r,c});
+      if(!ws[addr]) ws[addr]={t:'s',v:''};
+      ws[addr].s={...base,alignment:{...base.alignment}};
+      if(r===0){ws[addr].s={...base,font:{name:'Times New Roman',sz:14,bold:true},alignment:{horizontal:'center',vertical:'center',wrapText:true},border:borderedStyle()};}
+      else if(r===1){ws[addr].s={...base,font:{name:'Times New Roman',sz:11,bold:true},alignment:{horizontal:'center',vertical:'center',wrapText:true},border:borderedStyle()};}
+      else if((headerRows||[]).includes(r)){ws[addr].s={...base,font:{name:'Times New Roman',sz:10,bold:true},alignment:{horizontal:'center',vertical:'center',wrapText:true},border:borderedStyle()};}
+      if((totalRowIndexes||[]).includes(r)) ws[addr].s={...base,font:{name:'Times New Roman',sz:11,bold:true},alignment:{vertical:'center',horizontal:c<4?'left':'right',wrapText:true},border:borderedStyle()};
+    }
+    return ws;
+  }
+  function makeDiseaseSheet(code, title, from, to, periodSum, ytdSum, periodGroups, ytdGroups, isCgc){
+    const ncol=13, startYear=(parseISODate(to)||new Date()).getFullYear();
+    const periodLabel=`${dateLabel(from)} đến ${dateLabel(to)}`;
+    const ytdLabel=`01/01/${startYear} đến ${dateLabel(to)}`;
+    let aoa;
+    if(!isCgc){
+      aoa=[
+        [title], [`Từ ${periodLabel}`], [],
+        ['TT','Bệnh','Loài mắc bệnh','Tên xã có bệnh','Số thôn, bản có dịch bệnh trong kỳ','Số hộ có dịch bệnh trong kỳ',`Số lượng động vật mắc bệnh, chết và tiêu hủy từ ${periodLabel}`,'','Số thôn, bản có dịch bệnh lũy kế','Số hộ có dịch bệnh lũy kế',`Tổng số lũy kế từ ${ytdLabel}`,'','Ghi chú'],
+        ['','','','','','','Số mắc, chết (con)','Khối lượng tiêu hủy (Kg)','','','Số mắc, chết (con)','Khối lượng tiêu hủy (Kg)','']
+      ];
+    } else {
+      aoa=[
+        [title], [`Từ ${periodLabel}`], [],
+        ['TT','Bệnh','Loài mắc bệnh','Tên xã có bệnh','Tên thôn/bản có dịch bệnh trong kỳ','Tên hộ có dịch trong kỳ',`Tổng số con mắc, chết và tiêu hủy từ ${periodLabel}`,'','Tên thôn/bản có bệnh lũy kế','Số hộ có dịch bệnh lũy kế',`Tổng số mắc, chết và tiêu hủy lũy kế từ ${ytdLabel}`,'','Ghi chú'],
+        ['','','','','','','Số mắc, chết (con)','Khối lượng tiêu hủy (Kg)','','','Số mắc, chết (con)','Khối lượng tiêu hủy (Kg)','']
+      ];
+    }
+    const names=new Set([...periodGroups.keys(),...ytdGroups.keys()]);
+    const detailAvailable=names.size>0;
+    const body=[];
+    if(detailAvailable){
+      [...names].sort((a,b)=>a.localeCompare(b,'vi')).forEach((commune,i)=>{
+        const p=periodGroups.get(commune), y=ytdGroups.get(commune);
+        const pv=p?Array.from(p.villages):[], ph=p?Array.from(p.households):[], yv=y?Array.from(y.villages):[], yh=y?Array.from(y.households):[];
+        const row=[i+1,code,code==='DTLCP'?'Lợn':(code==='CGC'?'Gà/Vịt':(code==='VDNC'?'Trâu, bò':'Động vật')),commune];
+        if(isCgc){row.push(pv.join('; '),ph.join('; '),animalMetric(periodSum,p),weightMetric(periodSum,p),yv.join('; '),y?y.households.size:'',animalMetric(ytdSum,y),weightMetric(ytdSum,y),[...(p?.notes||[]),...(y?.notes||[])].join('; '));}
+        else {row.push(p?pv.length:'',p?ph.length:'',animalMetric(periodSum,p),weightMetric(periodSum,p),y?yv.length:'',y?yh.length:'',animalMetric(ytdSum,y),weightMetric(ytdSum,y),[...(p?.notes||[]),...(y?.notes||[])].join('; '));}
+        body.push(row);
+      });
+      const pd=periodSum||groupsSummary(periodGroups), yd=ytdSum||groupsSummary(ytdGroups);
+      if(isCgc){
+        body.push(['','TỔNG','','',pd?`Tổng: ${metric(pd,['villageCount'])||groupCount(periodGroups,'villages')} thôn/bản`:'',pd?`Tổng: ${metric(pd,['householdCount'])||groupCount(periodGroups,'households')} hộ`:'',animalMetric(pd,null),weightMetric(pd,null),yd?`Tổng: ${metric(yd,['villageCount'])||groupCount(ytdGroups,'villages')} thôn/bản`:'',metric(yd,['householdCount'])||groupCount(ytdGroups,'households')||'',animalMetric(yd,null),weightMetric(yd,null),'']);
+      }else{
+        body.push(['','TỔNG','','',metric(pd,['villageCount'])||groupCount(periodGroups,'villages'),metric(pd,['householdCount'])||groupCount(periodGroups,'households'),animalMetric(pd,null),weightMetric(pd,null),metric(yd,['villageCount'])||groupCount(ytdGroups,'villages'),metric(yd,['householdCount'])||groupCount(ytdGroups,'households'),animalMetric(yd,null),weightMetric(yd,null),'']);
+      }
+    } else if(periodSum || ytdSum){
+      const s=periodSum||{}, y=ytdSum||{};
+      if(isCgc) body.push([1,code,code==='CGC'?'Gà/Vịt':'', 'Tổng hợp toàn tỉnh',metric(s,['villageCount'])!==''?`Tổng: ${metric(s,['villageCount'])} thôn/bản`:'',metric(s,['householdCount'])!==''?`Tổng: ${metric(s,['householdCount'])} hộ`:'',animalMetric(s,null),weightMetric(s,null),metric(y,['villageCount'])!==''?`Tổng: ${metric(y,['villageCount'])} thôn/bản`:'',metric(y,['householdCount']),animalMetric(y,null),weightMetric(y,null),'API hiện chỉ có số tổng hợp, chưa có chi tiết theo xã']);
+      else body.push([1,code,code==='DTLCP'?'Lợn':'', 'Tổng hợp toàn tỉnh',metric(s,['villageCount']),metric(s,['householdCount']),animalMetric(s,null),weightMetric(s,null),metric(y,['villageCount']),metric(y,['householdCount']),animalMetric(y,null),weightMetric(y,null),'API hiện chỉ có số tổng hợp, chưa có chi tiết theo xã']);
+    } else {
+      if(isCgc) body.push(['','', '', 'Chưa có dữ liệu', '', '', '', '', '', '', '', '', 'Kiểm tra API báo cáo và nguồn dữ liệu chi tiết.']);
+      else body.push(['','', '', 'Chưa có dữ liệu', '', '', '', '', '', '', '', '', 'Kiểm tra API báo cáo và nguồn dữ liệu chi tiết.']);
+    }
+    const totalIndexes=detailAvailable?[5+body.length-1]:[];
+    aoa.push(...body);
+    const ws=createStyledSheet(aoa,title,[6,12,13,22,24,22,14,16,24,17,16,18,24],[0,ncol-1],[3,4],totalIndexes);
+    addMerge(ws,0,0,0,ncol-1);addMerge(ws,1,0,1,ncol-1);
+    [0,1,2,3,4,8,9,12].forEach(c=>addMerge(ws,3,c,4,c));
+    addMerge(ws,3,6,3,7);addMerge(ws,3,10,3,11);
+    if(isCgc){/* tên thôn/hộ là dạng liệt kê theo mẫu */}
+    return ws;
+  }
+  function getLiveRows(){
+    try{if(typeof window.getRows==='function'){const r=window.getRows();if(Array.isArray(r))return r.filter(x=>x&&typeof x==='object');}}catch(e){}
+    if(Array.isArray(window.sheetRows))return window.sheetRows.filter(x=>x&&typeof x==='object');
+    if(window.sheetData && typeof window.sheetData==='object') return Object.values(window.sheetData).flat().filter(x=>x&&typeof x==='object');
+    return [];
+  }
+  function communeName(r){return String(getField(r,['Tên xã/phường','Tên xã','Tên xã có bệnh','Xã/phường','Xã','Địa bàn','TEN_XA','TENXA','Commune'])||'').trim();}
+  function buildRabiesSheet(raw, to){
+    const title='TỔNG HỢP SỐ LIỆU TIÊM PHÒNG VẮC XIN DẠI NĂM '+(parseISODate(to)||new Date()).getFullYear();
+    const dateText='Ngày cập nhật: '+dateLabel(to);
+    const head=['STT','Tên xã/phường','Loài vật nuôi','Loại vắc xin','Tổng đàn trong diện tiêm (con)','Số được tiêm phòng (con)','Tỷ lệ tiêm phòng (%)','Ghi chú','','Tổng đàn toàn tỉnh','Số liều vc đã tiêm','Tỷ lệ % theo tổng đàn'];
+    const data=raw.filter(r=>{
+      const c=communeName(r); if(!c)return false;
+      const v=norm(getField(r,['Loại vắc xin','Vắc xin','Bệnh','Loài vắc xin'])||'');
+      const herd=numVal(getField(r,['Tổng đàn trong diện tiêm','Tổng đàn','Tổng đàn toàn tỉnh']));
+      const dosed=numVal(getField(r,['Số được tiêm phòng','Số liều đã tiêm','Số liều vc đã tiêm','Đã tiêm']));
+      return (v.includes('dai')||((herd!==null||dosed!==null)&&norm(Object.keys(r).join(' ')).includes('dai')))&& (herd!==null||dosed!==null);
+    });
+    const aoa=[[title],[dateText],[],head];
+    if(data.length){data.forEach((r,i)=>{const herd=metric(r,['Tổng đàn trong diện tiêm','Tổng đàn']);const dosed=metric(r,['Số được tiêm phòng','Số liều đã tiêm','Đã tiêm']);const rate=metric(r,['Tỷ lệ tiêm phòng','Tỷ lệ % theo tổng đàn','Tỷ lệ']);aoa.push([i+1,communeName(r),getField(r,['Loài vật nuôi'])||'Chó, mèo',getField(r,['Loại vắc xin','Vắc xin'])||'Dại',herd,dosed,rate,getField(r,['Ghi chú'])||'', '', '', '', '']);});}
+    else {
+      const rate=clean($('kpiDaiDone')?.textContent); const active=clean($('kpiDaiStartedVisible')?.textContent);
+      aoa.push([1,'TỔNG HỢP KPI TOÀN TỈNH','Chó, mèo','Dại','','',rate||'',(active?active+'; ':'')+'KPI tại thời điểm xuất, không lọc theo kỳ. API chưa có chi tiết theo xã, tổng đàn và số liều đã tiêm.','','','','']);
+    }
+    const ws=createStyledSheet(aoa,title,[6,22,16,14,19,18,17,27,4,18,18,18],[0,11],[3],[]);
+    ws['!rows'][0]={hpt:30};
+    addMerge(ws,0,0,0,11);addMerge(ws,1,0,1,11);return ws;
+  }
+  function buildPeriodicVaccineSheet(raw, to){
+    const head=['TT','Tên xã, phường','Nhiệt thán (liều)','Đã tiêm','Tụ huyết trùng trâu bò (liều)','Đã tiêm','VX Dịch tả lợn (liều)','Đã tiêm','VX Cúm gia cầm (liều)','Đã tiêm','Vắc xin Lở mồm long móng (liều)','Đã tiêm','Tổng liều theo KH','Đã tiêm','% theo KH','Ghi chú','','',''];
+    const fields=[
+      ['Nhiệt thán (liều)','Nhiệt thán','Nhiệt thán theo kế hoạch'],['Đã tiêm Nhiệt thán','Nhiệt thán đã tiêm','Đã tiêm nhiệt thán'],
+      ['Tụ huyết trùng trâu bò (liều)','Tụ huyết trùng trâu bò','THT trâu bò'],['Đã tiêm Tụ huyết trùng trâu bò','Tụ huyết trùng trâu bò đã tiêm','Đã tiêm THT'],
+      ['VX Dịch tả lợn (liều)','Dịch tả lợn theo kế hoạch','Vắc xin dịch tả lợn'],['Đã tiêm Dịch tả lợn','Dịch tả lợn đã tiêm','Đã tiêm VX DTL'],
+      ['VX Cúm gia cầm (liều)','Cúm gia cầm theo kế hoạch','Vắc xin cúm gia cầm'],['Đã tiêm Cúm gia cầm','Cúm gia cầm đã tiêm','Đã tiêm VX CGC'],
+      ['Vắc xin Lở mồm long móng (liều)','Lở mồm long móng theo kế hoạch','Vắc xin LMLM'],['Đã tiêm Lở mồm long móng','Lở mồm long móng đã tiêm','Đã tiêm LMLM']
+    ];
+    const data=raw.filter(r=>{
+      if(!communeName(r))return false;
+      return fields.some(keys=>numVal(getField(r,keys))!==null);
+    });
+    const title='Phụ lục 01: Số lượng vắc xin tiêm phòng cho đàn gia súc, gia cầm từ nguồn vốn hỗ trợ nông nghiệp của tỉnh đợt 1 năm '+(parseISODate(to)||new Date()).getFullYear()+'\nKỲ BÁO CÁO '+dateLabel(to);
+    const aoa=[[title],head];
+    let totals=Array(10).fill(0);
+    if(data.length){data.forEach((r,i)=>{
+      const vals=fields.map(keys=>metric(r,keys)); vals.forEach((v,j)=>{if(v!=='')totals[j]+=Number(v)||0;});
+      const planned=[vals[0],vals[2],vals[4],vals[6],vals[8]].reduce((a,v)=>a+(Number(v)||0),0);
+      const done=[vals[1],vals[3],vals[5],vals[7],vals[9]].reduce((a,v)=>a+(Number(v)||0),0);
+      aoa.push([i+1,communeName(r),...vals.slice(0,2),...vals.slice(2,4),...vals.slice(4,6),...vals.slice(6,8),...vals.slice(8,10),planned,done,planned?done/planned*100:'',getField(r,['Ghi chú'])||'', '', '', '']);
+    });
+      const planned=totals.filter((v,i)=>i%2===0).reduce((a,v)=>a+v,0), done=totals.filter((v,i)=>i%2===1).reduce((a,v)=>a+v,0);
+      aoa.push(['TỔNG','',...totals,planned,done,planned?done/planned*100:'','','','','']);
+    }else{
+      const t1=clean($('kpiTpd1Done')?.textContent)||'—'; const t2=clean($('kpiTpd2Done')?.textContent)||'—'; const vd=clean($('kpiVdncDone')?.textContent)||'—';
+      aoa.push(['','TỔNG HỢP KPI TOÀN TỈNH','','','','','','','','','','','','','','Đợt 1: '+t1+'; Đợt 2: '+t2+'; VDNC: '+vd+'. KPI tại thời điểm xuất; API hiện chưa cung cấp liều chi tiết theo xã.','','','']);
+    }
+    const ws=createStyledSheet(aoa,title,[6,22,16,13,20,13,17,13,18,13,20,13,16,14,13,30,3,3,3],[0,18],data.length?[1]:[1],data.length?[aoa.length-1]:[]);
+    addMerge(ws,0,0,0,18); return ws;
+  }
+  function buildSpraySheet(raw, from, to){
+    const title='TỔNG HỢP SỐ LIỆU PHUN PHÒNG NĂM '+(parseISODate(to)||new Date()).getFullYear();
+    const head=['STT','Tên xã/phường','Vòng phun','Số hộ phun','Diện tích phun (m2)','Hoá chất được sử dụng (lít)','Ghi chú','Cột 1'];
+    const fields={round:['Vòng phun','Vòng','Đợt phun','PHUN_Vòng'],house:['Số hộ phun','Số hộ','PHUN_Số hộ'],area:['Diện tích phun (m2)','Diện tích phun','Diện tích','PHUN_Diện tích'],chem:['Hoá chất được sử dụng (lít)','Hóa chất được sử dụng','Hóa chất (lít)','Lượng hóa chất','Hóa chất','PHUN_Hóa chất','PHUN_Hóa chất (lít)']};
+    const data=raw.filter(r=>communeName(r)&&(numVal(getField(r,fields.round))!==null||numVal(getField(r,fields.house))!==null||numVal(getField(r,fields.area))!==null||numVal(getField(r,fields.chem))!==null||String(getField(r,['PHUN_Tiến độ','Tiến độ phun'])||'').trim()!==''));
+    const aoa=[[title],['Ngày cập nhật '+dateLabel(to)],[],head];
+    if(data.length)data.forEach((r,i)=>aoa.push([i+1,communeName(r),metric(r,fields.round),metric(r,fields.house),metric(r,fields.area),metric(r,fields.chem),getField(r,['Ghi chú','PHUN_Tiến độ','Tiến độ phun'])||'','']));
+    else {
+      const xa=clean($('dbPhunXa')?.textContent)||'—'; const d1=clean($('dbPhunDot1')?.textContent)||'—'; const d2=clean($('dbPhunDot2')?.textContent)||'—';
+      aoa.push(['','TỔNG HỢP KPI TOÀN TỈNH','','','','','Số xã triển khai: '+xa+'; Đợt 1: '+d1+'; Đợt 2: '+d2+'. KPI tại thời điểm xuất, không lọc theo kỳ; API chưa cung cấp bảng chi tiết theo xã.','']);
+    }
+    const ws=createStyledSheet(aoa,title,[6,22,13,15,18,22,42,12],[0,7],[3],[]);
+    addMerge(ws,0,0,0,7);addMerge(ws,1,0,1,7);return ws;
+  }
+  async function exportAppendixWorkbook(from,to){
+    if(!window.XLSX || !window.XLSX.utils) throw new Error('Chưa tải được thư viện Excel. Kiểm tra Internet rồi tải lại trang (Ctrl+F5).');
+    const base=API_URL;
+    const y=(parseISODate(to)||new Date()).getFullYear();
+    const ytdStart=`${y}-01-01`;
+    const enc=x=>encodeURIComponent(x);
+    const [periodReport,ytdReport,trendResult]=await Promise.all([
+      fetchOptional(base+'?type=report&from='+enc(from)+'&to='+enc(to)),
+      fetchOptional(base+'?type=report&from='+enc(ytdStart)+'&to='+enc(to)),
+      fetchOptional(base+'?type=trend')
+    ]);
+    const trendRows=arrayFromApi(trendResult);
+    const rawRows=getLiveRows();
+    const detailSource=trendRows; // Chỉ lọc theo kỳ từ API dữ liệu dịch bệnh theo ngày; không dùng KPI tổng hợp thay thế chi tiết.
+    const periodStart=iso(from),periodEnd=iso(to),ytdEnd=iso(to);
+    const book=window.XLSX.utils.book_new();
+    for(const spec of [
+      {code:'DTLCP',tab:'01. DTLCP',title:'TÌNH HÌNH DỊCH BỆNH DTLCP TRÊN ĐỊA BÀN TỈNH ĐIỆN BIÊN',cgc:false},
+      {code:'CGC',tab:'02.CGC',title:'TÌNH HÌNH DỊCH BỆNH CÚM GIA CẦM TRÊN ĐỊA BÀN TỈNH ĐIỆN BIÊN',cgc:true}
+    ]){
+      const pSum=diseaseSummary(periodReport,spec.code), ySum=diseaseSummary(ytdReport,spec.code);
+      const pRows=getRowsFor(spec.code,detailSource,periodStart,periodEnd);
+      const yRows=getRowsFor(spec.code,detailSource,ytdStart,ytdEnd);
+      const pGroups=buildCommuneGroups(pRows,spec.code), yGroups=buildCommuneGroups(yRows,spec.code);
+      const ws=makeDiseaseSheet(spec.code,spec.title,from,to,pSum,ySum,pGroups,yGroups,spec.cgc);
+      window.XLSX.utils.book_append_sheet(book,ws,spec.tab);
+    }
+    window.XLSX.utils.book_append_sheet(book,buildRabiesSheet(rawRows,to),'VC Dại');
+    window.XLSX.utils.book_append_sheet(book,buildPeriodicVaccineSheet(rawRows,to),'Tiêm phòng định kỳ đợt 1');
+    window.XLSX.utils.book_append_sheet(book,buildSpraySheet(rawRows,from,to),'Phun phòng đợt 1');
+    const safeFrom=from.replace(/-/g,''); const safeTo=to.replace(/-/g,'');
+    window.XLSX.writeFile(book,'Phu_luc_DBĐV_'+safeFrom+'_den_'+safeTo+'.xlsx');
+  }
+  document.addEventListener('DOMContentLoaded',function(){
+    // Thêm nút tải Excel vào từng thẻ KPI, không thay đổi số liệu hay chức năng hiện có.
+    document.querySelectorAll('.sidebar-kpi > .summary-card, .side-kpi-mini > .summary-card').forEach(card=>{
+      if(card.querySelector('.kpi-download'))return;
+      const header=card.querySelector('.summary-head');if(!header)return;
+      const key=Object.keys(CARD_NAMES).find(k=>card.classList.contains(k));
+      const name=CARD_NAMES[key]||clean(header.querySelector('b')?.textContent)||'KPI';
+      const btn=document.createElement('button');btn.type='button';btn.className='kpi-download';btn.title='Tải số liệu Excel: '+name;btn.setAttribute('aria-label','Tải số liệu Excel: '+name);
+      btn.innerHTML='<i class="fa-solid fa-file-excel"></i><span>Excel</span>';
+      btn.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();const rows=cardRows(card);saveRows(rows,'KPI_'+name.replace(/[^\p{L}\p{N}-]+/gu,'_')+'.xlsx',name);});
+      header.appendChild(btn);
+    });
+    const allBtn=$('btnDownloadAllKpi');
+    if(allBtn)allBtn.addEventListener('click',async function(){
+      const from=$('reportStartDate')?.value||'',to=$('reportEndDate')?.value||'';
+      if(!from||!to){alert('Vui lòng chọn cả ngày bắt đầu và ngày kết thúc trước khi tải bảng tổng hợp.');return;}
+      if(from>to){alert('Ngày bắt đầu không được sau ngày kết thúc.');return;}
+      const old=allBtn.innerHTML;allBtn.disabled=true;allBtn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Đang tổng hợp…';
+      try{
+        await exportAppendixWorkbook(from,to);
+      }catch(err){console.error('Không thể xuất bảng số liệu tổng hợp:',err);alert('Không tải được bảng số liệu tổng hợp theo kỳ. '+(err.message||err));}
+      finally{allBtn.disabled=false;allBtn.innerHTML=old;}
+    });
+  });
+})();
+</script>
+
+<style id="vaccine-kpi-match-vdnc">
+.card-vaccine-kpi .vaccine-kpi-compact{display:flex;flex-direction:column;gap:2px;font-size:9px;line-height:13px;color:#697682;margin-top:6px}
+.card-vaccine-kpi .vaccine-kpi-compact span:not([hidden]){display:flex;justify-content:space-between;align-items:baseline;gap:6px;white-space:normal;overflow:visible;border:0;padding:0;font-size:9px;line-height:13px}
+.card-vaccine-kpi .vaccine-kpi-compact b{color:#27343f;font-weight:800;text-align:right;white-space:normal}
+.card-vaccine-kpi .vaccine-kpi-compact [hidden]{display:none!important}
+</style>
+
+<style id="exact-kpi-width-match-dtlcp">
+/* CHỐT BỐ CỤC: mỗi thẻ dọc rộng đúng bằng một thẻ KPI hàng trên (DTLCP) */
+@media (min-width: 761px) {
+  .webgis {
+    /* sidebar padding 18px + KPI padding 4px + bốn khoảng cách 8px = 54px */
+    grid-template-columns:
+      minmax(0, 1.2fr)
+      minmax(185px, .8fr)
+      minmax(0, calc((100% - 54px) / 5)) !important;
+    column-gap: 8px !important;
+  }
+  .sidebar { grid-column: 1 / -1 !important; }
+  .sidebar-kpi {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+    box-sizing: border-box !important;
+  }
+  .sidebar-kpi > .summary-card { width: 100% !important; min-width: 0 !important; box-sizing: border-box !important; }
+  .side-kpi-mini { width: 100% !important; min-width: 0 !important; box-sizing: border-box !important; padding-left: 0 !important; padding-right: 0 !important; }
+  .side-kpi-mini > .summary-card { width: 100% !important; min-width: 0 !important; box-sizing: border-box !important; }
+}
+
+/* ===== BẢN HIỆU CHỈNH KPI / CỘT HOẠT ĐỘNG: giữ nguyên các chức năng hiện có ===== */
+@media (min-width: 761px) {
+  .sidebar-kpi {
+    display:grid !important;
+    grid-template-columns:repeat(5,minmax(0,1fr)) !important;
+    gap:7px !important;
+    align-items:stretch;
+  }
+  .sidebar-kpi > .summary-card {
+    width:100%;
+    min-width:0;
+    height:100% !important;
+    min-height:142px !important;
+    padding:8px !important;
+    overflow:hidden !important;
+  }
+  .sidebar-kpi .card-vaccine-kpi { grid-column:auto !important; }
+  .sidebar-kpi .card-vaccine-kpi .summary-head {
+    min-height:25px;
+    margin-bottom:4px;
+  }
+  .vaccine-kpi-compact { gap:0 !important; }
+  .vaccine-kpi-compact > span {
+    display:flex !important;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:4px;
+    padding:4px 1px !important;
+    border-top:1px solid #e7edf2;
+    line-height:1.25;
+  }
+  .vaccine-kpi-compact > span:first-child { border-top:0; }
+  .vaccine-kpi-compact > span > b {
+    text-align:right;
+    font-size:10px;
+    white-space:normal;
+  }
+  .vaccine-kpi-compact .vaccine-rabies-line { flex-wrap:wrap; }
+  .vaccine-rabies-line em {
+    display:block;
+    width:100%;
+    text-align:right;
+    font-size:9px;
+    font-style:normal;
+    color:#687582;
+    white-space:nowrap;
+  }
+  .webgis {
+    grid-template-columns:minmax(0,1fr) 210px minmax(280px,290px) !important;
+    grid-template-rows:auto auto !important;
+    align-items:stretch;
+  }
+  .main-map { grid-column:1 !important; grid-row:2 !important; }
+  .side-kpi-mini {
+    grid-column:2 !important;
+    grid-row:2 !important;
+    min-width:0;
+    width:100%;
+    display:flex !important;
+    flex-direction:column;
+    gap:7px;
+    align-self:stretch;
+    padding:0;
+    overflow:hidden;
+  }
+  .side-kpi-mini .summary-card {
+    width:100% !important;
+    min-width:0;
+    flex:1 1 0;
+    min-height:0 !important;
+    height:auto !important;
+    padding:8px !important;
+    overflow:hidden !important;
+  }
+  .side-kpi-mini .side-kpi-title { display:none !important; }
+  .side-kpi-mini .summary-head { font-size:11px !important; line-height:1.25; }
+  .side-kpi-mini .summary-main { margin:5px 0 4px !important; }
+  .side-kpi-mini .summary-main span { font-size:22px !important; line-height:1.05; }
+  .side-kpi-mini .summary-main small { font-size:9px !important; }
+  .side-kpi-mini .summary-grid { font-size:10px !important; line-height:1.35; }
+  .side-kpi-mini .phun-rounds { gap:4px !important; }
+  .side-kpi-mini .phun-rounds span { display:flex; justify-content:space-between; gap:5px; }
+  .panel {
+    grid-column:3 !important;
+    grid-row:2 !important;
+    min-width:0;
+    min-height:360px;
+    max-height:none !important;
+    height:auto;
+    align-self:stretch;
+  }
+}
+@media (max-width:1100px) and (min-width:761px) {
+  .webgis { grid-template-columns:minmax(0,1fr) 180px minmax(260px,280px) !important; }
+}
+@media (max-width:760px) {
+  .sidebar-kpi { grid-template-columns:repeat(2,minmax(0,1fr)) !important; }
+  .sidebar-kpi > .summary-card { min-height:130px; }
+  .side-kpi-mini {
+    order:3;
+    display:grid !important;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:7px;
+    padding:0;
+    min-width:0;
+  }
+  .side-kpi-mini .side-kpi-title { display:none !important; }
+  .side-kpi-mini .summary-card { min-width:0; padding:8px !important; }
+  .panel { order:4 !important; }
+  .vaccine-rabies-line em { display:block; width:100%; font-size:9px; font-style:normal; text-align:right; }
+}
+
+</style>
+
+<style id="webgis-layout-and-appendix-final-fix">
+/* Bố cục ổn định: toàn bộ KPI ở hàng trên; bản đồ, thông tin xã và KPI hoạt động ở hàng dưới. */
+html, body { max-width:100%; }
+@media (min-width:1101px) {
+  .webgis {
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) minmax(255px,290px) minmax(205px,calc((100vw - 72px)/5)) !important;
+    grid-template-rows:auto 480px !important;
+    column-gap:8px !important; row-gap:8px !important;
+    padding:0 12px !important; height:auto !important; min-height:0 !important;
+    align-items:stretch !important;
+  }
+  .sidebar { grid-column:1 / -1 !important; grid-row:1 !important; width:100% !important; min-width:0 !important; }
+  .sidebar-kpi { display:grid !important; grid-template-columns:repeat(5,minmax(0,1fr)) !important; grid-auto-flow:row !important; gap:8px !important; width:100% !important; }
+  .sidebar-kpi > .summary-card { grid-column:auto !important; width:100% !important; min-width:0 !important; height:124px !important; min-height:124px !important; box-sizing:border-box !important; }
+  .main-map { grid-column:1 !important; grid-row:2 !important; width:100% !important; height:480px !important; min-width:0 !important; min-height:0 !important; }
+  .panel { grid-column:2 !important; grid-row:2 !important; width:100% !important; height:480px !important; min-width:0 !important; min-height:0 !important; max-height:480px !important; }
+  .side-kpi-mini { grid-column:3 !important; grid-row:2 !important; display:flex !important; flex-direction:column !important; align-self:stretch !important; align-items:stretch !important; width:100% !important; height:480px !important; min-width:0 !important; min-height:0 !important; max-height:480px !important; padding:0 !important; gap:7px !important; border:0 !important; background:transparent !important; overflow:hidden !important; }
+  .side-kpi-mini > .side-kpi-title { flex:0 0 auto !important; margin:0 !important; padding:2px 1px 3px !important; font-size:9px !important; line-height:1.25 !important; }
+  .side-kpi-mini > .summary-card { flex:1 1 0 !important; width:100% !important; min-width:0 !important; height:auto !important; min-height:0 !important; max-height:none !important; padding:8px !important; box-sizing:border-box !important; overflow:auto !important; }
+}
+@media (min-width:761px) and (max-width:1100px) {
+  .webgis { display:grid !important; grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important; grid-template-rows:auto 430px auto !important; gap:8px !important; padding:0 10px !important; height:auto !important; }
+  .sidebar { grid-column:1 / -1 !important; grid-row:1 !important; width:100% !important; }
+  .sidebar-kpi { display:grid !important; grid-template-columns:repeat(5,minmax(0,1fr)) !important; gap:6px !important; }
+  .sidebar-kpi > .summary-card { grid-column:auto !important; min-width:0 !important; height:134px !important; min-height:134px !important; padding:7px !important; }
+  .main-map { grid-column:1 / -1 !important; grid-row:2 !important; width:100% !important; height:430px !important; }
+  .panel { grid-column:1 !important; grid-row:3 !important; width:100% !important; min-width:0 !important; height:420px !important; max-height:420px !important; }
+  .side-kpi-mini { grid-column:2 !important; grid-row:3 !important; display:flex !important; flex-direction:column !important; min-width:0 !important; height:420px !important; padding:0 !important; gap:7px !important; overflow:hidden !important; }
+  .side-kpi-mini > .summary-card { flex:1 1 0 !important; width:100% !important; min-height:0 !important; height:auto !important; overflow:auto !important; }
+}
+@media (max-width:760px) {
+  body { overflow:auto !important; height:auto !important; }
+  .webgis { display:flex !important; flex-direction:column !important; height:auto !important; padding:0 8px !important; }
+  .sidebar { width:100% !important; order:1 !important; }
+  .sidebar-kpi { display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:7px !important; }
+  .sidebar-kpi > .summary-card { width:100% !important; height:auto !important; min-height:122px !important; }
+  .main-map { order:2 !important; width:100% !important; height:60vh !important; min-height:360px !important; }
+  .panel { order:3 !important; width:100% !important; height:auto !important; max-height:none !important; }
+  .side-kpi-mini { order:4 !important; display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr)) !important; width:100% !important; height:auto !important; padding:8px !important; gap:7px !important; }
+  .side-kpi-mini > .side-kpi-title { grid-column:1/-1 !important; }
+  .side-kpi-mini > .summary-card { width:100% !important; min-height:120px !important; height:auto !important; }
+}
+/* Form bảng Excel theo phụ lục: nút tổng hợp luôn phân biệt với nút xuất báo cáo Word/PDF. */
+#btnDownloadAllKpi { white-space:nowrap; }
+</style>
+
+
+<style id="webgis-layout-final-hotfix-20261016">
+/* Fix cuối: không cho các KPI bị cắt hoặc phần tử ẩn chiếm chỗ; 3 cột dưới tách biệt rõ ràng. */
+[hidden], [hidden="hidden"] { display: none !important; }
+.summary-grid [hidden], .vaccine-kpi-compact [hidden] { display: none !important; }
+
+@media (min-width: 1101px) {
+  .webgis {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(255px, 290px) minmax(205px, calc((100vw - 72px) / 5)) !important;
+    grid-template-rows: auto 480px !important;
+    gap: 8px !important;
+    padding: 0 12px !important;
+    height: auto !important; min-height: 0 !important;
+    align-items: stretch !important;
+  }
+  .sidebar { grid-column: 1 / -1 !important; grid-row: 1 !important; width: 100% !important; min-width: 0 !important; overflow: visible !important; }
+  .sidebar-kpi { display: grid !important; grid-template-columns: repeat(5, minmax(0, 1fr)) !important; gap: 8px !important; width: 100% !important; padding: 2px !important; align-items: stretch !important; }
+  .sidebar-kpi > .summary-card { width: 100% !important; height: 146px !important; min-height: 146px !important; min-width: 0 !important; padding: 8px !important; overflow: visible !important; box-sizing: border-box !important; }
+  .main-map { grid-column: 1 !important; grid-row: 2 !important; width: 100% !important; height: 480px !important; min-width: 0 !important; min-height: 0 !important; }
+  #map { width: 100% !important; height: 100% !important; min-height: 0 !important; }
+  .panel { grid-column: 2 !important; grid-row: 2 !important; width: 100% !important; height: 480px !important; min-width: 0 !important; min-height: 0 !important; max-height: 480px !important; }
+  .side-kpi-mini { grid-column: 3 !important; grid-row: 2 !important; display: flex !important; flex-direction: column !important; gap: 7px !important; width: 100% !important; height: 480px !important; min-width: 0 !important; min-height: 0 !important; max-height: 480px !important; padding: 0 !important; margin: 0 !important; border: 0 !important; background: transparent !important; overflow: hidden !important; }
+  .side-kpi-mini > .side-kpi-title { display: none !important; }
+  .side-kpi-mini > .summary-card { display: block !important; flex: 1 1 0 !important; width: 100% !important; height: auto !important; min-height: 0 !important; max-height: none !important; margin: 0 !important; padding: 8px !important; overflow: hidden !important; box-sizing: border-box !important; }
+  .side-kpi-mini .summary-head { font-size: 10px !important; line-height: 1.25 !important; margin-bottom: 5px !important; }
+  .side-kpi-mini .summary-main { margin: 4px 0 !important; }
+  .side-kpi-mini .summary-main span { font-size: 21px !important; line-height: 1.05 !important; }
+  .side-kpi-mini .summary-grid { font-size: 10px !important; line-height: 1.3 !important; gap: 3px !important; }
+}
+@media (min-width: 761px) and (max-width: 1100px) {
+  .webgis { display: grid !important; grid-template-columns: minmax(0, 1fr) minmax(230px, .8fr) !important; grid-template-rows: auto 420px auto !important; gap: 8px !important; padding: 0 10px !important; height: auto !important; }
+  .sidebar { grid-column: 1 / -1 !important; grid-row: 1 !important; width: 100% !important; }
+  .sidebar-kpi { display: grid !important; grid-template-columns: repeat(5, minmax(0,1fr)) !important; gap: 6px !important; }
+  .sidebar-kpi > .summary-card { height: 146px !important; min-height: 146px !important; padding: 7px !important; }
+  .main-map { grid-column: 1 / -1 !important; grid-row: 2 !important; height: 420px !important; width: 100% !important; }
+  .panel { grid-column: 1 !important; grid-row: 3 !important; height: 420px !important; max-height: 420px !important; width: 100% !important; }
+  .side-kpi-mini { grid-column: 2 !important; grid-row: 3 !important; display: flex !important; flex-direction: column !important; height: 420px !important; min-height: 0 !important; gap: 7px !important; overflow: hidden !important; }
+  .side-kpi-mini > .side-kpi-title { display: none !important; }
+  .side-kpi-mini > .summary-card { flex: 1 1 0 !important; height: auto !important; min-height: 0 !important; overflow: hidden !important; }
+}
+@media (max-width: 760px) {
+  body { overflow: auto !important; height: auto !important; }
+  .webgis { display: flex !important; flex-direction: column !important; height: auto !important; padding: 0 8px !important; }
+  .sidebar { width: 100% !important; order: 1 !important; }
+  .sidebar-kpi { display: grid !important; grid-template-columns: repeat(2, minmax(0,1fr)) !important; gap: 7px !important; }
+  .sidebar-kpi > .summary-card { height: auto !important; min-height: 130px !important; overflow: visible !important; }
+  .main-map { order: 2 !important; width: 100% !important; height: 60vh !important; min-height: 360px !important; }
+  .panel { order: 3 !important; width: 100% !important; height: auto !important; max-height: none !important; }
+  .side-kpi-mini { order: 4 !important; display: grid !important; grid-template-columns: repeat(2,minmax(0,1fr)) !important; width: 100% !important; height: auto !important; padding: 8px !important; gap: 7px !important; }
+  .side-kpi-mini > .side-kpi-title { display: block !important; grid-column: 1 / -1 !important; }
+  .side-kpi-mini > .summary-card { width: 100% !important; height: auto !important; min-height: 120px !important; overflow: visible !important; }
+}
+</style>
+<script id="webgis-map-layout-refresh-20261016">
+(function(){
+  function refreshLeafletSize(){
+    try {
+      var candidates = [];
+      if (window.map && typeof window.map.invalidateSize === 'function') candidates.push(window.map);
+      if (window.webgisMap && typeof window.webgisMap.invalidateSize === 'function') candidates.push(window.webgisMap);
+      if (typeof map !== 'undefined' && map && typeof map.invalidateSize === 'function') candidates.push(map);
+      var unique = candidates.filter(function(m, i, a){ return a.indexOf(m) === i; });
+      if (unique.length) unique.forEach(function(m){ m.invalidateSize({pan:false, animate:false}); });
+      else window.dispatchEvent(new Event('resize'));
+    } catch(e) { window.dispatchEvent(new Event('resize')); }
+  }
+  function scheduleRefresh(){ requestAnimationFrame(function(){ requestAnimationFrame(refreshLeafletSize); }); }
+  window.addEventListener('load', scheduleRefresh, {once:true});
+  document.addEventListener('DOMContentLoaded', function(){
+    var mapBox = document.querySelector('.main-map');
+    if (mapBox && window.ResizeObserver) new ResizeObserver(scheduleRefresh).observe(mapBox);
+    scheduleRefresh();
+  });
+})();
+</script>
 
 </body>
 </html>
