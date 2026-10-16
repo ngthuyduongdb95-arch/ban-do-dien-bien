@@ -3071,10 +3071,23 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
   function getField(row, candidates){
     if(!row || typeof row!=='object') return undefined;
     const keys=Object.keys(row);
+    // Match exact names first, then fields carried under TIEM_PHONG_ or TP_ prefixes
+    // by different revisions of the GIS Apps Script.
     for(const c of candidates){
       if(row[c]!==undefined && row[c]!==null && row[c]!=='') return row[c];
-      const hit=keys.find(k=>norm(k)===norm(c));
+      const wanted=norm(c);
+      const hit=keys.find(k=>norm(k)===wanted);
       if(hit && row[hit]!==undefined && row[hit]!==null && row[hit]!=='') return row[hit];
+    }
+    for(const c of candidates){
+      const wanted=norm(c);
+      const hit=keys.find(k=>{
+        const nk=norm(k);
+        const stripped=nk.startsWith('tiem phong ')?nk.slice('tiem phong '.length):
+          nk.startsWith('tp ')?nk.slice(3):nk;
+        return stripped===wanted && row[k]!==undefined && row[k]!==null && row[k]!=='';
+      });
+      if(hit) return row[hit];
     }
     return undefined;
   }
@@ -3282,12 +3295,12 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
     const data=raw.filter(r=>{
       const c=communeName(r); if(!c)return false;
       const v=norm(getField(r,['Loại vắc xin','Vắc xin','Bệnh','Loài vắc xin'])||'');
-      const herd=numVal(getField(r,['Tổng đàn trong diện tiêm','Tổng đàn','Tổng đàn toàn tỉnh']));
-      const dosed=numVal(getField(r,['Số được tiêm phòng','Số liều đã tiêm','Số liều vc đã tiêm','Đã tiêm']));
+      const herd=numVal(getField(r,['Tổng đàn trong diện tiêm','Tổng đàn','Tổng đàn toàn tỉnh','Tổng đàn chó mèo']));
+      const dosed=numVal(getField(r,['Số được tiêm phòng','Số liều đã tiêm','Số liều vc đã tiêm','Đã tiêm','Dại - Đã tiêm']));
       return (v.includes('dai')||((herd!==null||dosed!==null)&&norm(Object.keys(r).join(' ')).includes('dai')))&& (herd!==null||dosed!==null);
     });
     const aoa=[[title],[dateText],[],head];
-    if(data.length){data.forEach((r,i)=>{const herd=metric(r,['Tổng đàn trong diện tiêm','Tổng đàn']);const dosed=metric(r,['Số được tiêm phòng','Số liều đã tiêm','Đã tiêm']);const rate=metric(r,['Tỷ lệ tiêm phòng','Tỷ lệ % theo tổng đàn','Tỷ lệ']);aoa.push([i+1,communeName(r),getField(r,['Loài vật nuôi'])||'Chó, mèo',getField(r,['Loại vắc xin','Vắc xin'])||'Dại',herd,dosed,rate,getField(r,['Ghi chú'])||'', '', '', '', '']);});}
+    if(data.length){data.forEach((r,i)=>{const herd=metric(r,['Tổng đàn trong diện tiêm','Tổng đàn','Tổng đàn chó mèo']);const dosed=metric(r,['Số được tiêm phòng','Số liều đã tiêm','Đã tiêm','Dại - Đã tiêm']);const rate=metric(r,['Tỷ lệ tiêm phòng','Tỷ lệ % theo tổng đàn','Tỷ lệ','Tỷ lệ tiêm Dại (%)']);aoa.push([i+1,communeName(r),getField(r,['Loài vật nuôi'])||'Chó, mèo',getField(r,['Loại vắc xin','Vắc xin'])||'Dại',herd,dosed,rate,getField(r,['Ghi chú'])||'', '', '', '', '']);});}
     else {
       const rate=clean($('kpiDaiDone')?.textContent); const active=clean($('kpiDaiStartedVisible')?.textContent);
       aoa.push([1,'TỔNG HỢP KPI TOÀN TỈNH','Chó, mèo','Dại','','',rate||'',(active?active+'; ':'')+'KPI tại thời điểm xuất, không lọc theo kỳ. API chưa có chi tiết theo xã, tổng đàn và số liều đã tiêm.','','','','']);
@@ -3299,11 +3312,11 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
   function buildPeriodicVaccineSheet(raw, to){
     const head=['TT','Tên xã, phường','Nhiệt thán (liều)','Đã tiêm','Tụ huyết trùng trâu bò (liều)','Đã tiêm','VX Dịch tả lợn (liều)','Đã tiêm','VX Cúm gia cầm (liều)','Đã tiêm','Vắc xin Lở mồm long móng (liều)','Đã tiêm','Tổng liều theo KH','Đã tiêm','% theo KH','Ghi chú','','',''];
     const fields=[
-      ['Nhiệt thán (liều)','Nhiệt thán','Nhiệt thán theo kế hoạch'],['Đã tiêm Nhiệt thán','Nhiệt thán đã tiêm','Đã tiêm nhiệt thán'],
-      ['Tụ huyết trùng trâu bò (liều)','Tụ huyết trùng trâu bò','THT trâu bò'],['Đã tiêm Tụ huyết trùng trâu bò','Tụ huyết trùng trâu bò đã tiêm','Đã tiêm THT'],
-      ['VX Dịch tả lợn (liều)','Dịch tả lợn theo kế hoạch','Vắc xin dịch tả lợn'],['Đã tiêm Dịch tả lợn','Dịch tả lợn đã tiêm','Đã tiêm VX DTL'],
-      ['VX Cúm gia cầm (liều)','Cúm gia cầm theo kế hoạch','Vắc xin cúm gia cầm'],['Đã tiêm Cúm gia cầm','Cúm gia cầm đã tiêm','Đã tiêm VX CGC'],
-      ['Vắc xin Lở mồm long móng (liều)','Lở mồm long móng theo kế hoạch','Vắc xin LMLM'],['Đã tiêm Lở mồm long móng','Lở mồm long móng đã tiêm','Đã tiêm LMLM']
+      ['Nhiệt thán Đợt 1 - KH','Nhiệt thán (liều)','Nhiệt thán','Nhiệt thán theo kế hoạch'],['Nhiệt thán Đợt 1 - Đã tiêm','Đã tiêm Nhiệt thán','Nhiệt thán đã tiêm','Đã tiêm nhiệt thán'],
+      ['THT trâu bò Đợt 1 - KH','Tụ huyết trùng trâu bò (liều)','Tụ huyết trùng trâu bò','THT trâu bò'],['THT trâu bò Đợt 1 - Đã tiêm','Đã tiêm Tụ huyết trùng trâu bò','Tụ huyết trùng trâu bò đã tiêm','Đã tiêm THT'],
+      ['Dịch tả lợn Đợt 1 - KH','VX Dịch tả lợn (liều)','Dịch tả lợn theo kế hoạch','Vắc xin dịch tả lợn'],['Dịch tả lợn Đợt 1 - Đã tiêm','Đã tiêm Dịch tả lợn','Dịch tả lợn đã tiêm','Đã tiêm VX DTL'],
+      ['Cúm gia cầm Đợt 1 - KH','VX Cúm gia cầm (liều)','Cúm gia cầm theo kế hoạch','Vắc xin cúm gia cầm'],['Cúm gia cầm Đợt 1 - Đã tiêm','Đã tiêm Cúm gia cầm','Cúm gia cầm đã tiêm','Đã tiêm VX CGC'],
+      ['LMLM Đợt 1 - KH','Vắc xin Lở mồm long móng (liều)','Lở mồm long móng theo kế hoạch','Vắc xin LMLM'],['LMLM Đợt 1 - Đã tiêm','Đã tiêm Lở mồm long móng','Lở mồm long móng đã tiêm','Đã tiêm LMLM']
     ];
     const data=raw.filter(r=>{
       if(!communeName(r))return false;
@@ -3671,5 +3684,301 @@ html, body { max-width:100%; }
 })();
 </script>
 
+<script id="activity-kpi-data-fix-20261016">
+/* Patch: đọc dữ liệu tiêm phòng và phun phòng từ GIS_TONGHOP do tongHopGIS() tạo. */
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const normalize = value => String(value == null ? '' : value)
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd').replace(/Đ/g, 'D')
+    .toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().replace(/\s+/g, ' ');
+  const displayNumber = value => Number(value || 0).toLocaleString('vi-VN', { maximumFractionDigits: 2 });
+
+  function rowsNow() {
+    try { if (typeof window.getRows === 'function') { const rows = window.getRows(); if (Array.isArray(rows)) return rows.filter(r => r && typeof r === 'object'); } } catch (_) {}
+    if (Array.isArray(window.sheetRows)) return window.sheetRows.filter(r => r && typeof r === 'object');
+    if (window.sheetData && typeof window.sheetData === 'object') return Object.values(window.sheetData).flat().filter(r => r && typeof r === 'object');
+    return [];
+  }
+  function parseNum(value) {
+    if (value === null || value === undefined || String(value).trim() === '') return null;
+    if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+    let s = String(value).trim().replace(/[^0-9,.-]/g, '');
+    if (!s) return null;
+    if (s.includes('.') && s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
+    else if (s.includes(',')) {
+      const p = s.split(',');
+      s = p.length === 2 && p[1].length <= 2 ? p[0] + '.' + p[1] : s.replace(/,/g, '');
+    } else if ((s.match(/\./g) || []).length > 1) s = s.replace(/\./g, '');
+    const n = Number(s);
+    return Number.isFinite(n) ? n : null;
+  }
+  function normalizedEntries(row) {
+    return Object.keys(row || {}).map(key => ({ key, normalized: normalize(key), raw: row[key] }));
+  }
+  function findValue(row, candidates, prefix) {
+    const entries = normalizedEntries(row);
+    const targets = candidates.map(normalize);
+    const prefixNorm = prefix ? normalize(prefix) : '';
+    for (const e of entries) {
+      let k = e.normalized;
+      if (prefixNorm && k.startsWith(prefixNorm + ' ')) k = k.slice(prefixNorm.length).trim();
+      if (targets.includes(k)) return e.raw;
+    }
+    return null;
+  }
+  function hasAnyValue(value) { return value !== null && value !== undefined && String(value).trim() !== ''; }
+  function commune(row) {
+    return String(findValue(row, ['Tên xã', 'Tên xã/phường', 'Xã', 'Xã/phường', 'Tên địa bàn', 'Commune', 'NAME'], '') || '').trim();
+  }
+  function setText(id, value, title) {
+    const el = $(id);
+    if (!el) return;
+    el.textContent = value;
+    if (title) el.title = title;
+  }
+  function uniqueRows(rows) {
+    const map = new Map();
+    rows.forEach((row, i) => {
+      const name = commune(row);
+      map.set(normalize(name || ('row ' + i)), row); // GIS_TONGHOP dự kiến một dòng/xã; ưu tiên dòng cuối khi lặp.
+    });
+    return [...map.values()];
+  }
+  function tpValue(row, aliases) {
+    // Older deployments expose TP_* while newer tongHopGIS() exposes TIEM_PHONG_*; accept both.
+    let value = findValue(row, aliases, 'TIEM_PHONG');
+    if (hasAnyValue(value)) return value;
+    const entries = normalizedEntries(row);
+    const targets = aliases.map(normalize);
+    for (const e of entries) {
+      let k = e.normalized;
+      if (k.startsWith('tiem phong ')) k = k.slice('tiem phong '.length);
+      else if (k.startsWith('tp ')) k = k.slice(3);
+      if (targets.includes(k) && hasAnyValue(e.raw)) return e.raw;
+    }
+    return null;
+  }
+  function sumPresent(rows, aliases, prefix) {
+    let sum = 0, has = false;
+    rows.forEach(row => {
+      const raw = normalize(prefix) === 'tiem phong' ? tpValue(row, aliases) : findValue(row, aliases, prefix);
+      const n = parseNum(raw);
+      if (n !== null) { sum += n; has = true; }
+    });
+    return { value: sum, has };
+  }
+  function roundSummary(rows, pairs, statusAliases) {
+    let complete = 0, participating = 0, hasSource = false, totalPlan = 0, totalDone = 0, hasPlan = false, hasDone = false;
+    rows.forEach(row => {
+      const values = pairs.map(pair => ({ plan: parseNum(tpValue(row, pair[0])), done: parseNum(tpValue(row, pair[1])) }));
+      const hasValues = values.some(v => v.plan !== null || v.done !== null);
+      const statusRaw = statusAliases && statusAliases.length ? tpValue(row, statusAliases) : null;
+      const status = normalize(statusRaw || '');
+      if (hasValues || hasAnyValue(statusRaw)) hasSource = true;
+      const planned = values.filter(v => v.plan !== null && v.plan > 0);
+      const doneOnly = values.some(v => v.done !== null && v.done > 0);
+      const participatingByPlan = planned.length > 0 || doneOnly || /dang trien khai|da trien khai|hoan thanh/.test(status);
+      if (participatingByPlan) participating++;
+      let completeByNumbers = planned.length > 0 && planned.every(v => v.done !== null && v.done >= v.plan);
+      const completeByStatus = /hoan thanh|hoan tat|da xong/.test(status) && !/chua hoan thanh/.test(status);
+      if (completeByNumbers || completeByStatus) complete++;
+      values.forEach(v => {
+        if (v.plan !== null) { totalPlan += v.plan; hasPlan = true; }
+        if (v.done !== null) { totalDone += v.done; hasDone = true; }
+      });
+    });
+    return { complete, participating, hasSource, totalPlan, totalDone, hasPlan, hasDone };
+  }
+
+  const ROUND1 = [
+    [['nhiet than dot 1 kh'], ['nhiet than dot 1 da tiem']],
+    [['tht trau bo dot 1 kh'], ['tht trau bo dot 1 da tiem']],
+    [['dich ta lon dot 1 kh'], ['dich ta lon dot 1 da tiem']],
+    [['cum gia cam dot 1 kh'], ['cum gia cam dot 1 da tiem']],
+    [['lmlm dot 1 kh'], ['lmlm dot 1 da tiem']]
+  ];
+  const ROUND2 = [
+    [['tht trau bo dot 2 kh'], ['tht trau bo dot 2 da tiem']],
+    [['lmlm dot 2 kh'], ['lmlm dot 2 da tiem']],
+    [['cum gia cam dot 2 kh'], ['cum gia cam dot 2 da tiem']],
+    [['dich ta lon dot 2 kh'], ['dich ta lon dot 2 da tiem']]
+  ];
+  const SPRAY_BASE = {
+    progress: ['PHUN_Tiến độ', 'Tiến độ phun', 'Tiến độ'],
+    round: ['PHUN_Vòng', 'Vòng phun', 'Vòng'],
+    homes: ['PHUN_Số hộ', 'Số hộ phun', 'Số hộ'],
+    area: ['PHUN_Diện tích', 'Diện tích phun', 'Diện tích'],
+    chemical: ['PHUN_Hóa chất', 'Hóa chất', 'Lượng hóa chất'],
+    date: ['PHUN_Ngày', 'Ngày phun', 'Ngày cập nhật']
+  };
+  const SPRAY2 = ['PHUN_Đợt 2', 'PHUN_Dot 2', 'PHUN_Đợt 2 tiến độ', 'PHUN2_Tiến độ', 'Tiến độ phun đợt 2', 'Số xã phun đợt 2'];
+
+  function updateActivityKpis() {
+    const raw = rowsNow();
+    if (!raw.length) {
+      // Không dùng số 0 giả khi nguồn chưa được tải.
+      if (retries > 8) {
+        ['kpiTpd1Done','kpiTpd2Done','kpiVdncDone'].forEach(id => setText(id, 'Chưa kết nối', 'Không nhận được dữ liệu từ nguồn Google Sheets. Kiểm tra js/sheets.js và quyền truy cập API.'));
+        setText('dbPhunXa', 'Chưa kết nối', 'Không nhận được dữ liệu từ nguồn Google Sheets.');
+        setText('dbPhunDot1', 'Chưa kết nối');
+        setText('dbPhunDot2', 'Chưa kết nối');
+        setText('kpiDaiDone', 'Chưa kết nối', 'Không nhận được dữ liệu từ nguồn Google Sheets.');
+      } else {
+        setText('kpiTpd1Done', 'Đang tải…');
+        setText('kpiTpd2Done', 'Đang tải…');
+        setText('dbPhunXa', 'Đang tải…');
+        setText('dbPhunDot1', 'Đang tải…');
+        setText('dbPhunDot2', 'Đang tải…');
+      }
+      return false;
+    }
+    const rows = uniqueRows(raw);
+    const allKeys = new Set(raw.flatMap(r => Object.keys(r).map(normalize)));
+    const tpKeysExist = [...allKeys].some(k => k.startsWith('tiem phong ') || k.startsWith('tp '));
+
+    const r1 = roundSummary(rows, ROUND1, []);
+    const r2 = roundSummary(rows, ROUND2, ['trang thai dot 2']);
+    const r1Element = $('kpiTpd1Done');
+    const r2Element = $('kpiTpd2Done');
+    if (r1Element) {
+      if (!tpKeysExist) {
+        setText('kpiTpd1Done', 'Chưa đồng bộ', 'Không tìm thấy các cột TIEM_PHONG_*/TP_* trong dữ liệu GIS_TONGHOP. Chạy tongHopGIS() trong Apps Script rồi tải lại trang.');
+      } else if (!r1.hasSource) {
+        setText('kpiTpd1Done', 'Chưa cập nhật', 'Đã có cột nguồn tiêm phòng đợt 1 nhưng chưa có số liệu kế hoạch/đã tiêm. Kiểm tra sheet TIEN_DO_TIEM_PHONG.');
+      } else {
+        setText('kpiTpd1Done', `${r1.complete}/45 xã hoàn thành`, `Có số liệu ở ${r1.participating}/45 xã; kế hoạch ${r1.hasPlan ? displayNumber(r1.totalPlan) : 'chưa có'}, đã tiêm ${r1.hasDone ? displayNumber(r1.totalDone) : 'chưa có'}.`);
+      }
+    }
+    if (r2Element) {
+      if (!tpKeysExist) {
+        setText('kpiTpd2Done', 'Chưa đồng bộ', 'Không tìm thấy các cột TIEM_PHONG_*/TP_* trong dữ liệu GIS_TONGHOP. Chạy tongHopGIS() trong Apps Script rồi tải lại trang.');
+      } else if (!r2.hasSource) {
+        setText('kpiTpd2Done', 'Chưa cập nhật', 'Đã có cột nguồn nhưng chưa có số liệu đợt 2. Kiểm tra sheet TIEN_DO_TIEM_PHONG.');
+      } else {
+        setText('kpiTpd2Done', `${r2.complete}/45 xã hoàn thành`, `Có số liệu/đang triển khai ở ${r2.participating}/45 xã; kế hoạch ${r2.hasPlan ? displayNumber(r2.totalPlan) : 'chưa có'}, đã tiêm ${r2.hasDone ? displayNumber(r2.totalDone) : 'chưa có'}.`);
+      }
+      const started = $('kpiTpd2Started');
+      if (started) started.textContent = `${r2.participating}/45`;
+      const rate = $('kpiTpd2Rate');
+      if (rate) rate.textContent = r2.hasPlan && r2.totalPlan > 0 && r2.hasDone ? (r2.totalDone / r2.totalPlan * 100).toFixed(2) + '%' : '—';
+    }
+    const daiDose = sumPresent(rows, ['dai da tiem'], 'TIEM_PHONG');
+    const dogHerd = sumPresent(rows, ['tong dan cho meo'], 'TIEM_PHONG');
+    let daiRate = null;
+    if (daiDose.has && dogHerd.has && dogHerd.value > 0) daiRate = daiDose.value / dogHerd.value * 100;
+    else {
+      const rateVals = rows.map(r => parseNum(tpValue(r, ['ty le tiem dai']))).filter(v => v !== null);
+      if (rateVals.length) {
+        // Nguồn Apps Script lưu tỷ lệ dạng phần số (0–1); chỉ lấy trung bình khi tổng đàn không có.
+        const normalizedRates = rateVals.map(v => v <= 1 ? v * 100 : v);
+        daiRate = normalizedRates.reduce((a,b)=>a+b,0) / normalizedRates.length;
+      }
+    }
+    const hasDaiData = daiDose.has || dogHerd.has || rows.some(r => hasAnyValue(tpValue(r, ['ngay cap nhat dai', 'trang thai dai'])));
+    const daiStarted = rows.filter(row => {
+      const status = normalize(tpValue(row, ['trang thai dai']) || '');
+      if (/dang trien khai|dang tiem/.test(status)) return true;
+      const d = parseNum(tpValue(row, ['dai da tiem']));
+      const h = parseNum(tpValue(row, ['tong dan cho meo']));
+      return d !== null && d > 0 && (h === null || d < h);
+    }).length;
+    const daiDone = $('kpiDaiDone');
+    const daiRateHidden = $('kpiDaiRate');
+    const daiStartedHidden = $('kpiDaiStarted');
+    if (hasDaiData) {
+      if (daiRateHidden) daiRateHidden.textContent = daiRate === null ? '—' : `${displayNumber(daiRate)}% tổng đàn`;
+      if (daiStartedHidden) daiStartedHidden.textContent = `${daiStarted}/45`;
+      if (daiDone && daiRate === null) daiDone.textContent = 'Chưa đủ số liệu';
+    } else if (tpKeysExist) {
+      if (daiRateHidden) daiRateHidden.textContent = '—';
+      if (daiStartedHidden) daiStartedHidden.textContent = '—/45';
+      if (daiDone) daiDone.textContent = 'Chưa cập nhật';
+    } else if (daiDone) {
+      daiDone.textContent = 'Chưa đồng bộ';
+      daiDone.title = 'Cần đồng bộ dữ liệu tiêm phòng (TIEM_PHONG_*/TP_*) từ Apps Script.';
+    }
+
+    const vdncDose = sumPresent(rows, ['vdnc da tiem'], 'TIEM_PHONG');
+    const vdncCommunes = rows.filter(r => {
+      const n = parseNum(tpValue(r, ['vdnc da tiem']));
+      return n !== null && n > 0;
+    }).length;
+    if ($('kpiVdncDone')) {
+      if (vdncDose.has && vdncDose.value > 0) setText('kpiVdncDone', `${vdncCommunes}/45 xã đã tiêm`, `Tổng số liều đã tiêm ghi nhận: ${displayNumber(vdncDose.value)}.`);
+      else if (tpKeysExist) setText('kpiVdncDone', 'Chưa cập nhật', 'Nguồn hiện chưa có số liều VDNC dương tính để xác định xã đã tiêm.');
+      else setText('kpiVdncDone', 'Chưa đồng bộ', 'Không tìm thấy các cột TIEM_PHONG_*/TP_* trong dữ liệu GIS_TONGHOP.');
+    }
+
+    const phunRecordedCount = rows.filter(row => Object.values(SPRAY_BASE).some(aliases => {
+      return hasAnyValue(findValue(row, aliases, ''));
+    })).length;
+    const hasPhunColumns = [...allKeys].some(k => k.startsWith('phun '));
+    const homes = sumPresent(rows, SPRAY_BASE.homes, '');
+    const currentRoundRaw = rows.map(r => findValue(r, SPRAY_BASE.round, ''));
+    const currentRoundValues = currentRoundRaw.filter(hasAnyValue);
+    function sprayRound(value) {
+      const text = normalize(value || '');
+      if (!text) return null;
+      const n = parseNum(text);
+      if (n === 1 || /(^| )(dot|vong|lan) 1( |$)/.test(text)) return 1;
+      if (n === 2 || /(^| )(dot|vong|lan) 2( |$)/.test(text)) return 2;
+      if (/dot 1|vong 1|lan 1/.test(text)) return 1;
+      if (/dot 2|vong 2|lan 2/.test(text)) return 2;
+      return null;
+    }
+    const rowsWithRound = rows.map((row, i) => ({row, round: sprayRound(currentRoundRaw[i]) ?? sprayRound(findValue(row, SPRAY_BASE.progress, ''))})).filter(x => x.round !== null);
+    const hasRoundData = rowsWithRound.length > 0;
+    const phunCount = rows.filter(row => {
+      const progress = normalize(findValue(row, SPRAY_BASE.progress, '') || '');
+      const round = sprayRound(findValue(row, SPRAY_BASE.round, '')) ?? sprayRound(progress);
+      const homeCount = parseNum(findValue(row, SPRAY_BASE.homes, ''));
+      const area = parseNum(findValue(row, SPRAY_BASE.area, ''));
+      const chemical = parseNum(findValue(row, SPRAY_BASE.chemical, ''));
+      return /trien khai|da phun|hoan thanh/.test(progress) || round !== null ||
+        (homeCount !== null && homeCount > 0) || (area !== null && area > 0) || (chemical !== null && chemical > 0);
+    }).length;
+    const hasPhunValues = phunRecordedCount > 0;
+    if ($('dbPhunXa')) {
+      if (hasPhunValues) setText('dbPhunXa', displayNumber(phunCount), `Số xã có ít nhất một trường PHUN_* được ghi nhận. Tổng số hộ phun có dữ liệu: ${homes.has ? displayNumber(homes.value) : 'chưa có'}.`);
+      else setText('dbPhunXa', hasPhunColumns ? 'Chưa cập nhật' : 'Chưa đồng bộ', hasPhunColumns ? 'Các cột PHUN_* có tồn tại nhưng chưa có số liệu. Kiểm tra sheet GIS_PHUNPHONG rồi chạy tongHopGIS().' : 'Không tìm thấy các cột PHUN_* trong dữ liệu GIS_TONGHOP. Kiểm tra sheet GIS_PHUNPHONG và chạy tongHopGIS().');
+    }
+    const d1FieldAliases = ['PHUN_Đợt 1','PHUN_Dot 1','PHUN_Đợt 1 tiến độ','PHUN1_Tiến độ','Tiến độ phun đợt 1','Số xã phun đợt 1'];
+    const hasD1Specific = [...allKeys].some(k => d1FieldAliases.map(normalize).includes(k));
+    const d1Count = hasD1Specific
+      ? rows.filter(r => hasAnyValue(findValue(r, d1FieldAliases, ''))).length
+      : hasRoundData ? rowsWithRound.filter(x => x.round === 1).length : null;
+    const hasD2Specific = [...allKeys].some(k => SPRAY2.map(normalize).includes(k));
+    const d2Count = hasD2Specific
+      ? rows.filter(r => hasAnyValue(findValue(r, SPRAY2, ''))).length
+      : hasRoundData ? rowsWithRound.filter(x => x.round === 2).length : null;
+    if ($('dbPhunDot1')) {
+      if (d1Count !== null) setText('dbPhunDot1', `${d1Count}/45 xã triển khai`, hasD1Specific ? 'Đếm xã có trường riêng của đợt 1.' : 'Số liệu suy ra từ giá trị PHUN_Vòng của từng xã; cần bảo đảm sheet nguồn ghi rõ vòng/đợt.');
+      else setText('dbPhunDot1', hasPhunColumns ? 'Chưa cập nhật' : 'Chưa đồng bộ', 'Chưa có dữ liệu đủ để xác định số xã ở đợt 1.');
+    }
+    if ($('dbPhunDot2')) {
+      if (d2Count !== null) setText('dbPhunDot2', `${d2Count}/45 xã triển khai`, hasD2Specific ? 'Đếm xã có trường riêng của đợt 2.' : 'Số liệu suy ra từ giá trị PHUN_Vòng của từng xã; cần bảo đảm sheet nguồn ghi rõ vòng/đợt.');
+      else setText('dbPhunDot2', hasPhunColumns ? 'Chưa cập nhật' : 'Chưa đồng bộ', 'Chưa có dữ liệu đủ để xác định số xã ở đợt 2.');
+    }
+    // Gắn chẩn đoán ngắn để có thể xác định ngay trong trình duyệt nếu backend chưa đẩy đủ cột.
+    const kpi = $('.card-vaccine-kpi');
+    if (kpi) kpi.title = tpKeysExist ? `Nguồn tiến độ tiêm phòng: ${[...allKeys].filter(k=>k.startsWith('tiem phong ')).length} cột TIEM_PHONG_*; ${rows.length} xã/bản ghi.` : 'Chưa có cột TIEM_PHONG_* trong dữ liệu trả về của Google Sheets API.';
+    console.info('[WebGIS KPI tiêm/phun]', { rows: rows.length, vaccineColumns: [...allKeys].filter(k=>k.startsWith('tiem phong ')).length, phunColumns: [...allKeys].filter(k=>k.startsWith('phun ')).length, phunCount, r1, r2 });
+    return true;
+  }
+
+  let retries = 0;
+  function refresh() {
+    updateActivityKpis();
+    retries++;
+    if (retries < 90) window.setTimeout(refresh, 1000);
+  }
+  document.addEventListener('DOMContentLoaded', refresh);
+  window.addEventListener('load', updateActivityKpis);
+  ['sheets:data-loaded','sheetDataLoaded','dataLoaded','webgis:data-ready'].forEach(name => window.addEventListener(name, updateActivityKpis));
+})();
+
+</script>
 </body>
 </html>
