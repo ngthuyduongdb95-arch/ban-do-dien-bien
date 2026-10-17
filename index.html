@@ -2040,12 +2040,8 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
     <aside class="side-kpi-mini" aria-label="KPI hoạt động chuyên ngành">
             <div class="summary-card card-phun">
                 <div class="summary-head"><i class="fa-solid fa-spray-can-sparkles"></i><b>THỰC HIỆN THÁNG TVSKTTĐ</b></div>
-                <div class="summary-main"><span id="dbPhunXa">0</span><small>xã triển khai</small></div>
-                <div class="summary-grid phun-rounds">
-                    <span>Đợt 1 <b id="dbPhunDot1">—</b></span>
-                    <span>Đợt 2 <b id="dbPhunDot2">—</b></span>
-                    <span hidden id="dbPhunHo">—</span><span hidden id="dbPhunVong">—</span>
-                </div>
+                <div class="summary-main"><span id="dbPhunXa">0</span><small>xã đang triển khai</small></div>
+                <div class="summary-main"><span id="dbPhunXong">0</span><small>xã đã triển khai xong</small></div>
             </div>
 
 
@@ -3668,6 +3664,131 @@ html, body { max-width:100%; }
     if (mapBox && window.ResizeObserver) new ResizeObserver(scheduleRefresh).observe(mapBox);
     scheduleRefresh();
   });
+})();
+</script>
+
+
+<!-- WEBGIS PATCH: đọc GIS_PHUNPHONG từ API và ghép vào dữ liệu bản đồ hiện có -->
+<script id="webgisPhunPhongIntegration20261017">
+(function(){
+  'use strict';
+  const PHUN_API_URL = 'https://script.google.com/macros/s/AKfycbyRuJ9Wfv4HtWjMRT2Hox2-mOhBVRjyqLaHhpQjohPEkfHWNyjM004KgO3o7_4nRJtj/exec?type=phun';
+  let phunRows = [];
+  const norm = v => String(v == null ? '' : v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim().replace(/^(xa|phuong|thi tran)\s+/,'');
+  const value = (row, names) => {
+    if (!row) return '';
+    const keys = Object.keys(row);
+    for (const name of names) {
+      if (row[name] !== undefined && row[name] !== null && row[name] !== '') return row[name];
+      const k = keys.find(x => norm(x) === norm(name));
+      if (k && row[k] !== undefined && row[k] !== null && row[k] !== '') return row[k];
+    }
+    return '';
+  };
+  const number = v => {
+    if (typeof v === 'number') return Number.isFinite(v) ? v : 0;
+    let s = String(v == null ? '' : v).trim().replace(/[^0-9,.-]/g,'');
+    if (!s) return 0;
+    if (s.includes('.') && s.includes(',')) s = s.replace(/\./g,'').replace(',','.');
+    else if (s.includes(',')) s = s.replace(',','.');
+    else if ((s.match(/\./g)||[]).length > 1) s = s.replace(/\./g,'');
+    const n = Number(s); return Number.isFinite(n) ? n : 0;
+  };
+  const fmt = v => Number(v || 0).toLocaleString('vi-VN',{maximumFractionDigits:2});
+  const setText = (id, v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+  function isCommuneRow(r){
+    const name = value(r,['Tên xã/phường','Tên xã','Xã/phường','Xã','TEN_XA','TENXA']);
+    return !!String(name||'').trim() && !/^(tổng|tong|toàn tỉnh|toan tinh|ghi chú|ghi chu)$/i.test(String(name).trim());
+  }
+  function roundOf(r){
+    const raw=value(r,['Vòng phun','Vòng','Đợt phun','Vòng phun hiện tại']);
+    const m=String(raw).match(/\d+/); return m ? Number(m[0]) : number(raw);
+  }
+  function communeName(r){ return String(value(r,['Tên xã/phường','Tên xã','Xã/phường','Xã','TEN_XA','TENXA'])||'').trim(); }
+  function mergeIntoMap(rows){
+    if (typeof gisData === 'undefined' || !gisData) return;
+    const byName = new Map();
+    rows.forEach(r => { if(isCommuneRow(r)) byName.set(norm(communeName(r)),r); });
+    Object.keys(gisData).forEach(id => {
+      const base=gisData[id] || {};
+      const baseName=value(base,['Tên xã/phường','Tên xã','Xã/phường','Xã','TEN_XA','TENXA','NAME','Name']);
+      const phun=byName.get(norm(baseName));
+      if(!phun) return;
+      const round=roundOf(phun);
+      const status=String(value(phun,['Trạng thái','Tiến độ','Tiến độ phun'])|| (round===4?'Đã triển khai xong':round>=1&&round<=3?'Đang triển khai':'Chưa triển khai')).trim();
+      base['PHUN_Vòng']=round || value(phun,['Vòng phun','Vòng','Đợt phun']) || '';
+      base['PHUN_Tiến độ']=(round===4 || /đã triển khai xong/i.test(status)) ? 'Đã triển khai xong' : (round>=1 && round<=3) ? 'Đang triển khai' : status;
+      base['PHUN_Số hộ']=number(value(phun,['Số hộ phun','Số hộ']));
+      base['PHUN_Diện tích']=number(value(phun,['Diện tích phun (m²)','Diện tích phun (m2)','Diện tích phun','Diện tích']));
+      base['PHUN_Hóa chất']=number(value(phun,['Hóa chất sử dụng (lít)','Hoá chất sử dụng (lít)','Hóa chất được sử dụng (lít)','Hoá chất được sử dụng (lít)','Hóa chất sử dụng','Hóa chất (lít)']));
+      base['PHUN_Ghi chú']=value(phun,['Ghi chú']);
+      gisData[id]=base;
+    });
+    try { if (typeof geojson !== 'undefined' && geojson && typeof style === 'function') geojson.setStyle(style); } catch(e) {}
+    try { if (typeof drawLabels === 'function') drawLabels(); } catch(e) {}
+    try { if (typeof updateLegend === 'function') updateLegend(); } catch(e) {}
+  }
+  function renderKpi(rows){
+    const valid=rows.filter(isCommuneRow);
+    const inProgressCommunes=new Set();
+    const completedCommunes=new Set();
+    valid.forEach(r=>{
+      const round=roundOf(r);
+      const status=norm(value(r,['Trạng thái','Tiến độ','Tiến độ phun']));
+      const name=norm(communeName(r) || value(r,['Đơn vị','Địa bàn']));
+      if(!name) return;
+      if(round===4 || status.includes('da trien khai xong') || status.includes('hoan thanh')) {
+        completedCommunes.add(name);
+      } else if((round>=1 && round<=3) || status.includes('dang trien khai')) {
+        inProgressCommunes.add(name);
+      }
+    });
+    setText('dbPhunXa',fmt(inProgressCommunes.size));
+    setText('dbPhunXong',fmt(completedCommunes.size));
+  }
+  // Phần phun phòng chỉ hiển thị số xã theo trạng thái, không hiện chi tiết khi bấm vào bản đồ.
+  function showPhunDetails(feature){ return; }
+  async function loadPhun(){
+    try{
+      const response=await fetch(PHUN_API_URL,{cache:'no-store'});
+      if(!response.ok) throw new Error('HTTP '+response.status);
+      const payload=await response.json();
+      if(!payload || payload.success!==true || !Array.isArray(payload.data)) throw new Error(payload && payload.error ? payload.error : 'API type=phun chưa trả về {success:true,data:[...]}');
+      phunRows=payload.data.filter(isCommuneRow);
+      mergeIntoMap(phunRows); renderKpi(phunRows);
+      window.webgisPhunRows=phunRows;
+      console.info('WEBGIS phun phòng: đã tải',phunRows.length,'xã/phường từ GIS_PHUNPHONG');
+      const layerSelect=document.getElementById('layerSelect');
+      if(layerSelect && layerSelect.value==='PHUN'){
+        try { if(typeof geojson!=='undefined' && geojson && typeof style==='function') geojson.setStyle(style); } catch(e){}
+      }
+      // Gắn thêm xử lý click sau handler có sẵn để panel chuyên biệt hiện đúng dữ liệu PHUN.
+      try {
+        if(typeof geojson!=='undefined' && geojson && typeof geojson.eachLayer==='function'){
+          geojson.eachLayer(function(layer){
+            if(layer.__phunDetailsBound) return;
+            layer.__phunDetailsBound=true;
+            layer.on('click',function(e){
+              const select=document.getElementById('layerSelect');
+              if(select && select.value==='PHUN') showPhunDetails(e && e.target && e.target.feature);
+            });
+          });
+        }
+      } catch(e) { console.warn('Không gắn được panel phun phòng:',e); }
+      if(layerSelect && !layerSelect.dataset.phunKpiBound){
+        layerSelect.dataset.phunKpiBound='1';
+        layerSelect.addEventListener('change',function(){
+          if(this.value==='PHUN') renderKpi(phunRows);
+        });
+      }
+    }catch(err){
+      console.error('Không tải được GIS_PHUNPHONG:',err);
+      const note=document.getElementById('dbPhunXa');
+      if(note) note.title='Không tải được GIS_PHUNPHONG. Kiểm tra nhánh type=phun trong doGet và triển khai phiên bản mới.';
+    }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',loadPhun,{once:true});
+  else loadPhun();
 })();
 </script>
 
