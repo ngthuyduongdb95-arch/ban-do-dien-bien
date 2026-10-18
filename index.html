@@ -3478,33 +3478,109 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
     };
     writePhun('Phun phòng đợt 1',phun1); writePhun('Phun phòng đợt 2',phun2);
 
-    // Vaccination sheets: read the consolidated GIS_TONGHOP columns and join by commune name.
-    const vaccineFields=[
-      ['Nhiệt thán','Nhiệt thán'],['THT trâu bò','THT trâu bò'],['Dịch tả lợn','Dịch tả lợn'],['Cúm gia cầm','Cúm gia cầm'],['LMLM','LMLM']
-    ];
-    for(const [sheetName,round] of [['Tiêm phòng định kỳ đợt 1','Đợt 1'],['Tiêm phòng định kỳ đợt 2','Đợt 2']]){
-      const sh=sheet(sheetName);if(!sh)continue;
-      const rows=[['Xã','Nhiệt thán KH','Nhiệt thán đã tiêm','Tỷ lệ (%)','THT trâu bò KH','THT trâu bò đã tiêm','Tỷ lệ (%)','Dịch tả lợn KH','Dịch tả lợn đã tiêm','Tỷ lệ (%)','Cúm gia cầm KH','Cúm gia cầm đã tiêm','Tỷ lệ (%)','LMLM KH','LMLM đã tiêm','Tỷ lệ (%)']];
-      const names=[...new Set(tiemphong.map(r=>String(get(r,['Xã','Tên xã','Tên xã/phường','Xã/phường'])||'').trim()).filter(Boolean))];
-      names.forEach(name=>{const r=tpMap.get(norm(name))||{};const old=thMap.get(norm(name))||{};const vals=[];for(const [label] of vaccineFields){const plain=label+' '+round;const prefix='TIEM_PHONG_'+plain;const kh=get(r,[plain+' - KH',label+' '+round+' - KH',prefix+' - KH']) || get(old,[prefix+' - KH']);const done=get(r,[plain+' - Đã tiêm',label+' '+round+' - Đã tiêm',prefix+' - Đã tiêm']) || get(old,[prefix+' - Đã tiêm']);let rate=get(r,[plain+' - Tỷ lệ (%)',label+' '+round+' - Tỷ lệ (%)',prefix+' - Tỷ lệ (%)']);if(rate==='' ) rate=get(old,[prefix+' - Tỷ lệ (%)']);if(rate!==''&&Number(rate)<=1)rate=Number(rate)*100;vals.push(num(kh),num(done),num(rate));}rows.push([name,...vals]);});
-      writeTable(sheetName,2,0,rows,{maxRows:Math.max(rows.length,50),maxCols:16});
+    // Vaccination: prefer the dedicated TIEN_DO_TIEM_PHONG endpoint; if it is empty,
+    // use the already-aggregated TIEM_PHONG_ fields in GIS_TONGHOP as a safe fallback.
+    const vaccineSource = tiemphong.length ? tiemphong : tonghop;
+    const vaccineMap = byCommune(vaccineSource);
+    if(!vaccineSource.length) throw new Error('Không đọc được số liệu tiêm phòng từ TIEN_DO_TIEM_PHONG hoặc GIS_TONGHOP. Kiểm tra API type=tiemphong và dữ liệu nguồn.');
+    const vaccineValue=(row, label, round, suffix)=>{
+      const candidates=[`${label} ${round} - ${suffix}`,`TIEM_PHONG_${label} ${round} - ${suffix}`];
+      if(suffix==='KH') candidates.push(`${label} ${round} - Kế hoạch`);
+      if(suffix==='Đã tiêm') candidates.push(`${label} ${round} - Số đã tiêm`);
+      return get(row,candidates);
+    };
+    const vaccineRate=(row,label,round)=>{
+      let v=vaccineValue(row,label,round,'Tỷ lệ (%)');
+      if(v==='' && label==='Dại') v=get(row,['Tỷ lệ tiêm Dại (%)','TIEM_PHONG_Tỷ lệ tiêm Dại (%)']);
+      if(v!=='' && Number(v)<=1) v=Number(v)*100;
+      if(v==='' ){
+        const kh=Number(vaccineValue(row,label,round,'KH'));
+        const done=Number(vaccineValue(row,label,round,'Đã tiêm'));
+        if(Number.isFinite(kh)&&kh>0&&Number.isFinite(done)) v=done/kh*100;
+      }
+      return num(v);
+    };
+    const communeNames=[...new Set(vaccineSource.map(r=>String(get(r,['Xã','Tên xã','Tên xã/phường','Xã/phường'])||'').trim()).filter(Boolean))]
+      .sort((a,b)=>a.localeCompare(b,'vi'));
+
+    // Đợt 1: mẫu có hàng tiêu đề ở dòng 3; chỉ ghi dữ liệu từ dòng 4, giữ nguyên tiêu đề mẫu.
+    {
+      const rows=[];
+      communeNames.forEach((name,i)=>{
+        const r=vaccineMap.get(norm(name))||{};
+        const vals=[];
+        for(const label of ['Nhiệt thán','THT trâu bò','Dịch tả lợn','Cúm gia cầm','LMLM']){
+          vals.push(num(vaccineValue(r,label,'Đợt 1','KH')),num(vaccineValue(r,label,'Đợt 1','Đã tiêm')),vaccineRate(r,label,'Đợt 1'));
+        }
+        rows.push([i+1,name,...vals]);
+      });
+      writeTable('Tiêm phòng định kỳ đợt 1',3,0,rows,{maxRows:Math.max(45,rows.length),maxCols:17});
+      set(sheet('Tiêm phòng định kỳ đợt 1'),'A2',period);
     }
-    // Tiêm phòng VDNC: dữ liệu được tổng hợp trực tiếp từ các cột TIEM_PHONG trong GIS_TONGHOP.
-    const vdncSheet=sheet('TP VDNC');
-    if(vdncSheet){
-      const vdncOut=[['STT','Tên xã/ phường','Tổng đàn trong diện tiêm (con)','Số được tiêm phòng (con)','Tỷ lệ tiêm phòng (%)','Ghi chú']];
-      const names=[...new Set(tiemphong.map(r=>String(get(r,['Xã','Tên xã','Tên xã/phường','Xã/phường'])||'').trim()).filter(Boolean))];
-      names.forEach((name,i)=>{const r=tpMap.get(norm(name))||{};const old=thMap.get(norm(name))||{};let rate=get(r,['VDNC - Tỷ lệ (%)','TIEM_PHONG_VDNC - Tỷ lệ (%)']);if(rate==='')rate=get(old,['TIEM_PHONG_VDNC - Tỷ lệ (%)']);if(rate!==''&&Number(rate)<=1)rate=Number(rate)*100;vdncOut.push([i+1,name,num(get(r,['VDNC - KH','VDNC - Tổng đàn trong diện tiêm','TIEM_PHONG_VDNC - KH'])||get(old,['TIEM_PHONG_VDNC - KH'])),num(get(r,['VDNC - Đã tiêm','VDNC - Số được tiêm phòng','TIEM_PHONG_VDNC - Đã tiêm'])||get(old,['TIEM_PHONG_VDNC - Đã tiêm'])),num(rate),'']);});
-      writeTable('TP VDNC',2,0,vdncOut,{maxRows:Math.max(vdncOut.length,50),maxCols:6});
+
+    // Đợt 2: mẫu chỉ có 4 loại vắc xin; tiêu đề ở dòng 4, dữ liệu bắt đầu dòng 5.
+    {
+      const rows=[];
+      communeNames.forEach(name=>{
+        const r=vaccineMap.get(norm(name))||{};
+        const vals=['','','']; // Mẫu có cột Nhiệt thán đợt 2 nhưng nguồn không có chỉ tiêu này.
+        for(const label of ['THT trâu bò','Dịch tả lợn','Cúm gia cầm','LMLM']){
+          vals.push(num(vaccineValue(r,label,'Đợt 2','KH')),num(vaccineValue(r,label,'Đợt 2','Đã tiêm')),vaccineRate(r,label,'Đợt 2'));
+        }
+        rows.push([name,...vals]);
+      });
+      writeTable('Tiêm phòng định kỳ đợt 2',4,0,rows,{maxRows:Math.max(45,rows.length),maxCols:16});
+      set(sheet('Tiêm phòng định kỳ đợt 2'),'I2',period);
     }
-    // Tiêm phòng dại: giữ đúng 12 cột của mẫu, lấy số liệu đã tổng hợp theo xã.
-    const rabiesSheet=sheet('Tiêm phòng dại');
-    if(rabiesSheet){
-      const rabies=[['STT','Tên xã/phường','Loài vật nuôi','Loại vắc xin','Tổng đàn trong diện tiêm (con)','Số được tiêm phòng (con)','Tỷ lệ tiêm phòng (%)','Ghi chú','','Tổng đàn toàn tỉnh','Số liều vc đã tiêm','Tỷ lệ % theo tổng đàn']];
-      const names=[...new Set(tiemphong.map(r=>String(get(r,['Xã','Tên xã','Tên xã/phường','Xã/phường'])||'').trim()).filter(Boolean))];
-      names.forEach((name,i)=>{const r=tpMap.get(norm(name))||{};const old=thMap.get(norm(name))||{};let rate=get(r,['Tỷ lệ tiêm Dại (%)','Dại - Tỷ lệ (%)','TIEM_PHONG_Tỷ lệ tiêm Dại (%)']);if(rate==='')rate=get(old,['TIEM_PHONG_Tỷ lệ tiêm Dại (%)']);if(rate!==''&&Number(rate)<=1)rate=Number(rate)*100;const total=get(r,['Tổng đàn chó mèo','Dại - Tổng đàn','TIEM_PHONG_Tổng đàn chó mèo'])||get(old,['TIEM_PHONG_Tổng đàn chó mèo']);const done=get(r,['Dại - Đã tiêm','Dại - Số đã tiêm','TIEM_PHONG_Dại - Đã tiêm'])||get(old,['TIEM_PHONG_Dại - Đã tiêm']);rabies.push([i+1,name,'Chó, mèo','Dại',num(total),num(done),num(rate),'','','',num(done),num(rate)]);});
-      writeTable('Tiêm phòng dại',0,0,rabies,{maxRows:Math.max(rabies.length,50),maxCols:12});
+
+    // VDNC: tổng đàn kế hoạch, số đã tiêm và tỷ lệ lấy từ các cột đúng trong bảng tổng hợp.
+    {
+      const rows=communeNames.map((name,i)=>{
+        const r=vaccineMap.get(norm(name))||{};
+        let rate=get(r,['VDNC - Tỷ lệ (%)','TIEM_PHONG_VDNC - Tỷ lệ (%)']);
+        if(rate!==''&&Number(rate)<=1) rate=Number(rate)*100;
+        const kh=get(r,['VDNC - KH','VDNC - Tổng đàn trong diện tiêm','TIEM_PHONG_VDNC - KH']);
+        const done=get(r,['VDNC - Đã tiêm','VDNC - Số được tiêm phòng','TIEM_PHONG_VDNC - Đã tiêm']);
+        if(rate===''&&Number(kh)>0) rate=Number(done)/Number(kh)*100;
+        return [i+1,name,num(kh),num(done),num(rate),''];
+      });
+      writeTable('TP VDNC',4,0,rows,{maxRows:45,maxCols:6});
+      set(sheet('TP VDNC'),'A2',period);
     }
+
+    // Dại: map đúng các cột nguồn; không lấy tỷ lệ của loài/vắc xin khác.
+    {
+      const rows=communeNames.map((name,i)=>{
+        const r=vaccineMap.get(norm(name))||{};
+        const total=get(r,['Tổng đàn chó mèo','Dại - Tổng đàn','TIEM_PHONG_Tổng đàn chó mèo']);
+        const done=get(r,['Dại - Đã tiêm','Dại - Số đã tiêm','TIEM_PHONG_Dại - Đã tiêm']);
+        let rate=get(r,['Tỷ lệ tiêm Dại (%)','Dại - Tỷ lệ (%)','TIEM_PHONG_Tỷ lệ tiêm Dại (%)']);
+        if(rate!==''&&Number(rate)<=1) rate=Number(rate)*100;
+        if(rate===''&&Number(total)>0) rate=Number(done)/Number(total)*100;
+        return [i+1,name,num(total),num(done),num(rate),''];
+      });
+      writeTable('Tiêm phòng dại',4,0,rows,{maxRows:45,maxCols:6});
+      set(sheet('Tiêm phòng dại'),'A2',`Ngày cập nhật: ${fmt(to)}`);
+    }
+
+    // Hoàn thiện định dạng bảng: bộ lọc, cố định hàng tiêu đề, định dạng số và tỷ lệ.
+    // Giữ nguyên màu sắc, gộp ô và độ rộng cột đã có trong workbook mẫu.
+    const finishTable=(name,headerRow,firstCol,lastCol,lastRow,percentCols=[])=>{
+      const sh=sheet(name); if(!sh)return;
+      sh['!autofilter']={ref:`${colName(firstCol+1)}${headerRow+1}:${colName(lastCol)}${Math.max(headerRow+1,lastRow)}`};
+      sh['!freeze']={xSplit:firstCol?firstCol:2,ySplit:headerRow+1,topLeftCell:`${colName(firstCol+1)}${headerRow+2}`,activePane:'bottomRight',state:'frozen'};
+      for(let rr=headerRow+1;rr<lastRow;rr++){
+        for(let cc=firstCol;cc<lastCol;cc++){
+          const cell=sh[`${colName(cc+1)}${rr+1}`]; if(!cell||cell.v===''||cell.v==null)continue;
+          if(percentCols.includes(cc)) { cell.z='0.0"%"'; if(typeof cell.v==='number'&&cell.v<=1)cell.v*=100; }
+          else if(typeof cell.v==='number') cell.z='#,##0.##';
+        }
+      }
+    };
+    finishTable('Tiêm phòng định kỳ đợt 1',2,0,17,3+communeNames.length,[4,7,10,13,16]);
+    finishTable('Tiêm phòng định kỳ đợt 2',3,0,16,4+communeNames.length,[3,6,9,12,15]);
+    finishTable('TP VDNC',3,0,6,4+communeNames.length,[4]);
+    finishTable('Tiêm phòng dại',3,0,6,4+communeNames.length,[4]);
 
     // TTHC: source is GIS_TTHC_TONGHOP; keep the sheet name from the original workbook.
     const tthcRows=[['DANH SÁCH THỦ TỤC HÀNH CHÍNH'],[`Thời gian: từ ngày ${fmt(from)} đến ngày ${fmt(to)}`],[`Số hồ sơ TTHC trong kỳ: ${tthc.length}`],['STT','Tên TTHC','Ngày trả KQ']];
