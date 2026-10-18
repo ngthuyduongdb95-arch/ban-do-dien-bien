@@ -3040,74 +3040,40 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
   const rate=(done,plan)=>plan>0?done/plan*100:null;
   const set=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value;};
   const pct=v=>v===null?'Chưa có số liệu':v.toLocaleString('vi-VN',{maximumFractionDigits:2})+'%';
-  // Một xã chỉ được tính "hoàn thành" khi TẤT CẢ vắc xin có kế hoạch (>0)
-  // đều có tỷ lệ 100% (API có thể trả tỷ lệ dạng 1 hoặc 100).
-  function vaccineStatus(row, planKeys, doneKeys, rateKeys){
-    let hasData=false, hasApplicable=false, allComplete=true;
-    for(let i=0;i<planKeys.length;i++){
-      const p=number(get(row,[planKeys[i]]));
-      const d=number(get(row,[doneKeys[i]]));
-      let q=number(get(row,[rateKeys[i]]));
-      if((p!==null&&p>0)||(d!==null&&d>0)||(q!==null)) hasData=true;
-      // Chỉ xét tỷ lệ của loại vắc xin có kế hoạch; ô trống/không áp dụng không làm trượt.
-      if(p!==null&&p>0){
-        hasApplicable=true;
-        if(q!==null){ if(q<=1) q=q*100; }
-        else if(d!==null&&d>=p) q=100;
-        else q=null;
-        if(q===null||q<99.999) allComplete=false;
-      }
-    }
-    return {hasData, completed:hasApplicable&&allComplete};
-  }
-  function summarizeVaccine(rows, planKeys, doneKeys, rateKeys){
-    let completed=0, started=0;
-    rows.forEach(r=>{const s=vaccineStatus(r,planKeys,doneKeys,rateKeys);if(s.completed)completed++;else if(s.hasData)started++;});
-    return {completed,started};
+  function countCompleted(rows, planKeys, doneKeys, rateKeys){
+    return rows.filter(r=>{const p=number(get(r,planKeys)),d=number(get(r,doneKeys)),q=number(get(r,rateKeys));return q!==null?q>=99.999:(p!==null&&p>0&&d!==null&&d>=p);}).length;
   }
   async function load(){
     try{
-      let res=await fetch(API+'?type=tiemphong&_='+Date.now(),{cache:'no-store'});
+      const res=await fetch(API+'?type=tiemphong&_='+Date.now(),{cache:'no-store'});
       if(!res.ok)throw new Error('HTTP '+res.status);
-      let json=await res.json();
-      let rows=Array.isArray(json)?json:(Array.isArray(json.data)?json.data:[]);
-      // Một số bản triển khai API cũ bỏ qua type=tiemphong và trả GIS_TONGHOP.
-      // Dữ liệu tiêm phòng vẫn có trong các trường TIEM_PHONG_* nên dùng phản hồi đó;
-      // nếu endpoint riêng rỗng/lỗi thì chủ động lấy endpoint tổng hợp làm phương án dự phòng.
-      const hasVaccineFields=a=>a.some(r=>Object.keys(r||{}).some(k=>norm(k).startsWith('tiem phong ')));
-      if(!hasVaccineFields(rows)){
-        res=await fetch(API+'?_='+Date.now(),{cache:'no-store'});
-        if(!res.ok)throw new Error('API tổng hợp HTTP '+res.status);
-        json=await res.json();
-        if(json&&json.success===false)throw new Error(json.error||'API tổng hợp trả lỗi');
-        rows=Array.isArray(json)?json:(Array.isArray(json.data)?json.data:[]);
-      }
-      if(!rows.length)throw new Error('API không trả dữ liệu tiêm phòng');
-      if(!hasVaccineFields(rows) && !Object.keys(rows[0]||{}).some(k=>norm(k).includes('dot 1')||norm(k).includes('dot 2'))) throw new Error('Phản hồi API không có các trường tiêm phòng');
-      const d1Plan=['TIEM_PHONG_Nhiệt thán Đợt 1 - KH','TIEM_PHONG_THT trâu bò Đợt 1 - KH','TIEM_PHONG_Dịch tả lợn Đợt 1 - KH','TIEM_PHONG_Cúm gia cầm Đợt 1 - KH','TIEM_PHONG_LMLM Đợt 1 - KH'];
-      const d1Done=['TIEM_PHONG_Nhiệt thán Đợt 1 - Đã tiêm','TIEM_PHONG_THT trâu bò Đợt 1 - Đã tiêm','TIEM_PHONG_Dịch tả lợn Đợt 1 - Đã tiêm','TIEM_PHONG_Cúm gia cầm Đợt 1 - Đã tiêm','TIEM_PHONG_LMLM Đợt 1 - Đã tiêm'];
-      const d1Rate=['TIEM_PHONG_Nhiệt thán Đợt 1 - Tỷ lệ (%)','TIEM_PHONG_THT trâu bò Đợt 1 - Tỷ lệ (%)','TIEM_PHONG_Dịch tả lợn Đợt 1 - Tỷ lệ (%)','TIEM_PHONG_Cúm gia cầm Đợt 1 - Tỷ lệ (%)','TIEM_PHONG_LMLM Đợt 1 - Tỷ lệ (%)'];
-      const d2Plan=['TIEM_PHONG_THT trâu bò Đợt 2 - KH','TIEM_PHONG_LMLM Đợt 2 - KH','TIEM_PHONG_Cúm gia cầm Đợt 2 - KH','TIEM_PHONG_Dịch tả lợn Đợt 2 - KH'];
-      const d2Done=['TIEM_PHONG_THT trâu bò Đợt 2 - Đã tiêm','TIEM_PHONG_LMLM Đợt 2 - Đã tiêm','TIEM_PHONG_Cúm gia cầm Đợt 2 - Đã tiêm','TIEM_PHONG_Dịch tả lợn Đợt 2 - Đã tiêm'];
-      const d2Rate=['TIEM_PHONG_THT trâu bò Đợt 2 - Tỷ lệ (%)','TIEM_PHONG_LMLM Đợt 2 - Tỷ lệ (%)','TIEM_PHONG_Cúm gia cầm Đợt 2 - Tỷ lệ (%)','TIEM_PHONG_Dịch tả lợn Đợt 2 - Tỷ lệ (%)'];
-      const d1Summary=summarizeVaccine(rows,d1Plan,d1Done,d1Rate);
-      const d2Summary=summarizeVaccine(rows,d2Plan,d2Done,d2Rate);
-      set('kpiTpd1Done',d1Summary.completed+'/45 xã hoàn thành · '+d1Summary.started+' xã đã triển khai');
-      set('kpiTpd2Done',d2Summary.completed+'/45 xã hoàn thành · '+d2Summary.started+' xã đã triển khai');
-      const rabiesDone=sum(rows,['TIEM_PHONG_Dại - Đã tiêm','Dại - Đã tiêm','Dại - Số được tiêm phòng','Số liều đã tiêm Dại']);
-      const rabiesHerd=sum(rows,['TIEM_PHONG_Tổng đàn chó mèo','Tổng đàn chó mèo','Tổng đàn chó, mèo','Tổng đàn trong diện tiêm Dại']);
+      const json=await res.json();
+      if(json&&json.success===false)throw new Error(json.error||'API trả lỗi');
+      const rows=Array.isArray(json)?json:(Array.isArray(json.data)?json.data:[]);
+      if(!rows.length)throw new Error('Sheet TIEN_DO_TIEM_PHONG không có bản ghi');
+      const d1Plan=['Nhiệt thán Đợt 1 - KH','THT trâu bò Đợt 1 - KH','Dịch tả lợn Đợt 1 - KH','Cúm gia cầm Đợt 1 - KH','LMLM Đợt 1 - KH'];
+      const d1Done=['Nhiệt thán Đợt 1 - Đã tiêm','THT trâu bò Đợt 1 - Đã tiêm','Dịch tả lợn Đợt 1 - Đã tiêm','Cúm gia cầm Đợt 1 - Đã tiêm','LMLM Đợt 1 - Đã tiêm'];
+      const d1Rate=['Nhiệt thán Đợt 1 - Tỷ lệ (%)','THT trâu bò Đợt 1 - Tỷ lệ (%)','Dịch tả lợn Đợt 1 - Tỷ lệ (%)','Cúm gia cầm Đợt 1 - Tỷ lệ (%)','LMLM Đợt 1 - Tỷ lệ (%)'];
+      const d2Plan=['THT trâu bò Đợt 2 - KH','LMLM Đợt 2 - KH','Cúm gia cầm Đợt 2 - KH','Dịch tả lợn Đợt 2 - KH'];
+      const d2Done=['THT trâu bò Đợt 2 - Đã tiêm','LMLM Đợt 2 - Đã tiêm','Cúm gia cầm Đợt 2 - Đã tiêm','Dịch tả lợn Đợt 2 - Đã tiêm'];
+      const d2Rate=['THT trâu bò Đợt 2 - Tỷ lệ (%)','LMLM Đợt 2 - Tỷ lệ (%)','Cúm gia cầm Đợt 2 - Tỷ lệ (%)','Dịch tả lợn Đợt 2 - Tỷ lệ (%)'];
+      const d1DoneCount=rows.filter(r=>d1Rate.some(k=>{const v=number(get(r,[k]));return v!==null&&v>=99.999;} ) || d1Plan.some((k,i)=>{const p=number(get(r,[k])),d=number(get(r,[d1Done[i]]));return p!==null&&p>0&&d!==null&&d>=p;})).length;
+      const d2DoneCount=rows.filter(r=>d2Rate.some(k=>{const v=number(get(r,[k]));return v!==null&&v>=99.999;} ) || d2Plan.some((k,i)=>{const p=number(get(r,[k])),d=number(get(r,[d2Done[i]]));return p!==null&&p>0&&d!==null&&d>=p;})).length;
+      set('kpiTpd1Done',d1DoneCount+'/45 xã hoàn thành');
+      set('kpiTpd2Done',d2DoneCount+'/45 xã hoàn thành');
+      const rabiesDone=sum(rows,['Dại - Đã tiêm','Dại - Số được tiêm phòng','Số liều đã tiêm Dại']);
+      const rabiesHerd=sum(rows,['Tổng đàn chó mèo','Tổng đàn chó, mèo','Tổng đàn trong diện tiêm Dại']);
       let rabiesRate=rate(rabiesDone,rabiesHerd);
-      const explicitRates=rows.map(r=>{const v=number(get(r,['TIEM_PHONG_Tỷ lệ tiêm Dại (%)','Tỷ lệ tiêm Dại (%)','Tỷ lệ tiêm phòng Dại (%)','Tỷ lệ tiêm Dại']));const h=number(get(r,['TIEM_PHONG_Tổng đàn chó mèo','Tổng đàn chó mèo']));return v===null?null:{v,h};}).filter(x=>x&&x.v!==null);
-      if(rabiesRate===null&&explicitRates.length){const weighted=explicitRates.filter(x=>x.h>0);rabiesRate=weighted.length?weighted.reduce((a,x)=>a+x.v*x.h,0)/weighted.reduce((a,x)=>a+x.h,0):explicitRates.reduce((a,x)=>a+x.v,0)/explicitRates.length;}
+      const explicitRate=rows.map(r=>number(get(r,['Tỷ lệ tiêm Dại (%)','Tỷ lệ tiêm phòng Dại (%)','Tỷ lệ tiêm Dại']))).filter(v=>v!==null);
+      if(rabiesRate===null&&explicitRate.length)rabiesRate=explicitRate.reduce((a,b)=>a+b,0)/explicitRate.length;
       set('kpiDaiDone',rabiesRate===null?'—% tổng đàn':pct(rabiesRate)+' tổng đàn');
-      const rabiesStarted=rows.filter(r=>(number(get(r,['TIEM_PHONG_Dại - Đã tiêm','Dại - Đã tiêm','Dại - Số được tiêm phòng']))||0)>0).length;
+      const rabiesStarted=rows.filter(r=>(number(get(r,['Dại - Đã tiêm','Dại - Số được tiêm phòng']))||0)>0).length;
       set('kpiDaiStarted',''+rabiesStarted+'/45');
       set('kpiDaiStartedVisible','Đã ghi nhận tiêm: '+rabiesStarted+' xã');
-      const vdncDone=rows.filter(r=>(number(get(r,['TIEM_PHONG_VDNC - Đã tiêm','VDNC - Đã tiêm','VDNC - Số được tiêm phòng']))||0)>0).length;
+      const vdncDone=rows.filter(r=>(number(get(r,['VDNC - Đã tiêm','VDNC - Số được tiêm phòng','TIEM_PHONG_VDNC - Đã tiêm']))||0)>0).length;
       set('kpiVdncDone',vdncDone+'/45 xã có số liệu tiêm');
-      const d1PlanKeys=['TIEM_PHONG_Nhiệt thán Đợt 1 - KH','TIEM_PHONG_THT trâu bò Đợt 1 - KH','TIEM_PHONG_Dịch tả lợn Đợt 1 - KH','TIEM_PHONG_Cúm gia cầm Đợt 1 - KH','TIEM_PHONG_LMLM Đợt 1 - KH'];
-      set('kpiTpd1Plan',String(sum(rows,d1PlanKeys)));
-      set('kpiTpd1Rate',pct(rate(sum(rows,d1Done),sum(rows,d1PlanKeys))));
+      set('kpiTpd1Plan',String(sum(rows,d1Plan)));
+      set('kpiTpd1Rate',pct(rate(sum(rows,d1Done),sum(rows,d1Plan))));
       set('kpiTpd2Started',rows.filter(r=>d2Done.some(k=>(number(get(r,[k]))||0)>0)).length+'/45');
       set('kpiTpd2Rate',pct(rate(sum(rows,d2Done),sum(rows,d2Plan))));
       set('kpiDaiRate',rabiesRate===null?'—':pct(rabiesRate));
