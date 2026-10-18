@@ -2215,7 +2215,7 @@ document.addEventListener("DOMContentLoaded", function () {
       title.textContent = "Dự thảo báo cáo – xem và chỉnh sửa trước khi xuất Word";
       title.style.cssText = "font-size:19px;margin:0;";
       const note = document.createElement("p");
-      note.textContent = "Áp dụng cho báo cáo kỳ 10 ngày, tháng, quý và năm. Số liệu dịch bệnh được lấy từ API theo khoảng ngày đã chọn; các mục hoạt động chưa có nguồn dữ liệu kết nối, gồm KPI tiêm phòng định kỳ đợt 1, đợt 2, bệnh Dại và Viêm da nổi cục, được đánh dấu “...” để bạn bổ sung, kiểm tra trước khi xuất Word.";
+      note.textContent = "Áp dụng cho báo cáo kỳ 10 ngày, tháng, quý và năm. Số liệu dịch bệnh được lấy từ API theo khoảng ngày đã chọn; các chỉ tiêu tiêm phòng được lấy từ bảng tiến độ tiêm phòng khi nguồn dữ liệu kết nối thành công; cần đối chiếu số liệu nguồn trước khi xuất Word.";
       note.style.cssText = "font-size:13px;line-height:1.5;margin:0;color:#555;";
       const area = document.createElement("textarea");
       area.value = initialText;
@@ -3025,6 +3025,69 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
     const observer=new MutationObserver(syncRabiesKpi);
     ['kpiDaiRate','kpiDaiStarted','kpiDaiDone'].forEach(id=>{const el=document.getElementById(id);if(el)observer.observe(el,{childList:true,subtree:true,characterData:true});});
   });
+})();
+</script>
+
+<script id="webgisVaccinationKpiLiveFix">
+/* Đọc trực tiếp bảng TIEN_DO_TIEM_PHONG và cập nhật KPI trên giao diện. */
+(function(){
+  'use strict';
+  const API='https://script.google.com/macros/s/AKfycbyRuJ9Wfv4HtWjMRT2Hox2-mOhBVRjyqLaHhpQjohPEkfHWNyjM004KgO3o7_4nRJtj/exec';
+  const norm=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+  const get=(r,keys)=>{const m={};Object.keys(r||{}).forEach(k=>m[norm(k)]=r[k]);for(const k of keys){const v=m[norm(k)];if(v!==undefined&&v!==null&&v!=='')return v;}return '';};
+  const number=v=>{if(v===null||v===undefined||v==='')return null;const n=Number(String(v).replace(/[% ,]/g,''));return Number.isFinite(n)?n:null;};
+  const sum=(rows,keys)=>rows.reduce((a,r)=>a+(number(get(r,keys))||0),0);
+  const rate=(done,plan)=>plan>0?done/plan*100:null;
+  const set=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value;};
+  const pct=v=>v===null?'Chưa có số liệu':v.toLocaleString('vi-VN',{maximumFractionDigits:2})+'%';
+  function countCompleted(rows, planKeys, doneKeys, rateKeys){
+    return rows.filter(r=>{const p=number(get(r,planKeys)),d=number(get(r,doneKeys)),q=number(get(r,rateKeys));return q!==null?q>=99.999:(p!==null&&p>0&&d!==null&&d>=p);}).length;
+  }
+  async function load(){
+    try{
+      const res=await fetch(API+'?type=tiemphong&_='+Date.now(),{cache:'no-store'});
+      if(!res.ok)throw new Error('HTTP '+res.status);
+      const json=await res.json();
+      if(json&&json.success===false)throw new Error(json.error||'API trả lỗi');
+      const rows=Array.isArray(json)?json:(Array.isArray(json.data)?json.data:[]);
+      if(!rows.length)throw new Error('Sheet TIEN_DO_TIEM_PHONG không có bản ghi');
+      const d1Plan=['Nhiệt thán Đợt 1 - KH','THT trâu bò Đợt 1 - KH','Dịch tả lợn Đợt 1 - KH','Cúm gia cầm Đợt 1 - KH','LMLM Đợt 1 - KH'];
+      const d1Done=['Nhiệt thán Đợt 1 - Đã tiêm','THT trâu bò Đợt 1 - Đã tiêm','Dịch tả lợn Đợt 1 - Đã tiêm','Cúm gia cầm Đợt 1 - Đã tiêm','LMLM Đợt 1 - Đã tiêm'];
+      const d1Rate=['Nhiệt thán Đợt 1 - Tỷ lệ (%)','THT trâu bò Đợt 1 - Tỷ lệ (%)','Dịch tả lợn Đợt 1 - Tỷ lệ (%)','Cúm gia cầm Đợt 1 - Tỷ lệ (%)','LMLM Đợt 1 - Tỷ lệ (%)'];
+      const d2Plan=['THT trâu bò Đợt 2 - KH','LMLM Đợt 2 - KH','Cúm gia cầm Đợt 2 - KH','Dịch tả lợn Đợt 2 - KH'];
+      const d2Done=['THT trâu bò Đợt 2 - Đã tiêm','LMLM Đợt 2 - Đã tiêm','Cúm gia cầm Đợt 2 - Đã tiêm','Dịch tả lợn Đợt 2 - Đã tiêm'];
+      const d2Rate=['THT trâu bò Đợt 2 - Tỷ lệ (%)','LMLM Đợt 2 - Tỷ lệ (%)','Cúm gia cầm Đợt 2 - Tỷ lệ (%)','Dịch tả lợn Đợt 2 - Tỷ lệ (%)'];
+      const d1DoneCount=rows.filter(r=>d1Rate.some(k=>{const v=number(get(r,[k]));return v!==null&&v>=99.999;} ) || d1Plan.some((k,i)=>{const p=number(get(r,[k])),d=number(get(r,[d1Done[i]]));return p!==null&&p>0&&d!==null&&d>=p;})).length;
+      const d2DoneCount=rows.filter(r=>d2Rate.some(k=>{const v=number(get(r,[k]));return v!==null&&v>=99.999;} ) || d2Plan.some((k,i)=>{const p=number(get(r,[k])),d=number(get(r,[d2Done[i]]));return p!==null&&p>0&&d!==null&&d>=p;})).length;
+      set('kpiTpd1Done',d1DoneCount+'/45 xã hoàn thành');
+      set('kpiTpd2Done',d2DoneCount+'/45 xã hoàn thành');
+      const rabiesDone=sum(rows,['Dại - Đã tiêm','Dại - Số được tiêm phòng','Số liều đã tiêm Dại']);
+      const rabiesHerd=sum(rows,['Tổng đàn chó mèo','Tổng đàn chó, mèo','Tổng đàn trong diện tiêm Dại']);
+      let rabiesRate=rate(rabiesDone,rabiesHerd);
+      const explicitRate=rows.map(r=>number(get(r,['Tỷ lệ tiêm Dại (%)','Tỷ lệ tiêm phòng Dại (%)','Tỷ lệ tiêm Dại']))).filter(v=>v!==null);
+      if(rabiesRate===null&&explicitRate.length)rabiesRate=explicitRate.reduce((a,b)=>a+b,0)/explicitRate.length;
+      set('kpiDaiDone',rabiesRate===null?'—% tổng đàn':pct(rabiesRate)+' tổng đàn');
+      const rabiesStarted=rows.filter(r=>(number(get(r,['Dại - Đã tiêm','Dại - Số được tiêm phòng']))||0)>0).length;
+      set('kpiDaiStarted',''+rabiesStarted+'/45');
+      set('kpiDaiStartedVisible','Đã ghi nhận tiêm: '+rabiesStarted+' xã');
+      const vdncDone=rows.filter(r=>(number(get(r,['VDNC - Đã tiêm','VDNC - Số được tiêm phòng','TIEM_PHONG_VDNC - Đã tiêm']))||0)>0).length;
+      set('kpiVdncDone',vdncDone+'/45 xã có số liệu tiêm');
+      set('kpiTpd1Plan',String(sum(rows,d1Plan)));
+      set('kpiTpd1Rate',pct(rate(sum(rows,d1Done),sum(rows,d1Plan))));
+      set('kpiTpd2Started',rows.filter(r=>d2Done.some(k=>(number(get(r,[k]))||0)>0)).length+'/45');
+      set('kpiTpd2Rate',pct(rate(sum(rows,d2Done),sum(rows,d2Plan))));
+      set('kpiDaiRate',rabiesRate===null?'—':pct(rabiesRate));
+      set('kpiVdncStarted',vdncDone+'/45');
+      set('kpiVdncRate','—');
+    }catch(err){
+      console.error('[WebGIS KPI tiêm phòng]',err);
+      ['kpiTpd1Done','kpiTpd2Done','kpiVdncDone'].forEach(id=>set(id,'Chưa tải được dữ liệu'));
+      set('kpiDaiDone','Chưa tải được dữ liệu');
+      set('kpiDaiStartedVisible','Lỗi kết nối nguồn tiêm phòng');
+    }
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',load);else load();
+  window.addEventListener('focus',load);
 })();
 </script>
 
