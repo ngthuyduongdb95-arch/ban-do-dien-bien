@@ -3421,11 +3421,13 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
       return rows.filter(r=>r&&typeof r==='object');
     }
     // Fetch real source data. If a secondary endpoint fails, report the failing endpoint clearly.
-    const [tonghop, phun1, phun2, ksgm, tthc, diseaseDaily] = await Promise.all([
-      fetchRows(''), fetchRows('phun'), fetchRows('phun2').catch(()=>[]), fetchRows('ksgm'), fetchRows('tthc'), fetchRows('trend')
+    const [tonghop, phun1, phun2, ksgm, tthc, diseaseDaily, tiemphong] = await Promise.all([
+      fetchRows(''), fetchRows('phun'), fetchRows('phun2').catch(()=>[]), fetchRows('ksgm'), fetchRows('tthc'), fetchRows('trend'), fetchRows('tiemphong')
     ]);
+    if (!ksgm.length) throw new Error('Nguồn KSGM không trả bản ghi có ngày. Không thể lọc KSGM theo khoảng ngày đã chọn; kiểm tra sheet nguồn KSGM có cột ngày và dữ liệu chi tiết.');
     const byCommune=rows=>{const m=new Map();rows.forEach(r=>{const name=String(get(r,['Tên xã','Tên xã/phường','Xã','Xã/phường','Tên xã có bệnh'])||'').trim();if(name)m.set(norm(name),r);});return m;};
-    const thMap=byCommune(tonghop), ksgmMap=byCommune(ksgm), phunMap=byCommune(phun1);
+    const thMap=byCommune(tonghop), tpMap=byCommune(tiemphong), ksgmMap=byCommune(ksgm), phunMap=byCommune(phun1);
+    if(!tiemphong.length) throw new Error('API tiêm phòng không trả dữ liệu từ sheet TIEN_DO_TIEM_PHONG. Kiểm tra nguồn tiêm phòng và triển khai API mới.');
     const sheet=(name)=>book.Sheets[name];
     const set=(sh,addr,value)=>{if(!sh)return;const old=sh[addr];if(old){old.v=value;old.t=typeof value==='number'?'n':'s';delete old.w;}else sh[addr]={v:value,t:typeof value==='number'?'n':'s'};};
     const colName=n=>{let s='';while(n){const r=(n-1)%26;s=String.fromCharCode(65+r)+s;n=Math.floor((n-1)/26);}return s;};
@@ -3447,7 +3449,7 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
     // Mỗi bản ghi là một lần cập nhật/snapshot; lấy bản ghi mới nhất trong kỳ cho từng xã,
     // KHÔNG cộng các lần cập nhật lặp lại vì sẽ đếm trùng số con giết mổ.
     const rangeStart=parseISODate(from), rangeEnd=parseISODate(to);
-    const ksgmDate=r=>parseISODate(get(r,['Ngày cập nhật','ngày cập nhật','Ngày','Dấu thời gian','Timestamp','Thời gian gửi']));
+    const ksgmDate=r=>parseISODate(get(r,['Ngày cập nhật','Ngày báo cáo','Ngày ghi nhận','Ngày','Dấu thời gian','Timestamp','Thời gian gửi','Ngày gửi','Thời điểm gửi']));
     const ksgmInRange=ksgm.filter(r=>{const d=ksgmDate(r);return !!d&&!!rangeStart&&!!rangeEnd&&d>=rangeStart&&d<=rangeEnd;});
     const ksgmLatestByCommune=new Map();
     ksgmInRange.forEach(r=>{
@@ -3483,24 +3485,24 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
     for(const [sheetName,round] of [['Tiêm phòng định kỳ đợt 1','Đợt 1'],['Tiêm phòng định kỳ đợt 2','Đợt 2']]){
       const sh=sheet(sheetName);if(!sh)continue;
       const rows=[['Xã','Nhiệt thán KH','Nhiệt thán đã tiêm','Tỷ lệ (%)','THT trâu bò KH','THT trâu bò đã tiêm','Tỷ lệ (%)','Dịch tả lợn KH','Dịch tả lợn đã tiêm','Tỷ lệ (%)','Cúm gia cầm KH','Cúm gia cầm đã tiêm','Tỷ lệ (%)','LMLM KH','LMLM đã tiêm','Tỷ lệ (%)']];
-      const names=[...new Set(tonghop.map(r=>String(get(r,['Tên xã','Tên xã/phường','Xã'])||'').trim()).filter(Boolean))];
-      names.forEach(name=>{const r=thMap.get(norm(name))||{};const vals=[];for(const [label] of vaccineFields){const prefix='TIEM_PHONG_'+label+' '+round;const kh=get(r,[prefix+' - KH']);const done=get(r,[prefix+' - Đã tiêm']);let rate=get(r,[prefix+' - Tỷ lệ (%)']);if(rate!==''&&Number(rate)<=1)rate=Number(rate)*100;vals.push(num(kh),num(done),num(rate));}rows.push([name,...vals]);});
+      const names=[...new Set(tiemphong.map(r=>String(get(r,['Xã','Tên xã','Tên xã/phường','Xã/phường'])||'').trim()).filter(Boolean))];
+      names.forEach(name=>{const r=tpMap.get(norm(name))||{};const old=thMap.get(norm(name))||{};const vals=[];for(const [label] of vaccineFields){const plain=label+' '+round;const prefix='TIEM_PHONG_'+plain;const kh=get(r,[plain+' - KH',label+' '+round+' - KH',prefix+' - KH']) || get(old,[prefix+' - KH']);const done=get(r,[plain+' - Đã tiêm',label+' '+round+' - Đã tiêm',prefix+' - Đã tiêm']) || get(old,[prefix+' - Đã tiêm']);let rate=get(r,[plain+' - Tỷ lệ (%)',label+' '+round+' - Tỷ lệ (%)',prefix+' - Tỷ lệ (%)']);if(rate==='' ) rate=get(old,[prefix+' - Tỷ lệ (%)']);if(rate!==''&&Number(rate)<=1)rate=Number(rate)*100;vals.push(num(kh),num(done),num(rate));}rows.push([name,...vals]);});
       writeTable(sheetName,2,0,rows,{maxRows:Math.max(rows.length,50),maxCols:16});
     }
     // Tiêm phòng VDNC: dữ liệu được tổng hợp trực tiếp từ các cột TIEM_PHONG trong GIS_TONGHOP.
     const vdncSheet=sheet('TP VDNC');
     if(vdncSheet){
       const vdncOut=[['STT','Tên xã/ phường','Tổng đàn trong diện tiêm (con)','Số được tiêm phòng (con)','Tỷ lệ tiêm phòng (%)','Ghi chú']];
-      const names=[...new Set(tonghop.map(r=>String(get(r,['Tên xã','Tên xã/phường','Xã'])||'').trim()).filter(Boolean))];
-      names.forEach((name,i)=>{const r=thMap.get(norm(name))||{};let rate=get(r,['TIEM_PHONG_VDNC - Tỷ lệ (%)']);if(rate!==''&&Number(rate)<=1)rate=Number(rate)*100;vdncOut.push([i+1,name,num(get(r,['TIEM_PHONG_VDNC - KH'])),num(get(r,['TIEM_PHONG_VDNC - Đã tiêm'])),num(rate),'']);});
+      const names=[...new Set(tiemphong.map(r=>String(get(r,['Xã','Tên xã','Tên xã/phường','Xã/phường'])||'').trim()).filter(Boolean))];
+      names.forEach((name,i)=>{const r=tpMap.get(norm(name))||{};const old=thMap.get(norm(name))||{};let rate=get(r,['VDNC - Tỷ lệ (%)','TIEM_PHONG_VDNC - Tỷ lệ (%)']);if(rate==='')rate=get(old,['TIEM_PHONG_VDNC - Tỷ lệ (%)']);if(rate!==''&&Number(rate)<=1)rate=Number(rate)*100;vdncOut.push([i+1,name,num(get(r,['VDNC - KH','VDNC - Tổng đàn trong diện tiêm','TIEM_PHONG_VDNC - KH'])||get(old,['TIEM_PHONG_VDNC - KH'])),num(get(r,['VDNC - Đã tiêm','VDNC - Số được tiêm phòng','TIEM_PHONG_VDNC - Đã tiêm'])||get(old,['TIEM_PHONG_VDNC - Đã tiêm'])),num(rate),'']);});
       writeTable('TP VDNC',2,0,vdncOut,{maxRows:Math.max(vdncOut.length,50),maxCols:6});
     }
     // Tiêm phòng dại: giữ đúng 12 cột của mẫu, lấy số liệu đã tổng hợp theo xã.
     const rabiesSheet=sheet('Tiêm phòng dại');
     if(rabiesSheet){
       const rabies=[['STT','Tên xã/phường','Loài vật nuôi','Loại vắc xin','Tổng đàn trong diện tiêm (con)','Số được tiêm phòng (con)','Tỷ lệ tiêm phòng (%)','Ghi chú','','Tổng đàn toàn tỉnh','Số liều vc đã tiêm','Tỷ lệ % theo tổng đàn']];
-      const names=[...new Set(tonghop.map(r=>String(get(r,['Tên xã','Tên xã/phường','Xã'])||'').trim()).filter(Boolean))];
-      names.forEach((name,i)=>{const r=thMap.get(norm(name))||{};let rate=get(r,['TIEM_PHONG_Tỷ lệ tiêm Dại (%)']);if(rate!==''&&Number(rate)<=1)rate=Number(rate)*100;rabies.push([i+1,name,'Chó, mèo','Dại',num(get(r,['TIEM_PHONG_Tổng đàn chó mèo'])),num(get(r,['TIEM_PHONG_Dại - Đã tiêm'])),num(rate),'','','',num(get(r,['TIEM_PHONG_Dại - Đã tiêm'])),num(rate)]);});
+      const names=[...new Set(tiemphong.map(r=>String(get(r,['Xã','Tên xã','Tên xã/phường','Xã/phường'])||'').trim()).filter(Boolean))];
+      names.forEach((name,i)=>{const r=tpMap.get(norm(name))||{};const old=thMap.get(norm(name))||{};let rate=get(r,['Tỷ lệ tiêm Dại (%)','Dại - Tỷ lệ (%)','TIEM_PHONG_Tỷ lệ tiêm Dại (%)']);if(rate==='')rate=get(old,['TIEM_PHONG_Tỷ lệ tiêm Dại (%)']);if(rate!==''&&Number(rate)<=1)rate=Number(rate)*100;const total=get(r,['Tổng đàn chó mèo','Dại - Tổng đàn','TIEM_PHONG_Tổng đàn chó mèo'])||get(old,['TIEM_PHONG_Tổng đàn chó mèo']);const done=get(r,['Dại - Đã tiêm','Dại - Số đã tiêm','TIEM_PHONG_Dại - Đã tiêm'])||get(old,['TIEM_PHONG_Dại - Đã tiêm']);rabies.push([i+1,name,'Chó, mèo','Dại',num(total),num(done),num(rate),'','','',num(done),num(rate)]);});
       writeTable('Tiêm phòng dại',0,0,rabies,{maxRows:Math.max(rabies.length,50),maxCols:12});
     }
 
