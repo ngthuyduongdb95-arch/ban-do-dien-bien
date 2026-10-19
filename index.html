@@ -1626,16 +1626,6 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
     background: #173f7b;
 }
 
-.report-controls #btnPrintReport {
-    background: #fff;
-    color: #2457a7;
-    border-color: #cbd7e4;
-}
-
-.report-controls #btnPrintReport:hover {
-    background: #edf4fc;
-}
-
 @media (max-width: 760px) {
     .report-section {
         align-items: flex-start;
@@ -1858,6 +1848,18 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
   #btnDownloadAllKpi{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:0;border-radius:8px;padding:10px 14px;background:#176b45;color:#fff;font-weight:700;cursor:pointer;box-shadow:0 2px 5px #0001;}
   #btnDownloadAllKpi:hover{background:#105737;}
   @media(max-width:760px){.kpi-download{font-size:10px;padding:4px 5px}.kpi-download i{display:none}#btnDownloadAllKpi{width:100%;}}
+
+/* Fix: keep the vaccine KPI text inside the card/sidebar */
+.card-vaccine-kpi{box-sizing:border-box;width:100%;max-width:100%;padding:8px 9px;overflow:hidden}
+.card-vaccine-kpi .summary-head{box-sizing:border-box;width:100%;min-width:0;margin-bottom:4px;padding:4px 5px;font-size:11px;line-height:1.2}
+.card-vaccine-kpi .vaccine-kpi-compact{width:100%;min-width:0;gap:0;font-size:10px;line-height:1.25}
+.card-vaccine-kpi .vaccine-kpi-compact>div{min-width:0;gap:5px;padding:4px 1px;align-items:flex-start}
+.card-vaccine-kpi .vaccine-kpi-compact>div>b{min-width:0;flex:1 1 44%;font-size:9.5px;line-height:1.25;overflow-wrap:anywhere}
+.card-vaccine-kpi .vaccine-kpi-compact span{min-width:0;flex:1 1 56%;font-size:9.5px;line-height:1.25;text-align:right;white-space:normal;overflow-wrap:anywhere}
+.card-vaccine-kpi .vaccine-kpi-compact strong{font-size:9.5px;line-height:1.25;white-space:normal;overflow-wrap:anywhere;text-align:right}
+.sidebar{min-width:0;overflow-x:hidden}
+.summary-card{box-sizing:border-box;max-width:100%;overflow:hidden}
+
 </style>
 <script id="webgisSheetJSLoader" src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'"></script>
 
@@ -1925,9 +1927,6 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
         </label>
         <button type="button" id="btnCreateReport">
             <i class="fa-solid fa-file-word"></i> Tạo báo cáo Word (.docx)
-        </button>
-        <button type="button" id="btnPrintReport">
-            <i class="fa-solid fa-print"></i> In / lưu PDF
         </button>
         <button type="button" id="btnDownloadAllKpi" title="Tải bảng tổng hợp theo khoảng ngày đã chọn">
             <i class="fa-solid fa-file-excel"></i> Bảng số liệu tổng hợp (Excel)
@@ -2168,7 +2167,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const endInput = document.getElementById("reportEndDate");
   const reportTypeInput = document.getElementById("reportType");
   const createBtn = document.getElementById("btnCreateReport");
-  const printBtn = document.getElementById("btnPrintReport");
   const quarterInput = document.getElementById("reportQuarter");
   const yearInput = document.getElementById("reportYear");
   const quarterWrap = document.getElementById("reportQuarterWrap");
@@ -2294,7 +2292,6 @@ document.addEventListener("DOMContentLoaded", function () {
       cases:sum(cfg.cases), dead:sum(cfg.dead), culled:sum(cfg.culled), weight:sum(cfg.weight)};
   }
 
-  if (printBtn) printBtn.addEventListener("click", () => window.print());
   if (!createBtn) return;
   createBtn.addEventListener("click", async () => {
     const fromText = startInput?.value || "";
@@ -2498,7 +2495,12 @@ document.addEventListener("DOMContentLoaded", function () {
       fetchActivityRows("tiemphong"), fetchActivityRows("phun"), fetchActivityRows("phun2")
     ]);
     const nrm = v => norm(v);
-    const rowHasCommune = r => !!String(pick(r,["Tên xã/phường","Tên xã","Xã/phường","Xã","Địa bàn","Tên địa bàn","TEN_XA","TENXA","Commune"]) || "").trim();
+    const rowHasCommune = r => {
+      const name=String(pick(r,["Tên xã/phường","Tên xã","Xã/phường","Xã","Địa bàn","Tên địa bàn","TEN_XA","TENXA","Commune"]) || "").trim();
+      if(!name) return false;
+      const nn=nrm(name);
+      return !(/^(tong|tong hop|tong cong|cong|toan tinh|toan tinh tong hop)$/.test(nn) || nn.startsWith("tong hop ") || nn.startsWith("tong cong "));
+    };
     const rawNumber = v => {
       if (v === null || v === undefined || String(v).trim() === "") return null;
       const n = number(v); return Number.isFinite(n) ? n : null;
@@ -2602,7 +2604,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
       draftLines.push("3. Kế hoạch nhiệm vụ kỳ tiếp theo");
       draftLines.push("Tiếp tục giám sát tình hình dịch bệnh; phối hợp với UBND các xã, phường triển khai biện pháp phòng, chống dịch, tiêm phòng, vệ sinh tiêu độc khử trùng và các nhiệm vụ chuyên môn theo kế hoạch.");
-      draftLines.push("Trên đây là báo cáo kết quả thực hiện công tác thú y " + reportPeriodTitle + " của Phòng Thú y./.");
     } else {
       draftLines.push("1. Tình hình dịch bệnh động vật (số liệu từ " + dateText(from) + " đến " + dateText(to) + ")");
       for (const code of ["DTLCP", "CGC", "VDNC", "DAI"]) {
@@ -2617,7 +2618,6 @@ document.addEventListener("DOMContentLoaded", function () {
       if(activityLines.length) draftLines.push(...activityLines);
       draftLines.push("3. Kế hoạch kỳ tiếp theo");
       draftLines.push("Tiếp tục tăng cường giám sát, phát hiện, khoanh vùng và xử lý ổ dịch; đẩy mạnh tiêm phòng, vệ sinh tiêu độc khử trùng và chăn nuôi an toàn sinh học.");
-      draftLines.push("Trên đây là báo cáo Tình hình dịch bệnh động vật trên địa bàn tỉnh Điện Biên từ " + dateText(from) + " đến " + dateText(to) + "./.");
     }
     const draftText = await editReportDraft(draftLines.join("\\n"));
     if (draftText === null) return;
@@ -3486,9 +3486,15 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
       fetchOptional(base+'?type=trend'),fetchOptional(base+'?type=tiemphong'),
       fetchOptional(base+'?type=phun'),fetchOptional(base+'?type=phun2'),fetchOptional(base)
     ]);
-    const trendRows=arrayFromApi(trendResult), vaccineRows=arrayFromApi(vaccineResult),
-      spray1Rows=arrayFromApi(spray1Result), spray2Rows=arrayFromApi(spray2Result),
-      mainRows=arrayFromApi(mainResult).length?arrayFromApi(mainResult):getLiveRows();
+    const isDetailRow = r => {
+      const name=String(getField(r,['Tên xã/phường','Tên xã','Tên xã có bệnh','Xã/phường','Xã','Địa bàn','TEN_XA','TENXA','Commune'])||'').trim();
+      if(!name) return false;
+      const n=norm(name);
+      return !(/^(tong|tong hop|tong cong|cong|toan tinh|toan tinh tong hop)$/.test(n) || n.startsWith('tong hop ') || n.startsWith('tong cong '));
+    };
+    const trendRows=arrayFromApi(trendResult).filter(isDetailRow), vaccineRows=arrayFromApi(vaccineResult).filter(isDetailRow),
+      spray1Rows=arrayFromApi(spray1Result).filter(isDetailRow), spray2Rows=arrayFromApi(spray2Result).filter(isDetailRow),
+      mainRows=(arrayFromApi(mainResult).length?arrayFromApi(mainResult):getLiveRows()).filter(isDetailRow);
     const wb=window.XLSX.read(TEMPLATE_B64,{type:'base64',cellStyles:true,cellDates:true});
     const required=['DTLCP','TTHC','Dịch bệnh khác','TP VDNC','KSGM','Tiêm phòng dại','Tiêm phòng định kỳ đợt 2','Tiêm phòng định kỳ đợt 1','Phun phòng đợt 2','Phun phòng đợt 1'];
     required.forEach(n=>{if(!wb.Sheets[n])throw new Error('File mẫu Excel thiếu sheet: '+n);});
