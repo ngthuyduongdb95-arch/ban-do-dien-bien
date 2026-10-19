@@ -4101,8 +4101,11 @@ html, body { max-width:100%; }
   function render(rows){
     if(!Array.isArray(rows)||!rows.length){console.warn('API tiêm phòng chưa trả về dòng dữ liệu.');return;}
     const d1=countRows(rows,1),d2=countRows(rows,2),vd=countRows(rows,0),rabies=countRows(rows,3);
-    updateText('kpiTpd1Done',d1.complete+'/45 xã hoàn thành');
+    // Cả đợt 1 và đợt 2 dùng chung quy tắc trạng thái động theo dữ liệu thực tế.
+    // Chưa có dữ liệu thực hiện được hiển thị là “Chưa triển khai” theo yêu cầu.
+    updateText('kpiTpd1Done',vaccineStatus(d1));
     updateText('kpiTpd1Plan',String(d1.plan)); updateText('kpiTpd1Rate',d1.rate.toFixed(1)+'%');
+    updateText('kpiTpd1Started',d1.started+'/45');
     updateText('kpiTpd2Done',vaccineStatus(d2));
     updateText('kpiTpd2Started',d2.started+'/45'); updateText('kpiTpd2Rate',d2.rate.toFixed(1)+'%');
     updateText('kpiDaiRate',rabies.rate.toFixed(1)+'% tổng đàn');
