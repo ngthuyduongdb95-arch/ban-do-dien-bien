@@ -1863,6 +1863,43 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
 </style>
 <script id="webgisSheetJSLoader" src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'"></script>
 
+
+<style id="fix-vaccine-kpi-fit-frame">
+/* Final fix: keep every vaccine KPI line inside its card */
+.card-vaccine-kpi,
+.card-vaccine-kpi * { box-sizing: border-box; min-width: 0; }
+.card-vaccine-kpi { width: 100%; max-width: 100%; overflow: hidden; }
+.card-vaccine-kpi .summary-head { min-width: 0; max-width: 100%; flex-wrap: wrap; overflow-wrap: anywhere; }
+.card-vaccine-kpi .summary-grid.vaccine-kpi-compact {
+  display: flex !important; flex-direction: column; width: 100%; max-width: 100%;
+  min-width: 0; gap: 0; overflow: hidden;
+}
+.card-vaccine-kpi .vaccine-kpi-compact > span {
+  display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between;
+  gap: 2px 6px; width: 100%; max-width: 100%; min-width: 0;
+  padding: 4px 0; white-space: normal; overflow-wrap: anywhere; word-break: normal;
+  line-height: 1.25;
+}
+.card-vaccine-kpi .vaccine-kpi-compact > span > b {
+  display: block; flex: 1 1 100%; width: 100%; max-width: 100%; min-width: 0;
+  margin: 0; text-align: left; white-space: normal; overflow-wrap: anywhere;
+  word-break: normal; line-height: 1.25;
+}
+.card-vaccine-kpi .vaccine-kpi-compact > span > em {
+  display: block; flex: 1 1 100%; width: 100%; max-width: 100%; min-width: 0;
+  margin: 0; text-align: left; font-style: normal; white-space: normal;
+  overflow-wrap: anywhere; word-break: normal; line-height: 1.25;
+}
+.card-vaccine-kpi .vaccine-kpi-compact [hidden] { display: none !important; }
+@media (max-width: 520px) {
+  .card-vaccine-kpi { padding: 7px; }
+  .card-vaccine-kpi .summary-head { font-size: 11px; margin-bottom: 4px; }
+  .card-vaccine-kpi .vaccine-kpi-compact > span { font-size: 9px; padding: 4px 0; }
+  .card-vaccine-kpi .vaccine-kpi-compact > span > b,
+  .card-vaccine-kpi .vaccine-kpi-compact > span > em { font-size: 9px; }
+}
+</style>
+
 </head>
 <body>
 <header class="header">
