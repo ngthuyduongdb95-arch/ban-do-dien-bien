@@ -2221,7 +2221,7 @@ document.addEventListener("DOMContentLoaded", function () {
       title.textContent = "Dự thảo báo cáo – xem và chỉnh sửa trước khi xuất Word";
       title.style.cssText = "font-size:19px;margin:0;";
       const note = document.createElement("p");
-      note.textContent = "Áp dụng cho báo cáo kỳ 10 ngày, tháng, quý và năm. Số liệu dịch bệnh được lấy từ API theo khoảng ngày đã chọn; các mục hoạt động chưa có nguồn dữ liệu kết nối, gồm KPI tiêm phòng định kỳ đợt 1, đợt 2, bệnh Dại và Viêm da nổi cục, được đánh dấu “...” để bạn bổ sung, kiểm tra trước khi xuất Word.";
+      note.textContent = "Áp dụng cho báo cáo kỳ 10 ngày, tháng, quý và năm. Số liệu dịch bệnh được lấy theo khoảng ngày đã chọn. Tiến độ tiêm phòng và phun khử trùng lấy từ các bảng nguồn hiện có; nếu bảng nguồn không có trường ngày thì số liệu thể hiện tiến độ đang ghi nhận, không khẳng định là số phát sinh riêng trong kỳ. Vui lòng kiểm tra bản dự thảo trước khi xuất Word.";
       note.style.cssText = "font-size:13px;line-height:1.5;margin:0;color:#555;";
       const area = document.createElement("textarea");
       area.value = initialText;
@@ -2333,21 +2333,18 @@ document.addEventListener("DOMContentLoaded", function () {
       .filter(item => Number(item.records || 0) > 0)
       .sort((a,b) => String(a.code || "").localeCompare(String(b.code || ""), "vi"));
     if (!diseaseStats.length) {
-      const diagnostics = reportData.debug
-        ? "\nChẩn đoán API: " + JSON.stringify(reportData.debug)
-        : "";
-      alert("API đã chạy nhưng không tìm thấy bản ghi có ngày nằm trong khoảng " + fromText + " đến " + toText + ". Có thể cột ngày trong GIS_DICH_BENH_NGAY không đúng định dạng/cột mà API đang đọc, hoặc dữ liệu chi tiết chưa được cập nhật. Nếu tiếp tục gặp lỗi, gửi ảnh thông báo này và hàng tiêu đề của sheet GIS_DICH_BENH_NGAY để xác định đúng cột ngày." + diagnostics);
-      return;
+      console.info("Không có bản ghi dịch bệnh trong kỳ đã chọn; vẫn tiếp tục tạo báo cáo để có thể ghi nhận không phát sinh và kết quả hoạt động nếu có.", reportData.debug || "");
     }
 
-    const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle } = window.docx;
+    const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle, Table, TableRow, TableCell, WidthType } = window.docx;
     const from = parseDate(fromText);
     const to = parseDate(toText);
     const totals = reportData.totals || {};
     const totalRecords = diseaseStats.reduce((sum,item)=>sum+Number(item.records||0),0);
     const range = fromText || toText ? `từ ngày ${from ? dateText(from) : "đầu dữ liệu"} đến ngày ${to ? dateText(to) : "cuối dữ liệu"}` : "toàn bộ dữ liệu hiện có";
     const today = new Date();
-    const dateStamp = today.toLocaleDateString("vi-VN");
+    const reportDate = to || today;
+    const dateStamp = reportDate.toLocaleDateString("vi-VN");
     const p = (text, opts={}) => new Paragraph({ children:[new TextRun({text, font:"Times New Roman", size:opts.size||26, bold:!!opts.bold, italics:!!opts.italics})], alignment:opts.align, spacing:{after:opts.after ?? 140, line:360}, indent:opts.indent?{firstLine:560}:undefined, heading:opts.heading });
     const title = text => new Paragraph({children:[new TextRun({text,font:"Times New Roman",bold:true,size:30})],alignment:AlignmentType.CENTER,spacing:{after:120}});
     const heading = text => new Paragraph({children:[new TextRun({text,font:"Times New Roman",bold:true,size:26})],spacing:{before:180,after:100}});
@@ -2364,8 +2361,18 @@ document.addEventListener("DOMContentLoaded", function () {
     const nextPeriodLabel = reportKind === "period" ? "kỳ tiếp theo" : reportKind === "month" ? "tháng tiếp theo" : reportKind === "quarter" ? "quý tiếp theo" : "năm tiếp theo";
     const activitySectionTitle = reportKind === "period" ? "2. Công tác phòng, chống dịch và hoạt động thú y trong kỳ" : "2. Kết quả thực hiện công tác thú y";
     const headerLeft = new Paragraph({children:[new TextRun({text:"CHI CỤC NÔNG NGHIỆP TỈNH ĐIỆN BIÊN\nPHÒNG THÚ Y\nSố:       /BC-TY",font:"Times New Roman",bold:true,size:22})],alignment:AlignmentType.CENTER,spacing:{after:160}});
-    const headerRight = new Paragraph({children:[new TextRun({text:"CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\nĐộc lập - Tự do - Hạnh phúc\nĐiện Biên, ngày "+today.getDate()+" tháng "+(today.getMonth()+1)+" năm "+today.getFullYear(),font:"Times New Roman",bold:true,size:22})],alignment:AlignmentType.CENTER,spacing:{after:260}});
-    body.push(headerLeft, headerRight, title("BÁO CÁO"));
+    const headerRight = new Paragraph({children:[new TextRun({text:"CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\nĐộc lập - Tự do - Hạnh phúc\nĐiện Biên, ngày "+reportDate.getDate()+" tháng "+(reportDate.getMonth()+1)+" năm "+reportDate.getFullYear(),font:"Times New Roman",bold:true,size:22})],alignment:AlignmentType.CENTER,spacing:{after:80}});
+    const noBorder={style:BorderStyle.NONE,size:0,color:"FFFFFF"};
+    const headerTable = new Table({
+      width:{size:100,type:WidthType.PERCENTAGE},
+      columnWidths:[4500,4500],
+      rows:[new TableRow({children:[
+        new TableCell({width:{size:50,type:WidthType.PERCENTAGE},children:[headerLeft],borders:{top:noBorder,bottom:noBorder,left:noBorder,right:noBorder},margins:{top:0,bottom:0,left:80,right:80}}),
+        new TableCell({width:{size:50,type:WidthType.PERCENTAGE},children:[headerRight],borders:{top:noBorder,bottom:noBorder,left:noBorder,right:noBorder},margins:{top:0,bottom:0,left:80,right:80}})
+      ]})],
+      borders:{top:noBorder,bottom:noBorder,left:noBorder,right:noBorder,insideHorizontal:noBorder,insideVertical:noBorder}
+    });
+    body.push(headerTable, title("BÁO CÁO"));
     body.push(new Paragraph({children:[new TextRun({text:reportTitle,font:"Times New Roman",bold:true,size:28})],alignment:AlignmentType.CENTER,spacing:{after:100}}));
     body.push(new Paragraph({children:[new TextRun({text:periodLine,font:"Times New Roman",size:24,italics:true})],alignment:AlignmentType.CENTER,spacing:{after:280}}));
     body.push(heading(isMonth ? "1. Tình hình dịch bệnh" : "1. Tình hình dịch bệnh động vật (số liệu từ kỳ báo cáo)"));
@@ -2474,6 +2481,111 @@ document.addEventListener("DOMContentLoaded", function () {
       return text + ".";
     }
     const byCode = Object.fromEntries(diseaseStats.map(item => [String(item.code || "").toUpperCase(), item]));
+
+    // Hoạt động tiêm phòng/phun khử trùng lấy từ API hiện hành.
+    // Không tự gán chúng thành số phát sinh trong kỳ nếu nguồn không có trường ngày.
+    const ACTIVITY_API = "https://script.google.com/macros/s/AKfycbyRuJ9Wfv4HtWjMRT2Hox2-mOhBVRjyqLaHhpQjohPEkfHWNyjM004KgO3o7_4nRJtj/exec";
+    async function fetchActivityRows(type) {
+      try {
+        const res = await fetch(ACTIVITY_API + "?type=" + encodeURIComponent(type) + "&_=" + Date.now(), {cache:"no-store"});
+        if (!res.ok) return [];
+        const json = await res.json();
+        if (Array.isArray(json)) return json;
+        return Array.isArray(json?.data) ? json.data : [];
+      } catch (e) { console.warn("Không tải được nguồn hoạt động " + type, e); return []; }
+    }
+    const [vaccineRowsReport, spray1RowsReport, spray2RowsReport] = await Promise.all([
+      fetchActivityRows("tiemphong"), fetchActivityRows("phun"), fetchActivityRows("phun2")
+    ]);
+    const nrm = v => norm(v);
+    const rowHasCommune = r => !!String(pick(r,["Tên xã/phường","Tên xã","Xã/phường","Xã","Địa bàn","Tên địa bàn","TEN_XA","TENXA","Commune"]) || "").trim();
+    const rawNumber = v => {
+      if (v === null || v === undefined || String(v).trim() === "") return null;
+      const n = number(v); return Number.isFinite(n) ? n : null;
+    };
+    function activityField(row, predicate) {
+      for (const k of Object.keys(row || {})) {
+        const nk=nrm(k), v=row[k];
+        if (predicate(nk) && v!==null && v!==undefined && String(v).trim()!=="") return {key:k,value:v};
+      }
+      return null;
+    }
+    function sumActivity(rows, predicate) {
+      let sum=0, count=0;
+      for (const r of rows.filter(rowHasCommune)) {
+        const hit=activityField(r,predicate); if(!hit) continue;
+        const v=rawNumber(hit.value); if(v===null) continue;
+        sum+=v; count++;
+      }
+      return {value:count?sum:null,count};
+    }
+    const vaccineTypes = [
+      {label:"tụ huyết trùng trâu, bò",aliases:["tu huyet trung trau bo","tht trau bo"]},
+      {label:"dịch tả lợn",aliases:["dich ta lon"]},
+      {label:"cúm gia cầm",aliases:["cum gia cam"]},
+      {label:"lở mồm long móng",aliases:["lo mom long mong","lmlm"]}
+    ];
+    function vaxTotal(def, round, kind) {
+      return sumActivity(vaccineRowsReport, nk => {
+        if (!def.aliases.some(a=>nk.includes(nrm(a)))) return false;
+        if (!nk.includes("dot "+round)) return false;
+        if (kind==="plan") return /(^| )(kh|ke hoach)( |$)/.test(nk) || nk.endsWith(" kh");
+        return nk.includes("da tiem") || nk.includes("so duoc tiem") || nk.includes("thuc hien");
+      });
+    }
+    const round2Vax = vaccineTypes.map(d=>({...d,plan:vaxTotal(d,2,"plan"),done:vaxTotal(d,2,"done")}))
+      .filter(d=>d.plan.value!==null || d.done.value!==null);
+    const rabiesHerd = sumActivity(vaccineRowsReport, nk=>nk.includes("dai") && (nk.includes("tong dan cho meo") || nk.includes("tong dan trong dien tiem")));
+    const rabiesDone = sumActivity(vaccineRowsReport, nk=>nk.includes("dai") && (nk.includes("da tiem") || nk.includes("so duoc tiem") || nk.includes("so lieu da tiem")));
+    const vdncHerd = sumActivity(vaccineRowsReport, nk=>nk.includes("vdnc") && (nk.includes("tong dan") || nk.includes("tong kh") || nk.includes("ke hoach")));
+    const vdncDone = sumActivity(vaccineRowsReport, nk=>nk.includes("vdnc") && (nk.includes("da tiem") || nk.includes("so duoc tiem")));
+    function spraySummary(rows) {
+      const house=sumActivity(rows,nk=>nk.includes("so ho") && (nk.includes("phun") || nk.startsWith("so ho")));
+      const area=sumActivity(rows,nk=>nk.includes("dien tich") && (nk.includes("phun") || nk.startsWith("dien tich")));
+      const chemical=sumActivity(rows,nk=>nk.includes("hoa chat") && (nk.includes("phun") || nk.includes("lit") || nk.startsWith("hoa chat") || nk.includes("luong hoa chat")));
+      return {house,area,chemical,has:house.value!==null||area.value!==null||chemical.value!==null};
+    }
+    const spray1Summary=spraySummary(spray1RowsReport), spray2Summary=spraySummary(spray2RowsReport);
+    const activityLines=[];
+    if(round2Vax.length || rabiesHerd.value!==null || rabiesDone.value!==null || vdncHerd.value!==null || vdncDone.value!==null) {
+      activityLines.push("c. Công tác tiêm phòng vắc xin");
+      if(round2Vax.length) {
+        const parts=round2Vax.map(d=>{
+          const p=d.plan.value, done=d.done.value;
+          if(p!==null && done!==null) return d.label+" đạt "+fmt(done)+"/"+fmt(p)+" liều"+(p>0?" ("+(done/p*100).toFixed(1).replace(".",",")+"%)":"");
+          if(done!==null) return d.label+" đã tiêm "+fmt(done)+" liều; chưa có đủ số kế hoạch để tính tỷ lệ";
+          if(p!==null) return d.label+" có kế hoạch "+fmt(p)+" liều; chưa có số đã tiêm";
+          return "";
+        }).filter(Boolean);
+        if(parts.length) activityLines.push("Tiến độ tiêm phòng định kỳ đợt 2: "+parts.join("; ")+".");
+      }
+      if(rabiesHerd.value!==null || rabiesDone.value!==null) {
+        const h=rabiesHerd.value,d=rabiesDone.value;
+        let t="Tiêm phòng dại";
+        if(h!==null)t+=" có "+fmt(h)+" con trong diện tiêm";
+        if(d!==null)t+=(h!==null?", ":" có ")+fmt(d)+" con đã tiêm";
+        if(h!==null&&d!==null&&h>0)t+=" ("+(d/h*100).toFixed(1).replace(".",",")+"%)";
+        activityLines.push(t+".");
+      }
+      if((vdncHerd.value!==null&&vdncHerd.value>0)||(vdncDone.value!==null&&vdncDone.value>0)) {
+        const h=vdncHerd.value,d=vdncDone.value; let t="Tiêm phòng viêm da nổi cục";
+        if(h!==null)t+=" có "+fmt(h)+" con trong diện tiêm";
+        if(d!==null)t+=(h!==null?", ":" có ")+fmt(d)+" con đã tiêm";
+        if(h!==null&&d!==null&&h>0)t+=" ("+(d/h*100).toFixed(1).replace(".",",")+"%)";
+        activityLines.push(t+".");
+      }
+    }
+    if(spray1Summary.has || spray2Summary.has) {
+      activityLines.push("d. Công tác vệ sinh, tiêu độc khử trùng");
+      for(const [label,sm] of [["Phun phòng đợt 1",spray1Summary],["Phun phòng đợt 2",spray2Summary]]) {
+        if(!sm.has) continue;
+        const parts=[];
+        if(sm.house.value!==null)parts.push(fmt(sm.house.value)+" hộ");
+        if(sm.area.value!==null)parts.push(fmt(sm.area.value)+" m²");
+        if(sm.chemical.value!==null)parts.push(fmt(sm.chemical.value)+" lít hóa chất");
+        activityLines.push(label+" ghi nhận "+parts.join(", ")+".");
+      }
+    }
     const draftLines = [];
     if (reportKind === "month" || reportKind === "quarter" || reportKind === "year") {
       draftLines.push("1. Tình hình dịch bệnh");
@@ -2485,11 +2597,9 @@ document.addEventListener("DOMContentLoaded", function () {
       draftLines.push("Tiếp tục theo dõi chặt chẽ diễn biến dịch bệnh trên đàn vật nuôi; chủ động giám sát, phát hiện sớm và triển khai biện pháp phòng, chống dịch theo quy định.");
       draftLines.push("2. Kết quả thực hiện công tác thú y");
       draftLines.push("2.1. Công tác tham mưu, chỉ đạo và giám sát dịch bệnh");
-      draftLines.push("Chưa kết nối dữ liệu hoạt động trong kỳ. Không sử dụng số liệu mẫu của kỳ trước làm số liệu kỳ báo cáo này.");
-      draftLines.push("2.2. Công tác tiêm phòng, vệ sinh tiêu độc khử trùng");
-      draftLines.push("Chưa kết nối dữ liệu tiêm phòng và phun khử trùng để tổng hợp theo kỳ báo cáo.");
-      draftLines.push("2.3. Kiểm dịch, kiểm soát giết mổ, quản lý thuốc thú y và thủ tục hành chính");
-      draftLines.push("Chưa kết nối dữ liệu nghiệp vụ có ngày phát sinh để tổng hợp theo kỳ báo cáo.");
+      draftLines.push("Phối hợp với UBND các xã, phường triển khai các biện pháp phòng, chống dịch bệnh động vật; theo dõi, giám sát tại ổ dịch, ổ dịch cũ và khu vực nguy cơ cao.");
+      if(activityLines.length) draftLines.push(...activityLines.map(line => line.replace(/^c\. /,"2.2. ").replace(/^d\. /,"2.3. ")));
+
       draftLines.push("3. Kế hoạch nhiệm vụ kỳ tiếp theo");
       draftLines.push("Tiếp tục giám sát tình hình dịch bệnh; phối hợp với UBND các xã, phường triển khai biện pháp phòng, chống dịch, tiêm phòng, vệ sinh tiêu độc khử trùng và các nhiệm vụ chuyên môn theo kế hoạch.");
       draftLines.push("Trên đây là báo cáo kết quả thực hiện công tác thú y " + reportPeriodTitle + " của Phòng Thú y./.");
@@ -2504,8 +2614,7 @@ document.addEventListener("DOMContentLoaded", function () {
       draftLines.push("Phối hợp với các xã, phường triển khai các biện pháp phòng, chống dịch bệnh động vật theo quy định.");
       draftLines.push("b. Giám sát dịch bệnh");
       draftLines.push("Theo dõi, giám sát tình hình dịch bệnh trên đàn vật nuôi, tập trung tại ổ dịch, ổ dịch cũ và khu vực nguy cơ cao; phát hiện, xử lý kịp thời khi có dịch bệnh phát sinh.");
-      draftLines.push("c. Công tác tiêm phòng vắc xin, vệ sinh tiêu độc khử trùng");
-      draftLines.push("Chưa kết nối dữ liệu tiêm phòng và phun khử trùng để tổng hợp theo kỳ báo cáo.");
+      if(activityLines.length) draftLines.push(...activityLines);
       draftLines.push("3. Kế hoạch kỳ tiếp theo");
       draftLines.push("Tiếp tục tăng cường giám sát, phát hiện, khoanh vùng và xử lý ổ dịch; đẩy mạnh tiêm phòng, vệ sinh tiêu độc khử trùng và chăn nuôi an toàn sinh học.");
       draftLines.push("Trên đây là báo cáo Tình hình dịch bệnh động vật trên địa bàn tỉnh Điện Biên từ " + dateText(from) + " đến " + dateText(to) + "./.");
@@ -2519,7 +2628,7 @@ document.addEventListener("DOMContentLoaded", function () {
       return isHeading ? heading(text) : p(text, {indent:true});
     });
     // Giữ nguyên phần đầu trang và phần ký báo cáo theo mẫu; thay nội dung bằng bản đã duyệt.
-    const fixedHeader = body.slice(0, 5);
+    const fixedHeader = body.slice(0, 4);
     const fixedFooter = body.slice(-4);
     body.splice(0, body.length, ...fixedHeader, ...draftParagraphs, ...fixedFooter);
 
@@ -2529,7 +2638,8 @@ document.addEventListener("DOMContentLoaded", function () {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       const safeLayer = "tong_hop";
-      a.href=url; a.download=`Bao_cao_${reportKind}_${safeLayer}_${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,"0")}-${String(today.getDate()).padStart(2,"0")}.docx`;
+      const fileDate = reportDate;
+      a.href=url; a.download=`Bao_cao_${reportKind}_${safeLayer}_${fileDate.getFullYear()}-${String(fileDate.getMonth()+1).padStart(2,"0")}-${String(fileDate.getDate()).padStart(2,"0")}.docx`;
       document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1500);
     } catch (e) { console.error("Lỗi tạo báo cáo Word:",e); alert("Không tạo được file Word. Mở F12 > Console để xem lỗi."); }
   });
@@ -3385,8 +3495,23 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
     const ws=n=>wb.Sheets[n], put=(sheet,r,c,v)=>{
       if(v===null||v===undefined||v==='')return;
       const a=window.XLSX.utils.encode_cell({r,c}),old=sheet[a]||{};
-      sheet[a]={...old,v:v,t:typeof v==='number'?'n':'s'};
+      sheet[a]={...old,v:v,t:typeof v==='number'?'n':'s',...(typeof v==='number'?{z:'#,##0.##'}:{})};
     };
+    // Xóa dữ liệu mẫu/giá trị tồn từ lần xuất trước nhưng giữ nguyên định dạng ô.
+    function clearData(sheetName,r1,r2,c1,c2){
+      const sh=ws(sheetName);
+      for(let r=r1;r<=r2;r++)for(let c=c1;c<=c2;c++){
+        const a=window.XLSX.utils.encode_cell({r,c}),old=sh[a];
+        if(!old)continue;
+        const cell={...old,v:'',t:'s'};delete cell.f;delete cell.w;delete cell.D;sh[a]=cell;
+      }
+    }
+    function formatSheet(sheetName,ref,widths,headerRows,titleRows=[0]){
+      const sh=ws(sheetName);sh['!ref']=ref;sh['!cols']=widths.map(w=>({wch:w}));
+      const range=window.XLSX.utils.decode_range(ref);sh['!rows']=Array.from({length:range.e.r+1},(_,r)=>({hpt:titleRows.includes(r)?28:(headerRows.includes(r)?38:(r===1?22:20))}));
+      sh['!pageSetup']={orientation:'landscape',fitToWidth:1,fitToHeight:0,scale:100,paperSize:9};
+      sh['!pageMargins']={left:0.25,right:0.25,top:0.45,bottom:0.45,header:0.2,footer:0.2};
+    }
     const putText=(sheet,r,c,v)=>put(sheet,r,c,String(v??''));
     const extendRows=(sheet,lastRow,lastCol,styleRow)=>{
       for(let r=styleRow+1;r<=lastRow;r++)for(let c=0;c<lastCol;c++){
@@ -3402,6 +3527,11 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
       for(const tokens of tokenSets){const hit=entries.find(x=>tokens.every(t=>x.n.includes(norm(t)))&&row[x.k]!==''&&row[x.k]!==null&&row[x.k]!==undefined);if(hit)return row[hit.k];}
       return null;
     };
+    clearData('DTLCP',6,41,0,19);
+    [[5,9],[11,19],[21,29]].forEach(([a,b])=>clearData('Dịch bệnh khác',a,b,0,10));
+    clearData('TTHC',4,17,0,2);clearData('KSGM',4,48,0,5);clearData('TP VDNC',4,48,0,5);
+    clearData('Tiêm phòng dại',4,48,0,5);clearData('Tiêm phòng định kỳ đợt 1',3,48,0,16);
+    clearData('Tiêm phòng định kỳ đợt 2',4,49,0,15);clearData('Phun phòng đợt 1',4,48,0,7);clearData('Phun phòng đợt 2',3,47,0,7);
     const vaxValue=(row,aliases,round,kind)=>{
       const entries=Object.keys(row||{}).map(k=>({k,n:norm(k).replace(/^tiem phong /,'')}));
       const aliasN=aliases.map(norm);
@@ -3431,7 +3561,7 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
       {name:'Cúm gia cầm',aliases:['Cúm gia cầm'],cols:[11,12,13]},
       {name:'LMLM',aliases:['LMLM','Lở mồm long móng'],cols:[14,15,16]}
     ];
-    const communeList=vaccineRows.map(communeName).filter(Boolean);
+    const communeList=Array.from(new Set(vaccineRows.map(communeName).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'vi'));
     // Nếu API trả bảng KPI đã tổng hợp, các cột nguồn được giữ nguyên với tiền tố TIEM_PHONG_.
     function fillPeriodic(name,round,startRow,communes){
       const sh=ws(name), maxRow=startRow+Math.max(45,communes.length)-1;
@@ -3485,9 +3615,9 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
     const rabiesSh=ws('Tiêm phòng dại');extendRows(rabiesSh,49,6,4);
     vaccineRows.forEach((r,i)=>{
       if(i>=45)return;const xa=communeName(r);if(!xa)return;
-      const herd=findTokens(r,[['tong dan cho meo'],['tong dan trong dien tiem'],['tong dan']]);
-      const done=findTokens(r,[['dai','da tiem'],['so duoc tiem phong'],['so lieu da tiem']]);
-      const rate=findTokens(r,[['ty le tiem dai'],['ty le tiem phong']]);
+      const herd=findTokens(r,[['dai','tong dan cho meo'],['dai','tong dan trong dien tiem'],['tong dan cho meo']]);
+      const done=findTokens(r,[['dai','da tiem'],['dai','so duoc tiem phong'],['dai','so lieu da tiem']]);
+      const rate=findTokens(r,[['dai','ty le'],['ty le tiem dai']]);
       if(herd===null&&done===null&&rate===null)return;
       const rr=4+i;put(rabiesSh,rr,0,i+1);putText(rabiesSh,rr,1,xa);put(rabiesSh,rr,2,numVal(herd));put(rabiesSh,rr,3,numVal(done));put(rabiesSh,rr,4,rate!==null?numVal(rate):(numVal(herd)>0?numVal(done)/numVal(herd)*100:null));
     });
@@ -3549,6 +3679,22 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
     }
     // Ghi chú nguồn trong các sheet không có API chi tiết tương ứng, thay vì tự điền số liệu mẫu.
     putText(ws('TTHC'),1,0,'Từ ngày '+dateLabel(from)+' đến ngày '+dateLabel(to));
+    // Định dạng tỷ lệ: giá trị được lưu theo thang 0–100, vì vậy dùng mẫu 0.0"%" (không nhân 100 lần nữa).
+    function setNumberFormat(sheetName,rows,cols,fmt){const sh=ws(sheetName);for(const r of rows)for(const c of cols){const a=window.XLSX.utils.encode_cell({r,c});if(sh[a]&&typeof sh[a].v==='number')sh[a].z=fmt;}}
+    setNumberFormat('Tiêm phòng định kỳ đợt 1',Array.from({length:46},(_,i)=>i+3),[4,7,10,13,16],'0.0"%"');
+    setNumberFormat('Tiêm phòng định kỳ đợt 2',Array.from({length:46},(_,i)=>i+4),[3,6,9,12,15],'0.0"%"');
+    setNumberFormat('Tiêm phòng dại',Array.from({length:45},(_,i)=>i+4),[4],'0.0"%"');
+    setNumberFormat('TP VDNC',Array.from({length:45},(_,i)=>i+4),[4],'0.0"%"');
+    formatSheet('DTLCP','A1:T42',[6,24,13,13,14,14,14,15,14,15,14,15,14,15,14,15,16,16,17,20],[3,4,5],[0]);
+    formatSheet('Dịch bệnh khác','A1:K30',[6,24,14,13,15,16,14,14,15,16,28],[2,3],[0]);
+    formatSheet('TTHC','A1:C18',[6,48,20],[3],[0]);
+    formatSheet('KSGM','A1:F50',[6,24,17,17,17,17],[3],[0]);
+    formatSheet('TP VDNC','A1:F49',[6,24,23,23,18,30],[3],[0]);
+    formatSheet('Tiêm phòng dại','A1:F50',[6,24,23,23,18,30],[3],[0]);
+    formatSheet('Tiêm phòng định kỳ đợt 1','A1:Q49',[6,23,18,18,16,21,18,16,18,18,16,18,18,16,19,18,16],[2],[0]);
+    formatSheet('Tiêm phòng định kỳ đợt 2','A1:P50',[23,18,18,16,21,18,16,18,18,16,18,18,16,19,18,16],[3],[0]);
+    formatSheet('Phun phòng đợt 1','A1:H49',[6,24,14,16,20,24,32,10],[3],[0]);
+    formatSheet('Phun phòng đợt 2','A1:H48',[6,24,14,16,20,24,32,10],[2],[0]);
     const safeFrom=from.replace(/-/g,''),safeTo=to.replace(/-/g,'');
     window.XLSX.writeFile(wb,'Bang_so_lieu_thu_y_'+safeFrom+'_den_'+safeTo+'.xlsx');
   }
@@ -3864,8 +4010,19 @@ html, body { max-width:100%; }
     const roundLabel=round===0?'':(' dot '+round);
     const prefix='kpi '+(round===0?'vdnc':round===3?'dai':'');
     if(round===3){
-      if(kind==='plan')return num(value(row,['KPI_Dại - Tổng đàn chó mèo','Tổng đàn chó mèo','Tổng đàn trong diện tiêm']));
-      if(kind==='done')return num(value(row,['KPI_Dại - Đã tiêm','Dại - Đã tiêm','Số được tiêm phòng','Số liều đã tiêm']));
+      // Tên cột nguồn có thể kèm đơn vị (con), xuống dòng hoặc dấu câu.
+      if(kind==='plan'){
+        const direct=value(row,['KPI_Dại - Tổng đàn chó mèo','Tổng đàn chó mèo','Tổng đàn trong diện tiêm']);
+        if(direct!==null)return num(direct);
+        const byTokens=fieldBy(row,['tong dan','cho meo']) ?? fieldBy(row,['tong dan trong dien tiem']);
+        return byTokens===null?0:num(byTokens);
+      }
+      if(kind==='done'){
+        const direct=value(row,['KPI_Dại - Đã tiêm','Dại - Đã tiêm','Số được tiêm phòng','Số liều đã tiêm']);
+        if(direct!==null)return num(direct);
+        const byTokens=fieldBy(row,['so duoc tiem phong']) ?? fieldBy(row,['dai','da tiem']) ?? fieldBy(row,['so lieu','da tiem']);
+        return byTokens===null?0:num(byTokens);
+      }
       return null;
     }
     const directRound=round===0?'vdnc':('dot '+round);
@@ -3890,7 +4047,39 @@ html, body { max-width:100%; }
   function percent(done,plan){return plan>0?done/plan*100:0;}
   function countRows(rows, round){
     let plan=0,done=0,complete=0,started=0,hasPlan=0;
-    rows.forEach(r=>{const p=metric(r,round,'plan'),d=metric(r,round,'done');plan+=p;done+=d;if(p>0){hasPlan++;if(d>=p)complete++;if(d>0&&d<p)started++;}});
+    rows.forEach(r=>{
+      const p=metric(r,round,'plan'),d=metric(r,round,'done');
+      plan+=p; done+=d;
+      if(p<=0)return;
+      hasPlan++;
+      // Một xã chỉ hoàn thành khi TỪNG loại vắc xin có kế hoạch đều đạt kế hoạch.
+      // Không cho số tiêm vượt kế hoạch ở loại này bù cho loại khác còn thiếu.
+      const headers=keysOf(r);
+      const normHeader=h=>norm(h).replace(/\bke hoach\b/g,' ').replace(/\bkh\b/g,' ').replace(/\bda tiem\b/g,' ').replace(/\bso duoc tiem\b/g,' ').replace(/\bthuc hien\b/g,' ').replace(/\s+/g,' ').trim();
+      const plans=[];
+      headers.forEach(k=>{
+        const n=norm(k);
+        const inRound=round===0?n.includes('vdnc'):n.includes('dot '+round)&&!n.includes('vdnc');
+        if(!inRound)return;
+        const isPlan=/(^| )(kh|ke hoach)( |$)/.test(n)||n.endsWith(' kh');
+        if(!isPlan)return;
+        const base=normHeader(k);
+        const doneKey=headers.find(other=>{
+          const no=norm(other);
+          const isDone=no.includes('da tiem')||no.includes('so duoc tiem')||no.includes('thuc hien');
+          return isDone&&normHeader(other)===base;
+        });
+        plans.push({p:num(r[k]),d:doneKey?num(r[doneKey]):0});
+      });
+      const planned=plans.filter(x=>x.p>0);
+      if(planned.length){
+        if(planned.every(x=>x.d>=x.p))complete++;
+        else if(planned.some(x=>x.d>0))started++;
+      }else if(d>=p){
+        // Dự phòng nếu API đã trả sẵn các cột KPI tổng hợp.
+        complete++;
+      }else if(d>0){started++;}
+    });
     return {plan,done,complete,started,hasPlan,rate:percent(done,plan)};
   }
   function render(rows){
