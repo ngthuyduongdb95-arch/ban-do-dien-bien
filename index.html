@@ -2446,28 +2446,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Nội dung nền lấy nguyên văn từ 02 mẫu Word đã cung cấp. Chỉ phần diễn biến dịch bệnh
     // được thay bằng số liệu API; các hoạt động khác giữ nguyên mẫu, không tự suy diễn số liệu.
     const monthTemplate = ["1. Tình hình dịch bệnh", "Bệnh Dại: phát hiện 01 trường hợp chó nghi dại cắn người trên địa bàn Điện Biên Phủ; Phòng đã phối hợp với Trung tâm dịch vụ tổng hợp phường giám sát, lấy mẫu, gửi xét nghiệm; kết quả kết quả mẫu dương tính với vi rút Dại. Đồng thời, thông báo và phối hợp với cơ quan y tế tuyên truyền, vận động, hướng dẫn người bị chó dại cào, cắn đến cơ sở y tế để điều trị dự phòng.", "Bệnh Dịch tả lợn Châu phi: từ ngày 15/7/2025 đến ngày 15/8/2026 xảy ra tại 693 hộ thuộc 186 thôn, bản của 25 xã, phường với 2.478 con lợn mắc bệnh và chết, trọng lượng tiêu huỷ 129.259kg; Luỹ kế từ đầu năm đến nay, dịch bệnh xảy ra tại 3.182 hộ thuộc 531 thôn, bản của 34 xã, phường tổng lợn chết, tiêu hủy 13.365 con, trọng lượng tiêu huỷ là 696.087 kg, đến thời điểm hiện tại có 11/34 xã đã qua 21 ngày không phát sinh lợn mắc bệnh.", "Nhận định tình hình dịch: Nguy cơ dịch bệnh tiếp tục phát sinh trong thời gian tới là rất cao do vi rút DTLCP đã lưu hành khắp nơi, trên địa bàn tỉnh chăn nuôi nhỏ lẻ chiếm trên 95%, khó áp dụng các biện pháp an toàn sinh học; vi rút DTLCP lưu hành trên địa bàn tỉnh chủ yếu là vi rút tái tổ hợp genotyp I/II trong khi hiện nay vắc xin DTLCP chỉ có tác dùng với vi rút DTLCP chủng genotyp II.", "Bệnh Cúm gia cầm (CGC): Trong tháng dịch bệnh xảy ra tại 02 hộ thuộc 02 thôn, bản của 02 xã, phường với tổng 1.877 con gia cầm mắc bệnh và chết, trọng lượng tiêu huỷ 4.175 kg. Luỹ kế từ đầu năm đến nay, dịch bệnh xảy ra tại 14 hộ thuộc 10 thôn, bản của 05 xã, phường (Thanh Yên, Thanh Nưa, Nậm Nèn, Mươngg Thanh, Tủa Chùa) với tổng gia cầm chết, tiêu hủy là 17.848 con, trọng lượng tiêu huỷ 21.329 kg. Đến thời điểm hiện tại có 03/05 xã đã qua 21 ngày không phát sinh gia cầm mắc bệnh.", "Bệnh Viêm da nổi cục (VDNC): Trong tháng dịch, bệnh xảy ra tại 15 hộ thuộc 09 thôn, bản của 04 xã, phường với tổng số 27 con bò, bê mắc bệnh; trong đó 03 con bò, bê chết, tiêu hủy, trọng lượng tiêu huỷ là 245 kg. Luỹ kế từ đầu năm đến nay, dịch bệnh xảy ra tại 46 hộ thuộc 16 thôn, bản của 04 xã, phường (Sam Mứn, Núa Ngam, Mường Nhà, Điện Biên Phủ) với tổng gia súc mắc bệnh là 90 con bò, bê; trong đó 06 con bò, bê chết, tiêu hủy, trọng lượng tiêu huỷ 433 kg.", "2. Công tác phòng chống dịch bệnh đã và đang triển khai", "2.1. Tham mưu, chỉ đạo", "Tiếp tục căn cứ tình hình dịch bệnh trên địa bàn và văn bản chỉ đạo của Chính phủ, Bộ Nông nghiệp và Môi trường, Cục Chăn nuôi và Thú y để tham mưu kịp thời các văn bản chỉ đạo phòng chống dịch bệnh động vật.", "2.2. Giám sát dịch bệnh", "Phòng phối hợp với UBND các xã, phường, cơ quan, tổ chức có liên quan tiếp tục theo dõi, giám sát chặt chẽ diễn biến hình dịch bệnh trên đàn vật nuôi đặc biệt tại các ổ dịch, ổ dịch cũ, khu vực nguy cơ cao, nhằm phát hiện, xử lý kịp thời, hạn chế tối đa dịch bệnh lây lan ra diện rộng; trong tháng đã tiếp nhận và gửi 07 mẫu bệnh phẩm xét nghiệm vi rút gây bệnh DTLCP, 01 mẫu bệnh phẩm xét nghiệm vi rút gây bệnh Dại, 01 mẫu bệnh phẩm xét nghiệm vi rút gây bệnh Cúm gia cầm H5N1; 01 mẫu bênh phẩm xét nghiệm vi rút gây bệnh VDNC (trong đó 06 mẫu dương tính với vi rút DTLCP, 01 mẫu dương tính với vi rút gây bệnh Dại, 01 mẫu dương tính với vi rút cúm gia cầm H5N1, 01 mẫu dương tính với vi rút cúm VDNC).", "Phối hợp với Chi cục Chăn nuôi và Thú y vùng I thực hiện lấy mẫu giám sát bệnh Viêm da nổi cục vòng 1 với tổng số 28 mẫu của 28 con trâu, bò thuộc 04 thôn, bản trên địa bàn phường Điện Biên Phủ và xã Mường Phăng; hiện đang chờ kết quả xét nghiệm", "2.3. Công tác tiêm phòng vắc xin", "Tiêm phòng vắc xin dại: trên địa bàn tỉnh hiện nay có 27/45 xã đã và đang thực hiện tiêm phòng vắc xin dại với tổng số vắc xin tiêm được là 28.037 liều, đạt 29,17 % so với tổng đàn; Trong đó: 20/45 xã, phường đã triển khai xong tiêm phòng, tỉ lệ tiêm phòng đạt từ 43,89% - 88,34% so với tổng đàn; 7/45 xã, phường đang triển khai thực hiện.", "Tiêm phòng các loại vắc xin từ nguồn vốn hỗ trợ nông nghiệp của tỉnh: 45/45 xã phường đã và đang triển khai tiêm phòng cho đàn gia súc, gia cầm với tổng số vắc xin đã tiêm được trên toàn tỉnh đến thời điểm báo cáo là 415.797 liều, đạt 96,5% so với kế hoạch; Trong đó: 36/45 xã, phường đã hoàn thành công tác tiêm phòng vắc xin định kỳ đợt 1 đạt 100% theo kế hoạch; 09/45 xã đang triển khai tiêm phòng theo kế hoạch.", "2.4. Thực hiện tháng tổng vệ sinh, tiêu độc, khử trùng", "Tính đến thời điểm báo cáo, 27/45 xã, phường đã và đang triển khai thực hiện. Trong đó 23/45 xã, phường thực hiện phun xong vòng 4 vòng phun; xã Mường Lạn, Mường Chà và Tủa Chùa đang thực hiện phun vòng 3/4; xã Tủa Thàng đang thực hiện phun vòng 1.", "2.5. Kiểm dịch động vật, sản phẩm động vật, kiểm soát giết mổ, quản lý thuốc thú y, vệ sinh thú y, an toàn thực phẩm", "a. Kiểm dịch động vật, sản phẩm động vật xuất tỉnh", "Trong tháng, Chi cục đã thực hiện kiểm dịch động vật ra khỏi địa bàn tỉnh với tổng số 635 con lợn được vận chuyển đến tỉnh Phú Thọ, các lô hàng trên đảm bảo điều kiện vệ sinh thú y, an toàn thực phẩm.", "b. Kiểm soát động vật, sản phẩm động vật nhập tỉnh", "Trên địa bàn tỉnh hiện nay chưa có chốt kiểm dịch cố định nên không kiểm soát được số lượng động vật, sản phẩm động vật nhập vào tỉnh. Căn cứ theo số liệu báo cáo của cơ quan quản lý chuyên ngành thú y các tỉnh đã thực hiện kiểm dịch vận chuyển động vật, sản phẩm động vật vào địa bàn tỉnh Điện Biên, trong tháng đã nhập 2.100con gia cầm, 83 con lợn, 137 con trâu, bò, 1.895 kg thịt lợn, 2.826 kg thịt gia cầm, 11.908 kg sản phẩm động vật khác làm thực phẩm chủ yếu xuất phát từ các tỉnh Hà Nội, Nghệ An.", "c. Kiểm soát giết mổ", "Trung tâm dịch vụ các xã, phường thực hiện kiểm soát giết mổ; trong tháng thực hiện kiểm soát giết mổ được 6.650 con gia súc, gia cầm; trong 5.645 con lợn; 687 con trâu, bò và 318 con gia cầm. Luỹ kế từ đầu năm đến nay kết quả kiểm soát giết mổ được tổng số 40.591 con gia súc gia cầm. Trong đó 21.360 con lợn; 2.636 con trâu, bò; 16.476 con gia cầm và 119 con dê; không có trường hợp vi phạm phải xử lý.", "2.6. Quản lý thuốc thú y", "Trong tháng phòng Thú y thực hiện cấp, gia hạn 02 chứng chỉ hành nghề thú y; cấp, gia hạn 01 giấy chứng nhận đủ điều kiện buôn bán thuốc thú y.", "2.7. Thực hiện thủ tục hành chính", "Trong tháng đã thực hiện tổng số 08 thủ tục hành chính; trong đó cấp 05 hồ sơ giấy chứng nhận kiểm dịch vận chuyển động vật ra khỏi địa bàn tỉnh), 02 chứng chỉ hành nghề thú y, 01 giấy chứng nhận đủ điều kiện buôn bán thuốc thú y.", "3. Kế hoạch nhiệm vụ tháng 9 năm 2026", "Tiếp tục bám sát tình hình dịch bệnh trên địa bàn và các văn bản chỉ đạo của Trung ương để chủ động tham mưu kịp thời cho Sở Nông nghiệp và Môi trường, UBND tỉnh về chỉ đạo công tác phòng, chống dịch bệnh động vật.", "Phối hợp với UBND các xã, phường và các đơn vị chức năng tăng cường công tác phòng, chống dịch bệnh trên đàn vật nuôi, giám sát, lấy mẫu, gửi xét nghiệm nhằm phát hiện sớm, xử lý kịp thời đặc biệt đối với các bệnh nguy hiểm như bệnh: DTLCP, Cúm gia cầm, Dại…hạn chế tối đa dịch bệnh lây lan ra diện rộng; tăng cường kiểm soát động vật, sản phẩm động vật nhập vào địa bàn, phát hiện và xử lý nghiêm theo quy định các trường hợp vi phạm.", "Tiếp tục thực hiện các nhiệm vụ chuyên môn về kiểm dịch vận chuyển, kiểm tra vệ sinh thú y, an toàn thực phẩm, quản lý thuốc thú y.", "Phối hợp với các xã, phường, các đơn vị chức năng tăng cường kiểm soát động vật, sản phẩm động vật nhập vào địa bàn, phát hiện và xử lý nghiêm theo quy định các trường hợp vi phạm.", "Duy trì thực hiện quy chế phối hợp với cơ quan y tế cùng cấp theo Thông tư liên tịch số 16/2013/TTLT ngày 27/5/2013 của Bộ Y tế và Bộ Nông nghiệp và Môi trường về hướng dẫn phối hợp phòng, chống bệnh lây truyền từ động vật sang người.", "Thực hiện rà soát số lượng vắc xin Viêm da nổi cục đã đăng ký sử dụng năm 2026 của các xã, phương. Phối hợp tham mưu các thủ tục mua vắc xin Viêm da nổi cục để tiêm phòng cho đàn bò trên địa bàn tỉnh năm 2026.", "Tổ chức thực hiện lấy mẫu giám sát vệ sinh thú y, an toàn thực phẩm đối với sản phẩm động vật sử dụng làm thực phẩm đợt II năm 2026 theo kế hoạch số 404/KH-CCNN ngày 25/6/2026 của Chi cục Nông nghiệp.", "Phối hợp thực hiện lấy mẫu giám sát bệnh Viêm da nổi cục vòng 2 trên địa bàn tỉnh theo kế hoạch số 487/KH-CCNN ngày 05/8/2026 của Chi cục Nông nghiệp.", "Trên đây là báo cáo kết quả thực hiện công tác thú y tháng 8 năm 2026 của Phòng Thú y./."];
-    const periodTemplate = [
-      "1. Tình hình dịch bệnh động vật (số liệu từ kỳ báo cáo)",
-      "",
-      "",
-      "",
-      "2. Công tác phòng, chống dịch đã và đang thực hiện",
-      "a. Tham mưu, chỉ đạo",
-      "Trong kỳ, cập nhật danh mục văn bản chỉ đạo đã ban hành theo sổ văn bản đi; hệ thống hiện chưa kết nối nguồn danh mục văn bản nên không tự điền số, ký hiệu hoặc ngày ban hành.",
-      "b. Giám sát dịch bệnh",
-      "Phối hợp với UBND các xã, phường tiếp tục theo dõi, giám sát chặt chẽ diễn biến dịch bệnh trên đàn vật nuôi, nhất là tại ổ dịch, ổ dịch cũ và khu vực nguy cơ cao; phát hiện, xử lý kịp thời, hạn chế dịch bệnh lây lan.",
-      "Trong kỳ đã tiếp nhận và gửi 04 mẫu xét nghiệm bệnh DTLCP; kết quả 04/04 mẫu dương tính với vi rút DTLCP chủng genotype tái tổ hợp I+II. Cần đối chiếu phiếu trả kết quả xét nghiệm trước khi phát hành báo cáo.",
-      "c. Công tác tiêm phòng vắc xin, vệ sinh tiêu độc khử trùng",
-      "Số liệu tiêm phòng định kỳ đợt 1, đợt 2, bệnh Dại và VDNC chỉ được đưa vào báo cáo khi API trả về dữ liệu nguồn theo xã; nếu chưa có dữ liệu, không tự thay bằng số liệu kỳ trước.",
-      "Kết quả vệ sinh, tiêu độc, khử trùng môi trường được tổng hợp theo số liệu cập nhật của từng xã; không dùng số liệu kỳ trước để thay thế.",
-      "3. Kế hoạch kỳ tiếp theo",
-      "3.1. UBND các xã, phường",
-      "Tăng cường kiểm tra, giám sát tình hình dịch bệnh trên đàn vật nuôi; chủ động phát hiện, khoanh vùng và xử lý ổ dịch theo quy định, đặc biệt đối với DTLCP, CGC và VDNC.",
-      "Tổ chức tiêm phòng theo kế hoạch; rà soát, hoàn thiện chứng từ, cập nhật đầy đủ số liệu tiêm phòng và vệ sinh tiêu độc, khử trùng trên biểu mẫu dùng chung.",
-      "3.2. Chi cục Nông nghiệp",
-      "Tiếp tục theo dõi tình hình dịch bệnh, phối hợp với UBND các xã, phường giám sát, lấy mẫu, chẩn đoán và tham mưu xử lý kịp thời các ổ dịch; cập nhật số liệu và thực hiện chế độ báo cáo theo quy định.",
-      "Trên đây là báo cáo tình hình dịch bệnh động vật trên địa bàn tỉnh Điện Biên trong kỳ báo cáo./."
-    ];
+    const periodTemplate = ["1. Tình hình dịch bệnh động vật (số liệu từ 05/9/2026 đến 14/9/2026)", "Bệnh Dịch tả lợn Châu Phi (DTLCP): trong kỳ dịch bệnh xảy ra tại 118 hộ chăn nuôi ở 54 thôn bản, thuộc 20 xã, phường. Số lợn mắc bệnh đã tiêu huỷ 338 con, giảm 27% so với kỳ báo cáo trước, trọng lượng chết và tiêu huỷ 17.478 kg, giảm 31,84% so với kỳ báo cáo trước. Lũy kế từ 01/01/2026 đến nay dịch bệnh xảy ra tại 3.522 hộ chăn nuôi ở 562 thôn bản, thuộc 34 xã, phường với tổng số lợn mắc bệnh và tiêu hủy trên địa bàn tỉnh là 14.697 con, tổng trọng lượng 763.817 kg. Đến thời điểm hiện tại, 16 xã đã qua 21 ngày không phát sinh dịch bệnh, trong đó có 06 xã (Pa Ham, Mường Ảng, Tìa Dình, Búng Lao, Chà Tở và Nà Bủng) đã công bố hết dịch. (Chi tiết theo phụ lục 01 đính kèm).", "Bệnh Cúm gia cầm (CGC): Trong kỳ, không phát sinh ổ dịch nào. Luỹ kế từ 08/5/2026 đến nay, bệnh CGC xảy ra tại 16 hộ gia đình thuộc 10 thôn, bản của 05 xã, phường (Mường Thanh, Nậm Nèn, Tủa Chùa, Thanh Nưa và Thanh Yên). Tổng số gia cầm chết và tiêu huỷ 18.064 con, trọng lượng 21.718 kg, tiêu huỷ 4,6 kg trứng gia cầm các loại. Đến thời điểm hiện tại, 05/05 xã đã qua 21 ngày không phát sinh dịch bệnh.", "Bệnh Viêm da nổi cục (VDCN): Trong kỳ, bệnh dịch xảy ra tại 01 hộ thuộc bản Na Vai, xã Sam Mứn với 01 con bò, đã chết. Luỹ kế từ 26/5/2026 đến nay, bệnh VDNC xảy ra tại 44 hộ gia đình thuộc 14 thôn, bản tại 03 xã, phường (Núa Ngam, Sam Mứn và Điện Biên Phủ) với tổng số trâu bò mắc bệnh 92 con, chết 06 con.", "2. Công tác phòng, chống dịch đã và đang thực hiện", "a. Tham mưu, chỉ đạo", "Chi cục thường xuyên phối hợp với các xã, phường tổ chức triển khai các biện pháp phòng, chống dịch bệnh theo quy định của Luật Thú y, thông tư hướng dẫn thi hành Luật, các văn bản chỉ đạo của Chính phủ, Bộ Nông nghiệp và Môi trường, UBND tỉnh, hướng dẫn, chỉ đạo của Sở Nông nghiệp và Môi trường; tăng cường kiểm tra giám sát dịch bệnh tại cơ sở nhằm phát hiện và tham mưu xử lý các ổ dịch kịp thời khi có phát sinh.", "Trong kỳ, tham mưu để Sở Nông nghiệp và Môi trường ban hành 05 văn bản, cụ thể:", "- Công văn số 6256/SNNMT-CCNN ngày 09/9/2026 Ban hành công văn triển khai Tháng tổng vệ sinh, khử trùng, tiêu độc môi trường và khẩn trương tiêm phòng vắc xin cho đàn vật nuôi đợt 2 năm 2026", "- Công văn số 6257/SNNMT-CCNN ngày 09/9/2026 V/v tăng cường kiểm soát giết mổ, kiểm tra vệ sinh thú y đảm bảo an toàn thực phẩm đối với sản phẩm có nguồn gốc động vật cung cấp cho các trường học", "- Báo cáo số 6358/BC-SNNMT ngày 13/9/2026 Tình hình thiệt hại và nhu cầu kinh phí hỗ trợ sản xuất nông nghiệp do thiên tai, dịch bệnh trên động vật trên địa bàn tỉnh Điện Biên", "- Báo cáo số 6411/BC-SNNMT ngày 14/9/2026 Tình hình thiệt hại và nhu cầu kinh phí hỗ trợ sản xuất nông nghiệp do thiên tai, dịch bệnh trên động vật trên địa bàn tỉnh Điện Biên (bản đổi lại)", "- Công văn số 6409/SMMNT-CCNN ngày 14/9/2026 Ban hành Báo cáo tổng kết thi hành Luật Thú y năm 2015 và Luật Chăn nuôi năm 2018 trên địa bàn tỉnh", "Trong kỳ, tham mưu để Chi cục Nông nghiệp ban hành 02 văn bản, cụ thể:", "- Kế hoạch số 564/KH-CCNN ngày 08/9/2026 Lấy mẫu giám sát sau tiêm vắc xin phòng bệnh Lở mồm long móng trên địa bàn xã Núa Ngam và xã Sáng Nhè", "- Kế hoạch số 561/KH-CCNN ngày 08/9/2026 Kiểm tra thực hiện công tác tiêm phòng vắc xin và phòng, chống dịch bệnh gia súc, gia cầm trên địa bàn các xã Nà Hỳ, Nà Bủng, Si Pa Phìn", "b. Giám sát dịch bệnh", "Phối hợp với UBND các xã, phường tiếp tục tổ chức theo dõi, giám sát chặt chẽ diễn biến hình dịch bệnh trên đàn vật nuôi đặc biệt tại các ổ dịch, ổ dịch cũ, khu vực nguy cơ cao, nhằm phát hiện, xử lý kịp thời, hạn chế tối đa dịch bệnh lây lan ra diện rộng", "Thực hiện lấy mẫu giám sát sau tiêm vắc xin phòng bệnh Lở mồm long móng trên địa bàn xã Núa Ngam", "Trong kỳ đã thực hiện tiếp nhận và gửi 04 mẫu xét nghiệm. Trong đó 04 mẫu xét nghiệm bệnh DTLCP, kết quả 04/04 mẫu xét nghiệm dương tính với vi rút DTLCP chủng gennotyp tái tổ hợp I+II.", "c. Công tác tiêm phòng vắc xin, vệ sinh tiêu độc khử trùng", "Tiêm phòng vắc xin dại: 33/45 xã đã và đang thực hiện tiêm phòng vắc xin dại. Trong đó: 27/33 xã đã hoàn thành công tác tiêm phòng vắc xin dại, tỉ lệ tiêm phòng đạt 43,89% - 90,74% so với tổng đàn; 06/33 xã, phường đang triển khai thực hiện. Tổng số vắc xin đã tiêm toàn tỉnh 40.899 liều, đạt 42,55 % so với tổng đàn. (chi tiết tại phụ lục 03 đính kèm)", "Tiêm phòng các loại vắc xin LMLM, cúm gia cầm, Tụ huyết trùng trâu, bò, dịch tả lợn, nhiệt thán: 45/45 xã phường đã và đang triển khai tiêm phòng cho đàn gia súc, gia cầm. Trong đó:44/45 xã đã hoàn thành công tác tiêm phòng vắc xin định kỳ đợt 1; xã Sam Mứn đang triển khai tiêm phòng, đạt 98,2% KH. Tổng số vắc xin đã tiêm toàn tỉnh 430.520 liều, đạt 99,9% so với kế hoạch. (chi tiết tại phụ lục 05 đính kèm)", "Triển khai tháng tổng vệ sinh, tiêu độc, khử trùng môi trường chăn nuôi đợt 1 năm 2026: tính đến thời điểm báo cáo, 29/45 xã, phường đã và đang triển khai thực hiện. Trong đó 25/29 xã, phường thực hiện phun xong vòng 4/4 và đang hoàn thiện chứng từ; xã Chà Tở đang thực hiện phun vòng 4; xã Tủa Thàng và Mường Toong đang thực hiện phun vòng 2; xã Thanh An đang thực hiện phun vòng 1. (Chi tiết tại phụ lục 04 đính kèm)", "3. Kế hoạch kỳ tiếp theo", "3.1. UBND các xã, phường", "Tăng cường công tác kiểm tra, giám sát chặt chẽ tình hình dịch bệnh trên đàn vật nuôi, đặc biệt bệnh DTLCP, VDNC và CGC nhằm kịp thời phát hiện các dấu hiệu bất thường, ca bệnh nghi ngờ hoặc ổ dịch mới phát sinh. Qua đó, chủ động tham mưu triển khai các biện pháp xử lý, khoanh vùng, dập dịch hiệu quả, hạn chế tối đa dịch bệnh lây lan ra diện rộng, góp phần bảo vệ phát triển đàn đàn vật nuôi.", "Đối với xã đang có bệnh dịch DTLCP và CGC: chủ động bố trí kinh phí, vật tư, hóa chất để triển khai quyết liệt các giải pháp để xử lý dứt điểm các ổ dịch đang xảy ra trên địa bàn, hạn chế tối đa dịch bệnh lây lan diện rộng.", "Đối với xã đang có dịch hoặc phát hiện gia súc nghi mắc bệnh VDNC, khẩn trương rà soát, thống kê đàn gia súc mắc bệnh, nghi mắc bệnh; tổ chức khoanh vùng, xử lý ổ dịch, quản lý chặt chẽ việc mua bán, vận chuyển gia súc trong vùng dịch; truyên truyền hướng dẫn người chăn nuôi nuôi cách ly, chăm sóc, điều trị triệu chứng gia súc mắc bệnh; có biện pháp ngăn chặn, tiêu diệt động vật trung gian truyền bệnh (ruồi, muỗi, ve, mòng…)", "Tổ chức thực hiện trình tự, thủ tục hỗ trợ cơ sở sản xuất bị thiệt hại do dịch bệnh động vật; hàng tháng tổ chức thẩm định ít nhất một lần đối với hồ sơ đề nghị hỗ trợ được tiếp nhận trong tháng đó theo quy định.", "Ban hành kế hoạch, bố trí kinh phí mua hóa chất, vật tư, dụng cụ và tổ chức thực hiện “Tháng tổng vệ sinh, khử trùng, tiêu độc môi trường đợt 1 năm 2026”;", "Hoàn thiện chứng từ tiêm phòng các loại vắc xin từ nguồn vốn hỗ trợ nông nghiệp của tỉnh đợt 1 năm 2026gửi về Chi cục Nông nghiệp.", "Tổ chức triển khai tiêm phòng vắc xin Dại cho chó, mèo nuôi trên địa bàn; trong đó, các xã khu vực ổ dịch, khu vực II, khu vực III bố trí kinh phí hỗ trợ tiêm phòng vắc xin Dại cho chó, mèo nuôi trên địa bàn.", "Tiếp tục hướng dẫn các biện pháp chăn nuôi an toàn sinh học, vệ sinh tiêu độc khử trùng chuồng trại, không giấu dịch, không bán chạy động vật mắc bệnh. Phối hợp với cơ quan chuyên môn thú y thực hiện lấy mẫu xét nghiệm khi có động vật ốm, chết bất thường; xử lý ổ dịch kịp thời theo đúng quy trình, không để lây lan diện rộng.", "Kiểm tra, giám sát việc buôn bán, vận chuyển động vật và sản phẩm động vật trên địa bàn, nhằm phát hiện, ngăn chặn kịp thời và xử lý nghiêm các trường hợp buôn bán, vận chuyển, giết mổ động mắc bệnh, vứt xác lợn ra ngoài môi trường làm lây lan dịch bệnh và ô nhiễm môi trường.", "3.2. Chi cục Nông nghiệp", "Bám sát tình hình dịch bệnh trên địa bàn, các chỉ đạo của Chính phủ, Bộ Nông nghiệp và Môi trường, Cục Chăn nuôi và Thú y để chủ động tham mưu cho Sở Nông nghiệp và Môi trường, UBND tỉnh các văn bản chỉ đạo về phòng, chống dịch bệnh động vật.", "Tham mưu thực hiện các thủ tục mua vắc xin cho 45 xã, phường thực hiện tiêm phòng vắc xin VDNC cho đàn vật nuôi.", "Tiếp tục thực hiện hế hoạch lấy mẫu giám sát sau tiêm vắc xin LMLM trên đàn gia súc tại xã Núa Ngam và Sáng Nhè.", "Phối hợp với UBND các xã, phường tăng cường theo dõi, giám sát, phát hiện, lấy mẫu, chẩn đoán nhằm phát hiện sớm, xử lý kịp thời các ổ dịch bệnh nguy hiểm hạn chế tối đa dịch bệnh lây lan ra diện rộng; định kỳ báo cáo tình hình dịch bệnh và kết quả triển khai về Sở Nông nghiệp và Môi trường theo quy định.", "Phối hợp với các đơn vị liên quan thông tin, tuyên truyền, hướng dẫn người chăn nuôi các biện pháp phòng, chống dịch bệnh động vật và thủy sản trên địa bàn tỉnh. Duy trì thực hiện báo cáo cập nhật dịch bệnh động vật trên hệ thống phần mềm Vahis.", "Trên đây là báo cáo Tình hình dịch bệnh động vật trên địa bàn tỉnh Điện Biên từ 05/9/2026 đến 14/9/2026./."];
     function reportDiseaseSentence(item, monthly) {
       const code = String(item.code || "").toUpperCase();
       const name = item.name || ({DTLCP:"Bệnh Dịch tả lợn Châu Phi",CGC:"Bệnh Cúm gia cầm (CGC)",VDNC:"Bệnh Viêm da nổi cục (VDNC)",DAI:"Bệnh Dại"}[code] || code);
@@ -3303,12 +3282,12 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
     const data=raw.filter(r=>{
       const c=communeName(r); if(!c)return false;
       const v=norm(getField(r,['Loại vắc xin','Vắc xin','Bệnh','Loài vắc xin'])||'');
-      const herd=numVal(getField(r,['Tổng đàn trong diện tiêm','Tổng đàn chó mèo','Tổng đàn','Tổng đàn toàn tỉnh']));
-      const dosed=numVal(getField(r,['Dại - Đã tiêm','Số được tiêm phòng','Số liều đã tiêm','Số liều vc đã tiêm','Đã tiêm']));
+      const herd=numVal(getField(r,['Tổng đàn trong diện tiêm','Tổng đàn','Tổng đàn toàn tỉnh']));
+      const dosed=numVal(getField(r,['Số được tiêm phòng','Số liều đã tiêm','Số liều vc đã tiêm','Đã tiêm']));
       return (v.includes('dai')||((herd!==null||dosed!==null)&&norm(Object.keys(r).join(' ')).includes('dai')))&& (herd!==null||dosed!==null);
     });
     const aoa=[[title],[dateText],[],head];
-    if(data.length){data.forEach((r,i)=>{const herd=metric(r,['Tổng đàn trong diện tiêm','Tổng đàn chó mèo','Tổng đàn']);const dosed=metric(r,['Dại - Đã tiêm','Số được tiêm phòng','Số liều đã tiêm','Số liều vc đã tiêm','Đã tiêm']);const rate=metric(r,['Tỷ lệ tiêm Dại (%)','Tỷ lệ tiêm phòng','Tỷ lệ % theo tổng đàn','Tỷ lệ']);aoa.push([i+1,communeName(r),getField(r,['Loài vật nuôi'])||'Chó, mèo',getField(r,['Loại vắc xin','Vắc xin'])||'Dại',herd,dosed,rate,getField(r,['Ghi chú'])||'', '', '', '', '']);});}
+    if(data.length){data.forEach((r,i)=>{const herd=metric(r,['Tổng đàn trong diện tiêm','Tổng đàn']);const dosed=metric(r,['Số được tiêm phòng','Số liều đã tiêm','Đã tiêm']);const rate=metric(r,['Tỷ lệ tiêm phòng','Tỷ lệ % theo tổng đàn','Tỷ lệ']);aoa.push([i+1,communeName(r),getField(r,['Loài vật nuôi'])||'Chó, mèo',getField(r,['Loại vắc xin','Vắc xin'])||'Dại',herd,dosed,rate,getField(r,['Ghi chú'])||'', '', '', '', '']);});}
     else {
       const rate=clean($('kpiDaiDone')?.textContent); const active=clean($('kpiDaiStartedVisible')?.textContent);
       aoa.push([1,'TỔNG HỢP KPI TOÀN TỈNH','Chó, mèo','Dại','','',rate||'',(active?active+'; ':'')+'KPI tại thời điểm xuất, không lọc theo kỳ. API chưa có chi tiết theo xã, tổng đàn và số liều đã tiêm.','','','','']);
@@ -3320,11 +3299,11 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
   function buildPeriodicVaccineSheet(raw, to){
     const head=['TT','Tên xã, phường','Nhiệt thán (liều)','Đã tiêm','Tụ huyết trùng trâu bò (liều)','Đã tiêm','VX Dịch tả lợn (liều)','Đã tiêm','VX Cúm gia cầm (liều)','Đã tiêm','Vắc xin Lở mồm long móng (liều)','Đã tiêm','Tổng liều theo KH','Đã tiêm','% theo KH','Ghi chú','','',''];
     const fields=[
-      ['Nhiệt thán (liều)','Nhiệt thán Đợt 1 - KH','Nhiệt thán - KH','Nhiệt thán','Nhiệt thán theo kế hoạch'],['Đã tiêm Nhiệt thán','Nhiệt thán Đợt 1 - Đã tiêm','Nhiệt thán - Đã tiêm','Nhiệt thán đã tiêm','Đã tiêm nhiệt thán'],
-      ['Tụ huyết trùng trâu bò (liều)','THT trâu bò Đợt 1 - KH','Tụ huyết trùng trâu bò Đợt 1 - KH','Tụ huyết trùng trâu bò','THT trâu bò'],['Đã tiêm Tụ huyết trùng trâu bò','THT trâu bò Đợt 1 - Đã tiêm','Tụ huyết trùng trâu bò Đợt 1 - Đã tiêm','Tụ huyết trùng trâu bò đã tiêm','Đã tiêm THT'],
-      ['VX Dịch tả lợn (liều)','Dịch tả lợn Đợt 1 - KH','Dịch tả lợn - KH','Dịch tả lợn theo kế hoạch','Vắc xin dịch tả lợn'],['Đã tiêm Dịch tả lợn','Dịch tả lợn Đợt 1 - Đã tiêm','Dịch tả lợn - Đã tiêm','Dịch tả lợn đã tiêm','Đã tiêm VX DTL'],
-      ['VX Cúm gia cầm (liều)','Cúm gia cầm Đợt 1 - KH','Cúm gia cầm - KH','Cúm gia cầm theo kế hoạch','Vắc xin cúm gia cầm'],['Đã tiêm Cúm gia cầm','Cúm gia cầm Đợt 1 - Đã tiêm','Cúm gia cầm - Đã tiêm','Cúm gia cầm đã tiêm','Đã tiêm VX CGC'],
-      ['Vắc xin Lở mồm long móng (liều)','LMLM Đợt 1 - KH','LMLM - KH','Lở mồm long móng Đợt 1 - KH','Lở mồm long móng theo kế hoạch','Vắc xin LMLM'],['Đã tiêm Lở mồm long móng','LMLM Đợt 1 - Đã tiêm','LMLM - Đã tiêm','Lở mồm long móng Đợt 1 - Đã tiêm','Lở mồm long móng đã tiêm','Đã tiêm LMLM']
+      ['Nhiệt thán (liều)','Nhiệt thán','Nhiệt thán theo kế hoạch'],['Đã tiêm Nhiệt thán','Nhiệt thán đã tiêm','Đã tiêm nhiệt thán'],
+      ['Tụ huyết trùng trâu bò (liều)','Tụ huyết trùng trâu bò','THT trâu bò'],['Đã tiêm Tụ huyết trùng trâu bò','Tụ huyết trùng trâu bò đã tiêm','Đã tiêm THT'],
+      ['VX Dịch tả lợn (liều)','Dịch tả lợn theo kế hoạch','Vắc xin dịch tả lợn'],['Đã tiêm Dịch tả lợn','Dịch tả lợn đã tiêm','Đã tiêm VX DTL'],
+      ['VX Cúm gia cầm (liều)','Cúm gia cầm theo kế hoạch','Vắc xin cúm gia cầm'],['Đã tiêm Cúm gia cầm','Cúm gia cầm đã tiêm','Đã tiêm VX CGC'],
+      ['Vắc xin Lở mồm long móng (liều)','Lở mồm long móng theo kế hoạch','Vắc xin LMLM'],['Đã tiêm Lở mồm long móng','Lở mồm long móng đã tiêm','Đã tiêm LMLM']
     ];
     const data=raw.filter(r=>{
       if(!communeName(r))return false;
@@ -3368,21 +3347,14 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
     const y=(parseISODate(to)||new Date()).getFullYear();
     const ytdStart=`${y}-01-01`;
     const enc=x=>encodeURIComponent(x);
-    const [periodReport,ytdReport,trendResult,tiemPhongResult]=await Promise.all([
+    const [periodReport,ytdReport,trendResult]=await Promise.all([
       fetchOptional(base+'?type=report&from='+enc(from)+'&to='+enc(to)),
       fetchOptional(base+'?type=report&from='+enc(ytdStart)+'&to='+enc(to)),
-      fetchOptional(base+'?type=trend'),
-      fetchOptional(base+'?type=tiemphong')
+      fetchOptional(base+'?type=trend')
     ]);
     const trendRows=arrayFromApi(trendResult);
-    // Dùng API nguồn tiêm phòng riêng, tuyệt đối không lấy các hàng GIS đang hiển thị trên bản đồ.
-    const vaccineRows=arrayFromApi(tiemPhongResult);
-    const rawRows=vaccineRows;
-    const mapRows=getLiveRows();
-    const detailSource=trendRows; // Chỉ lọc dịch bệnh theo ngày từ API chuyên dụng.
-    if(!tiemPhongResult || tiemPhongResult.success===false){
-      console.warn('API tiêm phòng chưa trả dữ liệu:',tiemPhongResult?.error||'không có phản hồi');
-    }
+    const rawRows=getLiveRows();
+    const detailSource=trendRows; // Chỉ lọc theo kỳ từ API dữ liệu dịch bệnh theo ngày; không dùng KPI tổng hợp thay thế chi tiết.
     const periodStart=iso(from),periodEnd=iso(to),ytdEnd=iso(to);
     const book=window.XLSX.utils.book_new();
     for(const spec of [
@@ -3398,7 +3370,7 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
     }
     window.XLSX.utils.book_append_sheet(book,buildRabiesSheet(rawRows,to),'VC Dại');
     window.XLSX.utils.book_append_sheet(book,buildPeriodicVaccineSheet(rawRows,to),'Tiêm phòng định kỳ đợt 1');
-    window.XLSX.utils.book_append_sheet(book,buildSpraySheet(mapRows,from,to),'Phun phòng đợt 1');
+    window.XLSX.utils.book_append_sheet(book,buildSpraySheet(rawRows,from,to),'Phun phòng đợt 1');
     const safeFrom=from.replace(/-/g,''); const safeTo=to.replace(/-/g,'');
     window.XLSX.writeFile(book,'Phu_luc_DBĐV_'+safeFrom+'_den_'+safeTo+'.xlsx');
   }
@@ -3697,6 +3669,83 @@ html, body { max-width:100%; }
     scheduleRefresh();
   });
 })();
+</script>
+
+<script id="webgis-kpi-tiemphong-from-summary-sheet">
+
+(function(){
+  'use strict';
+  const endpoint = 'https://script.google.com/macros/s/AKfycbyRuJ9Wfv4HtWjMRT2Hox2-mOhBVRjyqLaHhpQjohPEkfHWNyjM004KgO3o7_4nRJtj/exec?type=tiemphong';
+  const $ = id => document.getElementById(id);
+  const num = v => {
+    if (typeof v === 'number' && Number.isFinite(v)) return v;
+    if (v === null || v === undefined || String(v).trim() === '') return 0;
+    const n = Number(String(v).replace(/%/g,'').replace(/,/g,''));
+    return Number.isFinite(n) ? n : 0;
+  };
+  const fmt = v => Math.round(v).toLocaleString('vi-VN');
+  function setText(id, value){ const el=$(id); if(el) el.textContent=value; }
+  function field(row, key){ return row && Object.prototype.hasOwnProperty.call(row,key) ? row[key] : null; }
+  function aggregate(rows, prefix, doneSuffix){
+    doneSuffix=doneSuffix||'Tổng đã tiêm';
+    let completed=0, started=0, plan=0, done=0, hasAny=false;
+    rows.forEach(r=>{
+      const status=String(field(r,prefix+' - Trạng thái')||'').trim().toLowerCase();
+      if(status==='hoàn thành') completed++;
+      if(status==='hoàn thành'||status==='đã triển khai') started++;
+      const p=num(field(r,prefix+' - Tổng KH'));
+      const d=num(field(r,prefix+' - '+doneSuffix));
+      if(p>0||d>0||status==='hoàn thành'||status==='đã triển khai') hasAny=true;
+      plan+=p; done+=d;
+    });
+    return {completed,started,plan,done,rate:plan>0?done/plan*100:null,hasAny};
+  }
+  async function loadKpi(){
+    try {
+      const response=await fetch(endpoint,{cache:'no-store'});
+      if(!response.ok) throw new Error('HTTP '+response.status);
+      const payload=await response.json();
+      if(!payload || payload.success!==true || !Array.isArray(payload.data)) throw new Error(payload&&payload.error?payload.error:'API KPI không hợp lệ');
+      const rows=payload.data;
+      const d1=aggregate(rows,'KPI_Đợt 1');
+      const d2=aggregate(rows,'KPI_Đợt 2');
+      const vd=aggregate(rows,'KPI_VDNC','Đã tiêm');
+      const rabiesTotal=rows.reduce((s,r)=>s+num(field(r,'KPI_Dại - Tổng đàn chó mèo')),0);
+      const rabiesDone=rows.reduce((s,r)=>s+num(field(r,'KPI_Dại - Đã tiêm')),0);
+      const rabiesStarted=rows.filter(r=>['đã triển khai','hoàn thành'].includes(String(field(r,'KPI_Dại - Trạng thái')||'').trim().toLowerCase())).length;
+      const rabiesRate=rabiesTotal>0?rabiesDone/rabiesTotal*100:null;
+      const totalCommunes=rows.filter(r=>String(field(r,'Tên xã')||'').trim()).length || 45;
+      if(d1.hasAny){
+        setText('kpiTpd1Done',fmt(d1.completed)+'/'+totalCommunes+' xã hoàn thành');
+        setText('kpiTpd1Plan',fmt(d1.plan)); setText('kpiTpd1Rate',d1.rate===null?'—':d1.rate.toFixed(1)+'%');
+        setText('kpiTpd1Started',d1.started+'/'+totalCommunes);
+      }
+      if(d2.hasAny){
+        setText('kpiTpd2Done',fmt(d2.completed)+'/'+totalCommunes+' xã hoàn thành');
+        setText('kpiTpd2Started',d2.started+'/'+totalCommunes); setText('kpiTpd2Rate',d2.rate===null?'—':d2.rate.toFixed(1)+'%');
+      }
+      if(vd.hasAny){
+        setText('kpiVdncDone',fmt(vd.completed)+'/'+totalCommunes+' xã hoàn thành');
+        setText('kpiVdncStarted',vd.started+'/'+totalCommunes); setText('kpiVdncRate',vd.rate===null?'—':vd.rate.toFixed(1)+'%');
+      }
+      if(rabiesTotal>0 || rabiesDone>0){
+        setText('kpiDaiDone',rabiesRate===null?'—% tổng đàn':rabiesRate.toFixed(1)+'% tổng đàn');
+        setText('kpiDaiStarted',rabiesStarted+'/'+totalCommunes);
+        setText('kpiDaiStartedVisible','Đang triển khai: '+rabiesStarted+' xã');
+        setText('kpiDaiRate',rabiesRate===null?'—':rabiesRate.toFixed(1)+'%');
+      }
+      document.dispatchEvent(new CustomEvent('webgis:tiemphong-kpi-loaded',{detail:{sheet:payload.sheet,count:rows.length}}));
+    } catch(err) {
+      console.error('Không tải được KPI tiêm phòng từ GIS_TIEM_PHONG_KPI:',err);
+      const card=document.querySelector('.card-vaccine-kpi');
+      if(card) card.title='Không tải được KPI từ sheet GIS_TIEM_PHONG_KPI. Kiểm tra API và dữ liệu sheet.';
+    }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',loadKpi,{once:true}); else loadKpi();
+  // Làm mới khi người dùng quay lại tab, tránh giữ KPI cũ quá lâu.
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)loadKpi();});
+})();
+
 </script>
 
 </body>
