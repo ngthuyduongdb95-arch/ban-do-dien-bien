@@ -3016,6 +3016,9 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
     webgis.style.removeProperty('grid-template-columns');
     side.style.removeProperty('height');
   }
+  function setTextIfChanged(el, value){
+    if(el && el.textContent !== value) el.textContent = value;
+  }
   function syncRabiesKpi(){
     const rate=document.getElementById('kpiDaiRate');
     const started=document.getElementById('kpiDaiStarted');
@@ -3026,12 +3029,13 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
     const startedText=(started?.textContent||'').trim();
     const validRate=rateText && rateText!=='—' && rateText!=='-';
     const validStarted=startedText && startedText!=='—/45' && startedText!=='—' && startedText!=='-';
-    if(validRate) done.textContent=/%|tổng đàn/i.test(rateText)?rateText:(rateText+'% tổng đàn');
-    else if(!done.textContent || done.textContent==='—/45 xã hoàn thành') done.textContent='—% tổng đàn';
+    // Chỉ ghi khi nội dung thay đổi; tránh kích hoạt MutationObserver lặp vô hạn.
+    if(validRate) setTextIfChanged(done, /%|tổng đàn/i.test(rateText)?rateText:(rateText+'% tổng đàn'));
+    else if(!done.textContent || done.textContent==='—/45 xã hoàn thành') setTextIfChanged(done, '—% tổng đàn');
     if(validStarted){
       const m=startedText.match(/^\s*(\d+)/);
-      startedOut.textContent='Đang triển khai: '+(m?m[1]:startedText)+' xã';
-    }else startedOut.textContent='Đang triển khai: — xã';
+      setTextIfChanged(startedOut, 'Đang triển khai: '+(m?m[1]:startedText)+' xã');
+    }else setTextIfChanged(startedOut, 'Đang triển khai: — xã');
   }
   window.addEventListener('resize',syncWebgisLayout);
   window.addEventListener('load',function(){syncWebgisLayout();syncRabiesKpi();});
@@ -3042,7 +3046,8 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
       ['.panel','.sidebar-kpi'].forEach(sel=>{const el=document.querySelector(sel);if(el)ro.observe(el);});
     }
     const observer=new MutationObserver(syncRabiesKpi);
-    ['kpiDaiRate','kpiDaiStarted','kpiDaiDone'].forEach(id=>{const el=document.getElementById(id);if(el)observer.observe(el,{childList:true,subtree:true,characterData:true});});
+    // Chỉ theo dõi đầu vào. Không theo dõi kpiDaiDone vì đây là đầu ra do hàm trên cập nhật.
+    ['kpiDaiRate','kpiDaiStarted'].forEach(id=>{const el=document.getElementById(id);if(el)observer.observe(el,{childList:true,subtree:true,characterData:true});});
   });
 })();
 </script>
