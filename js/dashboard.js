@@ -1,7 +1,7 @@
 
 // ======================================================
 // DASHBOARD.JS
-// Tổng quan và tải bảng số liệu theo từng KPI
+// Tổng quan và xem trước, tải bảng số liệu theo từng KPI
 // ======================================================
 
 (function () {
@@ -80,7 +80,10 @@
         if (el) el.textContent = value;
     }
 
-    // ================= BIỂU ĐỒ DASHBOARD =================
+    // ======================================================
+    // BIỂU ĐỒ DASHBOARD
+    // ======================================================
+
     const dashboardCharts = {};
 
     function renderDashboardCharts(rows) {
@@ -117,8 +120,10 @@
 
         if (dashboardCharts.xa) dashboardCharts.xa.destroy();
 
-        const oldChartXa = window.Chart.getChart(canvasXa);
-        if (oldChartXa) oldChartXa.destroy();
+        if (typeof window.Chart.getChart === "function") {
+            const oldChartXa = window.Chart.getChart(canvasXa);
+            if (oldChartXa) oldChartXa.destroy();
+        }
 
         dashboardCharts.xa = new window.Chart(canvasXa, {
             type: "bar",
@@ -162,8 +167,10 @@
 
         if (dashboardCharts.benh) dashboardCharts.benh.destroy();
 
-        const oldChartBenh = window.Chart.getChart(canvasBenh);
-        if (oldChartBenh) oldChartBenh.destroy();
+        if (typeof window.Chart.getChart === "function") {
+            const oldChartBenh = window.Chart.getChart(canvasBenh);
+            if (oldChartBenh) oldChartBenh.destroy();
+        }
 
         dashboardCharts.benh = new window.Chart(canvasBenh, {
             type: "bar",
@@ -195,7 +202,10 @@
         });
     }
 
-    // ================= XUẤT BẢNG SỐ LIỆU THEO KPI =================
+    // ======================================================
+    // CẤU HÌNH BẢNG DỮ LIỆU CHO CÁC KPI
+    // ======================================================
+
     const KPI_EXPORTS = {
         "card-dtlcp": {
             name: "Du_lieu_DTLCP",
@@ -210,9 +220,8 @@
                 ["Ngày cuối ghi nhận", "DTLCP_Ngày cuối"],
                 ["Số ngày", "DTLCP_Số ngày"]
             ],
-            include: row => hasHistory(
-                row, "DTLCP_Trạng thái", "DTLCP_Ổ dịch", "DTLCP_Chết"
-            )
+            include: row =>
+                hasHistory(row, "DTLCP_Trạng thái", "DTLCP_Ổ dịch", "DTLCP_Chết")
         },
 
         "card-cgc": {
@@ -228,9 +237,8 @@
                 ["Ngày cuối ghi nhận", "CGC_Ngày cuối"],
                 ["Số ngày", "CGC_Số ngày"]
             ],
-            include: row => hasHistory(
-                row, "CGC_Trạng thái", "CGC_Ổ dịch", "CGC_Chết"
-            )
+            include: row =>
+                hasHistory(row, "CGC_Trạng thái", "CGC_Ổ dịch", "CGC_Chết")
         },
 
         "card-vdnc": {
@@ -247,10 +255,14 @@
                 ["Ngày cuối ghi nhận", "VDNC_Ngày cuối"],
                 ["Số ngày", "VDNC_Số ngày"]
             ],
-            include: row => hasHistory(
-                row, "VDNC_Trạng thái", "VDNC_Ổ dịch",
-                "VDNC_Mắc", "VDNC_Chết"
-            )
+            include: row =>
+                hasHistory(
+                    row,
+                    "VDNC_Trạng thái",
+                    "VDNC_Ổ dịch",
+                    "VDNC_Mắc",
+                    "VDNC_Chết"
+                )
         },
 
         "card-dai": {
@@ -269,8 +281,11 @@
             ],
             include: row =>
                 hasHistory(
-                    row, "DAI_Trạng thái", "DAI_Ổ dịch",
-                    "DAI_Chết", "DAI_Tiêu hủy"
+                    row,
+                    "DAI_Trạng thái",
+                    "DAI_Ổ dịch",
+                    "DAI_Chết",
+                    "DAI_Tiêu hủy"
                 ) || numberValue(row["DAI_Mắc"]) > 0
         },
 
@@ -319,404 +334,537 @@
         }
     };
 
- 
-function installKpiDownloadButtons() {
-    installKpiPreviewStyles();
+    // ======================================================
+    // THÊM NÚT XEM TRƯỚC VÀO CÁC THẺ KPI
+    // ======================================================
 
-    Object.keys(KPI_EXPORTS).forEach(className => {
-        const card = document.querySelector(".summary-card." + className);
-        if (!card || card.querySelector(".kpi-download-btn")) return;
+    function installKpiDownloadButtons() {
+        installKpiPreviewStyles();
 
-        const cfg = KPI_EXPORTS[className];
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "kpi-download-btn";
-        btn.textContent = "Xem trước bảng số liệu";
-        btn.addEventListener("click", () => openKpiPreview(cfg));
-        card.appendChild(btn);
-    });
-}
+        Object.keys(KPI_EXPORTS).forEach(className => {
+            const card = document.querySelector(".summary-card." + className);
+            if (!card || card.querySelector(".kpi-download-btn")) return;
 
-function installKpiPreviewStyles() {
-    if (document.getElementById("kpi-preview-style")) return;
+            const cfg = KPI_EXPORTS[className];
+            const btn = document.createElement("button");
 
-    const style = document.createElement("style");
-    style.id = "kpi-preview-style";
-    style.textContent = `
-        .kpi-download-btn {
-            display:block;width:100%;margin-top:8px;padding:8px;
-            border:1px solid #cbd5e1;border-radius:7px;
-            background:#f8fafc;color:#24465a;
-            font-size:12px;font-weight:700;cursor:pointer;
-        }
-        .kpi-download-btn:hover { background:#eaf3f8; }
+            btn.type = "button";
+            btn.className = "kpi-download-btn";
+            btn.innerHTML =
+                '<i class="fa-solid fa-table-list" aria-hidden="true"></i>' +
+                '<span>Xem trước bảng số liệu</span>';
 
-        .kpi-preview-overlay {
-            position:fixed;inset:0;z-index:99999;
-            display:flex;align-items:center;justify-content:center;
-            padding:12px;background:rgba(15,23,42,.65);
-        }
-        .kpi-preview-modal {
-            display:flex;flex-direction:column;
-            width:min(1200px,100%);max-height:94vh;
-            overflow:hidden;background:#fff;color:#1f2937;
-            border-radius:12px;box-shadow:0 15px 50px #0004;
-            font-family:Arial,sans-serif;
-        }
-        .kpi-preview-head {
-            display:flex;justify-content:space-between;gap:12px;
-            align-items:flex-start;padding:16px 20px;
-            border-bottom:1px solid #e2e8f0;
-        }
-        .kpi-preview-title {
-            margin:0 0 6px;font-size:19px;color:#17384e;
-        }
-        .kpi-preview-subtitle {
-            margin:0;font-size:12px;color:#64748b;
-        }
-        .kpi-preview-close {
-            border:0;background:none;font-size:26px;
-            color:#64748b;cursor:pointer;
-        }
-        .kpi-preview-toolbar {
-            display:flex;align-items:center;justify-content:space-between;
-            gap:10px;flex-wrap:wrap;padding:12px 20px;
-        }
-        .kpi-preview-search {
-            box-sizing:border-box;flex:1;min-width:200px;
-            max-width:420px;padding:9px 10px;
-            border:1px solid #cbd5e1;border-radius:7px;
-        }
-        .kpi-preview-count { font-size:12px;color:#475569; }
-        .kpi-preview-table-wrap {
-            overflow:auto;padding:0 20px;
-            max-height:calc(94vh - 230px);
-        }
-        .kpi-preview-table {
-            width:100%;border-collapse:collapse;
-            font-size:12px;white-space:nowrap;
-        }
-        .kpi-preview-table th {
-            position:sticky;top:0;background:#edf4f8;
-            color:#24465a;text-align:left;z-index:1;
-        }
-        .kpi-preview-table th,.kpi-preview-table td {
-            border:1px solid #e2e8f0;padding:9px 10px;
-        }
-        .kpi-preview-table tbody tr:nth-child(even) { background:#f8fafc; }
-        .kpi-preview-empty { text-align:center;color:#64748b;padding:24px!important; }
-        .kpi-preview-footer {
-            display:flex;justify-content:space-between;align-items:center;
-            gap:10px;flex-wrap:wrap;padding:14px 20px;
-            border-top:1px solid #e2e8f0;
-        }
-        .kpi-preview-actions,.kpi-preview-pages {
-            display:flex;align-items:center;gap:8px;flex-wrap:wrap;
-        }
-        .kpi-preview-action {
-            padding:8px 12px;border:1px solid #cbd5e1;
-            border-radius:7px;background:#fff;color:#334155;
-            font-size:12px;font-weight:700;cursor:pointer;
-        }
-        .kpi-preview-action:disabled { opacity:.4;cursor:not-allowed; }
-        .kpi-preview-download {
-            background:#176b48;border-color:#176b48;color:white;
-        }
-        @media(max-width:600px) {
-            .kpi-preview-overlay { padding:5px; }
-            .kpi-preview-head,.kpi-preview-toolbar,.kpi-preview-footer {
-                padding:12px;
+            btn.title = "Xem trước bảng số liệu của " + cfg.title;
+            btn.addEventListener("click", () => openKpiPreview(cfg));
+            card.appendChild(btn);
+        });
+    }
+
+    // ======================================================
+    // GIAO DIỆN XEM TRƯỚC
+    // ======================================================
+
+    function installKpiPreviewStyles() {
+        if (document.getElementById("kpi-preview-style")) return;
+
+        const style = document.createElement("style");
+        style.id = "kpi-preview-style";
+
+        style.textContent = `
+            .kpi-download-btn {
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                gap:6px;
+                width:100%;
+                margin-top:8px;
+                padding:7px 8px;
+                border:1px solid #d7e0e7;
+                border-radius:7px;
+                background:#f8fafc;
+                color:#334b5d;
+                font-size:11px;
+                line-height:15px;
+                font-weight:700;
+                cursor:pointer;
             }
-            .kpi-preview-title { font-size:16px; }
-            .kpi-preview-table-wrap { padding:0 8px; }
-            .kpi-preview-search { min-width:100%;max-width:none; }
+            .kpi-download-btn:hover {
+                background:#eaf3f8;
+                border-color:#9db8c8;
+            }
+            .kpi-preview-overlay {
+                position:fixed;
+                inset:0;
+                z-index:99999;
+                background:rgba(15,23,42,.62);
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                padding:16px;
+            }
+            .kpi-preview-modal {
+                width:min(1180px,100%);
+                max-height:92vh;
+                background:#fff;
+                color:#1f2937;
+                border-radius:12px;
+                box-shadow:0 18px 60px rgba(0,0,0,.28);
+                display:flex;
+                flex-direction:column;
+                overflow:hidden;
+                font-family:Arial,sans-serif;
+            }
+            .kpi-preview-head {
+                display:flex;
+                align-items:flex-start;
+                justify-content:space-between;
+                gap:16px;
+                padding:18px 20px;
+                border-bottom:1px solid #e5e7eb;
+            }
+            .kpi-preview-title {
+                font-size:19px;
+                font-weight:700;
+                margin:0 0 5px;
+                color:#17384e;
+            }
+            .kpi-preview-subtitle {
+                font-size:12px;
+                color:#64748b;
+                margin:0;
+            }
+            .kpi-preview-close {
+                border:0;
+                background:transparent;
+                color:#64748b;
+                font-size:25px;
+                cursor:pointer;
+                line-height:1;
+                padding:0 3px;
+            }
+            .kpi-preview-toolbar {
+                display:flex;
+                gap:10px;
+                align-items:center;
+                justify-content:space-between;
+                padding:12px 20px;
+                flex-wrap:wrap;
+            }
+            .kpi-preview-search {
+                box-sizing:border-box;
+                min-width:220px;
+                max-width:420px;
+                flex:1;
+                padding:9px 11px;
+                border:1px solid #cbd5e1;
+                border-radius:7px;
+                font-size:13px;
+                color:#1f2937;
+                background:#fff;
+            }
+            .kpi-preview-count {
+                font-size:12px;
+                color:#475569;
+            }
+            .kpi-preview-table-wrap {
+                overflow:auto;
+                min-height:120px;
+                max-height:calc(92vh - 245px);
+                padding:0 20px;
+            }
+            .kpi-preview-table {
+                border-collapse:collapse;
+                width:100%;
+                font-size:12px;
+                white-space:nowrap;
+            }
+            .kpi-preview-table th {
+                position:sticky;
+                top:0;
+                background:#eef4f8;
+                color:#24465a;
+                font-weight:700;
+                text-align:left;
+                z-index:1;
+            }
+            .kpi-preview-table th,
+            .kpi-preview-table td {
+                border:1px solid #e2e8f0;
+                padding:9px 10px;
+            }
+            .kpi-preview-table tbody tr:nth-child(even) {
+                background:#f8fafc;
+            }
+            .kpi-preview-empty {
+                text-align:center;
+                color:#64748b;
+                padding:28px!important;
+            }
+            .kpi-preview-footer {
+                display:flex;
+                align-items:center;
+                justify-content:space-between;
+                gap:12px;
+                flex-wrap:wrap;
+                padding:14px 20px;
+                border-top:1px solid #e5e7eb;
+                margin-top:12px;
+            }
+            .kpi-preview-pages {
+                display:flex;
+                align-items:center;
+                gap:8px;
+                font-size:12px;
+                color:#475569;
+            }
+            .kpi-preview-action {
+                border:1px solid #cbd5e1;
+                border-radius:7px;
+                background:#fff;
+                color:#334155;
+                padding:8px 12px;
+                font-size:12px;
+                font-weight:700;
+                cursor:pointer;
+            }
+            .kpi-preview-action:disabled {
+                opacity:.4;
+                cursor:not-allowed;
+            }
+            .kpi-preview-download {
+                border-color:#176b48;
+                background:#176b48;
+                color:#fff;
+            }
+            .kpi-preview-download:hover {
+                background:#10573a;
+            }
+            @media(max-width:600px) {
+                .kpi-preview-overlay { padding:6px; }
+                .kpi-preview-modal { max-height:96vh; }
+                .kpi-preview-head { padding:14px; }
+                .kpi-preview-title { font-size:16px; }
+                .kpi-preview-toolbar,
+                .kpi-preview-footer { padding:10px 14px; }
+                .kpi-preview-table-wrap {
+                    padding:0 10px;
+                    max-height:calc(96vh - 270px);
+                }
+                .kpi-preview-search {
+                    min-width:100%;
+                    max-width:none;
+                }
+            }
+        `;
+
+        document.head.appendChild(style);
+    }
+
+    function getFieldValue(row, fieldKey) {
+        if (fieldKey === "Tên xã") {
+            return row["Tên xã"] ||
+                row["Tên xã/phường"] ||
+                row["Xã"] ||
+                row["Xa"] ||
+                row["TEN_XA"] ||
+                row["TENXA"] ||
+                "";
         }
-    `;
-    document.head.appendChild(style);
-}
 
-function getKpiFieldValue(row, key) {
-    if (key === "Tên xã") {
-        return row["Tên xã"] ||
-            row["Tên xã/phường"] ||
-            row["Xã"] ||
-            row["Xa"] ||
-            row["TEN_XA"] ||
-            row["TENXA"] || "";
+        return row[fieldKey] === null || row[fieldKey] === undefined
+            ? ""
+            : row[fieldKey];
     }
 
-    return row[key] == null ? "" : row[key];
-}
-
-function downloadKpiCsv(cfg, rows) {
-    if (!rows || !rows.length) {
-        alert("Không có dữ liệu để tải xuống.");
-        return;
-    }
+    // ======================================================
+    // TẢI CSV
+    // ======================================================
 
     function csvCell(value) {
-        let s = value == null ? "" : String(value);
+        let s = value === null || value === undefined ? "" : String(value);
+
+        // Tránh nội dung được hiểu là công thức khi mở bằng bảng tính.
         if (/^[=+@]/.test(s) || /^-[^0-9]/.test(s)) s = "'" + s;
+
         return '"' + s.replace(/"/g, '""') + '"';
     }
 
-    const lines = [
-        cfg.fields.map(f => csvCell(f[0])).join(";")
-    ];
+    function downloadKpiCsv(cfg, filteredRows) {
+        const rows = Array.isArray(filteredRows) ? filteredRows : [];
 
-    rows.forEach(row => {
-        lines.push(
-            cfg.fields.map(f =>
-                csvCell(getKpiFieldValue(row, f[1]))
-            ).join(";")
-        );
-    });
+        if (!rows.length) {
+            alert("Không có dữ liệu để tải xuống.");
+            return;
+        }
 
-    const blob = new Blob(
-        ["\uFEFF" + lines.join("\r\n")],
-        { type: "text/csv;charset=utf-8;" }
-    );
+        const lines = [
+            cfg.fields.map(field => csvCell(field[0])).join(";")
+        ];
 
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    const d = new Date();
-    const stamp = d.getFullYear() +
-        String(d.getMonth() + 1).padStart(2, "0") +
-        String(d.getDate()).padStart(2, "0");
-
-    link.href = url;
-    link.download = cfg.name + "_" + stamp + ".csv";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-
-function openKpiPreview(cfg) {
-    const sourceRows = getRows();
-
-    if (!sourceRows.length) {
-        alert("Chưa nhận được dữ liệu Google Sheets. Hãy tải lại trang rồi thử lại.");
-        return;
-    }
-
-    const rows = sourceRows.filter(row => cfg.include(row));
-
-    if (!rows.length) {
-        alert("Chưa có dữ liệu để xem trước: " + cfg.title);
-        return;
-    }
-
-    const overlay = document.createElement("div");
-    overlay.className = "kpi-preview-overlay";
-
-    const modal = document.createElement("section");
-    modal.className = "kpi-preview-modal";
-    modal.setAttribute("role", "dialog");
-    modal.setAttribute("aria-modal", "true");
-
-    const head = document.createElement("div");
-    head.className = "kpi-preview-head";
-
-    const titleWrap = document.createElement("div");
-    const title = document.createElement("h2");
-    title.className = "kpi-preview-title";
-    title.textContent = "Bảng số liệu — " + cfg.title;
-
-    const subtitle = document.createElement("p");
-    subtitle.className = "kpi-preview-subtitle";
-    subtitle.textContent =
-        "Kiểm tra dữ liệu nguồn trước khi tải xuống.";
-
-    titleWrap.append(title, subtitle);
-
-    const closeTop = document.createElement("button");
-    closeTop.className = "kpi-preview-close";
-    closeTop.type = "button";
-    closeTop.textContent = "×";
-    closeTop.setAttribute("aria-label", "Đóng");
-
-    head.append(titleWrap, closeTop);
-
-    const toolbar = document.createElement("div");
-    toolbar.className = "kpi-preview-toolbar";
-
-    const search = document.createElement("input");
-    search.type = "search";
-    search.className = "kpi-preview-search";
-    search.placeholder = "Tìm xã/phường hoặc nội dung...";
-    search.setAttribute("aria-label", "Tìm dữ liệu");
-
-    const count = document.createElement("span");
-    count.className = "kpi-preview-count";
-    toolbar.append(search, count);
-
-    const tableWrap = document.createElement("div");
-    tableWrap.className = "kpi-preview-table-wrap";
-
-    const table = document.createElement("table");
-    table.className = "kpi-preview-table";
-
-    const thead = document.createElement("thead");
-    const headerRow = document.createElement("tr");
-
-    cfg.fields.forEach(field => {
-        const th = document.createElement("th");
-        th.textContent = field[0];
-        headerRow.appendChild(th);
-    });
-
-    thead.appendChild(headerRow);
-
-    const tbody = document.createElement("tbody");
-    table.append(thead, tbody);
-    tableWrap.appendChild(table);
-
-    const footer = document.createElement("div");
-    footer.className = "kpi-preview-footer";
-
-    const pageControls = document.createElement("div");
-    pageControls.className = "kpi-preview-pages";
-
-    const prev = document.createElement("button");
-    prev.className = "kpi-preview-action";
-    prev.type = "button";
-    prev.textContent = "‹ Trước";
-
-    const pageLabel = document.createElement("span");
-
-    const next = document.createElement("button");
-    next.className = "kpi-preview-action";
-    next.type = "button";
-    next.textContent = "Sau ›";
-
-    pageControls.append(prev, pageLabel, next);
-
-    const actions = document.createElement("div");
-    actions.className = "kpi-preview-actions";
-
-    const closeBottom = document.createElement("button");
-    closeBottom.className = "kpi-preview-action";
-    closeBottom.type = "button";
-    closeBottom.textContent = "Đóng";
-
-    const download = document.createElement("button");
-    download.className = "kpi-preview-action kpi-preview-download";
-    download.type = "button";
-    download.textContent = "Tải toàn bộ bảng CSV";
-
-    actions.append(closeBottom, download);
-    footer.append(pageControls, actions);
-    modal.append(head, toolbar, tableWrap, footer);
-    overlay.appendChild(modal);
-    document.body.appendChild(overlay);
-
-    const pageSize = 10;
-    let currentPage = 1;
-    let visibleRows = rows.slice();
-
-    function closeModal() {
-        document.removeEventListener("keydown", onKeyDown);
-        overlay.remove();
-    }
-
-    function onKeyDown(event) {
-        if (event.key === "Escape") closeModal();
-    }
-
-    function renderTable() {
-        const query = String(search.value || "").trim().toLowerCase();
-
-        visibleRows = rows.filter(row => {
-            if (!query) return true;
-
-            return cfg.fields.some(field =>
-                String(getKpiFieldValue(row, field[1]))
-                    .toLowerCase().includes(query)
+        rows.forEach(row => {
+            lines.push(
+                cfg.fields
+                    .map(field => csvCell(getFieldValue(row, field[1])))
+                    .join(";")
             );
         });
 
-        const pageCount = Math.max(
-            1, Math.ceil(visibleRows.length / pageSize)
+        // BOM UTF-8 để Excel hiển thị tiếng Việt đúng.
+        const blob = new Blob(
+            ["\uFEFF" + lines.join("\r\n")],
+            { type: "text/csv;charset=utf-8;" }
         );
 
-        currentPage = Math.min(currentPage, pageCount);
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        const date = new Date();
+        const stamp =
+            date.getFullYear() +
+            String(date.getMonth() + 1).padStart(2, "0") +
+            String(date.getDate()).padStart(2, "0");
 
-        const start = (currentPage - 1) * pageSize;
-        const pageRows = visibleRows.slice(start, start + pageSize);
+        link.href = url;
+        link.download = cfg.name + "_" + stamp + ".csv";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
 
-        tbody.replaceChildren();
-
-        if (!pageRows.length) {
-            const tr = document.createElement("tr");
-            const td = document.createElement("td");
-            td.colSpan = cfg.fields.length;
-            td.className = "kpi-preview-empty";
-            td.textContent = "Không tìm thấy dữ liệu phù hợp.";
-            tr.appendChild(td);
-            tbody.appendChild(tr);
-        } else {
-            pageRows.forEach(row => {
-                const tr = document.createElement("tr");
-
-                cfg.fields.forEach(field => {
-                    const td = document.createElement("td");
-                    td.textContent = String(
-                        getKpiFieldValue(row, field[1])
-                    );
-                    tr.appendChild(td);
-                });
-
-                tbody.appendChild(tr);
-            });
-        }
-
-        count.textContent =
-            "Tổng " + rows.length.toLocaleString("vi-VN") +
-            " dòng; tìm thấy " +
-            visibleRows.length.toLocaleString("vi-VN") + " dòng.";
-
-        pageLabel.textContent =
-            "Trang " + currentPage + "/" + pageCount;
-
-        prev.disabled = currentPage <= 1;
-        next.disabled = currentPage >= pageCount;
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
-    closeTop.addEventListener("click", closeModal);
-    closeBottom.addEventListener("click", closeModal);
+    // ======================================================
+    // MỞ BẢNG XEM TRƯỚC
+    // ======================================================
 
-    overlay.addEventListener("click", event => {
-        if (event.target === overlay) closeModal();
-    });
+    function openKpiPreview(cfg) {
+        const sourceRows = getRows();
 
-    search.addEventListener("input", () => {
-        currentPage = 1;
-        renderTable();
-    });
-
-    prev.addEventListener("click", () => {
-        if (currentPage > 1) {
-            currentPage--;
-            renderTable();
+        if (!sourceRows.length) {
+            alert("Chưa nhận được dữ liệu từ Google Sheets. Vui lòng tải lại trang rồi thử lại.");
+            return;
         }
-    });
 
-    next.addEventListener("click", () => {
-        currentPage++;
+        const rows = sourceRows.filter(row => cfg.include(row));
+
+        if (!rows.length) {
+            alert("Chưa có dữ liệu để xem trước cho KPI " + cfg.title + ".");
+            return;
+        }
+
+        const overlay = document.createElement("div");
+        overlay.className = "kpi-preview-overlay";
+
+        const modal = document.createElement("section");
+        modal.className = "kpi-preview-modal";
+        modal.setAttribute("role", "dialog");
+        modal.setAttribute("aria-modal", "true");
+        modal.setAttribute("aria-label", "Xem trước " + cfg.title);
+
+        const head = document.createElement("div");
+        head.className = "kpi-preview-head";
+
+        const titleWrap = document.createElement("div");
+        const title = document.createElement("h2");
+        title.className = "kpi-preview-title";
+        title.textContent = "Bảng số liệu — " + cfg.title;
+
+        const subtitle = document.createElement("p");
+        subtitle.className = "kpi-preview-subtitle";
+        subtitle.textContent =
+            "Dữ liệu lấy từ nguồn WebGIS hiện đang sử dụng. Kiểm tra trước khi tải.";
+
+        titleWrap.append(title, subtitle);
+
+        const closeTop = document.createElement("button");
+        closeTop.type = "button";
+        closeTop.className = "kpi-preview-close";
+        closeTop.setAttribute("aria-label", "Đóng cửa sổ xem trước");
+        closeTop.textContent = "×";
+
+        head.append(titleWrap, closeTop);
+
+        const toolbar = document.createElement("div");
+        toolbar.className = "kpi-preview-toolbar";
+
+        const search = document.createElement("input");
+        search.type = "search";
+        search.className = "kpi-preview-search";
+        search.placeholder = "Tìm trong bảng số liệu...";
+        search.setAttribute("aria-label", "Tìm trong bảng số liệu");
+
+        const count = document.createElement("div");
+        count.className = "kpi-preview-count";
+
+        toolbar.append(search, count);
+
+        const tableWrap = document.createElement("div");
+        tableWrap.className = "kpi-preview-table-wrap";
+
+        const table = document.createElement("table");
+        table.className = "kpi-preview-table";
+
+        const thead = document.createElement("thead");
+        const headRow = document.createElement("tr");
+
+        cfg.fields.forEach(field => {
+            const th = document.createElement("th");
+            th.textContent = field[0];
+            headRow.appendChild(th);
+        });
+
+        thead.appendChild(headRow);
+
+        const tbody = document.createElement("tbody");
+        table.append(thead, tbody);
+        tableWrap.appendChild(table);
+
+        const footer = document.createElement("div");
+        footer.className = "kpi-preview-footer";
+
+        const pages = document.createElement("div");
+        pages.className = "kpi-preview-pages";
+
+        const prev = document.createElement("button");
+        prev.type = "button";
+        prev.className = "kpi-preview-action";
+        prev.textContent = "‹ Trước";
+
+        const pageLabel = document.createElement("span");
+
+        const next = document.createElement("button");
+        next.type = "button";
+        next.className = "kpi-preview-action";
+        next.textContent = "Sau ›";
+
+        pages.append(prev, pageLabel, next);
+
+        const actions = document.createElement("div");
+        actions.style.display = "flex";
+        actions.style.gap = "8px";
+
+        const closeBottom = document.createElement("button");
+        closeBottom.type = "button";
+        closeBottom.className = "kpi-preview-action";
+        closeBottom.textContent = "Đóng";
+
+        const download = document.createElement("button");
+        download.type = "button";
+        download.className = "kpi-preview-action kpi-preview-download";
+        download.textContent = "Tải toàn bộ bảng CSV";
+
+        actions.append(closeBottom, download);
+        footer.append(pages, actions);
+        modal.append(head, toolbar, tableWrap, footer);
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        const pageSize = 10;
+        let currentPage = 1;
+        let visibleRows = rows.slice();
+
+        function closeModal() {
+            document.removeEventListener("keydown", onKeyDown);
+            overlay.remove();
+        }
+
+        function onKeyDown(event) {
+            if (event.key === "Escape") closeModal();
+        }
+
+        function renderTable() {
+            const query = norm(search.value);
+
+            visibleRows = rows.filter(row => {
+                if (!query) return true;
+
+                return cfg.fields.some(field =>
+                    norm(getFieldValue(row, field[1])).includes(query)
+                );
+            });
+
+            const pageCount = Math.max(
+                1,
+                Math.ceil(visibleRows.length / pageSize)
+            );
+
+            currentPage = Math.min(currentPage, pageCount);
+
+            const start = (currentPage - 1) * pageSize;
+            const pageRows = visibleRows.slice(start, start + pageSize);
+
+            tbody.replaceChildren();
+
+            if (!pageRows.length) {
+                const tr = document.createElement("tr");
+                const td = document.createElement("td");
+                td.colSpan = cfg.fields.length;
+                td.className = "kpi-preview-empty";
+                td.textContent = "Không tìm thấy dòng dữ liệu phù hợp.";
+                tr.appendChild(td);
+                tbody.appendChild(tr);
+            } else {
+                pageRows.forEach(row => {
+                    const tr = document.createElement("tr");
+
+                    cfg.fields.forEach(field => {
+                        const td = document.createElement("td");
+                        td.textContent = String(getFieldValue(row, field[1]));
+                        tr.appendChild(td);
+                    });
+
+                    tbody.appendChild(tr);
+                });
+            }
+
+            count.textContent =
+                "Tổng " + rows.length.toLocaleString("vi-VN") +
+                " dòng; đang hiển thị " +
+                visibleRows.length.toLocaleString("vi-VN") + " dòng sau lọc.";
+
+            pageLabel.textContent =
+                "Trang " + currentPage + "/" + pageCount;
+
+            prev.disabled = currentPage <= 1;
+            next.disabled = currentPage >= pageCount;
+        }
+
+        closeTop.addEventListener("click", closeModal);
+        closeBottom.addEventListener("click", closeModal);
+
+        overlay.addEventListener("click", event => {
+            if (event.target === overlay) closeModal();
+        });
+
+        search.addEventListener("input", () => {
+            currentPage = 1;
+            renderTable();
+        });
+
+        prev.addEventListener("click", () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderTable();
+            }
+        });
+
+        next.addEventListener("click", () => {
+            currentPage++;
+            renderTable();
+        });
+
+        // Tải toàn bộ dữ liệu của KPI, không chỉ trang đang xem.
+        download.addEventListener("click", () => downloadKpiCsv(cfg, rows));
+
+        document.addEventListener("keydown", onKeyDown);
         renderTable();
-    });
+        closeTop.focus();
+    }
 
-    download.addEventListener("click", () => {
-        // Tải toàn bộ dữ liệu KPI, không chỉ các dòng đang hiển thị.
-        downloadKpiCsv(cfg, rows);
-    });
+    // ======================================================
+    // CẬP NHẬT DASHBOARD
+    // ======================================================
 
-    document.addEventListener("keydown", onKeyDown);
-    renderTable();
-    closeTop.focus();
-}
-
+    const dashboard = {
         update() {
             installKpiDownloadButtons();
 
@@ -736,7 +884,10 @@ function openKpiPreview(cfg) {
             rows.forEach(row => {
                 // DỊCH TẢ LỢN CHÂU PHI
                 if (hasHistory(
-                    row, "DTLCP_Trạng thái", "DTLCP_Ổ dịch", "DTLCP_Chết"
+                    row,
+                    "DTLCP_Trạng thái",
+                    "DTLCP_Ổ dịch",
+                    "DTLCP_Chết"
                 )) stat.dtlcpXa++;
 
                 if (isActive(row, "DTLCP_Trạng thái")) stat.dtlcpDang++;
@@ -745,7 +896,10 @@ function openKpiPreview(cfg) {
 
                 // CÚM GIA CẦM
                 if (hasHistory(
-                    row, "CGC_Trạng thái", "CGC_Ổ dịch", "CGC_Chết"
+                    row,
+                    "CGC_Trạng thái",
+                    "CGC_Ổ dịch",
+                    "CGC_Chết"
                 )) stat.cgcXa++;
 
                 if (isActive(row, "CGC_Trạng thái")) stat.cgcDang++;
@@ -754,8 +908,11 @@ function openKpiPreview(cfg) {
 
                 // VIÊM DA NỔI CỤC
                 if (hasHistory(
-                    row, "VDNC_Trạng thái", "VDNC_Ổ dịch",
-                    "VDNC_Mắc", "VDNC_Chết"
+                    row,
+                    "VDNC_Trạng thái",
+                    "VDNC_Ổ dịch",
+                    "VDNC_Mắc",
+                    "VDNC_Chết"
                 )) stat.vdncXa++;
 
                 if (isActive(row, "VDNC_Trạng thái")) stat.vdncDang++;
@@ -764,8 +921,11 @@ function openKpiPreview(cfg) {
 
                 // BỆNH DẠI
                 if (hasHistory(
-                    row, "DAI_Trạng thái", "DAI_Ổ dịch",
-                    "DAI_Chết", "DAI_Tiêu hủy"
+                    row,
+                    "DAI_Trạng thái",
+                    "DAI_Ổ dịch",
+                    "DAI_Chết",
+                    "DAI_Tiêu hủy"
                 )) stat.daiXa++;
 
                 if (isActive(row, "DAI_Trạng thái")) stat.daiDang++;
@@ -829,7 +989,7 @@ function openKpiPreview(cfg) {
 
             setText("dbCSBBTTY", fmt(stat.csbbtty));
 
-            // Tổng quan ở sidebar
+            // Tổng quan nhỏ ở sidebar
             setText("sideOverviewXa", rows.length);
             setText(
                 "sideOverviewDang",
@@ -839,10 +999,10 @@ function openKpiPreview(cfg) {
                 "sideOverviewCon",
                 stat.dtlcpCon + stat.cgcCon + stat.vdncMac + stat.daiChet
             );
-            setText(
-                "sideOverviewKg",
-                stat.dtlcpKg + stat.cgcKg
-            );
+            setText("sideOverviewKg", stat.dtlcpKg + stat.cgcKg);
+
+            // Chỉ cập nhật biểu đồ khi các canvas tồn tại.
+            renderDashboardCharts(rows);
         }
     };
 
