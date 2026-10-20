@@ -1976,7 +1976,8 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
 <style id="webgis-white-map-panel-readable-final-v2">
 /* NỀN BẢN ĐỒ TRẮNG: ẩn lớp nền ảnh, giữ nguyên các lớp vector/ranh giới/điểm dữ liệu */
 .main-map, #map, .leaflet-container { background-color:#fff !important; }
-.leaflet-tile-pane { display:none !important; }
+/* Cho phep hien thi lop nen OSM/ve tinh khi chon; chi an tile khi bam Nen trang bang cach go bo layer */
+.leaflet-tile-pane { display:block !important; }
 /* Tăng cỡ chữ toàn bộ panel thông tin bên phải */
 .panel-kicker { font-size:12px !important; line-height:1.5 !important; }
 #panel-title, .panel h2 { font-size:24px !important; line-height:1.3 !important; }
@@ -2276,41 +2277,23 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
 <script src="js/dashboard.js"></script>
 <script src="js/map.js"></script>
 <script src="js/app.js"></script>
-<!-- Tải thư viện tạo Word theo nhiều CDN dự phòng; biểu đồ Word dùng ChartRun của docx/charts -->
-<script>
-(function(){
-  function loadOne(urls, globalName, done){
-    let i=0;
-    function attempt(){
-      if(i>=urls.length){ console.error('Không tải được thư viện:',globalName,urls); done(false); return; }
-      const url=urls[i++], script=document.createElement('script');
-      script.src=url; script.async=false;
-      script.onload=function(){
-        if(window[globalName]) done(true);
-        else { console.warn('Đã tải tệp nhưng không thấy global',globalName,url); attempt(); }
-      };
-      script.onerror=function(){ console.warn('CDN lỗi, thử nguồn tiếp theo:',url); attempt(); };
-      document.head.appendChild(script);
-    }
-    attempt();
+<!-- Tải docx qua ESM CDN để tránh lỗi MIME application/node khi nạp tệp .cjs -->
+<script type="module">
+(async function(){
+  try {
+    const docxModule = await import('https://esm.sh/docx@9.5.1?bundle');
+    window.docx = docxModule;
+  } catch (err) {
+    console.error('Không tải được thư viện docx:', err);
+    window.__docxLibraryError = 'Không tải được thư viện tạo Word. Kiểm tra kết nối Internet/CDN.';
   }
-  const v='9.11.0';
-  loadOne([
-    `https://cdn.jsdelivr.net/npm/docx@${v}/dist/index.umd.cjs`,
-    `https://unpkg.com/docx@${v}/dist/index.umd.cjs`,
-    `https://cdn.jsdelivr.net/npm/docx@9.10.0/dist/index.umd.cjs`,
-    `https://unpkg.com/docx@9.10.0/dist/index.umd.cjs`
-  ],'docx',function(ok){
-    if(!ok){ window.__docxLibraryError='Không tải được thư viện docx từ các CDN dự phòng.'; return; }
-    loadOne([
-      `https://cdn.jsdelivr.net/npm/docx@${v}/dist/charts.umd.cjs`,
-      `https://unpkg.com/docx@${v}/dist/charts.umd.cjs`,
-      'https://cdn.jsdelivr.net/npm/docx@9.10.0/dist/charts.umd.cjs',
-      'https://unpkg.com/docx@9.10.0/dist/charts.umd.cjs'
-    ],'docxCharts',function(chartOk){
-      if(!chartOk) window.__docxLibraryError='Không tải được thư viện biểu đồ Word (docx/charts).';
-    });
-  });
+  try {
+    const chartsModule = await import('https://esm.sh/docx@9.5.1/charts?bundle');
+    window.docxCharts = chartsModule;
+  } catch (err) {
+    console.error('Không tải được thư viện biểu đồ Word:', err);
+    window.__docxLibraryError = 'Không tải được thư viện biểu đồ Word.';
+  }
 })();
 </script>
 <script>
@@ -2450,7 +2433,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const toText = endInput?.value || "";
     if (!fromText || !toText) { alert("Vui lòng chọn cả ngày bắt đầu và ngày kết thúc."); return; }
     if (fromText > toText) { alert("Ngày bắt đầu không được sau ngày kết thúc."); return; }
-    if (!window.docx) { alert("Chưa tải được thư viện tạo Word. Hãy kiểm tra kết nối Internet hoặc quyền truy cập jsdelivr.net / unpkg.com rồi tải lại trang (Ctrl+F5)."); return; }
+    if (!window.docx) { alert("Chưa tải được thư viện tạo Word. Hãy kiểm tra kết nối Internet hoặc quyền truy cập CDN rồi tải lại trang (Ctrl+F5)."); return; }
 
     // Lấy số liệu báo cáo từ API chi tiết theo đúng khoảng ngày đã chọn.
     // Không phụ thuộc lớp bản đồ đang tải trong GIS_TONGHOP.
@@ -4386,7 +4369,7 @@ html, body { max-width:100%; }
     });
     var style = document.createElement('style');
     style.id = 'webgisBasemapSwitcherStyle';
-    style.textContent = '#map,.main-map,.leaflet-container{background:#fff!important} .map-actions{gap:5px;flex-wrap:wrap} #btnWhiteMap{border:1px solid #d5dde5} #btnWhiteMap.active{background:#155eef;color:#fff;border-color:#155eef}';
+    style.textContent = '#map,.main-map,.leaflet-container{background:#fff!important} .leaflet-tile-pane{display:block!important} .leaflet-tile{visibility:visible!important} .map-actions{gap:5px;flex-wrap:wrap} #btnWhiteMap{border:1px solid #d5dde5} #btnWhiteMap.active{background:#155eef;color:#fff;border-color:#155eef}';
     document.head.appendChild(style);
     initialized = true;
     show('street');
