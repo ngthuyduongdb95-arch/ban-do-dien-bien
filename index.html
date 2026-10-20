@@ -2152,6 +2152,33 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
         </div>
     </aside>
 
+    <!-- KPI bổ sung bên trái bản đồ: TTHC thú y và mẫu xét nghiệm -->
+    <aside class="left-extra-kpi" aria-label="KPI thủ tục hành chính và mẫu xét nghiệm">
+      <section class="summary-card card-tthc-extra" id="kpiTTHCExtra">
+        <div class="summary-head"><i class="fa-solid fa-file-circle-check"></i><b>TTHC LĨNH VỰC THÚ Y</b></div>
+        <div class="summary-main"><span id="kpiTTHCTotal">—</span><small>hồ sơ trong dữ liệu</small></div>
+        <div class="extra-kpi-lines" id="kpiTTHCLines">
+          <div class="extra-kpi-row"><span>Chứng chỉ hành nghề thú y</span><b>—</b></div>
+          <div class="extra-kpi-row"><span>GCN đủ điều kiện buôn bán thuốc thú y</span><b>—</b></div>
+          <div class="extra-kpi-row"><span>GCN kiểm dịch</span><b>—</b></div>
+        </div>
+        <div class="extra-kpi-foot" id="kpiTTHCNote">Đang tải dữ liệu…</div>
+      </section>
+      <section class="summary-card card-sample-extra" id="kpiMauXNExtra">
+        <div class="summary-head"><i class="fa-solid fa-flask-vial"></i><b>MẪU XÉT NGHIỆM</b></div>
+        <div class="summary-main"><span id="kpiMauXNTotal">—</span><small>mẫu tổng cộng</small></div>
+        <div class="extra-kpi-lines" id="kpiMauXNLines">
+          <div class="extra-kpi-row"><span>DTLCP</span><b>—/—</b></div>
+          <div class="extra-kpi-row"><span>CGC</span><b>—/—</b></div>
+          <div class="extra-kpi-row"><span>VDNC</span><b>—/—</b></div>
+          <div class="extra-kpi-row"><span>Dại</span><b>—/—</b></div>
+          <div class="extra-kpi-row"><span>LMLM</span><b>—/—</b></div>
+          <div class="extra-kpi-row"><span>Bệnh khác</span><b>—/—</b></div>
+        </div>
+        <div class="extra-kpi-foot" id="kpiMauXNNote">Dương tính / tổng số mẫu</div>
+      </section>
+    </aside>
+
     <main class="main-map">
         <div class="map-toolbar">
             <div class="map-actions">
@@ -4554,5 +4581,147 @@ html, body { max-width:100%; }
 })();
 </script>
 
+
+<style id="extra-tthc-sample-kpi-layout">
+/* Hai KPI mới đặt bên trái bản đồ; tổng chiều cao khớp chiều cao hàng bản đồ. */
+.left-extra-kpi{display:none;min-width:0;box-sizing:border-box;}
+.left-extra-kpi .summary-card{min-width:0;min-height:0;overflow:hidden;box-sizing:border-box;padding:10px;border-radius:9px;display:flex;flex-direction:column;gap:7px;}
+.card-tthc-extra{border:1px solid #c9dced;border-top:4px solid #2878c8;background:linear-gradient(180deg,#f3f8ff 0%,#fff 70%);}
+.card-sample-extra{border:1px solid #c9e7e2;border-top:4px solid #15998c;background:linear-gradient(180deg,#f0fbf8 0%,#fff 70%);}
+.card-tthc-extra .summary-head{color:#205b91}.card-sample-extra .summary-head{color:#087d73}
+.extra-kpi-lines{display:flex;flex-direction:column;gap:0;min-height:0;overflow:auto;}
+.extra-kpi-row{display:flex;align-items:flex-start;justify-content:space-between;gap:7px;padding:6px 0;border-bottom:1px solid #e8edf1;font-size:11px;line-height:1.3;}
+.extra-kpi-row:last-child{border-bottom:0}.extra-kpi-row span{color:#5d6b76;min-width:0;overflow-wrap:anywhere}.extra-kpi-row b{flex:0 0 auto;color:#213b4d;font-size:12px;font-weight:850;text-align:right;white-space:nowrap;}
+.extra-kpi-foot{margin-top:auto;color:#71808c;font-size:9px;line-height:1.3;padding-top:4px;border-top:1px solid #e7edf1;}
+@media (min-width:1101px){
+ .webgis{grid-template-columns:minmax(170px,190px) minmax(0,1fr) minmax(245px,270px) minmax(190px,205px)!important;grid-template-rows:auto 480px!important;}
+ .sidebar{grid-column:1/-1!important;grid-row:1!important;}
+ .left-extra-kpi{grid-column:1!important;grid-row:2!important;display:grid!important;grid-template-rows:minmax(0,0.62fr) minmax(0,1.38fr)!important;gap:8px!important;height:480px!important;min-height:480px!important;max-height:480px!important;}
+ .left-extra-kpi .summary-card{height:auto!important;min-height:0!important;max-height:none!important;}
+ /* Thu gọn TTHC để ưu tiên không gian cho KPI mẫu xét nghiệm. */
+ .card-tthc-extra{padding:7px 9px!important;gap:3px!important;}
+ .card-tthc-extra .summary-head{font-size:10px!important;line-height:13px!important;}
+ .card-tthc-extra .summary-main{margin:2px 0!important;gap:3px!important;}
+ .card-tthc-extra .summary-main span{font-size:21px!important;line-height:22px!important;}
+ .card-tthc-extra .summary-main small{font-size:8px!important;}
+ .card-tthc-extra .extra-kpi-row{padding:3px 0!important;font-size:9px!important;line-height:1.15!important;gap:4px!important;}
+ .card-tthc-extra .extra-kpi-row b{font-size:10px!important;}
+ .card-tthc-extra .extra-kpi-foot{font-size:8px!important;padding-top:2px!important;}
+ /* Cân bằng lại cỡ chữ: TTHC vẫn đọc rõ, mẫu xét nghiệm không cần thanh cuộn. */
+ .left-extra-kpi{grid-template-rows:minmax(0,0.78fr) minmax(0,1.22fr)!important;}
+ .left-extra-kpi .extra-kpi-lines{overflow:hidden!important;}
+ .card-tthc-extra{padding:8px 9px!important;gap:4px!important;}
+ .card-tthc-extra .summary-head{font-size:11px!important;line-height:14px!important;}
+ .card-tthc-extra .summary-main span{font-size:22px!important;line-height:24px!important;}
+ .card-tthc-extra .summary-main small{font-size:9px!important;}
+ .card-tthc-extra .extra-kpi-row{padding:5px 0!important;font-size:10.5px!important;line-height:1.2!important;gap:5px!important;}
+ .card-tthc-extra .extra-kpi-row b{font-size:11px!important;}
+ .card-tthc-extra .extra-kpi-foot{font-size:9px!important;padding-top:3px!important;}
+ .card-sample-extra{padding:9px!important;gap:5px!important;}
+ .card-sample-extra .summary-head{font-size:12px!important;line-height:15px!important;}
+ .card-sample-extra .summary-main span{font-size:23px!important;line-height:25px!important;}
+ .card-sample-extra .summary-main small{font-size:9px!important;}
+ .card-sample-extra .extra-kpi-row{padding:5px 0!important;font-size:12px!important;line-height:1.2!important;gap:5px!important;}
+ .card-sample-extra .extra-kpi-row b{font-size:12px!important;}
+ /* Giảm nhẹ chữ ở bộ chọn lớp để tên lựa chọn không bị xuống dòng. */
+ .header-layer select,#layerSelect{font-size:11px!important;white-space:nowrap!important;}
+ .main-map{grid-column:2!important;grid-row:2!important;width:100%!important;height:480px!important;}
+ .panel{grid-column:3!important;grid-row:2!important;width:100%!important;height:480px!important;max-height:480px!important;}
+ .side-kpi-mini{grid-column:4!important;grid-row:2!important;height:480px!important;max-height:480px!important;}
+}
+@media (min-width:761px) and (max-width:1100px){
+ .left-extra-kpi{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;grid-column:1/-1;grid-row:3;min-height:220px;}
+ .left-extra-kpi .summary-card{min-height:210px;}
+ .webgis{grid-template-rows:auto 420px auto auto!important;}
+ .main-map{grid-row:2!important;} .panel{grid-row:3!important;} .side-kpi-mini{grid-row:3!important;}
+}
+@media (max-width:760px){.left-extra-kpi{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;order:5;width:100%;}.left-extra-kpi .summary-card{min-height:280px;}}
+</style>
+<script id="extra-tthc-sample-kpi-loader">
+(function(){
+ 'use strict';
+ const API='https://script.google.com/macros/s/AKfycbyRuJ9Wfv4HtWjMRT2Hox2-mOhBVRjyqLaHhpQjohPEkfHWNyjM004KgO3o7_4nRJtj/exec';
+ const norm=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+ const fmt=n=>Number(n||0).toLocaleString('vi-VN');
+ const val=(r,terms)=>{for(const [k,v] of Object.entries(r||{})){const nk=norm(k);if(terms.every(t=>nk.includes(norm(t)))&&v!==''&&v!=null)return v;}return null;};
+ const text=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+ async function fetchRows(types){for(const type of types){try{const res=await fetch(API+'?type='+encodeURIComponent(type)+'&_='+Date.now(),{cache:'no-store'});if(!res.ok)continue;const j=await res.json();const rows=Array.isArray(j)?j:(Array.isArray(j?.data)?j.data:[]);if(rows.length)return {type,rows};}catch(e){}}return {type:'',rows:[]};}
+ function procedureCategory(name){const n=norm(name);if(n.includes('chung chi')&&n.includes('hanh nghe'))return 'practice';if((n.includes('du dieu kien')||n.includes('du dk'))&&(n.includes('buon ban')||n.includes('thuoc thu y')))return 'drug';if(n.includes('kiem dich'))return 'quarantine';return ''; }
+ function numericValue(v){if(typeof v==='number'&&Number.isFinite(v))return v;const s=String(v??'').trim().replace(/\s/g,'').replace(/\.(?=\d{3}(\D|$))/g,'').replace(/,/g,'.');const n=Number(s);return Number.isFinite(n)?n:0;}
+ function countValue(r){const v=val(r,['tong so ho so'])??val(r,['so luong ho so'])??val(r,['so ho so'])??val(r,['tong so'])??val(r,['so luong']);return v==null?1:Math.max(0,numericValue(v));}
+ function renderTTHC(rows,source){
+   const cats={practice:0,drug:0,quarantine:0};let total=0;
+   for(const r of rows){const name=val(r,['ten tthc'])??val(r,['ten thu tuc hanh chinh'])??val(r,['ten thu tuc'])??val(r,['thu tuc'])??val(r,['loai thu tuc'])??val(r,['linh vuc thu tuc']);if(name===null)continue;const c=procedureCategory(name);if(!c)continue;const n=countValue(r);cats[c]+=n;total+=n;}
+   text('kpiTTHCTotal',rows.length?fmt(total):'—');
+   const lines=document.getElementById('kpiTTHCLines');if(lines)lines.innerHTML='';
+   const data=[['Chứng chỉ hành nghề thú y',cats.practice],['GCN đủ điều kiện buôn bán thuốc thú y',cats.drug],['GCN kiểm dịch',cats.quarantine]];
+   data.forEach(([label,n])=>{const row=document.createElement('div');row.className='extra-kpi-row';const a=document.createElement('span'),b=document.createElement('b');a.textContent=label;b.textContent=rows.length?fmt(n):'—';row.append(a,b);lines?.appendChild(row);});
+   text('kpiTTHCNote',rows.length?'Nguồn: '+source+' · Số hồ sơ theo dữ liệu tổng hợp':'Chưa đọc được dữ liệu từ GIS_TTHC_TONGHOP.');
+ }
+ const diseases=[['DTLCP',['dtlcp','dich ta lon chau phi']],['CGC',['cgc','cum gia cam']],['VDNC',['vdnc','viem da noi cuc']],['Dại',['dai','benh dai','rabies']],['LMLM',['lmlm','lo mom long mong']],['Bệnh khác',[]]];
+ function diseaseOf(r){const v=val(r,['ten benh'])??val(r,['benh dich'])??val(r,['loai benh'])??val(r,['chi tieu xet nghiem'])??val(r,['benh']);return norm(v||'');}
+ function sampleResult(r){return norm(val(r,['ket qua xet nghiem'])??val(r,['ket qua'])??val(r,['result'])??val(r,['nhan xet'])??val(r,['ket luan'])??'');}
+ function renderSamples(rows,source){
+   const counts=diseases.map(([label,aliases],idx)=>{let total=0,pos=0;for(const r of rows){const disease=diseaseOf(r);const match=idx===5?!diseases.slice(0,5).some(([,a])=>a.some(x=>disease.includes(norm(x)))):aliases.some(x=>disease.includes(norm(x)));if(!match)continue;const n=countValue(r);total+=n;const result=sampleResult(r);if(result.includes('duong tinh')||result==='positive'||result==='pos'||result.includes('positive'))pos+=n;}return {label,total,pos};});
+   const totalRows=rows.reduce((sum,r)=>sum+countValue(r),0);text('kpiMauXNTotal',rows.length?fmt(totalRows):'—');const lines=document.getElementById('kpiMauXNLines');if(lines)lines.innerHTML='';
+   counts.filter(c=>c.total>0).forEach(c=>{const row=document.createElement('div');row.className='extra-kpi-row';const a=document.createElement('span'),b=document.createElement('b');a.textContent=c.label;b.textContent=fmt(c.pos)+'/'+fmt(c.total);row.append(a,b);lines?.appendChild(row);});
+   if(lines && !counts.some(c=>c.total>0)){const row=document.createElement('div');row.className='extra-kpi-row';row.textContent=rows.length?'Chưa có mẫu xét nghiệm theo bệnh.':'Chưa có dữ liệu mẫu xét nghiệm.';lines.appendChild(row);}
+   text('kpiMauXNNote',rows.length?'Dương tính / tổng số mẫu · Nguồn: '+source:'Chưa đọc được dữ liệu từ GIS_LAYMAU.');
+ }
+ async function load(){const [tthc,samples]=await Promise.all([fetchRows(['tthc','TTHC']),fetchRows(['mauxetnghiem','xetnghiem','mau'])]);renderTTHC(tthc.rows,tthc.type);renderSamples(samples.rows,samples.type);}
+ document.addEventListener('DOMContentLoaded',load);window.addEventListener('webgis:refresh-extra-kpi',load);
+})();
+</script>
+
 </body>
 </html>
+
+<style id="extra-kpi-column-width-balance">
+/* Mở rộng cột KPI mới để cân đối hơn với các thẻ KPI ngang phía trên. */
+@media (min-width:1101px){
+  /* Hai cột KPI trái/phải dùng cùng một dải chiều rộng; panel là phần co lại trước. */
+  .webgis{
+    width:100%!important;
+    max-width:none!important;
+    box-sizing:border-box!important;
+    grid-template-columns:minmax(230px,245px) minmax(180px,1fr) minmax(240px,300px) minmax(230px,245px)!important;
+    justify-content:stretch!important;
+    justify-items:stretch!important;
+  }
+  .left-extra-kpi{
+    grid-column:1!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+    justify-self:stretch!important;
+  }
+  .left-extra-kpi>.summary-card{
+    width:100%!important;
+    box-sizing:border-box!important;
+  }
+  .side-kpi-mini{
+    grid-column:4!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+    justify-self:stretch!important;
+    box-sizing:border-box!important;
+  }
+  .side-kpi-mini>.summary-card{
+    width:100%!important;
+    min-width:0!important;
+    box-sizing:border-box!important;
+  }
+  /* Cột KPI trái và phải bằng nhau; panel rộng hơn, bản đồ co giãn. */
+  .webgis{
+    grid-template-columns: minmax(230px,245px) minmax(120px,1fr) minmax(260px,310px) minmax(230px,245px)!important;
+  }
+  .panel{
+    grid-column:3!important;
+    min-width:0!important;
+    width:100%!important;
+    max-width:none!important;
+    box-sizing:border-box!important;
+  }
+}
+</style>
