@@ -1900,6 +1900,78 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
 }
 </style>
 
+
+<style id="layout-three-cards-match-panel-final">
+/* Hàng KPI: 4 bệnh + Phun phòng. Cột cạnh panel: Tiêm phòng, KSGM, Thuốc thú y. */
+@media (min-width: 761px) {
+  .sidebar-kpi { display:grid !important; grid-template-columns:repeat(5,minmax(0,1fr)) !important; gap:8px !important; }
+  .sidebar-kpi > .summary-card { min-width:0 !important; width:100% !important; height:124px !important; min-height:124px !important; max-height:124px !important; box-sizing:border-box !important; }
+  .webgis { align-items:stretch !important; }
+  .panel { height:480px !important; min-height:480px !important; max-height:480px !important; box-sizing:border-box !important; }
+  .side-kpi-mini { display:flex !important; flex-direction:column !important; align-self:stretch !important; align-items:stretch !important; gap:8px !important; height:480px !important; min-height:480px !important; max-height:480px !important; overflow:hidden !important; box-sizing:border-box !important; }
+  .side-kpi-mini > .summary-card { flex:1 1 0 !important; width:100% !important; height:auto !important; min-height:0 !important; max-height:none !important; box-sizing:border-box !important; padding:8px !important; overflow:hidden !important; }
+  .side-kpi-mini > .summary-card .summary-head { min-height:0 !important; margin-bottom:5px !important; line-height:1.25 !important; font-size:10px !important; }
+  .side-kpi-mini > .summary-card .summary-head b { white-space:normal !important; overflow-wrap:anywhere !important; }
+  .side-kpi-mini > .summary-card .summary-main { margin:3px 0 !important; }
+  .side-kpi-mini > .summary-card .summary-main span { font-size:21px !important; line-height:1.15 !important; }
+  .side-kpi-mini > .summary-card .summary-main small, .side-kpi-mini > .summary-card .summary-grid, .side-kpi-mini > .summary-card .summary-grid span, .side-kpi-mini > .summary-card .summary-grid b { font-size:10px !important; line-height:1.25 !important; }
+  .side-kpi-mini > .card-vaccine-kpi .vaccine-kpi-compact > span:not([hidden]) { padding:2px 0 !important; row-gap:1px !important; }
+  .side-kpi-mini > .card-vaccine-kpi .vaccine-kpi-compact > span:not([hidden]) > b, .side-kpi-mini > .card-vaccine-kpi .vaccine-kpi-compact > span:not([hidden]) > em { font-size:10px !important; line-height:1.2 !important; }
+}
+@media (max-width:760px) {
+  .sidebar-kpi { display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr)) !important; }
+  .side-kpi-mini { display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr)) !important; height:auto !important; max-height:none !important; overflow:visible !important; }
+  .side-kpi-mini > .summary-card { height:auto !important; min-height:120px !important; max-height:none !important; }
+}
+</style>
+
+<style id="side-kpi-vaccine-priority-layout">
+/* Ưu tiên chiều cao cho Tiêm phòng; thu gọn KSGM và Thuốc thú y nhưng giữ đủ nội dung */
+@media (min-width: 761px) {
+  .side-kpi-mini { gap:6px !important; }
+  .side-kpi-mini > .card-vaccine-kpi { flex: 2.45 1 0 !important; min-height:0 !important; padding:8px 9px !important; overflow:hidden !important; }
+  .side-kpi-mini > .card-ksgm,
+  .side-kpi-mini > .card-drug { flex: 1 1 0 !important; min-height:0 !important; padding:6px 8px !important; overflow:hidden !important; }
+  .side-kpi-mini > .card-ksgm .summary-head,
+  .side-kpi-mini > .card-drug .summary-head { margin-bottom:2px !important; }
+  .side-kpi-mini > .card-ksgm .summary-main,
+  .side-kpi-mini > .card-drug .summary-main { margin:1px 0 !important; }
+  .side-kpi-mini > .card-ksgm .summary-main span,
+  .side-kpi-mini > .card-drug .summary-main span { font-size:18px !important; line-height:1.1 !important; }
+  .side-kpi-mini > .card-ksgm .summary-grid { margin-top:1px !important; }
+  .side-kpi-mini > .card-vaccine-kpi .vaccine-kpi-compact { gap:1px !important; }
+  .side-kpi-mini > .card-vaccine-kpi .vaccine-kpi-compact > span:not([hidden]) { padding:4px 0 !important; }
+  .side-kpi-mini > .card-vaccine-kpi .vaccine-kpi-compact > span:not([hidden]) > b,
+  .side-kpi-mini > .card-vaccine-kpi .vaccine-kpi-compact > span:not([hidden]) > em { font-size:10.5px !important; line-height:1.25 !important; }
+}
+</style>
+
+
+<style id="final-override-vaccine-taller-than-ksgm-drug">
+/* Override toàn bộ CSS chiều cao trước đó: Tiêm phòng cao hơn rõ rệt KSGM và Thuốc thú y. */
+@media (min-width: 761px) {
+  .side-kpi-mini { height:480px !important; min-height:480px !important; max-height:480px !important; gap:8px !important; display:flex !important; flex-direction:column !important; align-items:stretch !important; overflow:hidden !important; }
+  .side-kpi-mini > .summary-card { box-sizing:border-box !important; width:100% !important; min-height:0 !important; max-height:none !important; height:auto !important; flex-shrink:1 !important; overflow:hidden !important; }
+  .side-kpi-mini > .summary-card.card-vaccine-kpi { flex:2.5 1 0% !important; padding:8px 9px !important; }
+  .side-kpi-mini > .summary-card.card-ksgm,
+  .side-kpi-mini > .summary-card.card-drug { flex:1 1 0% !important; padding:5px 7px !important; }
+  .side-kpi-mini > .card-ksgm .summary-head,
+  .side-kpi-mini > .card-drug .summary-head { margin:0 0 2px !important; padding:3px 4px !important; min-height:0 !important; font-size:10px !important; line-height:1.15 !important; }
+  .side-kpi-mini > .card-ksgm .summary-main,
+  .side-kpi-mini > .card-drug .summary-main { margin:1px 0 !important; }
+  .side-kpi-mini > .card-ksgm .summary-main span,
+  .side-kpi-mini > .card-drug .summary-main span { font-size:18px !important; line-height:1.05 !important; }
+  .side-kpi-mini > .card-ksgm .summary-main small,
+  .side-kpi-mini > .card-drug .summary-main small,
+  .side-kpi-mini > .card-ksgm .summary-grid,
+  .side-kpi-mini > .card-ksgm .summary-grid span,
+  .side-kpi-mini > .card-ksgm .summary-grid b { font-size:9px !important; line-height:1.15 !important; }
+  .side-kpi-mini > .card-vaccine-kpi .summary-head { margin-bottom:4px !important; }
+  .side-kpi-mini > .card-vaccine-kpi .vaccine-kpi-compact > span:not([hidden]) { padding:3px 0 !important; }
+  .side-kpi-mini > .card-vaccine-kpi .vaccine-kpi-compact > span:not([hidden]) > b,
+  .side-kpi-mini > .card-vaccine-kpi .vaccine-kpi-compact > span:not([hidden]) > em { font-size:10.5px !important; line-height:1.2 !important; }
+}
+</style>
 </head>
 <body>
 <header class="header">
@@ -2014,17 +2086,13 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
             </div>
 
 
-            <div class="summary-card card-vaccine-kpi" aria-label="KPI tiêm phòng">
-                <div class="summary-head"><i class="fa-solid fa-syringe"></i><b>TIÊM PHÒNG</b></div>
-                <div class="summary-grid vaccine-kpi-compact">
-                    <span>Định kỳ đợt 1 <b id="kpiTpd1Done">—/45 xã hoàn thành</b></span>
-                    <span>Định kỳ đợt 2 <b id="kpiTpd2Done">—/45 xã hoàn thành</b></span>
-                    <span class="vaccine-rabies-line">Bệnh Dại <b id="kpiDaiDone">—% tổng đàn</b><em id="kpiDaiStartedVisible">Đang triển khai: — xã</em></span>
-                    <span>Viêm da nổi cục <b id="kpiVdncDone">—/45 xã hoàn thành</b></span>
-                    <span hidden id="kpiTpd1Plan">—</span><span hidden id="kpiTpd1Rate">—</span>
-                    <span hidden id="kpiTpd2Started">—/45</span><span hidden id="kpiTpd2Rate">—</span>
-                    <span hidden id="kpiDaiStarted">—/45</span><span hidden id="kpiDaiRate">—</span>
-                    <span hidden id="kpiVdncStarted">—/45</span><span hidden id="kpiVdncRate">—</span>
+            <div class="summary-card card-phun">
+                <div class="summary-head"><i class="fa-solid fa-spray-can-sparkles"></i><b>THỰC HIỆN THÁNG TVSKTTĐ</b></div>
+                <div class="summary-main"><span id="dbPhunXa">0</span><small>xã triển khai</small></div>
+                <div class="summary-grid phun-rounds">
+                    <span>Đợt 1 <b id="dbPhunDot1">—</b></span>
+                    <span>Đợt 2 <b id="dbPhunDot2">—</b></span>
+                    <span hidden id="dbPhunHo">—</span><span hidden id="dbPhunVong">—</span>
                 </div>
             </div>
         </div>
@@ -2074,18 +2142,21 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
         </div>
         </aside>
     <aside class="side-kpi-mini" aria-label="KPI hoạt động chuyên ngành">
-            <div class="summary-card card-phun">
-                <div class="summary-head"><i class="fa-solid fa-spray-can-sparkles"></i><b>THỰC HIỆN THÁNG TVSKTTĐ</b></div>
-                <div class="summary-main"><span id="dbPhunXa">0</span><small>xã triển khai</small></div>
-                <div class="summary-grid phun-rounds">
-                    <span>Đợt 1 <b id="dbPhunDot1">—</b></span>
-                    <span>Đợt 2 <b id="dbPhunDot2">—</b></span>
-                    <span hidden id="dbPhunHo">—</span><span hidden id="dbPhunVong">—</span>
+            <div class="summary-card card-vaccine-kpi" aria-label="KPI tiêm phòng">
+                <div class="summary-head"><i class="fa-solid fa-syringe"></i><b>TIÊM PHÒNG</b></div>
+                <div class="summary-grid vaccine-kpi-compact">
+                    <span><strong class="vaccine-type">Định kỳ đợt 1</strong><b class="vaccine-progress" id="kpiTpd1Done">—/45 xã hoàn thành</b></span>
+                    <span><strong class="vaccine-type">Định kỳ đợt 2</strong><b class="vaccine-progress" id="kpiTpd2Done">—/45 xã hoàn thành</b></span>
+                    <span class="vaccine-rabies-line"><strong class="vaccine-type">Bệnh Dại</strong><b class="vaccine-progress" id="kpiDaiDone">—% tổng đàn</b><em id="kpiDaiStartedVisible">Đang triển khai: — xã</em></span>
+                    <span><strong class="vaccine-type">Viêm da nổi cục</strong><b class="vaccine-progress" id="kpiVdncDone">—/45 xã hoàn thành</b></span>
+                    <span hidden id="kpiTpd1Plan">—</span><span hidden id="kpiTpd1Rate">—</span>
+                    <span hidden id="kpiTpd2Started">—/45</span><span hidden id="kpiTpd2Rate">—</span>
+                    <span hidden id="kpiDaiStarted">—/45</span><span hidden id="kpiDaiRate">—</span>
+                    <span hidden id="kpiVdncStarted">—/45</span><span hidden id="kpiVdncRate">—</span>
                 </div>
             </div>
 
 
-        <div class="side-kpi-title">HOẠT ĐỘNG CHUYÊN NGÀNH</div>
             <div class="summary-card card-ksgm">
                 <div class="summary-head"><i class="fa-solid fa-warehouse"></i><b>KSGM</b></div>
                 <div class="summary-main"><span id="dbKSGMXa">0</span><small>xã triển khai</small></div>
@@ -3619,7 +3690,7 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
           const baseCol=round===1?d.cols[0]:d.cols[0]-1;
           const plan=getVax(xa,d.aliases,round,'plan'),done=getVax(xa,d.aliases,round,'done'),rate=getVax(xa,d.aliases,round,'rate');
           put(sh,rowIndex,baseCol,plan);put(sh,rowIndex,baseCol+1,done);
-          put(sh,rowIndex,baseCol+2,rate!==null?rate:(plan>0&&done!==null?done/plan*100:null));
+          put(sh,rowIndex,baseCol+2,rate!==null?normalizeRate(rate):(plan>0&&done!==null?done/plan:null));
         });
       });
       const totalRow=startRow+45;
@@ -3650,7 +3721,7 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
     vaccineRows.forEach((r,i)=>{
       if(i>=45)return;const xa=communeName(r);if(!xa)return;const rr=4+i;
       const plan=vaxValue(r,['VDNC'],0,'plan'),done=vaxValue(r,['VDNC'],0,'done'),rate=vaxValue(r,['VDNC'],0,'rate');
-      put(vdSh,rr,0,i+1);putText(vdSh,rr,1,xa);put(vdSh,rr,2,numVal(plan));put(vdSh,rr,3,numVal(done));put(vdSh,rr,4,rate!==null?numVal(rate):(numVal(plan)>0?numVal(done)/numVal(plan)*100:null));
+      put(vdSh,rr,0,i+1);putText(vdSh,rr,1,xa);put(vdSh,rr,2,numVal(plan));put(vdSh,rr,3,numVal(done));put(vdSh,rr,4,rate!==null?normalizeRate(rate):(numVal(plan)>0?numVal(done)/numVal(plan):null));
     });
     fillPeriodic('Tiêm phòng định kỳ đợt 1',1,3,communeList);
     fillPeriodic('Tiêm phòng định kỳ đợt 2',2,4,communeList);
@@ -3662,7 +3733,7 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
       const done=findTokens(r,[['dai','da tiem'],['dai','so duoc tiem phong'],['dai','so lieu da tiem']]);
       const rate=findTokens(r,[['dai','ty le'],['ty le tiem dai']]);
       if(herd===null&&done===null&&rate===null)return;
-      const rr=4+i;put(rabiesSh,rr,0,i+1);putText(rabiesSh,rr,1,xa);put(rabiesSh,rr,2,numVal(herd));put(rabiesSh,rr,3,numVal(done));put(rabiesSh,rr,4,rate!==null?numVal(rate):(numVal(herd)>0?numVal(done)/numVal(herd)*100:null));
+      const rr=4+i;put(rabiesSh,rr,0,i+1);putText(rabiesSh,rr,1,xa);put(rabiesSh,rr,2,numVal(herd));put(rabiesSh,rr,3,numVal(done));put(rabiesSh,rr,4,rate!==null?normalizeRate(rate):(numVal(herd)>0?numVal(done)/numVal(herd):null));
     });
     // Phun phòng đợt 1/2; API nào không có số liệu thì để trống đúng mẫu, không lấy nhầm số liệu dịch bệnh.
     function fillSpray(sheetName,rows,startRow){
@@ -3723,11 +3794,12 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
     // Ghi chú nguồn trong các sheet không có API chi tiết tương ứng, thay vì tự điền số liệu mẫu.
     putText(ws('TTHC'),1,0,'Từ ngày '+dateLabel(from)+' đến ngày '+dateLabel(to));
     // Định dạng tỷ lệ: giá trị được lưu theo thang 0–100, vì vậy dùng mẫu 0.0"%" (không nhân 100 lần nữa).
+    function normalizeRate(value){const n=numVal(value);if(n===null)return null;return n>1?n/100:n;}
     function setNumberFormat(sheetName,rows,cols,fmt){const sh=ws(sheetName);for(const r of rows)for(const c of cols){const a=window.XLSX.utils.encode_cell({r,c});if(sh[a]&&typeof sh[a].v==='number')sh[a].z=fmt;}}
-    setNumberFormat('Tiêm phòng định kỳ đợt 1',Array.from({length:46},(_,i)=>i+3),[4,7,10,13,16],'0.0"%"');
-    setNumberFormat('Tiêm phòng định kỳ đợt 2',Array.from({length:46},(_,i)=>i+4),[3,6,9,12,15],'0.0"%"');
-    setNumberFormat('Tiêm phòng dại',Array.from({length:45},(_,i)=>i+4),[4],'0.0"%"');
-    setNumberFormat('TP VDNC',Array.from({length:45},(_,i)=>i+4),[4],'0.0"%"');
+    setNumberFormat('Tiêm phòng định kỳ đợt 1',Array.from({length:46},(_,i)=>i+3),[4,7,10,13,16],'0.0%');
+    setNumberFormat('Tiêm phòng định kỳ đợt 2',Array.from({length:46},(_,i)=>i+4),[3,6,9,12,15],'0.0%');
+    setNumberFormat('Tiêm phòng dại',Array.from({length:45},(_,i)=>i+4),[4],'0.0%');
+    setNumberFormat('TP VDNC',Array.from({length:45},(_,i)=>i+4),[4],'0.0%');
     formatSheet('DTLCP','A1:T42',[6,24,13,13,14,14,14,15,14,15,14,15,14,15,14,15,16,16,17,20],[3,4,5],[0]);
     formatSheet('Dịch bệnh khác','A1:K30',[6,24,14,13,15,16,14,14,15,16,28],[2,3],[0]);
     formatSheet('TTHC','A1:C18',[6,48,20],[3],[0]);
@@ -4165,6 +4237,37 @@ html, body { max-width:100%; }
   window.addEventListener('webgis:refresh-vaccine-kpi',load);
 })();
 </script>
+
+
+<style id="kpi-readable-fit-final">
+/* KPI tiêm phòng: bố cục 2 tầng để giá trị dài không thể tràn ngang khỏi thẻ */
+.sidebar-kpi > .card-vaccine-kpi,
+.sidebar-kpi .card-vaccine-kpi { box-sizing:border-box!important; width:100%!important; min-width:0!important; max-width:100%!important; height:auto!important; min-height:0!important; max-height:none!important; overflow:visible!important; padding:9px 10px!important; }
+.card-vaccine-kpi .summary-head { display:flex!important; align-items:center!important; gap:6px!important; min-width:0!important; width:100%!important; max-width:100%!important; box-sizing:border-box!important; font-size:13px!important; line-height:1.3!important; }
+.card-vaccine-kpi .vaccine-kpi-compact { display:flex!important; flex-direction:column!important; gap:2px!important; width:100%!important; min-width:0!important; max-width:100%!important; box-sizing:border-box!important; }
+.card-vaccine-kpi .vaccine-kpi-compact > span:not([hidden]) { display:grid!important; grid-template-columns:minmax(0,1fr)!important; grid-auto-flow:row!important; align-items:start!important; row-gap:2px!important; width:100%!important; min-width:0!important; max-width:100%!important; box-sizing:border-box!important; padding:5px 0!important; line-height:1.3!important; white-space:normal!important; overflow:visible!important; border-bottom:1px solid var(--border,#e3e8eb)!important; }
+.card-vaccine-kpi .vaccine-kpi-compact > span:not([hidden]) > b,
+.card-vaccine-kpi .vaccine-kpi-compact > span:not([hidden]) > em { display:block!important; grid-column:1!important; width:100%!important; min-width:0!important; max-width:100%!important; box-sizing:border-box!important; white-space:normal!important; overflow:visible!important; overflow-wrap:anywhere!important; word-break:break-word!important; font-size:12px!important; line-height:1.35!important; text-align:left!important; }
+.card-vaccine-kpi .vaccine-kpi-compact > span:not([hidden]) > b { font-weight:700!important; }
+.card-vaccine-kpi .vaccine-kpi-compact > span:not([hidden]) > em { font-style:normal!important; color:var(--muted,#52616b)!important; font-weight:600!important; }
+@media(max-width:760px){ .card-vaccine-kpi .vaccine-kpi-compact > span:not([hidden]) > b, .card-vaccine-kpi .vaccine-kpi-compact > span:not([hidden]) > em { font-size:12px!important; } }
+</style>
+
+
+<!-- Không ghi cứng KPI bệnh Dại; chỉ hiển thị số liệu do API nguồn trả về. -->
+
+
+<style id="vaccine-kpi-label-emphasis-final">
+/* Làm nổi bật loại hình tiêm; tiến độ trình bày nhẹ, rõ và dễ quét mắt */
+.side-kpi-mini .card-vaccine-kpi { background:#fff!important; border:1px solid #d6e1ec!important; border-radius:10px!important; box-shadow:0 2px 7px rgba(28,58,85,.07)!important; }
+.side-kpi-mini .card-vaccine-kpi .summary-head { margin-bottom:5px!important; border-radius:7px!important; background:#eaf3ff!important; color:#254766!important; }
+.side-kpi-mini .card-vaccine-kpi .vaccine-kpi-compact > span:not([hidden]) { display:flex!important; flex-direction:column!important; align-items:stretch!important; gap:2px!important; padding:6px 1px!important; border-bottom:1px solid #e7edf3!important; }
+.side-kpi-mini .card-vaccine-kpi .vaccine-type { display:block!important; color:#243f59!important; font-size:11px!important; font-weight:800!important; line-height:1.25!important; text-align:left!important; }
+.side-kpi-mini .card-vaccine-kpi .vaccine-progress { display:block!important; color:#435466!important; font-size:11px!important; font-weight:500!important; line-height:1.35!important; text-align:left!important; overflow-wrap:anywhere!important; }
+.side-kpi-mini .card-vaccine-kpi #kpiDaiDone { color:#244e70!important; font-weight:600!important; }
+.side-kpi-mini .card-vaccine-kpi #kpiDaiStartedVisible { display:block!important; color:#6b7785!important; font-size:10px!important; font-weight:400!important; line-height:1.3!important; text-align:left!important; }
+.side-kpi-mini .card-vaccine-kpi .vaccine-kpi-compact > span:last-of-type { border-bottom:0!important; }
+</style>
 
 </body>
 </html>
