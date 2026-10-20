@@ -3669,330 +3669,78 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
   async function exportAppendixWorkbook(from,to){
     if(!window.XLSX || !window.XLSX.utils) throw new Error('Chưa tải được thư viện Excel. Kiểm tra Internet rồi tải lại trang (Ctrl+F5).');
     const enc=x=>encodeURIComponent(x), base=API_URL;
-    const year=(parseISODate(to)||new Date()).getFullYear(), ytdStart=String(year)+'-01-01'; // Tách rõ phát sinh trong kỳ và lũy kế từ 01/01 đến ngày kết thúc kỳ.
-    const [periodReport,ytdReport,trendResult,vaccineResult,spray1Result,spray2Result,ksgmResult,mainResult]=await Promise.all([
-      fetchOptional(base+'?type=report&from='+enc(from)+'&to='+enc(to)),
-      fetchOptional(base+'?type=report&from='+enc(ytdStart)+'&to='+enc(to)), // Lũy kế đầu năm đến ngày kết thúc kỳ
-      fetchOptional(base+'?type=trend'),fetchOptional(base+'?type=tiemphong'),
-      fetchOptional(base+'?type=phun'),fetchOptional(base+'?type=phun2'),
-      fetchOptional(base+'?type=ksgm'),fetchOptional(base)
+    const [trendResult,vaccineResult,spray1Result,spray2Result,ksgmResult,mainResult]=await Promise.all([
+      fetchOptional(base+'?type=trend'),
+      fetchOptional(base+'?type=tiemphong'),
+      fetchOptional(base+'?type=phun'),
+      fetchOptional(base+'?type=phun2'),
+      fetchOptional(base+'?type=ksgm'),
+      fetchOptional(base)
     ]);
-    const isDetailRow = r => {
-      const name=String(getField(r,['Tên xã/phường','Tên xã','Tên xã có bệnh','Xã/phường','Xã','Địa bàn','TEN_XA','TENXA','Commune'])||'').trim();
-      if(!name) return false;
-      const n=norm(name);
-      return !(/^(tong|tong hop|tong cong|cong|toan tinh|toan tinh tong hop)$/.test(n) || n.startsWith('tong hop ') || n.startsWith('tong cong '));
-    };
-    // Các sheet hoạt động dùng bản ghi có ngày trong kỳ; phần lũy kế dịch bệnh được tổng hợp riêng từ 01/01 đến ngày kết thúc.
-    // Không dùng KPI trên bản đồ thay thế cho dữ liệu báo cáo khi nguồn không có ngày tương ứng.
-    const inSelectedPeriod = (r, dateFields) => {
-      const raw=getField(r,dateFields);
-      const d=parseISODate(raw), a=parseISODate(from), b=parseISODate(to);
-      return !!(d&&a&&b&&d>=a&&d<=b);
-    };
-    const trendRows=arrayFromApi(trendResult).filter(isDetailRow),
-      vaccineRows=arrayFromApi(vaccineResult).filter(isDetailRow).filter(r=>inSelectedPeriod(r,[
-        'Ngày tiêm','Ngày thực hiện tiêm','Ngày triển khai','Ngày ghi nhận','Ngày cập nhật','Ngày báo cáo','Ngày thống kê','Ngày'
-      ])),
-      spray1Rows=arrayFromApi(spray1Result).filter(isDetailRow).filter(r=>inSelectedPeriod(r,[
-        'Ngày thực hiện','Ngày phun','Ngày phun phòng','Ngày ghi nhận','Ngày cập nhật','Ngày báo cáo','Ngày thống kê','Ngày'
-      ])),
-      spray2Rows=arrayFromApi(spray2Result).filter(isDetailRow).filter(r=>inSelectedPeriod(r,[
-        'Ngày thực hiện','Ngày phun','Ngày phun phòng','Ngày ghi nhận','Ngày cập nhật','Ngày báo cáo','Ngày thống kê','Ngày'
-      ])),
-      ksgmRows=arrayFromApi(ksgmResult).filter(isDetailRow),
-      mainRows=(arrayFromApi(mainResult).length?arrayFromApi(mainResult):getLiveRows()).filter(isDetailRow);
-    const wb=window.XLSX.read(TEMPLATE_B64,{type:'base64',cellStyles:true,cellDates:true});
-    const required=['DTLCP','TTHC','Dịch bệnh khác','TP VDNC','KSGM','Tiêm phòng dại','Tiêm phòng định kỳ đợt 2','Tiêm phòng định kỳ đợt 1','Phun phòng đợt 2','Phun phòng đợt 1'];
-    required.forEach(n=>{if(!wb.Sheets[n])throw new Error('File mẫu Excel thiếu sheet: '+n);});
-    const ws=n=>wb.Sheets[n], put=(sheet,r,c,v)=>{
-      if(v===null||v===undefined||v==='')return;
-      const a=window.XLSX.utils.encode_cell({r,c}),old=sheet[a]||{};
-      sheet[a]={...old,v:v,t:typeof v==='number'?'n':'s',...(typeof v==='number'?{z:'#,##0.##'}:{})};
-    };
-    // Xóa dữ liệu mẫu/giá trị tồn từ lần xuất trước nhưng giữ nguyên định dạng ô.
-    function clearData(sheetName,r1,r2,c1,c2){
-      const sh=ws(sheetName);
-      for(let r=r1;r<=r2;r++)for(let c=c1;c<=c2;c++){
-        const a=window.XLSX.utils.encode_cell({r,c}),old=sh[a];
-        if(!old)continue;
-        const cell={...old,v:'',t:'s'};delete cell.f;delete cell.w;delete cell.D;sh[a]=cell;
+    const fromDate=parseISODate(from), toDate=parseISODate(to);
+    if(!fromDate||!toDate||fromDate>toDate) throw new Error('Khoảng ngày không hợp lệ.');
+    const getRows=result=>arrayFromApi(result).filter(r=>r&&typeof r==='object'&&!Array.isArray(r));
+    const trend=getRows(trendResult), vaccine=getRows(vaccineResult), spray1=getRows(spray1Result), spray2=getRows(spray2Result), ksgm=getRows(ksgmResult), main=getRows(mainResult);
+    const normKey=v=>norm(v||'');
+    const dateKeys=['Ngày','Ngày ghi nhận','Ngày phát hiện','Ngày xảy ra','Ngày phát sinh','Ngày cập nhật','Ngày báo cáo','Ngày thống kê','Ngày nghiệp vụ','Ngày gửi mẫu','Ngày tiêm','Ngày thực hiện tiêm','Ngày triển khai','Ngày thực hiện','Ngày phun','Ngày phun phòng','Ngày trả KQ','Ngày trả kết quả','Thời gian','Thời gian ghi nhận','Date'];
+    const dateFor=row=>{
+      const keys=Object.keys(row||{});
+      for(const want of dateKeys){
+        const hit=keys.find(k=>normKey(k)===normKey(want));
+        if(hit && row[hit]!=='' && row[hit]!=null){const d=parseISODate(row[hit]);if(d)return d;}
       }
-    }
-    function formatSheet(sheetName,ref,widths,headerRows,titleRows=[0]){
-      const sh=ws(sheetName);sh['!ref']=ref;sh['!cols']=widths.map(w=>({wch:w}));
-      const range=window.XLSX.utils.decode_range(ref);sh['!rows']=Array.from({length:range.e.r+1},(_,r)=>({hpt:titleRows.includes(r)?28:(headerRows.includes(r)?38:(r===1?22:20))}));
-      sh['!pageSetup']={orientation:'landscape',fitToWidth:1,fitToHeight:0,scale:100,paperSize:9};
-      sh['!pageMargins']={left:0.25,right:0.25,top:0.45,bottom:0.45,header:0.2,footer:0.2};
-    }
-    const putText=(sheet,r,c,v)=>put(sheet,r,c,String(v??''));
-    const extendRows=(sheet,lastRow,lastCol,styleRow)=>{
-      for(let r=styleRow+1;r<=lastRow;r++)for(let c=0;c<lastCol;c++){
-        const a=window.XLSX.utils.encode_cell({r,c});
-        if(!sheet[a]){const src=sheet[window.XLSX.utils.encode_cell({r:styleRow,c})];sheet[a]={t:'s',v:'',...(src&&src.s?{s:src.s}:{})};}
-      }
-      const ref=window.XLSX.utils.decode_range(sheet['!ref']||'A1:A1');
-      ref.e.r=Math.max(ref.e.r,lastRow);ref.e.c=Math.max(ref.e.c,lastCol-1);sheet['!ref']=window.XLSX.utils.encode_range(ref);
+      // Dự phòng cho cột có tên dạng ngày ...
+      const hit=keys.find(k=>/^ngay\b/.test(normKey(k)) || /^thoi gian/.test(normKey(k)));
+      return hit?parseISODate(row[hit]):null;
     };
-    const writeDateRange=(name,cell,txt)=>putText(ws(name),cell[0],cell[1],txt);
-    const findTokens=(row,tokenSets)=>{
-      const entries=Object.keys(row||{}).map(k=>({k,n:norm(k)}));
-      for(const tokens of tokenSets){const hit=entries.find(x=>tokens.every(t=>x.n.includes(norm(t)))&&row[x.k]!==''&&row[x.k]!==null&&row[x.k]!==undefined);if(hit)return row[hit.k];}
-      return null;
+    const inPeriod=row=>{const d=dateFor(row);return !!(d&&d>=fromDate&&d<=toDate);};
+    const hasDateColumn=rows=>rows.length>0&&Object.keys(rows[0]).some(k=>dateKeys.some(d=>normKey(k)===normKey(d))||/^ngay\b/.test(normKey(k))||/^thoi gian/.test(normKey(k)));
+    const periodRows=rows=>hasDateColumn(rows)?rows.filter(inPeriod):rows;
+    const diseaseCode=row=>{
+      const raw=[getField(row,['Mã bệnh','Mã bệnh dịch','Mã dịch bệnh','Code bệnh','Mã']),getField(row,['Tên bệnh','Tên dịch bệnh','Bệnh','Loại bệnh'])].filter(v=>v!=null).join(' ');
+      const n=normKey(raw);
+      if(n.includes('dtlcp')||n.includes('dich ta lon chau phi'))return 'DTLCP';
+      if(n.includes('cgc')||n.includes('cum gia cam'))return 'CGC';
+      if(n.includes('vdnc')||n.includes('viem da noi cuc'))return 'VDNC';
+      if(n.includes('dai')||n.includes('benh dai'))return 'DAI';
+      if(n.includes('lmlm')||n.includes('lo mom long mong'))return 'LMLM';
+      return '';
     };
-    clearData('DTLCP',6,41,0,19);
-    [[5,9],[11,19],[21,29]].forEach(([a,b])=>clearData('Dịch bệnh khác',a,b,0,10));
-    clearData('TTHC',4,17,0,2);clearData('KSGM',4,48,0,5);clearData('TP VDNC',4,48,0,5);
-    clearData('Tiêm phòng dại',4,48,0,5);clearData('Tiêm phòng định kỳ đợt 1',3,48,0,16);
-    clearData('Tiêm phòng định kỳ đợt 2',4,49,0,15);clearData('Phun phòng đợt 1',4,48,0,7);clearData('Phun phòng đợt 2',3,47,0,7);
-    const vaxValue=(row,aliases,round,kind)=>{
-      const entries=Object.keys(row||{}).map(k=>({k,n:norm(k).replace(/^tiem phong /,'')}));
-      const aliasN=aliases.map(norm);
-      const hit=entries.find(x=>{
-        const n=x.n;
-        if(!aliasN.some(a=>n.includes(a)))return false;
-        if(round===0 ? !n.includes('vdnc') : !n.includes('dot '+round))return false;
-        if(kind==='plan')return /(^| )(kh|ke hoach)( |$)/.test(n)||n.endsWith(' kh');
-        if(kind==='done')return n.includes('da tiem')||n.includes('so duoc tiem');
-        if(kind==='rate')return n.includes('ty le');
-        return false;
-      });
-      if(hit)return row[hit.k];
-      // Không lấy tổng cả đợt để điền vào từng loại vắc xin: sẽ nhân lặp số liệu.
-      return null;
-    };
-    const communeMap=new Map();
-    vaccineRows.forEach(r=>{const name=communeName(r);if(name)communeMap.set(norm(name),r);});
-    const getVax=(name,aliases,round,kind)=>{
-      const row=communeMap.get(norm(name));if(!row)return null;
-      const v=vaxValue(row,aliases,round,kind);return numVal(v);
-    };
-    const vaccineDefs=[
-      {name:'Nhiệt thán',aliases:['Nhiệt thán'],cols:[2,3,4]},
-      {name:'THT trâu bò',aliases:['THT trâu bò','Tụ huyết trùng trâu bò'],cols:[5,6,7]},
-      {name:'Dịch tả lợn',aliases:['Dịch tả lợn'],cols:[8,9,10]},
-      {name:'Cúm gia cầm',aliases:['Cúm gia cầm'],cols:[11,12,13]},
-      {name:'LMLM',aliases:['LMLM','Lở mồm long móng'],cols:[14,15,16]}
+    const nonEmpty=rows=>rows.filter(r=>Object.values(r).some(v=>v!==''&&v!==null&&v!==undefined));
+    const tthc=periodRows(main).filter(r=>{
+      const n=normKey(Object.keys(r).filter(k=>/tthc|thu tuc hanh chinh/.test(normKey(k))).map(k=>r[k]).join(' '));
+      return Object.keys(r).some(k=>/ten tthc|ten thu tuc hanh chinh/.test(normKey(k))) || n.includes('thu tuc');
+    });
+    const sourceSheets=[
+      {name:'DTLCP',rows:periodRows(trend).filter(r=>diseaseCode(r)==='DTLCP')},
+      {name:'TTHC',rows:tthc.length?tthc:periodRows(main).filter(r=>Object.keys(r).some(k=>/ngay tra kq|ngay tra ket qua/.test(normKey(k))))},
+      {name:'Dịch bệnh khác',rows:periodRows(trend).filter(r=>['CGC','DAI','LMLM'].includes(diseaseCode(r)))},
+      {name:'TP VDNC',rows:periodRows(trend).filter(r=>diseaseCode(r)==='VDNC')},
+      {name:'KSGM',rows:periodRows(ksgm)},
+      {name:'Tiêm phòng dại',rows:periodRows(vaccine).filter(r=>/dai|rabies/.test(normKey(Object.keys(r).map(k=>k+' '+r[k]).join(' '))))},
+      {name:'Tiêm phòng định kỳ đợt 2',rows:periodRows(vaccine).filter(r=>/dot 2|dot hai|dinh ky 2/.test(normKey(Object.keys(r).map(k=>k+' '+r[k]).join(' '))))},
+      {name:'Tiêm phòng định kỳ đợt 1',rows:periodRows(vaccine).filter(r=>/dot 1|dot mot|dinh ky 1/.test(normKey(Object.keys(r).map(k=>k+' '+r[k]).join(' '))))},
+      {name:'Phun phòng đợt 2',rows:periodRows(spray2)},
+      {name:'Phun phòng đợt 1',rows:periodRows(spray1)}
     ];
-    const communeList=Array.from(new Set(vaccineRows.map(communeName).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'vi'));
-    // Nếu API trả bảng KPI đã tổng hợp, các cột nguồn được giữ nguyên với tiền tố TIEM_PHONG_.
-    function fillPeriodic(name,round,startRow,communes){
-      const sh=ws(name), maxRow=startRow+Math.max(45,communes.length)-1;
-      extendRows(sh,maxRow,round===1?17:16,Math.min(startRow+1,sh['!ref']?window.XLSX.utils.decode_range(sh['!ref']).e.r:0));
-      const ordered=communes.slice(0,45);
-      const defs = round===1 ? [
-        {aliases:['Nhiệt thán'],cols:[2,3,4]},
-        {aliases:['THT trâu bò','Tụ huyết trùng trâu bò'],cols:[5,6,7]},
-        {aliases:['Dịch tả lợn'],cols:[8,9,10]},
-        {aliases:['Cúm gia cầm'],cols:[11,12,13]},
-        {aliases:['LMLM','Lở mồm long móng'],cols:[14,15,16]}
-      ] : [
-        {aliases:['THT trâu bò','Tụ huyết trùng trâu bò'],cols:[1,2,3]},
-        {aliases:['Dịch tả lợn'],cols:[4,5,6]},
-        {aliases:['Cúm gia cầm'],cols:[7,8,9]},
-        {aliases:['LMLM','Lở mồm long móng'],cols:[10,11,12]}
-      ];
-      ordered.forEach((xa,i)=>{
-        const rowIndex=startRow+i, source=communeMap.get(norm(xa));
-        if(round===1){put(sh,rowIndex,0,i+1);putText(sh,rowIndex,1,xa);} else putText(sh,rowIndex,0,xa);
-        if(!source)return;
-        defs.forEach(d=>{
-          const plan=getVax(xa,d.aliases,round,'plan'),done=getVax(xa,d.aliases,round,'done'),rate=getVax(xa,d.aliases,round,'rate');
-          put(sh,rowIndex,d.cols[0],plan);put(sh,rowIndex,d.cols[1],done);
-          put(sh,rowIndex,d.cols[2],rate!==null?normalizeRate(rate):(plan>0&&done!==null?done/plan:null));
-        });
-      });
-      // Tổng kế hoạch và số đã tiêm: cộng theo từng xã, không lấy số KPI toàn tỉnh để tránh lệch nguồn.
-      const totalRow=startRow+45; putText(sh,totalRow,round===1?1:0,'TỔNG');
-      defs.forEach(d=>{
-        const ps=ordered.map(xa=>getVax(xa,d.aliases,round,'plan')).filter(v=>v!==null);
-        const ds=ordered.map(xa=>getVax(xa,d.aliases,round,'done')).filter(v=>v!==null);
-        if(ps.length)put(sh,totalRow,d.cols[0],ps.reduce((a,b)=>a+b,0));
-        if(ds.length)put(sh,totalRow,d.cols[1],ds.reduce((a,b)=>a+b,0));
-        const p=ps.reduce((a,b)=>a+b,0),dval=ds.reduce((a,b)=>a+b,0);
-        if(ps.length&&ds.length&&p>0)put(sh,totalRow,d.cols[2],dval/p);
-      });
-      if(round===2){
-        const allPlans=defs.map(d=>ordered.map(xa=>getVax(xa,d.aliases,round,'plan')).filter(v=>v!==null).reduce((a,b)=>a+b,0));
-        const allDones=defs.map(d=>ordered.map(xa=>getVax(xa,d.aliases,round,'done')).filter(v=>v!==null).reduce((a,b)=>a+b,0));
-        const totalPlan=allPlans.reduce((a,b)=>a+b,0), totalDone=allDones.reduce((a,b)=>a+b,0);
-        if(allPlans.some(v=>v>0))put(sh,totalRow,13,totalPlan);
-        if(allDones.some(v=>v>0))put(sh,totalRow,14,totalDone);
-        if(totalPlan>0)put(sh,totalRow,15,totalDone/totalPlan);
+    const wb=window.XLSX.utils.book_new();
+    sourceSheets.forEach(spec=>{
+      const rows=nonEmpty(spec.rows);
+      let aoa=[];
+      if(rows.length){
+        const headers=[]; rows.forEach(r=>Object.keys(r).forEach(k=>{if(!headers.includes(k))headers.push(k);}));
+        aoa=[headers,...rows.map(r=>headers.map(k=>r[k]===undefined||r[k]===null?'':r[k]))];
+      }else{
+        // Giữ tên sheet, đồng thời thể hiện rõ nguồn chưa có dòng phù hợp trong khoảng ngày.
+        const source=spec.name==='DTLCP'||spec.name==='Dịch bệnh khác'||spec.name==='TP VDNC'?'GIS_DICH_BENH_NGAY':spec.name==='TTHC'?'GIS_TONGHOP':spec.name==='KSGM'?'KSGM':spec.name.startsWith('Phun')?'GIS_PHUNPHONG':'TIEN_DO_TIEM_PHONG';
+        aoa=[['Nguồn dữ liệu',source],['Từ ngày',from],['Đến ngày',to],['Ghi chú','Không có dòng dữ liệu phù hợp hoặc nguồn không có trường ngày để lọc.']];
       }
-    }
-    function getVaxTotals(xs,aliases,round,kind){const vals=xs.slice(0,45).map(x=>getVax(x,aliases,round,kind)).filter(v=>v!==null);return vals.length?vals.reduce((a,b)=>a+b,0):null;}
-    const stamp='Từ ngày '+dateLabel(from)+' đến ngày '+dateLabel(to);
-    // Ghi ngày báo cáo lên đúng vùng tiêu đề của từng sheet mẫu.
-    writeDateRange('DTLCP',[1,0],stamp);writeDateRange('Dịch bệnh khác',[1,0],stamp);
-    writeDateRange('TP VDNC',[1,0],stamp);writeDateRange('KSGM',[1,0],stamp);
-    writeDateRange('Tiêm phòng định kỳ đợt 1',[1,0],stamp);writeDateRange('Tiêm phòng định kỳ đợt 2',[1,8],stamp);
-    writeDateRange('Phun phòng đợt 1',[1,0],stamp);writeDateRange('Phun phòng đợt 2',[1,0],stamp);
-    putText(ws('Tiêm phòng dại'),1,0,'Ngày cập nhật: '+dateLabel(to));
-    putText(ws('KSGM'),0,1,'TỔNG HỢP KẾT QUẢ KIỂM SOÁT GIẾT MỔ NĂM '+year);
-    putText(ws('DTLCP'),0,0,'BÁO CÁO TÌNH HÌNH BỆNH DỊCH TẢ LỢN CHÂU PHI TRÊN ĐỊA BÀN TỈNH ĐIỆN BIÊN');
-    putText(ws('Dịch bệnh khác'),0,0,'TÌNH HÌNH DỊCH BỆNH KHÁC TRÊN ĐỊA BÀN TỈNH ĐIỆN BIÊN');
-    // Tiêm phòng VDNC: bảng nguồn riêng theo xã, chỉ điền khi có đủ chỉ tiêu tương ứng.
-    const vdSh=ws('TP VDNC');extendRows(vdSh,48,6,Math.min(4,window.XLSX.utils.decode_range(vdSh['!ref']).e.r));
-    vaccineRows.forEach((r,i)=>{
-      if(i>=45)return;const xa=communeName(r);if(!xa)return;const rr=4+i;
-      const plan=vaxValue(r,['VDNC'],0,'plan'),done=vaxValue(r,['VDNC'],0,'done'),rate=vaxValue(r,['VDNC'],0,'rate');
-      put(vdSh,rr,0,i+1);putText(vdSh,rr,1,xa);put(vdSh,rr,2,numVal(plan));put(vdSh,rr,3,numVal(done));put(vdSh,rr,4,rate!==null?normalizeRate(rate):(numVal(plan)>0?numVal(done)/numVal(plan):null));
+      const ws=window.XLSX.utils.aoa_to_sheet(aoa);
+      ws['!cols']=(aoa[0]||[]).map((_,i)=>({wch:Math.min(42,Math.max(12,...aoa.slice(0,100).map(r=>String(r[i]??'').length+2)))}));
+      if(aoa.length>1)ws['!autofilter']={ref:window.XLSX.utils.encode_range({s:{r:0,c:0},e:{r:aoa.length-1,c:Math.max(0,(aoa[0]||[]).length-1)}})};
+      window.XLSX.utils.book_append_sheet(wb,ws,spec.name);
     });
-    fillPeriodic('Tiêm phòng định kỳ đợt 1',1,3,communeList);
-    fillPeriodic('Tiêm phòng định kỳ đợt 2',2,4,communeList);
-    // Tiêm phòng dại: điền theo xã nếu API có cột tổng đàn/số đã tiêm; không suy diễn số liệu.
-    const rabiesSh=ws('Tiêm phòng dại');extendRows(rabiesSh,49,6,4);
-    vaccineRows.forEach((r,i)=>{
-      if(i>=45)return;const xa=communeName(r);if(!xa)return;
-      const herd=findTokens(r,[['dai','tong dan cho meo'],['dai','tong dan trong dien tiem'],['tong dan cho meo']]);
-      const done=findTokens(r,[['dai','da tiem'],['dai','so duoc tiem phong'],['dai','so lieu da tiem']]);
-      const rate=findTokens(r,[['dai','ty le'],['ty le tiem dai']]);
-      if(herd===null&&done===null&&rate===null)return;
-      const rr=4+i;put(rabiesSh,rr,0,i+1);putText(rabiesSh,rr,1,xa);put(rabiesSh,rr,2,numVal(herd));put(rabiesSh,rr,3,numVal(done));put(rabiesSh,rr,4,rate!==null?normalizeRate(rate):(numVal(herd)>0?numVal(done)/numVal(herd):null));
-    });
-    // Phun phòng đợt 1/2; API nào không có số liệu thì để trống đúng mẫu, không lấy nhầm số liệu dịch bệnh.
-    function fillSpray(sheetName,rows,startRow){
-      const sh=ws(sheetName);extendRows(sh,startRow+44,8,Math.min(startRow,window.XLSX.utils.decode_range(sh['!ref']).e.r));
-      rows.slice(0,45).forEach((r,i)=>{
-        const xa=communeName(r);if(!xa)return;const rr=startRow+i;
-        put(sh,rr,0,i+1);putText(sh,rr,1,xa);
-        put(sh,rr,2,numVal(findTokens(r,[['vong phun'],['phun','vong'],['dot phun']])));
-        put(sh,rr,3,numVal(findTokens(r,[['so ho phun'],['phun','so ho']])));
-        put(sh,rr,4,numVal(findTokens(r,[['dien tich phun'],['dien tich']])));
-        put(sh,rr,5,numVal(findTokens(r,[['hoa chat duoc su dung'],['hoa chat','lit'],['luong hoa chat']])));
-        const note=findTokens(r,[['ghi chu'],['tien do phun']]);if(note!==null)putText(sh,rr,6,note);
-      });
-    }
-    fillSpray('Phun phòng đợt 1',spray1Rows,4);fillSpray('Phun phòng đợt 2',spray2Rows,3);
-    // KSGM: lấy bản ghi theo ngày từ sheet KSGM 1; cộng theo xã trong khoảng đã chọn.
-    const ksgmAgg=new Map();
-    ksgmRows.forEach(r=>{
-      const d=parseISODate(getField(r,['Ngày cập nhật','Ngày']));
-      if(!d || d<parseISODate(from) || d>parseISODate(to))return;
-      const xa=communeName(r);if(!xa)return;
-      const key=norm(xa);if(!ksgmAgg.has(key))ksgmAgg.set(key,{xa,pig:0,cow:0,poultry:0,goat:0,has:false});
-      const g=ksgmAgg.get(key);g.has=true;
-      const vals=[['pig',['Lợn (con)','Lợn']],['cow',['Trâu, bò (con)','Trâu, bò','Trâu bò']],['poultry',['Gia cầm (con)','Gia cầm']],['goat',['Dê (con)','Dê']]];
-      vals.forEach(([k,keys])=>{const n=numVal(getField(r,keys));if(n!==null)g[k]+=n;});
-    });
-    const ksgmSh=ws('KSGM');extendRows(ksgmSh,49,6,4);
-    [...ksgmAgg.values()].sort((a,b)=>a.xa.localeCompare(b.xa,'vi')).slice(0,45).forEach((g,i)=>{const rr=4+i;put(ksgmSh,rr,0,i+1);putText(ksgmSh,rr,1,g.xa);put(ksgmSh,rr,2,g.pig);put(ksgmSh,rr,3,g.cow);put(ksgmSh,rr,4,g.poultry);put(ksgmSh,rr,5,g.goat);});
-    // TTHC chỉ lấy dòng có đủ tên thủ tục và ngày trả kết quả từ dữ liệu đang được API cung cấp.
-    const tthcRows=mainRows.filter(r=>{
-      if(findTokens(r,[['ten tthc'],['ten thu tuc hanh chinh']])===null)return false;
-      const rawDate=findTokens(r,[['ngay tra kq'],['ngay tra ket qua']]);
-      if(rawDate===null)return false;
-      const d=parseISODate(rawDate),a=parseISODate(from),b=parseISODate(to);
-      return !!(d&&a&&b&&d>=a&&d<=b);
-    });
-    tthcRows.slice(0,14).forEach((r,i)=>{const rr=4+i;put(ws('TTHC'),rr,0,i+1);putText(ws('TTHC'),rr,1,findTokens(r,[['ten tthc'],['ten thu tuc hanh chinh']]));putText(ws('TTHC'),rr,2,findTokens(r,[['ngay tra kq'],['ngay tra ket qua']]));});
-    // DTLCP: bảng mẫu có cả chỉ tiêu phát sinh trong kỳ (p/periodGroups) và lũy kế từ 01/01 đến ngày kết thúc (y/ytdGroups). Không lấy KPI trên bản đồ thay thế cho dữ liệu báo cáo.
-    const pSum=diseaseSummary(periodReport,'DTLCP'), ySum=diseaseSummary(ytdReport,'DTLCP');
-    const periodGroups=buildCommuneGroups(getRowsFor('DTLCP',trendRows,iso(from),iso(to)),'DTLCP');
-    const ytdGroups=buildCommuneGroups(getRowsFor('DTLCP',trendRows,iso(ytdStart),iso(to)),'DTLCP');
-    const dSh=ws('DTLCP');
-    const allNames=[...new Set([...periodGroups.keys(),...ytdGroups.keys()])].sort((a,b)=>a.localeCompare(b,'vi'));
-    allNames.slice(0,35).forEach((xa,i)=>{
-      const rr=6+i,p=periodGroups.get(xa),y=ytdGroups.get(xa);
-      put(dSh,rr,0,i+1);putText(dSh,rr,1,xa);
-      if(y){put(dSh,rr,2,y.villages.size);put(dSh,rr,3,y.households.size);put(dSh,rr,14,y.hasDead?y.deadCull:null);put(dSh,rr,15,y.hasWeight?y.weight:null);}
-      if(p){put(dSh,rr,4,p.villages.size);put(dSh,rr,5,p.households.size);}
-    });
-    // Dòng tổng của mẫu DTLCP: chỉ điền các chỉ tiêu mà API có thể xác nhận.
-    if(ySum){put(dSh,41,2,numVal(ySum.villageCount));put(dSh,41,3,numVal(ySum.householdCount));put(dSh,41,14,numVal(ySum.deadCull));put(dSh,41,15,numVal(ySum.weightKg));}
-    if(pSum){put(dSh,41,4,numVal(pSum.villageCount));put(dSh,41,5,numVal(pSum.householdCount));}
-    // Sheet “Dịch bệnh khác”: phân nhóm theo các mục CGC, VDNC và Dại có sẵn trong mẫu.
-    const otherSh=ws('Dịch bệnh khác');
-    const otherSpecs=[
-      {code:'CGC',heading:4,first:5,capacity:5},
-      {code:'VDNC',heading:10,first:11,capacity:9},
-      {code:'DAI',heading:20,first:21,capacity:9}
-    ];
-    for(const spec of otherSpecs){
-      const pg=buildCommuneGroups(getRowsFor(spec.code,trendRows,iso(from),iso(to)),spec.code);
-      const yg=buildCommuneGroups(getRowsFor(spec.code,trendRows,iso(ytdStart),iso(to)),spec.code);
-      const ps=diseaseSummary(periodReport,spec.code),ys=diseaseSummary(ytdReport,spec.code);
-      const names=[...new Set([...pg.keys(),...yg.keys()])].sort((a,b)=>a.localeCompare(b,'vi'));
-      names.slice(0,spec.capacity).forEach((xa,i)=>{
-        const rr=spec.first+i,p=pg.get(xa),y=yg.get(xa);
-        put(otherSh,rr,0,i+1);putText(otherSh,rr,1,xa);
-        if(p){put(otherSh,rr,2,p.villages.size);put(otherSh,rr,3,p.households.size);put(otherSh,rr,4,animalMetric(ps,p));put(otherSh,rr,5,weightMetric(ps,p));}
-        if(y){put(otherSh,rr,6,y.villages.size);put(otherSh,rr,7,y.households.size);put(otherSh,rr,8,animalMetric(ys,y));put(otherSh,rr,9,weightMetric(ys,y));}
-      });
-      if(names.length>spec.capacity)putText(otherSh,spec.first+spec.capacity-1,10,'Mẫu chỉ bố trí '+spec.capacity+' dòng; còn '+(names.length-spec.capacity)+' xã chưa thể trình bày trong mẫu này.');
-    }
-    // Ghi chú nguồn trong các sheet không có API chi tiết tương ứng, thay vì tự điền số liệu mẫu.
-    putText(ws('TTHC'),1,0,'Từ ngày '+dateLabel(from)+' đến ngày '+dateLabel(to));
-    // Định dạng tỷ lệ: giá trị được lưu theo thang 0–100, vì vậy dùng mẫu 0.0"%" (không nhân 100 lần nữa).
-    function normalizeRate(value){const n=numVal(value);if(n===null)return null;return n>1?n/100:n;}
-    function setNumberFormat(sheetName,rows,cols,fmt){const sh=ws(sheetName);for(const r of rows)for(const c of cols){const a=window.XLSX.utils.encode_cell({r,c});if(sh[a]&&typeof sh[a].v==='number')sh[a].z=fmt;}}
-    setNumberFormat('Tiêm phòng định kỳ đợt 1',Array.from({length:46},(_,i)=>i+3),[4,7,10,13,16],'0.0%');
-    setNumberFormat('Tiêm phòng định kỳ đợt 2',Array.from({length:46},(_,i)=>i+4),[3,6,9,12,15],'0.0%');
-    setNumberFormat('Tiêm phòng dại',Array.from({length:45},(_,i)=>i+4),[4],'0.0%');
-    setNumberFormat('TP VDNC',Array.from({length:45},(_,i)=>i+4),[4],'0.0%');
-    formatSheet('DTLCP','A1:T42',[6,24,13,13,14,14,14,15,14,15,14,15,14,15,14,15,16,16,17,20],[3,4,5],[0]);
-    formatSheet('Dịch bệnh khác','A1:K30',[6,24,14,13,15,16,14,14,15,16,28],[2,3],[0]);
-    formatSheet('TTHC','A1:C18',[6,48,20],[3],[0]);
-    formatSheet('KSGM','A1:F50',[6,24,17,17,17,17],[3],[0]);
-    formatSheet('TP VDNC','A1:F49',[6,24,23,23,18,30],[3],[0]);
-    formatSheet('Tiêm phòng dại','A1:F50',[6,24,23,23,18,30],[3],[0]);
-    formatSheet('Tiêm phòng định kỳ đợt 1','A1:Q49',[6,23,18,18,16,21,18,16,18,18,16,18,18,16,19,18,16],[2],[0]);
-    formatSheet('Tiêm phòng định kỳ đợt 2','A1:P50',[23,18,18,16,21,18,16,18,18,16,18,18,16,19,18,16],[3],[0]);
-    formatSheet('Phun phòng đợt 1','A1:H49',[6,24,14,16,20,24,32,10],[3],[0]);
-    formatSheet('Phun phòng đợt 2','A1:H48',[6,24,14,16,20,24,32,10],[2],[0]);
-    const safeFrom=from.replace(/-/g,''),safeTo=to.replace(/-/g,'');
-    window.XLSX.writeFile(wb,'Bang_so_lieu_thu_y_'+safeFrom+'_den_'+safeTo+'.xlsx');
-  }
-  // Xem trước bảng tổng hợp theo kiểu bảng chi tiết KPI: mở trong cửa sổ ngay trên WebGIS,
-  // cho phép chuyển sheet và chỉ tải file khi người dùng bấm nút tải xuống.
-  let __appendixPreviewWorkbook=null, __appendixPreviewFilename='Bang_so_lieu_thu_y.xlsx';
-  function ensureAppendixPreviewModal(){
-    let modal=document.getElementById('appendixPreviewModal'); if(modal)return modal;
-    modal=document.createElement('div'); modal.id='appendixPreviewModal'; modal.className='appendix-preview-overlay';
-    modal.innerHTML=`<section class="appendix-preview-dialog" role="dialog" aria-modal="true" aria-labelledby="appendixPreviewTitle">
-      <header class="appendix-preview-head"><div><div class="appendix-preview-kicker">WEBGIS · BÁO CÁO TỔNG HỢP</div><h2 id="appendixPreviewTitle">Xem trước bảng số liệu Excel</h2><div id="appendixPreviewRange" class="appendix-preview-range"></div></div><button type="button" id="appendixPreviewClose" class="appendix-preview-close" aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button></header>
-      <div id="appendixPreviewTabs" class="appendix-preview-tabs"></div><div id="appendixPreviewNote" class="appendix-preview-note">Bản xem trước dữ liệu theo khoảng ngày đã chọn.</div>
-      <div class="appendix-preview-table-wrap"><table id="appendixPreviewTable" class="appendix-preview-table"></table></div>
-      <footer class="appendix-preview-foot"><span id="appendixPreviewCount"></span><div><button type="button" id="appendixPreviewCancel" class="appendix-preview-secondary">Đóng</button><button type="button" id="appendixPreviewDownload" class="appendix-preview-primary"><i class="fa-solid fa-file-excel"></i> Tải Excel (.xlsx)</button></div></footer>
-    </section>`;
-    document.body.appendChild(modal);
-    const close=()=>modal.classList.remove('is-open');
-    modal.querySelector('#appendixPreviewClose').addEventListener('click',close);
-    modal.querySelector('#appendixPreviewCancel').addEventListener('click',close);
-    modal.addEventListener('click',e=>{if(e.target===modal)close();});
-    document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('is-open'))close();});
-    modal.querySelector('#appendixPreviewDownload').addEventListener('click',()=>{
-      if(!__appendixPreviewWorkbook||!window.XLSX){alert('Chưa có dữ liệu Excel để tải.');return;}
-      window.XLSX.writeFile(__appendixPreviewWorkbook,__appendixPreviewFilename);
-    });
-    return modal;
-  }
-  function renderAppendixPreviewSheet(sheetName){
-    const wb=__appendixPreviewWorkbook, modal=document.getElementById('appendixPreviewModal'); if(!wb||!modal)return;
-    const sheet=wb.Sheets[sheetName], table=modal.querySelector('#appendixPreviewTable'); table.replaceChildren();
-    if(!sheet){table.innerHTML='<tbody><tr><td>Không có dữ liệu trong bảng này.</td></tr></tbody>';return;}
-    const rows=window.XLSX.utils.sheet_to_json(sheet,{header:1,defval:'',raw:false});
-    const nonEmpty=rows.filter(row=>row.some(cell=>String(cell??'').trim()!==''));
-    const shown=nonEmpty.slice(0,150);
-    shown.forEach((row,ri)=>{
-      const tr=document.createElement('tr');
-      row.forEach(cell=>{const el=document.createElement(ri===0?'th':'td');el.textContent=String(cell??'');tr.appendChild(el);});
-      table.appendChild(tr);
-    });
-    modal.querySelector('#appendixPreviewCount').textContent=`${nonEmpty.length} dòng có dữ liệu${nonEmpty.length>shown.length?' · bản xem trước giới hạn 150 dòng':''}`;
-    modal.querySelectorAll('.appendix-preview-tab').forEach(btn=>{const active=btn.dataset.sheet===sheetName;btn.classList.toggle('active',active);btn.setAttribute('aria-selected',active?'true':'false');});
-  }
-  function openAppendixPreview(from,to){
-    const modal=ensureAppendixPreviewModal();
-    modal.querySelector('#appendixPreviewRange').textContent=`Khoảng báo cáo: ${dateLabel(from)} – ${dateLabel(to)} · gồm phát sinh trong kỳ và lũy kế nếu nguồn dữ liệu có hỗ trợ`;
-    const tabs=modal.querySelector('#appendixPreviewTabs'); tabs.replaceChildren();
-    (__appendixPreviewWorkbook?.SheetNames||[]).forEach((name,i)=>{
-      const btn=document.createElement('button');btn.type='button';btn.className='appendix-preview-tab'+(i===0?' active':'');btn.dataset.sheet=name;btn.textContent=name;btn.setAttribute('role','tab');btn.setAttribute('aria-selected',i===0?'true':'false');
-      btn.addEventListener('click',()=>renderAppendixPreviewSheet(name));tabs.appendChild(btn);
-    });
-    modal.querySelector('#appendixPreviewNote').textContent='Chọn từng tab để xem các bảng trong file Excel. Nội dung tải xuống sẽ tương ứng với toàn bộ các tab này.';
-    modal.classList.add('is-open'); if(__appendixPreviewWorkbook?.SheetNames?.length)renderAppendixPreviewSheet(__appendixPreviewWorkbook.SheetNames[0]);
+    window.XLSX.writeFile(wb,'So_lieu_thu_y_'+from+'_den_'+to+'.xlsx');
   }
   async function previewAppendixWorkbook(from,to){
     if(!window.XLSX||typeof window.XLSX.writeFile!=='function')throw new Error('Thư viện Excel chưa sẵn sàng.');
