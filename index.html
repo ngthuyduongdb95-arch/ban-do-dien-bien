@@ -2132,6 +2132,9 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
                 <button id="btnSatellite" class="map-action" title="Bản đồ vệ tinh" aria-label="Bản đồ vệ tinh">
                     <i class="fa-solid fa-satellite"></i>
                 </button>
+                <button id="btnWhiteMap" class="map-action" title="Bản đồ Điện Biên nền trắng" aria-label="Bản đồ Điện Biên nền trắng">
+                    <i class="fa-solid fa-map"></i>
+                </button>
                 <button id="btnFullscreen" class="map-action" title="Toàn màn hình" aria-label="Toàn màn hình">
                     <i class="fa-solid fa-expand"></i>
                 </button>
@@ -2253,6 +2256,22 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
 </section>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script id="webgisBasemapCapture">
+/* Ghi nhận đối tượng Leaflet map do ứng dụng hiện tại tạo ra, không thay đổi logic dữ liệu. */
+(function(){
+  function capture(){
+    if(!window.L || window.L.__webgisMapCaptureInstalled) return;
+    var originalMap = window.L.map;
+    window.L.map = function(){
+      var map = originalMap.apply(this, arguments);
+      window.__webgisMap = map;
+      return map;
+    };
+    window.L.__webgisMapCaptureInstalled = true;
+  }
+  capture();
+})();
+</script>
 <script src="js/sheets.js"></script>
 <script src="js/dashboard.js"></script>
 <script src="js/map.js"></script>
@@ -4293,6 +4312,99 @@ html, body { max-width:100%; }
 .side-kpi-mini .card-vaccine-kpi #kpiDaiStartedVisible { display:block!important; color:#6b7785!important; font-size:10px!important; font-weight:400!important; line-height:1.3!important; text-align:left!important; }
 .side-kpi-mini .card-vaccine-kpi .vaccine-kpi-compact > span:last-of-type { border-bottom:0!important; }
 </style>
+
+
+<script id="webgisBasemapSwitcher20261020">
+(function(){
+  'use strict';
+  var initialized = false;
+  var osmLayer = null, satelliteLayer = null;
+  var map = null;
+  var buttons = {};
+
+  function setActive(mode){
+    Object.keys(buttons).forEach(function(key){
+      if(buttons[key]){
+        buttons[key].classList.toggle('active', key === mode);
+        buttons[key].setAttribute('aria-pressed', key === mode ? 'true' : 'false');
+      }
+    });
+  }
+
+  function removeRasterBasemaps(){
+    if(!map || !window.L) return;
+    // Xóa các lớp nền dạng tile, nhưng không đụng tới GeoJSON, điểm dịch bệnh hay lớp vector.
+    var remove = [];
+    map.eachLayer(function(layer){
+      if(layer instanceof window.L.TileLayer || (layer && layer._url && typeof layer.setUrl === 'function')) remove.push(layer);
+    });
+    remove.forEach(function(layer){ try { map.removeLayer(layer); } catch(e) {} });
+  }
+
+  function show(mode){
+    if(!map || !window.L) return;
+    removeRasterBasemaps();
+    var mapEl = document.getElementById('map');
+    if(mapEl) mapEl.style.background = '#ffffff';
+    if(mode === 'street') {
+      if(!osmLayer) osmLayer = window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        subdomains: 'abc', maxZoom: 19, crossOrigin: true,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'
+      });
+      osmLayer.addTo(map);
+    } else if(mode === 'satellite') {
+      if(!satelliteLayer) satelliteLayer = window.L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19, crossOrigin: true,
+        attribution: 'Tiles &copy; <a href="https://www.esri.com/" target="_blank" rel="noopener">Esri</a> and imagery contributors'
+      });
+      satelliteLayer.addTo(map);
+    }
+    // mode 'white': không thêm tile nền, giữ nền trắng và toàn bộ lớp dữ liệu vector hiện có.
+    setActive(mode);
+    if(map.invalidateSize) setTimeout(function(){ map.invalidateSize({animate:false}); }, 80);
+  }
+
+  function setup(){
+    if(initialized) return true;
+    map = window.__webgisMap || window.map || window.webgisMap || null;
+    if(!map || typeof map.eachLayer !== 'function' || !window.L) return false;
+    buttons = {
+      street: document.getElementById('btnStreet'),
+      satellite: document.getElementById('btnSatellite'),
+      white: document.getElementById('btnWhiteMap')
+    };
+    if(!buttons.street || !buttons.satellite || !buttons.white) return false;
+
+    // Chặn các handler nền cũ để không xảy ra xung đột khi chuyển lớp bản đồ.
+    Object.keys(buttons).forEach(function(mode){
+      buttons[mode].addEventListener('click', function(event){
+        event.preventDefault();
+        event.stopPropagation();
+        if(event.stopImmediatePropagation) event.stopImmediatePropagation();
+        show(mode);
+      }, true);
+    });
+    var style = document.createElement('style');
+    style.id = 'webgisBasemapSwitcherStyle';
+    style.textContent = '#map,.main-map,.leaflet-container{background:#fff!important} .map-actions{gap:5px;flex-wrap:wrap} #btnWhiteMap{border:1px solid #d5dde5} #btnWhiteMap.active{background:#155eef;color:#fff;border-color:#155eef}';
+    document.head.appendChild(style);
+    initialized = true;
+    show('street');
+    return true;
+  }
+
+  function start(){
+    var attempts = 0;
+    var timer = window.setInterval(function(){
+      attempts++;
+      if(setup() || attempts >= 80) window.clearInterval(timer);
+    }, 250);
+    setup();
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, {once:true});
+  else start();
+})();
+</script>
 
 </body>
 </html>
