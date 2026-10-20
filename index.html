@@ -4658,16 +4658,185 @@ html, body { max-width:100%; }
    data.forEach(([label,n])=>{const row=document.createElement('div');row.className='extra-kpi-row';const a=document.createElement('span'),b=document.createElement('b');a.textContent=label;b.textContent=rows.length?fmt(n):'—';row.append(a,b);lines?.appendChild(row);});
    text('kpiTTHCNote',rows.length?'Nguồn: '+source+' · Số hồ sơ theo dữ liệu tổng hợp':'Chưa đọc được dữ liệu từ GIS_TTHC_TONGHOP.');
  }
- const diseases=[['DTLCP',['dtlcp','dich ta lon chau phi']],['CGC',['cgc','cum gia cam']],['VDNC',['vdnc','viem da noi cuc']],['Dại',['dai','benh dai','rabies']],['LMLM',['lmlm','lo mom long mong']],['Bệnh khác',[]]];
- function diseaseOf(r){const v=val(r,['ten benh'])??val(r,['benh dich'])??val(r,['loai benh'])??val(r,['chi tieu xet nghiem'])??val(r,['benh']);return norm(v||'');}
- function sampleResult(r){return norm(val(r,['ket qua xet nghiem'])??val(r,['ket qua'])??val(r,['result'])??val(r,['nhan xet'])??val(r,['ket luan'])??'');}
- function renderSamples(rows,source){
-   const counts=diseases.map(([label,aliases],idx)=>{let total=0,pos=0;for(const r of rows){const disease=diseaseOf(r);const match=idx===5?!diseases.slice(0,5).some(([,a])=>a.some(x=>disease.includes(norm(x)))):aliases.some(x=>disease.includes(norm(x)));if(!match)continue;const n=countValue(r);total+=n;const result=sampleResult(r);if(result.includes('duong tinh')||result==='positive'||result==='pos'||result.includes('positive'))pos+=n;}return {label,total,pos};});
-   const totalRows=rows.reduce((sum,r)=>sum+countValue(r),0);text('kpiMauXNTotal',rows.length?fmt(totalRows):'—');const lines=document.getElementById('kpiMauXNLines');if(lines)lines.innerHTML='';
-   counts.filter(c=>c.total>0).forEach(c=>{const row=document.createElement('div');row.className='extra-kpi-row';const a=document.createElement('span'),b=document.createElement('b');a.textContent=c.label;b.textContent=fmt(c.pos)+'/'+fmt(c.total);row.append(a,b);lines?.appendChild(row);});
-   if(lines && !counts.some(c=>c.total>0)){const row=document.createElement('div');row.className='extra-kpi-row';row.textContent=rows.length?'Chưa có mẫu xét nghiệm theo bệnh.':'Chưa có dữ liệu mẫu xét nghiệm.';lines.appendChild(row);}
-   text('kpiMauXNNote',rows.length?'Dương tính / tổng số mẫu · Nguồn: '+source:'Chưa đọc được dữ liệu từ GIS_LAYMAU.');
- }
+ const diseases = [
+  ['DTLCP', ['dtlcp', 'dich ta lon chau phi']],
+  ['CGC',   ['cgc', 'cum gia cam']],
+  ['VDNC',  ['vdnc', 'viem da noi cuc']],
+  ['Dại',   ['dai', 'benh dai', 'rabies']],
+  ['LMLM',  ['lmlm', 'lo mom long mong']]
+];
+
+// Lấy dữ liệu theo tên cột trong API
+function sampleField(r, terms) {
+  return val(r, terms);
+}
+
+function sampleNumber(r, terms) {
+  const v = sampleField(r, terms);
+  return Math.max(0, numericValue(v));
+}
+
+// Chuẩn hóa kết quả xét nghiệm
+function classifySampleResult(value) {
+  const s = norm(value || '');
+
+  if (
+    s.includes('chua co') ||
+    s.includes('chua xet nghiem') ||
+    s.includes('cho ket qua') ||
+    s.includes('dang xet nghiem') ||
+    s.includes('pending')
+  ) return 'pending';
+
+  if (
+    s.includes('duong tinh') ||
+    s === 'positive' ||
+    s === 'pos' ||
+    s === '+' ||
+    s.includes('duong tinh')
+  ) return 'positive';
+
+  if (
+    s.includes('am tinh') ||
+    s === 'negative' ||
+    s === 'neg' ||
+    s === '-'
+  ) return 'negative';
+
+  return 'unknown';
+}
+
+function diseaseOf(r) {
+  return norm(
+    sampleField(r, ['benh']) ||
+    sampleField(r, ['ten benh']) ||
+    sampleField(r, ['benh dich']) ||
+    ''
+  );
+}
+
+function renderSamples(rows, source) {
+  const summary = diseases.map(([label, aliases]) => ({
+    label,
+    aliases,
+    total: 0,
+    positive: 0,
+    negative: 0,
+    pending: 0
+  }));
+
+  let totalSamples = 0;
+  let totalPositive = 0;
+  let totalNegative = 0;
+  let totalPending = 0;
+
+  for (const r of rows) {
+    // Cột K: Số lượng mẫu
+    const quantity = sampleNumber(r, ['so luong mau']);
+
+    // Bỏ qua dòng không có số lượng mẫu hợp lệ
+    if (quantity <= 0) continue;
+
+    totalSamples += quantity;
+
+    // Cột B: Bệnh
+    const disease = diseaseOf(r);
+
+    // Chỉ tổng hợp các bệnh được khai báo ở trên
+    const item = summary.find(d =>
+      d.aliases.some(alias => disease.includes(norm(alias)))
+    );
+
+    // Cột N: Kết quả
+    const result = classifySampleResult(
+      sampleField(r, ['ket qua'])
+    );
+
+    // Cột O, P, Q: số mẫu dương tính, âm tính, chưa có kết quả
+    const positiveCol = sampleNumber(r, ['so mau duong tinh']);
+    const negativeCol = sampleNumber(r, ['so mau am tinh']);
+    const pendingCol = sampleNumber(r, ['so mau chua co kq']);
+
+    const hasColumnCounts =
+      positiveCol + negativeCol + pendingCol > 0;
+
+    let positive = 0;
+    let negative = 0;
+    let pending = 0;
+
+    if (hasColumnCounts) {
+      // Ưu tiên số liệu đã nhập ở O, P, Q
+      positive = positiveCol;
+      negative = negativeCol;
+      pending = pendingCol;
+    } else if (result === 'positive') {
+      positive = quantity;
+    } else if (result === 'negative') {
+      negative = quantity;
+    } else {
+      // Kết quả trống, chưa có hoặc chưa xác định
+      pending = quantity;
+    }
+
+    totalPositive += positive;
+    totalNegative += negative;
+    totalPending += pending;
+
+    if (item) {
+      item.total += quantity;
+      item.positive += positive;
+      item.negative += negative;
+      item.pending += pending;
+    }
+  }
+
+  // Tổng số mẫu trên toàn bộ dữ liệu
+  text(
+    'kpiMauXNTotal',
+    rows.length ? fmt(totalSamples) : '—'
+  );
+
+  const lines = document.getElementById('kpiMauXNLines');
+  if (lines) lines.innerHTML = '';
+
+  // Hiển thị kết quả theo từng bệnh
+  summary
+    .filter(item => item.total > 0)
+    .forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'extra-kpi-row';
+
+      const label = document.createElement('span');
+      const value = document.createElement('b');
+
+      label.textContent = item.label;
+
+      value.textContent =
+        'Tổng ' + fmt(item.total) +
+        ' | Dương ' + fmt(item.positive) +
+        ' | Âm ' + fmt(item.negative) +
+        ' | Chưa có KQ ' + fmt(item.pending);
+
+      row.append(label, value);
+      lines?.appendChild(row);
+    });
+
+  if (lines && !summary.some(item => item.total > 0)) {
+    const row = document.createElement('div');
+    row.className = 'extra-kpi-row';
+    row.textContent = rows.length
+      ? 'Chưa có số lượng mẫu thuộc các bệnh được thống kê.'
+      : 'Chưa đọc được dữ liệu mẫu xét nghiệm.';
+    lines.appendChild(row);
+  }
+
+  text(
+    'kpiMauXNNote',
+    rows.length
+      ? 'Tổng số mẫu theo cột K; phân loại theo cột N và đối chiếu O, P, Q. Nguồn: ' + source
+      : 'Chưa đọc được dữ liệu từ GIS_LAYMAU.'
+  );
+}
  async function load(){const [tthc,samples]=await Promise.all([fetchRows(['tthc','TTHC']),fetchRows(['mauxetnghiem','xetnghiem','mau'])]);renderTTHC(tthc.rows,tthc.type);renderSamples(samples.rows,samples.type);}
  document.addEventListener('DOMContentLoaded',load);window.addEventListener('webgis:refresh-extra-kpi',load);
 })();
