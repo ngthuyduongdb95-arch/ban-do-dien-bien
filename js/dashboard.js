@@ -1,6 +1,7 @@
+
 // ======================================================
 // DASHBOARD.JS
-// Tổng quan theo đúng trường dữ liệu thực tế
+// Tổng quan và tải bảng số liệu theo từng KPI
 // ======================================================
 
 (function () {
@@ -97,7 +98,6 @@
             { label: "Dại", field: "DAI_Chết" }
         ];
 
-        // Xác định tên xã từ các trường tên thường gặp.
         const getCommuneName = row =>
             row["Tên xã/phường"] ||
             row["Tên xã"] ||
@@ -115,16 +115,12 @@
             borderWidth: 1
         }));
 
-        if (dashboardCharts.xa) {
-    dashboardCharts.xa.destroy();
-}
+        if (dashboardCharts.xa) dashboardCharts.xa.destroy();
 
-const oldChartXa = window.Chart.getChart(canvasXa);
-if (oldChartXa) {
-    oldChartXa.destroy();
-}
+        const oldChartXa = window.Chart.getChart(canvasXa);
+        if (oldChartXa) oldChartXa.destroy();
 
-dashboardCharts.xa = new window.Chart(canvasXa, {
+        dashboardCharts.xa = new window.Chart(canvasXa, {
             type: "bar",
             data: {
                 labels,
@@ -164,16 +160,12 @@ dashboardCharts.xa = new window.Chart(canvasXa, {
             )
         );
 
-        if (dashboardCharts.benh) {
-    dashboardCharts.benh.destroy();
-}
+        if (dashboardCharts.benh) dashboardCharts.benh.destroy();
 
-const oldChartBenh = window.Chart.getChart(canvasBenh);
-if (oldChartBenh) {
-    oldChartBenh.destroy();
-}
+        const oldChartBenh = window.Chart.getChart(canvasBenh);
+        if (oldChartBenh) oldChartBenh.destroy();
 
-dashboardCharts.benh = new window.Chart(canvasBenh, {
+        dashboardCharts.benh = new window.Chart(canvasBenh, {
             type: "bar",
             data: {
                 labels: diseases.map(disease => disease.label),
@@ -203,8 +195,254 @@ dashboardCharts.benh = new window.Chart(canvasBenh, {
         });
     }
 
+    // ================= XUẤT BẢNG SỐ LIỆU THEO KPI =================
+    const KPI_EXPORTS = {
+        "card-dtlcp": {
+            name: "Du_lieu_DTLCP",
+            title: "Dịch tả lợn châu Phi",
+            fields: [
+                ["ID", "ID"],
+                ["Tên xã/phường", "Tên xã"],
+                ["Trạng thái dịch", "DTLCP_Trạng thái"],
+                ["Số ổ dịch", "DTLCP_Ổ dịch"],
+                ["Số con tiêu hủy", "DTLCP_Chết"],
+                ["Khối lượng (kg)", "DTLCP_Trọng lượng"],
+                ["Ngày cuối ghi nhận", "DTLCP_Ngày cuối"],
+                ["Số ngày", "DTLCP_Số ngày"]
+            ],
+            include: row => hasHistory(
+                row, "DTLCP_Trạng thái", "DTLCP_Ổ dịch", "DTLCP_Chết"
+            )
+        },
+
+        "card-cgc": {
+            name: "Du_lieu_CGC",
+            title: "Cúm gia cầm",
+            fields: [
+                ["ID", "ID"],
+                ["Tên xã/phường", "Tên xã"],
+                ["Trạng thái dịch", "CGC_Trạng thái"],
+                ["Số ổ dịch", "CGC_Ổ dịch"],
+                ["Số con tiêu hủy", "CGC_Chết"],
+                ["Khối lượng (kg)", "CGC_Trọng lượng"],
+                ["Ngày cuối ghi nhận", "CGC_Ngày cuối"],
+                ["Số ngày", "CGC_Số ngày"]
+            ],
+            include: row => hasHistory(
+                row, "CGC_Trạng thái", "CGC_Ổ dịch", "CGC_Chết"
+            )
+        },
+
+        "card-vdnc": {
+            name: "Du_lieu_VDNC",
+            title: "Viêm da nổi cục",
+            fields: [
+                ["ID", "ID"],
+                ["Tên xã/phường", "Tên xã"],
+                ["Trạng thái dịch", "VDNC_Trạng thái"],
+                ["Số ổ dịch", "VDNC_Ổ dịch"],
+                ["Số con mắc", "VDNC_Mắc"],
+                ["Số con chết", "VDNC_Chết"],
+                ["Khối lượng (kg)", "VDNC_Trọng lượng"],
+                ["Ngày cuối ghi nhận", "VDNC_Ngày cuối"],
+                ["Số ngày", "VDNC_Số ngày"]
+            ],
+            include: row => hasHistory(
+                row, "VDNC_Trạng thái", "VDNC_Ổ dịch",
+                "VDNC_Mắc", "VDNC_Chết"
+            )
+        },
+
+        "card-dai": {
+            name: "Du_lieu_Benh_Dai",
+            title: "Bệnh dại",
+            fields: [
+                ["ID", "ID"],
+                ["Tên xã/phường", "Tên xã"],
+                ["Trạng thái dịch", "DAI_Trạng thái"],
+                ["Số ổ dịch", "DAI_Ổ dịch"],
+                ["Số con mắc", "DAI_Mắc"],
+                ["Số con chết", "DAI_Chết"],
+                ["Số con tiêu hủy", "DAI_Tiêu hủy"],
+                ["Ngày cuối ghi nhận", "DAI_Ngày cuối"],
+                ["Số ngày", "DAI_Số ngày"]
+            ],
+            include: row =>
+                hasHistory(
+                    row, "DAI_Trạng thái", "DAI_Ổ dịch",
+                    "DAI_Chết", "DAI_Tiêu hủy"
+                ) || numberValue(row["DAI_Mắc"]) > 0
+        },
+
+        "card-phun": {
+            name: "Du_lieu_Phun_phong",
+            title: "Thực hiện tháng tiêu độc, khử trùng",
+            fields: [
+                ["ID", "ID"],
+                ["Tên xã/phường", "Tên xã"],
+                ["Tiến độ", "PHUN_Tiến độ"],
+                ["Số vòng", "PHUN_Vòng"],
+                ["Số hộ", "PHUN_Số hộ"],
+                ["Diện tích", "PHUN_Diện tích"],
+                ["Hóa chất", "PHUN_Hóa chất"],
+                ["Ngày thực hiện", "PHUN_Ngày"]
+            ],
+            include: row =>
+                numberValue(row["PHUN_Số hộ"]) > 0 ||
+                numberValue(row["PHUN_Vòng"]) > 0 ||
+                norm(row["PHUN_Tiến độ"]) !== ""
+        },
+
+        "card-ksgm": {
+            name: "Du_lieu_KSGM",
+            title: "Kiểm soát giết mổ",
+            fields: [
+                ["ID", "ID"],
+                ["Tên xã/phường", "Tên xã"],
+                ["Trạng thái triển khai", "KSGM_Trạng thái"],
+                ["Số cơ sở", "KSGM_Cơ sở"]
+            ],
+            include: row =>
+                norm(row["KSGM_Trạng thái"]) !== "" ||
+                numberValue(row["KSGM_Cơ sở"]) > 0
+        },
+
+        "card-drug": {
+            name: "Du_lieu_Co_so_Thuoc_Thu_Y",
+            title: "Cơ sở thuốc thú y",
+            fields: [
+                ["ID", "ID"],
+                ["Tên xã/phường", "Tên xã"],
+                ["Số cơ sở", "CSBBTTY_Cơ sở"]
+            ],
+            include: row => numberValue(row["CSBBTTY_Cơ sở"]) > 0
+        }
+    };
+
+    function installKpiDownloadButtons() {
+        if (document.getElementById("kpi-download-style")) return;
+
+        const style = document.createElement("style");
+        style.id = "kpi-download-style";
+        style.textContent = `
+            .kpi-download-btn {
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                gap:6px;
+                width:100%;
+                margin-top:8px;
+                padding:6px 8px;
+                border:1px solid #d7e0e7;
+                border-radius:7px;
+                background:#f8fafc;
+                color:#334b5d;
+                font-size:10px;
+                line-height:14px;
+                font-weight:700;
+                cursor:pointer;
+            }
+            .kpi-download-btn:hover {
+                background:#eaf3f8;
+                border-color:#9db8c8;
+            }
+            .kpi-download-btn:disabled {
+                opacity:.55;
+                cursor:wait;
+            }
+        `;
+        document.head.appendChild(style);
+
+        Object.keys(KPI_EXPORTS).forEach(className => {
+            const card = document.querySelector(".summary-card." + className);
+            if (!card || card.querySelector(".kpi-download-btn")) return;
+
+            const cfg = KPI_EXPORTS[className];
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "kpi-download-btn";
+            btn.innerHTML =
+                '<i class="fa-solid fa-file-arrow-down" aria-hidden="true"></i>' +
+                '<span>Tải bảng số liệu</span>';
+
+            btn.title = "Tải bảng số liệu của " + cfg.title +
+                " (tệp CSV mở được bằng Excel)";
+
+            btn.addEventListener("click", () => downloadKpiCsv(cfg));
+            card.appendChild(btn);
+        });
+    }
+
+    function csvCell(value) {
+        let s = value === null || value === undefined ? "" : String(value);
+
+        // Hạn chế nội dung bị bảng tính hiểu nhầm là công thức.
+        if (/^[=+@]/.test(s) || /^-[^0-9]/.test(s)) s = "'" + s;
+
+        return '"' + s.replace(/"/g, '""') + '"';
+    }
+
+    function downloadKpiCsv(cfg) {
+        const rows = getRows();
+
+        if (!rows.length) {
+            alert("Chưa tải được dữ liệu Google Sheets. Vui lòng tải lại trang rồi thử lại.");
+            return;
+        }
+
+        const filtered = rows.filter(row => cfg.include(row));
+
+        if (!filtered.length) {
+            alert("Chưa có dữ liệu để xuất cho KPI " + cfg.title + ".");
+            return;
+        }
+
+        const headers = cfg.fields.map(field => field[0]);
+        const lines = [headers.map(csvCell).join(";")];
+
+        filtered.forEach(row => {
+            const values = cfg.fields.map(field => {
+                if (field[1] === "Tên xã") {
+                    return row["Tên xã"] ||
+                        row["Tên xã/phường"] ||
+                        row["Xã"] ||
+                        row["TEN_XA"] ||
+                        "";
+                }
+                return row[field[1]];
+            });
+
+            lines.push(values.map(csvCell).join(";"));
+        });
+
+        // BOM UTF-8 giúp Excel hiển thị đúng tiếng Việt.
+        const blob = new Blob(
+            ["\uFEFF" + lines.join("\r\n")],
+            { type: "text/csv;charset=utf-8;" }
+        );
+
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        const date = new Date();
+        const stamp =
+            date.getFullYear() +
+            String(date.getMonth() + 1).padStart(2, "0") +
+            String(date.getDate()).padStart(2, "0");
+
+        link.href = url;
+        link.download = cfg.name + "_" + stamp + ".csv";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    // ================= CẬP NHẬT DASHBOARD =================
     const dashboard = {
         update() {
+            installKpiDownloadButtons();
+
             const rows = getRows();
             if (!rows.length) return;
 
@@ -219,75 +457,69 @@ dashboardCharts.benh = new window.Chart(canvasBenh, {
             };
 
             rows.forEach(row => {
-                // ---------------- DTLCP ----------------
+                // DỊCH TẢ LỢN CHÂU PHI
                 if (hasHistory(
-                    row,
-                    "DTLCP_Trạng thái",
-                    "DTLCP_Ổ dịch",
-                    "DTLCP_Chết"
+                    row, "DTLCP_Trạng thái", "DTLCP_Ổ dịch", "DTLCP_Chết"
                 )) stat.dtlcpXa++;
 
                 if (isActive(row, "DTLCP_Trạng thái")) stat.dtlcpDang++;
                 stat.dtlcpCon += numberValue(row["DTLCP_Chết"]);
                 stat.dtlcpKg += numberValue(row["DTLCP_Trọng lượng"]);
 
-                // ---------------- CGC ----------------
+                // CÚM GIA CẦM
                 if (hasHistory(
-                    row,
-                    "CGC_Trạng thái",
-                    "CGC_Ổ dịch",
-                    "CGC_Chết"
+                    row, "CGC_Trạng thái", "CGC_Ổ dịch", "CGC_Chết"
                 )) stat.cgcXa++;
 
                 if (isActive(row, "CGC_Trạng thái")) stat.cgcDang++;
                 stat.cgcCon += numberValue(row["CGC_Chết"]);
                 stat.cgcKg += numberValue(row["CGC_Trọng lượng"]);
 
-                // ---------------- VDNC ----------------
+                // VIÊM DA NỔI CỤC
                 if (hasHistory(
-                    row,
-                    "VDNC_Trạng thái",
-                    "VDNC_Ổ dịch",
-                    "VDNC_Mắc",
-                    "VDNC_Chết"
+                    row, "VDNC_Trạng thái", "VDNC_Ổ dịch",
+                    "VDNC_Mắc", "VDNC_Chết"
                 )) stat.vdncXa++;
 
                 if (isActive(row, "VDNC_Trạng thái")) stat.vdncDang++;
                 stat.vdncMac += numberValue(row["VDNC_Mắc"]);
                 stat.vdncChet += numberValue(row["VDNC_Chết"]);
 
-                // ---------------- DẠI ----------------
+                // BỆNH DẠI
                 if (hasHistory(
-                    row,
-                    "DAI_Trạng thái",
-                    "DAI_Ổ dịch",
-                    "DAI_Chết",
-                    "DAI_Tiêu hủy"
+                    row, "DAI_Trạng thái", "DAI_Ổ dịch",
+                    "DAI_Chết", "DAI_Tiêu hủy"
                 )) stat.daiXa++;
 
                 if (isActive(row, "DAI_Trạng thái")) stat.daiDang++;
                 stat.daiChet += numberValue(row["DAI_Chết"]);
                 stat.daiTieuHuy += numberValue(row["DAI_Tiêu hủy"]);
 
-                // ---------------- PHUN ----------------
+                // PHUN PHÒNG
                 const phunHo = numberValue(row["PHUN_Số hộ"]);
                 const phunVong = numberValue(row["PHUN_Vòng"]);
-                if (phunHo > 0 || phunVong > 0 || norm(row["PHUN_Tiến độ"]) !== "") {
-                    stat.phunXa++;
-                }
+
+                if (
+                    phunHo > 0 ||
+                    phunVong > 0 ||
+                    norm(row["PHUN_Tiến độ"]) !== ""
+                ) stat.phunXa++;
+
                 stat.phunHo += phunHo;
                 stat.phunVong += phunVong;
 
-                // ---------------- KSGM ----------------
+                // KIỂM SOÁT GIẾT MỔ
                 const ksgmCoSo = numberValue(row["KSGM_Cơ sở"]);
+
                 if (norm(row["KSGM_Trạng thái"]) === "đã triển khai") {
                     stat.ksgmXa++;
                 } else if (ksgmCoSo > 0) {
                     stat.ksgmXa++;
                 }
+
                 stat.ksgmCoSo += ksgmCoSo;
 
-                // ---------------- THUỐC THÚ Y ----------------
+                // CƠ SỞ THUỐC THÚ Y
                 stat.csbbtty += numberValue(row["CSBBTTY_Cơ sở"]);
             });
 
@@ -320,7 +552,7 @@ dashboardCharts.benh = new window.Chart(canvasBenh, {
 
             setText("dbCSBBTTY", fmt(stat.csbbtty));
 
-            // Tổng quan nhỏ ở sidebar
+            // Tổng quan ở sidebar
             setText("sideOverviewXa", rows.length);
             setText(
                 "sideOverviewDang",
@@ -332,9 +564,11 @@ dashboardCharts.benh = new window.Chart(canvasBenh, {
             );
             setText(
                 "sideOverviewKg",
-                stat.dtlcpKg + stat.cgcKg );            
+                stat.dtlcpKg + stat.cgcKg
+            );
         }
-    }; 
+    };
+
     window.dashboard = dashboard;
 
     window.updateDashboard = function () {
