@@ -3742,15 +3742,9 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
     });
     window.XLSX.writeFile(wb,'So_lieu_thu_y_'+from+'_den_'+to+'.xlsx');
   }
+  // Tải trực tiếp tệp Excel; không gọi hàm xem trước chưa được định nghĩa.
   async function previewAppendixWorkbook(from,to){
-    if(!window.XLSX||typeof window.XLSX.writeFile!=='function')throw new Error('Thư viện Excel chưa sẵn sàng.');
-    const originalWriteFile=window.XLSX.writeFile; let captured=false;
-    try{
-      window.XLSX.writeFile=function(wb,filename){__appendixPreviewWorkbook=wb;__appendixPreviewFilename=filename||'Bang_so_lieu_thu_y.xlsx';captured=true;};
-      await exportAppendixWorkbook(from,to);
-    }finally{window.XLSX.writeFile=originalWriteFile;}
-    if(!captured||!__appendixPreviewWorkbook)throw new Error('Không tạo được dữ liệu xem trước Excel.');
-    openAppendixPreview(from,to);
+    return await exportAppendixWorkbook(from,to);
   }
 
   document.addEventListener('DOMContentLoaded',function(){
