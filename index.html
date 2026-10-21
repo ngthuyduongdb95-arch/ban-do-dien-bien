@@ -2332,6 +2332,94 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
 <script src="js/dashboard.js"></script>
 <script src="js/map.js"></script>
 <script src="js/app.js"></script>
+<script id="webgis-commune-click-kpi-fix-20261021">
+/* Bổ sung xử lý chọn xã khi phóng to bản đồ: nếu cú nhấp rơi vào vùng đa giác nhưng
+   Leaflet không chuyển sự kiện tới lớp xã, tìm đa giác tại tọa độ đó và gọi lại click handler hiện có. */
+(function(){
+  'use strict';
+  function getMap(){
+    return window.__webgisMap || window.map || window.webgisMap || null;
+  }
+  function getFeatureName(layer){
+    var p=(layer && layer.feature && layer.feature.properties)||{};
+    var keys=['TEN_XA','TENXA','ten_xa','TenXa','Ten_Xa','NAME_3','NAME_2','name','Name','tenxa','xa','Xa','Tên xã','Tên xã/phường','Xã','Xã/phường','ten_dvhc','TEN_DVHC'];
+    for(var i=0;i<keys.length;i++){
+      if(p[keys[i]]!=null && String(p[keys[i]]).trim()) return String(p[keys[i]]).trim();
+    }
+    return '';
+  }
+  function findPolygonAt(map, latlng){
+    var hits=[];
+    function inspect(layer){
+      if(!layer) return;
+      if(typeof layer.eachLayer==='function' && !(window.L && layer instanceof L.Path)){
+        layer.eachLayer(inspect); return;
+      }
+      if(!(window.L && layer instanceof L.Polygon) || !layer.feature) return;
+      try{
+        if(layer.options) layer.options.interactive=true;
+        var b=layer.getBounds && layer.getBounds();
+        if(b && b.contains(latlng) && getFeatureName(layer)){
+          var sw=b.getSouthWest(), ne=b.getNorthEast();
+          var area=Math.abs((ne.lat-sw.lat)*(ne.lng-sw.lng));
+          hits.push({layer:layer,area:area});
+        }
+      }catch(_e){}
+    }
+    map.eachLayer(inspect);
+    hits.sort(function(a,b){return a.area-b.area;});
+    return hits.length?hits[0].layer:null;
+  }
+  function showBasicFeatureInfo(layer){
+    var name=getFeatureName(layer); if(!name) return;
+    var title=document.getElementById('panel-title');
+    var panel=document.getElementById('info-panel');
+    if(title) title.textContent=name;
+    if(panel){
+      panel.innerHTML='';
+      var box=document.createElement('div'); box.className='selected-summary';
+      var strong=document.createElement('div'); strong.className='selected-name'; strong.textContent=name;
+      var hint=document.createElement('div'); hint.className='selected-hint';
+      hint.textContent='Đã chọn địa bàn. Đang chờ dữ liệu KPI chi tiết từ hệ thống.';
+      box.appendChild(strong); box.appendChild(hint); panel.appendChild(box);
+      var props=(layer.feature&&layer.feature.properties)||{};
+      var rows=Object.keys(props).filter(function(k){return props[k]!==null && props[k]!=='' && !/^(geometry|style|color|fillcolor)$/i.test(k);}).slice(0,16);
+      if(rows.length){
+        var section=document.createElement('section'); section.className='info-section';
+        var heading=document.createElement('div'); heading.className='info-section-title'; heading.textContent='Thông tin thuộc tính bản đồ'; section.appendChild(heading);
+        rows.forEach(function(k){var row=document.createElement('div');row.className='info-row';var label=document.createElement('span');label.textContent=k;var val=document.createElement('b');val.textContent=String(props[k]);row.append(label,val);section.appendChild(row);});
+        panel.appendChild(section);
+      }
+    }
+  }
+  function install(){
+    var map=getMap();
+    if(!map || !window.L || map.__communeClickKpiFixInstalled) return false;
+    map.__communeClickKpiFixInstalled=true;
+    map.on('click',function(e){
+      var layer=findPolygonAt(map,e.latlng); if(!layer) return;
+      // Gọi handler gốc để dùng đúng logic KPI chi tiết đã có trong ứng dụng.
+      if(typeof layer.listens==='function' && layer.listens('click')){
+        layer.fire('click',{latlng:e.latlng,originalEvent:e.originalEvent,communeClickFallback:true});
+      }else{
+        showBasicFeatureInfo(layer);
+      }
+    });
+    // Đảm bảo các lớp ranh giới xã có thể nhận tương tác sau khi tải GeoJSON bất đồng bộ.
+    function makeInteractive(layer){
+      if(!layer) return;
+      if(typeof layer.eachLayer==='function' && !(layer instanceof L.Path)){layer.eachLayer(makeInteractive);return;}
+      if(layer instanceof L.Polygon && layer.feature && layer.options){layer.options.interactive=true;}
+    }
+    map.eachLayer(makeInteractive);
+    map.on('layeradd',function(e){makeInteractive(e.layer);});
+    return true;
+  }
+  if(!install()){
+    var tries=0, timer=setInterval(function(){tries++;if(install()||tries>=80)clearInterval(timer);},250);
+  }
+})();
+</script>
 <!-- Tải docx qua ESM CDN để tránh lỗi MIME application/node khi nạp tệp .cjs -->
 <script type="module">
 (async function(){
