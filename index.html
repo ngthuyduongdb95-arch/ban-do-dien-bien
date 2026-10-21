@@ -4935,6 +4935,62 @@ html, body { max-width:100%; }
 })();
 </script>
 
+
+<style id="fullscreen-map-hide-kpi-fix">
+/* Toàn màn hình chỉ giữ bản đồ và thanh công cụ bản đồ; ẩn các KPI/panel bên ngoài. */
+.main-map:fullscreen,
+.main-map:-webkit-full-screen { position:fixed!important; inset:0!important; z-index:2147483000!important; width:100vw!important; height:100vh!important; max-width:none!important; max-height:none!important; margin:0!important; padding:0!important; border:0!important; border-radius:0!important; background:#fff!important; }
+.main-map:fullscreen #map,
+.main-map:-webkit-full-screen #map { width:100%!important; height:100vh!important; min-height:100vh!important; max-height:100vh!important; }
+.main-map:fullscreen .map-actions,
+.main-map:-webkit-full-screen .map-actions { z-index:2147483001!important; }
+.main-map:fullscreen .left-extra-kpi,
+.main-map:fullscreen .side-kpi-mini,
+.main-map:fullscreen .sidebar-kpi,
+.main-map:fullscreen .kpi-card,
+.main-map:fullscreen .summary-card,
+.main-map:-webkit-full-screen .left-extra-kpi,
+.main-map:-webkit-full-screen .side-kpi-mini,
+.main-map:-webkit-full-screen .sidebar-kpi,
+.main-map:-webkit-full-screen .kpi-card,
+.main-map:-webkit-full-screen .summary-card { display:none!important; }
+</style>
+<script id="fullscreen-map-hide-kpi-fix-js">
+(function(){
+  function initFullscreenMap(){
+    const btn=document.getElementById('btnFullscreen');
+    const mapBox=document.querySelector('.webgis');
+    const mapEl=document.getElementById('map');
+    if(!btn||!mapBox||btn.dataset.fullscreenKpiFixed==='1') return;
+    btn.dataset.fullscreenKpiFixed='1';
+    btn.addEventListener('click',function(ev){
+      ev.preventDefault(); ev.stopPropagation();
+      if(ev.stopImmediatePropagation) ev.stopImmediatePropagation();
+      const active=document.fullscreenElement||document.webkitFullscreenElement;
+      if(active){
+        const exit=document.exitFullscreen||document.webkitExitFullscreen;
+        if(exit) Promise.resolve(exit.call(document)).catch(err=>console.warn('Không thoát được toàn màn hình:',err));
+      }else{
+        const enter=mapBox.requestFullscreen||mapBox.webkitRequestFullscreen;
+        if(enter) Promise.resolve(enter.call(mapBox)).catch(err=>console.warn('Không mở được toàn màn hình:',err));
+        else mapBox.classList.add('map-fullscreen-fallback');
+      }
+    },true);
+    function resizeMap(){
+      setTimeout(function(){
+        try{ if(window.map && typeof window.map.invalidateSize==='function') window.map.invalidateSize(true); }
+        catch(e){}
+        try{ if(window.leafletMap && typeof window.leafletMap.invalidateSize==='function') window.leafletMap.invalidateSize(true); }
+        catch(e){}
+      },180);
+    }
+    document.addEventListener('fullscreenchange',resizeMap);
+    document.addEventListener('webkitfullscreenchange',resizeMap);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initFullscreenMap); else initFullscreenMap();
+})();
+</script>
+
 </body>
 </html>
 
@@ -4985,5 +5041,39 @@ html, body { max-width:100%; }
     max-width:none!important;
     box-sizing:border-box!important;
   }
+}
+</style>
+
+<style id="fullscreen-map-keep-commune-panel">
+/* Toàn màn hình: mở rộng toàn bộ khung WebGIS, giữ bản đồ và panel thông tin xã; ẩn các cột KPI tổng quan. */
+.webgis:fullscreen, .webgis:-webkit-full-screen {
+  display:grid!important; grid-template-columns:minmax(0,1fr) 360px!important;
+  grid-template-rows:minmax(0,1fr)!important; gap:0!important;
+  width:100vw!important; height:100vh!important; min-height:100vh!important;
+  margin:0!important; padding:0!important; overflow:hidden!important;
+  background:#fff!important;
+}
+.webgis:fullscreen > .sidebar, .webgis:-webkit-full-screen > .sidebar,
+.webgis:fullscreen > .side-kpi-mini, .webgis:-webkit-full-screen > .side-kpi-mini,
+.webgis:fullscreen > .left-extra-kpi, .webgis:-webkit-full-screen > .left-extra-kpi {display:none!important}
+.webgis:fullscreen > .main-map, .webgis:-webkit-full-screen > .main-map {
+  display:flex!important; position:relative!important; inset:auto!important;
+  width:auto!important; height:100vh!important; min-width:0!important;
+  max-width:none!important; max-height:none!important; border:0!important;
+}
+.webgis:fullscreen > .main-map #map, .webgis:-webkit-full-screen > .main-map #map {
+  height:calc(100vh - 42px)!important; min-height:0!important; flex:1 1 auto!important;
+}
+.webgis:fullscreen > .panel, .webgis:-webkit-full-screen > .panel {
+  display:block!important; position:relative!important; inset:auto!important;
+  width:360px!important; min-width:0!important; max-width:360px!important;
+  height:100vh!important; max-height:100vh!important; overflow:auto!important;
+  background:#fff!important; border-left:1px solid #d8e0e6!important;
+  z-index:2!important;
+}
+.webgis:fullscreen .map-actions, .webgis:-webkit-full-screen .map-actions {z-index:20!important}
+@media(max-width:700px){
+ .webgis:fullscreen, .webgis:-webkit-full-screen {grid-template-columns:minmax(0,1fr) 300px!important}
+ .webgis:fullscreen > .panel, .webgis:-webkit-full-screen > .panel {width:300px!important;max-width:300px!important}
 }
 </style>
