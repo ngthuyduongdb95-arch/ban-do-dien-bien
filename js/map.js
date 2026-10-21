@@ -667,7 +667,7 @@ function renderLabels() {
             pane: "mapLabels",
             icon: L.divIcon({
                 className: "map-label-wrap",
-                html: `<span class="map-label" style="color:#000000;font-weight:800;-webkit-text-stroke:0.25px #FFFFFF;text-shadow:1px 1px 0 #FFFFFF,-1px 1px 0 #FFFFFF,1px -1px 0 #FFFFFF,-1px -1px 0 #FFFFFF,0 0 3px #FFFFFF;">${escapeHtml(name)}</span>`,
+                html: `<span class="map-label" style="color:#000000;font-weight:800;">${escapeHtml(name)}</span>`,
                 iconSize: [width, 18],
                 iconAnchor: [width / 2, 9]
             })
