@@ -2279,7 +2279,17 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
       <div class="chart-body"><canvas id="chartTrend"></canvas></div>
     </div>
 
-    <!-- 2. THIỆT HẠI THEO XÃ VÀ LOẠI HÌNH -->
+    <!-- 2. SỐ CON TIÊU HỦY THEO THÁNG -->
+    <div class="chart-card">
+      <div class="chart-card-head">
+        <div class="chart-title">📊 Dịch bệnh theo tháng trong năm</div>
+        <button class="chart-download" type="button" data-download-chart="chartMonthly" title="Tải biểu đồ Word có thể chỉnh sửa" aria-label="Tải biểu đồ số liệu dịch theo tháng">↓ Tải Word</button>
+      </div>
+      <div class="chart-legend-note" id="monthlyNote">Số con chết/tiêu hủy theo tháng, căn cứ ngày tiêu hủy trong dữ liệu nguồn.</div>
+      <div class="chart-body"><canvas id="chartMonthly"></canvas></div>
+    </div>
+
+    <!-- 3. THIỆT HẠI THEO XÃ VÀ LOẠI HÌNH -->
     <div class="chart-card">
       <div class="chart-card-head">
         <div class="chart-title">📊 Thiệt hại theo xã/phường</div>
@@ -3171,6 +3181,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const cfg = diseaseConfig[key] || diseaseConfig.DTLCP;
     const note = document.getElementById("trendNote");
     const trendCanvas = document.getElementById("chartTrend");
+    updateMonthlyChart(key);
     if(trendChart) { trendChart.destroy(); trendChart=null; }
     if(trendCanvas && window.Chart && window.Chart.getChart(trendCanvas)) window.Chart.getChart(trendCanvas).destroy();
 
@@ -3259,6 +3270,47 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   }
+  function updateMonthlyChart(key){
+    const canvas = document.getElementById("chartMonthly");
+    const note = document.getElementById("monthlyNote");
+    if (!canvas || !window.Chart) return;
+    const cfg = diseaseConfig[key] || diseaseConfig.DTLCP;
+    const monthly = Array(12).fill(0);
+    let matched = 0, skipped = 0;
+    trendRows.forEach(row => {
+      if (trendDiseaseKey(row) !== key) return;
+      matched++;
+      // Ưu tiên đúng ngày tiêu hủy; chỉ dùng ngày ghi nhận/phát hiện nếu nguồn không có trường ngày tiêu hủy.
+      let dateRaw = firstValue(row, ["Ngày tiêu hủy", "Ngày tiêu huỷ", "Ngày chết/tiêu hủy", "Ngày chết, tiêu hủy", "Ngày", "Ngày ghi nhận", "Ngày phát hiện", "Ngày xảy ra", "Ngày cập nhật", "Ngày xảy ra ổ dịch", "Ngày bắt đầu"]);
+      if (dateRaw === null) dateRaw = fuzzyValue(row, "date");
+      const date = parseTrendDate(dateRaw);
+      const value = trendValue(row, key);
+      if (!date || value === null || !Number.isFinite(value)) { skipped++; return; }
+      monthly[date.getMonth()] += value;
+    });
+    const old = window.Chart.getChart(canvas);
+    if (old) old.destroy();
+    const colors = {DTLCP:"#e53935", CGC:"#2e7d32", VDNC:"#1976d2", DAI:"#6a35d1"};
+    const metric = key === "VDNC" ? "Số con mắc bệnh" : "Số con chết/tiêu hủy";
+    if (note) {
+      note.textContent = matched
+        ? `${cfg.label} · ${metric} theo tháng, cộng theo ngày tiêu hủy/ngày ghi nhận trong dữ liệu nguồn${skipped ? `; bỏ qua ${skipped} bản ghi thiếu ngày hoặc chỉ tiêu` : ""}.`
+        : `${cfg.label}: chưa có bản ghi phù hợp để tổng hợp theo tháng.`;
+    }
+    new Chart(canvas, {
+      type: "bar",
+      data: {
+        labels: ["Tháng 1","Tháng 2","Tháng 3","Tháng 4","Tháng 5","Tháng 6","Tháng 7","Tháng 8","Tháng 9","Tháng 10","Tháng 11","Tháng 12"],
+        datasets: [{ label: metric, data: monthly, backgroundColor: colors[key] || "#477fd1", borderRadius: 4, maxBarThickness: 36 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: true, position: "bottom", labels: { boxWidth: 10, font: { size: 9 } } }, tooltip: { callbacks: { label: ctx => `${metric}: ${Number(ctx.raw || 0).toLocaleString("vi-VN")} con` } } },
+        scales: { x: { grid: { display: false }, ticks: { font: { size: 9 } } }, y: { beginAtZero: true, title: { display: true, text: "Số con" }, ticks: { precision: 0, font: { size: 9 } } } }
+      }
+    });
+  }
+
   function updateDamage(){
     const key=selected(), cfg=diseaseConfig[key], data=rows(), map=new Map();
     // Với VDNC biểu diễn số con mắc bệnh; các lớp bệnh còn lại chỉ biểu diễn số con tiêu hủy.
