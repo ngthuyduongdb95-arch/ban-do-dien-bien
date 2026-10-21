@@ -76,7 +76,7 @@ const layerConfig = {
         name: "Kiểm soát giết mổ",
         field: "KSGM_Cơ sở",
         status: "KSGM_Trạng thái",
-        colors: ["#F0E6FF","#D8BFFF","#BD91FF","#9A63F5","#7840D8","#5426A8"]
+        colors: ["#F5F1FA","#E9E0F3","#D9C9E9","#C6AFDE","#B195D0","#9677BC"]
     },
     CSBBTTY: {
         name: "Cơ sở buôn bán thuốc thú y",
@@ -667,7 +667,7 @@ function renderLabels() {
             pane: "mapLabels",
             icon: L.divIcon({
                 className: "map-label-wrap",
-                html: `<span class="map-label" style="color:#000000;font-weight:800;">${escapeHtml(name)}</span>`,
+                html: `<span class="map-label" style="color:#000000;font-size:15px;font-weight:900;line-height:1.2;">${escapeHtml(name)}</span>`,
                 iconSize: [width, 18],
                 iconAnchor: [width / 2, 9]
             })
