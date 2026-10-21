@@ -1258,7 +1258,7 @@ button,input,select{font:inherit}
 }
 
 
-/* 🟦 PHUN PHÒNG */
+/* 🟦 THỰC HIỆN THÁNG TVSKTTĐ */
 
 .card-phun{
   border-top:3px solid #1597a3;
@@ -1681,67 +1681,6 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
   border-bottom:3px solid #d7b66d !important;
   box-shadow:0 3px 12px rgba(10,25,40,.2) !important;
 }
-
-
-/* FIX: Giữ nguyên KPI/lớp dữ liệu phun phòng; chữ KPI luôn nằm gọn trong khung */
-.summary-card, .summary-head, .summary-main, .summary-grid,
-.summary-grid span, .extra-kpi-row, .vaccine-kpi-compact > span {
-  box-sizing: border-box !important;
-  min-width: 0 !important;
-  max-width: 100% !important;
-}
-.summary-card { overflow: hidden !important; }
-.summary-head {
-  display: flex !important;
-  align-items: flex-start !important;
-  gap: 7px !important;
-  white-space: normal !important;
-  overflow-wrap: anywhere !important;
-  word-break: normal !important;
-  line-height: 1.3 !important;
-  height: auto !important;
-  min-height: 34px !important;
-}
-.summary-head b, .summary-head span {
-  display: block !important;
-  flex: 1 1 auto !important;
-  min-width: 0 !important;
-  white-space: normal !important;
-  overflow-wrap: anywhere !important;
-  line-height: 1.3 !important;
-}
-.summary-main, .summary-grid { min-width: 0 !important; }
-.summary-grid span {
-  white-space: normal !important;
-  overflow-wrap: anywhere !important;
-  word-break: normal !important;
-  line-height: 1.4 !important;
-}
-.summary-grid b, .summary-main small, .summary-main span {
-  white-space: normal !important;
-  overflow-wrap: anywhere !important;
-  max-width: 100% !important;
-}
-/* KPI tiêm phòng: giữ cỡ chữ dễ đọc nhưng không tràn khỏi thẻ */
-.side-kpi-mini > .card-vaccine-kpi { overflow: hidden !important; }
-.side-kpi-mini > .card-vaccine-kpi .summary-head { align-items: flex-start !important; }
-.side-kpi-mini > .card-vaccine-kpi .vaccine-kpi-compact > span,
-.side-kpi-mini > .card-vaccine-kpi .vaccine-type,
-.side-kpi-mini > .card-vaccine-kpi .vaccine-progress,
-.side-kpi-mini > .card-vaccine-kpi em {
-  min-width: 0 !important;
-  max-width: 100% !important;
-  white-space: normal !important;
-  overflow-wrap: anywhere !important;
-}
-/* Tiêu đề dài của KPI phun phòng vẫn hiển thị đủ trong thẻ */
-.card-disinfection .summary-head, .card-spray .summary-head,
-.card-tskttd .summary-head, [id*="phun"].summary-card .summary-head {
-  white-space: normal !important;
-  overflow-wrap: anywhere !important;
-  height: auto !important;
-}
-
 </style>
 
 <style id="layout-kpi-final-adjustment">
@@ -1963,7 +1902,7 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
 
 
 <style id="layout-three-cards-match-panel-final">
-/* Hàng KPI: 4 bệnh + Phun phòng. Cột cạnh panel: Tiêm phòng, KSGM, Thuốc thú y. */
+/* Hàng KPI và các nhóm dữ liệu quản lý thú y. */
 @media (min-width: 761px) {
   .sidebar-kpi { display:grid !important; grid-template-columns:repeat(5,minmax(0,1fr)) !important; gap:8px !important; }
   .sidebar-kpi > .summary-card { min-width:0 !important; width:100% !important; height:124px !important; min-height:124px !important; max-height:124px !important; box-sizing:border-box !important; }
@@ -2087,7 +2026,6 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
 @media(max-width:700px){.appendix-preview-overlay{padding:0}.appendix-preview-dialog{width:100vw;height:100dvh;border-radius:0}.appendix-preview-head{padding:13px}.appendix-preview-head h2{font-size:17px}.appendix-preview-foot{align-items:flex-start;flex-direction:column}.appendix-preview-foot>div{width:100%}.appendix-preview-foot button{flex:1}}
 </style>
 
-
 <style id="kpi-fit-and-actions-style">
 /* KPI: giữ chữ trong khung, tự xuống dòng và thu gọn khoảng cách khi tiêu đề dài */
 .summary-card,.summary-card *{box-sizing:border-box;min-width:0}
@@ -2115,58 +2053,6 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
 #kpiDetailFooter{padding:12px 18px;border-top:1px solid #dce5eb;display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
 @media(max-width:600px){#kpiDetailOverlay{padding:0}#kpiDetailDialog{width:100vw;height:100dvh;max-height:none;border-radius:0}.kpi-action-btn{font-size:9px;padding:4px 5px}}
 </style>
-
-
-<style id="kpi-typography-final-fix">
-/* KPI typography: readable, wrapped, and contained within each card */
-.sidebar-kpi { grid-template-columns: repeat(8, minmax(0, 1fr)); align-items: stretch; }
-.sidebar-kpi .summary-card {
-  box-sizing: border-box !important; min-width: 0 !important; width: 100% !important;
-  height: auto !important; min-height: 0 !important; max-height: none !important;
-  padding: 9px !important; overflow: hidden !important;
-}
-.sidebar-kpi .summary-head {
-  display: flex !important; align-items: flex-start !important; gap: 6px !important;
-  min-width: 0 !important; height: auto !important; min-height: 0 !important;
-  margin: 0 0 7px !important; padding: 6px 7px !important;
-  font-size: clamp(10px, .78vw, 12px) !important;
-  line-height: 1.25 !important; letter-spacing: 0 !important;
-  white-space: normal !important; overflow-wrap: anywhere !important; word-break: normal !important;
-}
-.sidebar-kpi .summary-head i { flex: 0 0 auto !important; margin-top: 1px !important; }
-.sidebar-kpi .summary-main { min-width: 0 !important; display: flex !important; flex-wrap: wrap !important; align-items: baseline !important; gap: 3px 5px !important; margin: 4px 0 6px !important; }
-.sidebar-kpi .summary-main span { font-size: clamp(18px, 1.55vw, 24px) !important; line-height: 1.12 !important; white-space: normal !important; overflow-wrap: anywhere !important; }
-.sidebar-kpi .summary-main small { min-width: 0 !important; font-size: 10px !important; line-height: 1.3 !important; white-space: normal !important; overflow-wrap: anywhere !important; }
-.sidebar-kpi .summary-grid { min-width: 0 !important; display: flex !important; flex-direction: column !important; gap: 4px !important; font-size: 10px !important; line-height: 1.3 !important; }
-.sidebar-kpi .summary-grid span { min-width: 0 !important; display: block !important; line-height: 1.3 !important; white-space: normal !important; overflow-wrap: anywhere !important; word-break: normal !important; }
-.sidebar-kpi .vaccine-kpi-compact > div { align-items: flex-start !important; gap: 5px !important; min-width: 0 !important; }
-.sidebar-kpi .vaccine-kpi-compact > div > b { min-width: 0 !important; line-height: 1.3 !important; overflow-wrap: anywhere !important; }
-.sidebar-kpi .vaccine-kpi-compact span, .sidebar-kpi .vaccine-kpi-compact strong { white-space: normal !important; overflow-wrap: anywhere !important; line-height: 1.3 !important; text-align: right; }
-@media (max-width: 1200px) { .sidebar-kpi { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; } }
-@media (max-width: 760px) { .sidebar-kpi { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
-</style>
-
-<style id="kpi-title-height-balanced-final">
-/* Tăng nhẹ chiều cao vùng tiêu đề KPI để chứa tiêu đề dài, không làm thẻ quá cao */
-.kpi-card .kpi-title, .summary-card .kpi-title, .sidebar-kpi .kpi-title,
-.side-kpi-mini .kpi-title, .left-extra-kpi .kpi-title, .kpi-panel .kpi-title,
-.kpi-card h2, .kpi-card h3, .kpi-card h4, .extra-kpi-card h2, .extra-kpi-card h3 {
-  min-height: 34px !important;
-  height: auto !important;
-  max-height: 46px !important;
-  padding-top: 5px !important;
-  padding-bottom: 5px !important;
-  line-height: 1.08 !important;
-  white-space: normal !important;
-  overflow: hidden !important;
-  overflow-wrap: anywhere !important;
-  word-break: normal !important;
-  box-sizing: border-box !important;
-}
-.kpi-card, .summary-card, .sidebar-kpi, .side-kpi-mini, .left-extra-kpi, .kpi-panel, .extra-kpi-card, .dashboard-card {
-  min-width: 0 !important;
-}
-</style>
 </head>
 <body>
 <header class="header">
@@ -2185,7 +2071,7 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
                 <option value="CGC">Cúm gia cầm</option>
                 <option value="VDNC">Viêm da nổi cục</option>
                 <option value="DAI">Bệnh Dại</option>
-                <option value="TIEM_DAI">Tỷ lệ tiêm phòng dại</option>
+                <option value="TIEMDAI">Tiêm phòng dại</option>
                 <option value="KSGM">Kiểm soát giết mổ</option>
                 <option value="CSBBTTY">Cơ sở buôn bán thuốc thú y</option>
             </select>
@@ -2281,8 +2167,8 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
             </div>
 
 
-            <div class="summary-card card-phun" id="cardPhunRestored">
-                <div class="summary-head"><i class="fa-solid fa-spray-can-sparkles"></i><b>PHUN PHÒNG</b></div>
+            <div class="summary-card card-phun">
+                <div class="summary-head"><i class="fa-solid fa-spray-can-sparkles"></i><b>THỰC HIỆN THÁNG TVSKTTĐ</b></div>
                 <div class="summary-main"><span id="dbPhunXa">0</span><small>xã triển khai</small></div>
                 <div class="summary-grid phun-rounds">
                     <span>Đợt 1 <b id="dbPhunDot1">—</b></span>
@@ -2290,8 +2176,7 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
                     <span hidden id="dbPhunHo">—</span><span hidden id="dbPhunVong">—</span>
                 </div>
             </div>
-
-                    </div>
+        </div>
     </aside>
 
     <!-- KPI bổ sung bên trái bản đồ: TTHC thú y và mẫu xét nghiệm -->
@@ -2421,17 +2306,25 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
       <div class="chart-body"><canvas id="chartTrend"></canvas></div>
     </div>
 
-    <!-- 2. SỐ CON TIÊU HỦY THEO THÁNG -->
+    <!-- Biểu đồ cột tình hình dịch bệnh theo tháng -->
     <div class="chart-card">
       <div class="chart-card-head">
-        <div class="chart-title">📊 Dịch bệnh theo tháng trong năm</div>
-        <button class="chart-download" type="button" data-download-chart="chartMonthly" title="Tải biểu đồ Word có thể chỉnh sửa" aria-label="Tải biểu đồ số liệu dịch theo tháng">↓ Tải Word</button>
+        <div class="chart-title">📊 Tình hình dịch bệnh theo tháng</div>
+        <button class="chart-download" type="button" data-download-chart="chartMonthlyDisease" title="Tải biểu đồ Word có thể chỉnh sửa" aria-label="Tải biểu đồ dịch bệnh theo tháng">↓ Tải Word</button>
       </div>
-      <div class="chart-legend-note" id="monthlyNote">Số con chết/tiêu hủy theo tháng, căn cứ ngày tiêu hủy trong dữ liệu nguồn.</div>
-      <div class="chart-body"><canvas id="chartMonthly"></canvas></div>
+      <div class="chart-toolbar">
+        <label for="monthlyDiseaseYear" style="font-size:10px;color:#536273;align-self:center;">Năm:</label>
+        <select id="monthlyDiseaseYear" class="chart-filter" style="cursor:pointer;">
+          <option value="2026" selected>2026</option>
+          <option value="2025">2025</option>
+          <option value="2024">2024</option>
+        </select>
+      </div>
+      <div class="chart-legend-note" id="monthlyDiseaseNote">Số con chết/tiêu hủy; riêng viêm da nổi cục thể hiện số con mắc bệnh. Dữ liệu lấy từ API diễn biến dịch bệnh.</div>
+      <div class="chart-body"><canvas id="chartMonthlyDisease"></canvas></div>
     </div>
 
-    <!-- 3. THIỆT HẠI THEO XÃ VÀ LOẠI HÌNH -->
+    <!-- 2. THIỆT HẠI THEO XÃ VÀ LOẠI HÌNH -->
     <div class="chart-card">
       <div class="chart-card-head">
         <div class="chart-title">📊 Thiệt hại theo xã/phường</div>
@@ -2484,94 +2377,6 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
 <script src="js/dashboard.js"></script>
 <script src="js/map.js"></script>
 <script src="js/app.js"></script>
-<script id="webgis-commune-click-kpi-fix-20261021">
-/* Bổ sung xử lý chọn xã khi phóng to bản đồ: nếu cú nhấp rơi vào vùng đa giác nhưng
-   Leaflet không chuyển sự kiện tới lớp xã, tìm đa giác tại tọa độ đó và gọi lại click handler hiện có. */
-(function(){
-  'use strict';
-  function getMap(){
-    return window.__webgisMap || window.map || window.webgisMap || null;
-  }
-  function getFeatureName(layer){
-    var p=(layer && layer.feature && layer.feature.properties)||{};
-    var keys=['TEN_XA','TENXA','ten_xa','TenXa','Ten_Xa','NAME_3','NAME_2','name','Name','tenxa','xa','Xa','Tên xã','Tên xã/phường','Xã','Xã/phường','ten_dvhc','TEN_DVHC'];
-    for(var i=0;i<keys.length;i++){
-      if(p[keys[i]]!=null && String(p[keys[i]]).trim()) return String(p[keys[i]]).trim();
-    }
-    return '';
-  }
-  function findPolygonAt(map, latlng){
-    var hits=[];
-    function inspect(layer){
-      if(!layer) return;
-      if(typeof layer.eachLayer==='function' && !(window.L && layer instanceof L.Path)){
-        layer.eachLayer(inspect); return;
-      }
-      if(!(window.L && layer instanceof L.Polygon) || !layer.feature) return;
-      try{
-        if(layer.options) layer.options.interactive=true;
-        var b=layer.getBounds && layer.getBounds();
-        if(b && b.contains(latlng) && getFeatureName(layer)){
-          var sw=b.getSouthWest(), ne=b.getNorthEast();
-          var area=Math.abs((ne.lat-sw.lat)*(ne.lng-sw.lng));
-          hits.push({layer:layer,area:area});
-        }
-      }catch(_e){}
-    }
-    map.eachLayer(inspect);
-    hits.sort(function(a,b){return a.area-b.area;});
-    return hits.length?hits[0].layer:null;
-  }
-  function showBasicFeatureInfo(layer){
-    var name=getFeatureName(layer); if(!name) return;
-    var title=document.getElementById('panel-title');
-    var panel=document.getElementById('info-panel');
-    if(title) title.textContent=name;
-    if(panel){
-      panel.innerHTML='';
-      var box=document.createElement('div'); box.className='selected-summary';
-      var strong=document.createElement('div'); strong.className='selected-name'; strong.textContent=name;
-      var hint=document.createElement('div'); hint.className='selected-hint';
-      hint.textContent='Đã chọn địa bàn. Đang chờ dữ liệu KPI chi tiết từ hệ thống.';
-      box.appendChild(strong); box.appendChild(hint); panel.appendChild(box);
-      var props=(layer.feature&&layer.feature.properties)||{};
-      var rows=Object.keys(props).filter(function(k){return props[k]!==null && props[k]!=='' && !/^(geometry|style|color|fillcolor)$/i.test(k);}).slice(0,16);
-      if(rows.length){
-        var section=document.createElement('section'); section.className='info-section';
-        var heading=document.createElement('div'); heading.className='info-section-title'; heading.textContent='Thông tin thuộc tính bản đồ'; section.appendChild(heading);
-        rows.forEach(function(k){var row=document.createElement('div');row.className='info-row';var label=document.createElement('span');label.textContent=k;var val=document.createElement('b');val.textContent=String(props[k]);row.append(label,val);section.appendChild(row);});
-        panel.appendChild(section);
-      }
-    }
-  }
-  function install(){
-    var map=getMap();
-    if(!map || !window.L || map.__communeClickKpiFixInstalled) return false;
-    map.__communeClickKpiFixInstalled=true;
-    map.on('click',function(e){
-      var layer=findPolygonAt(map,e.latlng); if(!layer) return;
-      // Gọi handler gốc để dùng đúng logic KPI chi tiết đã có trong ứng dụng.
-      if(typeof layer.listens==='function' && layer.listens('click')){
-        layer.fire('click',{latlng:e.latlng,originalEvent:e.originalEvent,communeClickFallback:true});
-      }else{
-        showBasicFeatureInfo(layer);
-      }
-    });
-    // Đảm bảo các lớp ranh giới xã có thể nhận tương tác sau khi tải GeoJSON bất đồng bộ.
-    function makeInteractive(layer){
-      if(!layer) return;
-      if(typeof layer.eachLayer==='function' && !(layer instanceof L.Path)){layer.eachLayer(makeInteractive);return;}
-      if(layer instanceof L.Polygon && layer.feature && layer.options){layer.options.interactive=true;}
-    }
-    map.eachLayer(makeInteractive);
-    map.on('layeradd',function(e){makeInteractive(e.layer);});
-    return true;
-  }
-  if(!install()){
-    var tries=0, timer=setInterval(function(){tries++;if(install()||tries>=80)clearInterval(timer);},250);
-  }
-})();
-</script>
 <!-- Tải docx qua ESM CDN để tránh lỗi MIME application/node khi nạp tệp .cjs -->
 <script type="module">
 (async function(){
@@ -3311,6 +3116,7 @@ document.addEventListener("DOMContentLoaded", function () {
       trendRows = list;
       trendLoadError = "";
       updateTrend();
+      updateMonthlyDiseaseChart();
     } catch(err) {
       trendLoadError = err && err.message ? err.message : String(err);
       console.error("Không tải được dữ liệu biểu đồ theo ngày:", err);
@@ -3323,7 +3129,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const cfg = diseaseConfig[key] || diseaseConfig.DTLCP;
     const note = document.getElementById("trendNote");
     const trendCanvas = document.getElementById("chartTrend");
-    updateMonthlyChart(key);
     if(trendChart) { trendChart.destroy(); trendChart=null; }
     if(trendCanvas && window.Chart && window.Chart.getChart(trendCanvas)) window.Chart.getChart(trendCanvas).destroy();
 
@@ -3412,45 +3217,39 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   }
-  function updateMonthlyChart(key){
-    const canvas = document.getElementById("chartMonthly");
-    const note = document.getElementById("monthlyNote");
-    if (!canvas || !window.Chart) return;
-    const cfg = diseaseConfig[key] || diseaseConfig.DTLCP;
-    const monthly = Array(12).fill(0);
-    let matched = 0, skipped = 0;
-    trendRows.forEach(row => {
-      if (trendDiseaseKey(row) !== key) return;
-      matched++;
-      // Ưu tiên đúng ngày tiêu hủy; chỉ dùng ngày ghi nhận/phát hiện nếu nguồn không có trường ngày tiêu hủy.
-      let dateRaw = firstValue(row, ["Ngày tiêu hủy", "Ngày tiêu huỷ", "Ngày chết/tiêu hủy", "Ngày chết, tiêu hủy", "Ngày", "Ngày ghi nhận", "Ngày phát hiện", "Ngày xảy ra", "Ngày cập nhật", "Ngày xảy ra ổ dịch", "Ngày bắt đầu"]);
-      if (dateRaw === null) dateRaw = fuzzyValue(row, "date");
-      const date = parseTrendDate(dateRaw);
-      const value = trendValue(row, key);
-      if (!date || value === null || !Number.isFinite(value)) { skipped++; return; }
-      monthly[date.getMonth()] += value;
+
+  let monthlyDiseaseChart = null;
+  function updateMonthlyDiseaseChart(){
+    const canvas=document.getElementById("chartMonthlyDisease");
+    const yearSelect=document.getElementById("monthlyDiseaseYear");
+    const note=document.getElementById("monthlyDiseaseNote");
+    if(!canvas || !window.Chart) return;
+    const year=Number(yearSelect?.value)||new Date().getFullYear();
+    const keys=["DTLCP","CGC","VDNC","DAI"];
+    const colors={DTLCP:"#e53935",CGC:"#2e7d32",VDNC:"#1976d2",DAI:"#6a35d1"};
+    const labels=["Thg 1","Thg 2","Thg 3","Thg 4","Thg 5","Thg 6","Thg 7","Thg 8","Thg 9","Thg 10","Thg 11","Thg 12"];
+    const sums={}; keys.forEach(k=>sums[k]=Array(12).fill(0));
+    let valid=0, skipped=0;
+    (trendRows||[]).forEach(row=>{
+      const key=trendDiseaseKey(row);
+      if(!keys.includes(key)) return;
+      const raw=firstValue(row,["Ngày","Ngày ghi nhận","Ngày phát hiện","Ngày xảy ra","Ngày tiêu hủy","Ngày chết/tiêu hủy","Ngày chết, tiêu hủy","Ngày cập nhật","Ngày xảy ra ổ dịch","Ngày bắt đầu"]) ?? fuzzyValue(row,"date");
+      const date=parseTrendDate(raw);
+      const value=trendValue(row,key);
+      if(!date || value===null || !Number.isFinite(value)){skipped++;return;}
+      if(date.getFullYear()!==year)return;
+      sums[key][date.getMonth()]+=value; valid++;
     });
-    const old = window.Chart.getChart(canvas);
-    if (old) old.destroy();
-    const colors = {DTLCP:"#e53935", CGC:"#2e7d32", VDNC:"#1976d2", DAI:"#6a35d1"};
-    const metric = key === "VDNC" ? "Số con mắc bệnh" : "Số con chết/tiêu hủy";
-    if (note) {
-      note.textContent = matched
-        ? `${cfg.label} · ${metric} theo tháng, cộng theo ngày tiêu hủy/ngày ghi nhận trong dữ liệu nguồn${skipped ? `; bỏ qua ${skipped} bản ghi thiếu ngày hoặc chỉ tiêu` : ""}.`
-        : `${cfg.label}: chưa có bản ghi phù hợp để tổng hợp theo tháng.`;
-    }
-    new Chart(canvas, {
-      type: "bar",
-      data: {
-        labels: ["Tháng 1","Tháng 2","Tháng 3","Tháng 4","Tháng 5","Tháng 6","Tháng 7","Tháng 8","Tháng 9","Tháng 10","Tháng 11","Tháng 12"],
-        datasets: [{ label: metric, data: monthly, backgroundColor: colors[key] || "#477fd1", borderRadius: 4, maxBarThickness: 36 }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: true, position: "bottom", labels: { boxWidth: 10, font: { size: 9 } } }, tooltip: { callbacks: { label: ctx => `${metric}: ${Number(ctx.raw || 0).toLocaleString("vi-VN")} con` } } },
-        scales: { x: { grid: { display: false }, ticks: { font: { size: 9 } } }, y: { beginAtZero: true, title: { display: true, text: "Số con" }, ticks: { precision: 0, font: { size: 9 } } } }
-      }
+    if(monthlyDiseaseChart){monthlyDiseaseChart.destroy();monthlyDiseaseChart=null;}
+    if(window.Chart.getChart(canvas)) window.Chart.getChart(canvas).destroy();
+    monthlyDiseaseChart=new Chart(canvas,{
+      type:"bar",
+      data:{labels,datasets:keys.map(k=>({label:({DTLCP:"DTLCP – chết/tiêu hủy",CGC:"Cúm gia cầm – chết/tiêu hủy",VDNC:"Viêm da nổi cục – mắc bệnh",DAI:"Bệnh dại – chết/tiêu hủy"})[k],data:sums[k],backgroundColor:colors[k],borderColor:colors[k],borderWidth:1,borderRadius:3}))},
+      options:{responsive:true,maintainAspectRatio:false,interaction:{mode:"index",intersect:false},plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:9,font:{size:9}}},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${Number(c.raw||0).toLocaleString("vi-VN")} con`}}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{beginAtZero:true,ticks:{precision:0,font:{size:9}},title:{display:true,text:"Số con"}}}}
     });
+    if(note) note.textContent=valid
+      ? `Năm ${year}: cộng số liệu theo tháng từ ngày ghi nhận/ngày tiêu hủy có trong nguồn. VDNC dùng số mắc bệnh; 3 bệnh còn lại dùng số chết/tiêu hủy.${skipped?` Bỏ qua ${skipped} bản ghi thiếu ngày hoặc chỉ tiêu.`:""}`
+      : `Chưa có bản ghi đủ ngày và chỉ tiêu cho năm ${year}; biểu đồ để trống, không tự tạo số liệu.`;
   }
 
   function updateDamage(){
@@ -3511,6 +3310,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.addEventListener("DOMContentLoaded",function(){
     const trendDiseaseSelect=document.getElementById("trendDiseaseSelect");
     if(trendDiseaseSelect) trendDiseaseSelect.addEventListener("change",updateTrend);
+    const monthlyYearSelect=document.getElementById("monthlyDiseaseYear"); if(monthlyYearSelect) monthlyYearSelect.addEventListener("change",updateMonthlyDiseaseChart);
     const layer=document.getElementById("layerSelect"); if(layer) layer.addEventListener("change",updateDamage);
     document.querySelectorAll("[data-download-chart]").forEach(b=>b.addEventListener("click",async function(){
       const id=this.dataset.downloadChart;
@@ -4394,9 +4194,16 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
   }
 
   document.addEventListener('DOMContentLoaded',function(){
-    // Không thêm nút Excel riêng vào từng KPI; mỗi thẻ chỉ có một nút Chi tiết.
+    // Thêm nút tải Excel vào từng thẻ KPI, không thay đổi số liệu hay chức năng hiện có.
     document.querySelectorAll('.sidebar-kpi > .summary-card, .side-kpi-mini > .summary-card').forEach(card=>{
-      card.querySelectorAll('.kpi-download').forEach(btn=>btn.remove());
+      if(card.querySelector('.kpi-download'))return;
+      const header=card.querySelector('.summary-head');if(!header)return;
+      const key=Object.keys(CARD_NAMES).find(k=>card.classList.contains(k));
+      const name=CARD_NAMES[key]||clean(header.querySelector('b')?.textContent)||'KPI';
+      const btn=document.createElement('button');btn.type='button';btn.className='kpi-download';btn.title='Tải số liệu Excel: '+name;btn.setAttribute('aria-label','Tải số liệu Excel: '+name);
+      btn.innerHTML='<i class="fa-solid fa-file-excel"></i><span>Excel</span>';
+      btn.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();const rows=cardRows(card);saveRows(rows,'KPI_'+name.replace(/[^\p{L}\p{N}-]+/gu,'_')+'.xlsx',name);});
+      header.appendChild(btn);
     });
     const allBtn=$('btnDownloadAllKpi');
     if(allBtn)allBtn.addEventListener('click',async function(){
@@ -5071,225 +4878,6 @@ html, body { max-width:100%; }
 </script>
 
 
-<style id="fullscreen-map-hide-kpi-fix">
-/* Toàn màn hình chỉ giữ bản đồ và thanh công cụ bản đồ; ẩn các KPI/panel bên ngoài. */
-.main-map:fullscreen,
-.main-map:-webkit-full-screen { position:fixed!important; inset:0!important; z-index:2147483000!important; width:100vw!important; height:100vh!important; max-width:none!important; max-height:none!important; margin:0!important; padding:0!important; border:0!important; border-radius:0!important; background:#fff!important; }
-.main-map:fullscreen #map,
-.main-map:-webkit-full-screen #map { width:100%!important; height:100vh!important; min-height:100vh!important; max-height:100vh!important; }
-.main-map:fullscreen .map-actions,
-.main-map:-webkit-full-screen .map-actions { z-index:2147483001!important; }
-.main-map:fullscreen .left-extra-kpi,
-.main-map:fullscreen .side-kpi-mini,
-.main-map:fullscreen .sidebar-kpi,
-.main-map:fullscreen .kpi-card,
-.main-map:fullscreen .summary-card,
-.main-map:-webkit-full-screen .left-extra-kpi,
-.main-map:-webkit-full-screen .side-kpi-mini,
-.main-map:-webkit-full-screen .sidebar-kpi,
-.main-map:-webkit-full-screen .kpi-card,
-.main-map:-webkit-full-screen .summary-card { display:none!important; }
-</style>
-<script id="fullscreen-map-hide-kpi-fix-js">
-(function(){
-  function initFullscreenMap(){
-    const btn=document.getElementById('btnFullscreen');
-    const mapBox=document.querySelector('.webgis');
-    const mapEl=document.getElementById('map');
-    if(!btn||!mapBox||btn.dataset.fullscreenKpiFixed==='1') return;
-    btn.dataset.fullscreenKpiFixed='1';
-    btn.addEventListener('click',function(ev){
-      ev.preventDefault(); ev.stopPropagation();
-      if(ev.stopImmediatePropagation) ev.stopImmediatePropagation();
-      const active=document.fullscreenElement||document.webkitFullscreenElement;
-      if(active){
-        const exit=document.exitFullscreen||document.webkitExitFullscreen;
-        if(exit) Promise.resolve(exit.call(document)).catch(err=>console.warn('Không thoát được toàn màn hình:',err));
-      }else{
-        const enter=mapBox.requestFullscreen||mapBox.webkitRequestFullscreen;
-        if(enter) Promise.resolve(enter.call(mapBox)).catch(err=>console.warn('Không mở được toàn màn hình:',err));
-        else mapBox.classList.add('map-fullscreen-fallback');
-      }
-    },true);
-    function resizeMap(){
-      setTimeout(function(){
-        try{ if(window.map && typeof window.map.invalidateSize==='function') window.map.invalidateSize(true); }
-        catch(e){}
-        try{ if(window.leafletMap && typeof window.leafletMap.invalidateSize==='function') window.leafletMap.invalidateSize(true); }
-        catch(e){}
-      },180);
-    }
-    document.addEventListener('fullscreenchange',function(){ if(!document.fullscreenElement&&!document.webkitFullscreenElement) mapBox.classList.remove('map-fullscreen-fallback'); resizeMap(); });
-    document.addEventListener('webkitfullscreenchange',function(){ if(!document.fullscreenElement&&!document.webkitFullscreenElement) mapBox.classList.remove('map-fullscreen-fallback'); resizeMap(); });
-    window.addEventListener('resize',resizeMap);
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initFullscreenMap); else initFullscreenMap();
-})();
-</script>
-
-
-<!-- Fix các khe trắng/đường kẻ thành khung giữa các tile bản đồ Leaflet -->
-<style id="fix-leaflet-white-tile-seams">
-  #map, .main-map, .leaflet-container { overflow:hidden !important; }
-  .leaflet-tile-container {
-    line-height: 0 !important;
-    font-size: 0 !important;
-  }
-  .leaflet-tile {
-    outline: 1px solid transparent !important;
-    border: 0 !important;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-  }
-  .leaflet-container img.leaflet-tile {
-    max-width: none !important;
-    width: 256px;
-    height: 256px;
-  }
-  .leaflet-overlay-pane svg { overflow: visible; }
-</style>
-<script id="fix-leaflet-white-tile-seams-js">
-(function(){
-  function refreshMapTiles(){
-    try {
-      var m = window.webgisMap || window.map;
-      if (m && typeof m.invalidateSize === 'function') {
-        m.invalidateSize({pan:false, animate:false});
-      }
-    } catch(e) {}
-  }
-  window.addEventListener('resize', refreshMapTiles);
-  document.addEventListener('fullscreenchange', function(){ setTimeout(refreshMapTiles, 120); });
-  window.addEventListener('load', function(){ setTimeout(refreshMapTiles, 250); });
-})();
-</script>
-
-
-<style id="webgis-final-fullscreen-toolbar-and-tile-fix">
-/* Bố cục toàn màn hình: bản đồ bên trái, panel xã/phường bên phải. */
-.webgis:fullscreen,.webgis:-webkit-full-screen,.webgis.map-fullscreen-fallback{
-  position:fixed!important; inset:0!important; z-index:2147483000!important;
-  width:100vw!important;height:100vh!important;max-width:none!important;max-height:none!important;
-  margin:0!important;padding:0!important;overflow:hidden!important;background:#fff!important;
-  display:grid!important;grid-template-columns:minmax(0,1fr) 320px!important;
-  grid-template-rows:minmax(0,1fr)!important;gap:0!important;
-}
-.webgis:fullscreen > .sidebar,.webgis:-webkit-full-screen > .sidebar,
-.webgis:fullscreen > .left-extra-kpi,.webgis:-webkit-full-screen > .left-extra-kpi,
-.webgis.map-fullscreen-fallback > .sidebar,.webgis.map-fullscreen-fallback > .left-extra-kpi{display:none!important}
-.webgis:fullscreen > .main-map,.webgis:-webkit-full-screen > .main-map,.webgis.map-fullscreen-fallback > .main-map{
-  grid-column:1!important;grid-row:1!important;position:relative!important;
-  width:100%!important;height:100vh!important;min-width:0!important;min-height:0!important;
-  max-height:100vh!important;margin:0!important;overflow:hidden!important;
-}
-.webgis:fullscreen > .panel,.webgis:-webkit-full-screen > .panel,.webgis.map-fullscreen-fallback > .panel{
-  display:block!important;visibility:visible!important;grid-column:2!important;grid-row:1!important;
-  position:relative!important;inset:auto!important;width:320px!important;min-width:0!important;
-  max-width:320px!important;height:100vh!important;max-height:100vh!important;overflow:auto!important;
-  z-index:2147483002!important;background:#fff!important;
-}
-.webgis:fullscreen #map,.webgis:-webkit-full-screen #map,.webgis.map-fullscreen-fallback #map{
-  position:absolute!important;inset:0!important;width:100%!important;height:100%!important;
-  min-height:0!important;max-height:none!important;
-}
-.webgis:fullscreen .map-toolbar,.webgis:-webkit-full-screen .map-toolbar,.webgis.map-fullscreen-fallback .map-toolbar{
-  position:absolute!important;top:10px!important;left:10px!important;right:auto!important;bottom:auto!important;
-  z-index:2147483003!important;max-width:calc(100% - 20px)!important;pointer-events:none!important;
-}
-.webgis:fullscreen .map-actions,.webgis:-webkit-full-screen .map-actions,.webgis.map-fullscreen-fallback .map-actions{
-  position:relative!important;display:flex!important;flex-wrap:nowrap!important;gap:5px!important;
-  padding:5px!important;background:rgba(255,255,255,.97)!important;border:1px solid #d7dfe7!important;
-  border-radius:10px!important;box-shadow:0 3px 12px rgba(20,35,50,.18)!important;
-  pointer-events:auto!important;visibility:visible!important;opacity:1!important;
-}
-.webgis:fullscreen .map-action,.webgis:-webkit-full-screen .map-action,.webgis.map-fullscreen-fallback .map-action{
-  display:inline-flex!important;align-items:center!important;justify-content:center!important;
-  flex:0 0 38px!important;width:38px!important;height:38px!important;min-width:38px!important;
-  padding:0!important;position:relative!important;z-index:2147483004!important;cursor:pointer!important;
-}
-/* Giảm khe trắng do chống răng cưa/đường ghép giữa các tile Leaflet. */
-.leaflet-container{background:#e9edf0!important;outline:0!important}
-.leaflet-tile{outline:1px solid transparent!important;border:0!important;backface-visibility:hidden!important}
-.leaflet-tile-container img{max-width:none!important}
-.leaflet-pane,.leaflet-tile-pane{transform:translateZ(0)}
-@media(max-width:700px){
- .webgis:fullscreen,.webgis:-webkit-full-screen,.webgis.map-fullscreen-fallback{grid-template-columns:minmax(0,1fr) 270px!important}
- .webgis:fullscreen > .panel,.webgis:-webkit-full-screen > .panel,.webgis.map-fullscreen-fallback > .panel{width:270px!important;max-width:270px!important}
-}
-</style>
-<script id="webgis-final-toolbar-refresh-fix">
-(function(){
- function refresh(){
-  [window.map,window.leafletMap,window.webgisMap].forEach(function(m){try{if(m&&typeof m.invalidateSize==='function')m.invalidateSize({animate:false});}catch(e){}});
- }
- document.addEventListener('fullscreenchange',function(){setTimeout(refresh,120);setTimeout(refresh,450);});
- document.addEventListener('webkitfullscreenchange',function(){setTimeout(refresh,120);setTimeout(refresh,450);});
- window.addEventListener('resize',function(){setTimeout(refresh,120);});
- document.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('#btnStreet,#btnSatellite,#btnWhiteMap,#btnFullscreen,#btnExport'))setTimeout(refresh,250);},true);
-})();
-</script>
-
-<style id="webgis-global-visual-refresh">
-/* Nâng độ rõ chữ và tạo hệ màu thống nhất cho toàn bộ giao diện */
-:root{--ui-ink:#18324a;--ui-blue:#1769aa;--ui-teal:#087f8c;--ui-purple:#6650a4;--ui-orange:#c66a16;--ui-green:#237a4b;--ui-line:#d8e3ec}
-body{color:var(--ui-ink)}
-/* KPI tổng quan: tăng cỡ chữ và độ tương phản */
-.summary-card{border:1px solid #d8e3ec!important;border-radius:12px!important;box-shadow:0 3px 10px rgba(24,50,74,.09)!important;padding:12px 13px!important}
-.summary-head{font-size:13px!important;line-height:1.45!important;font-weight:800!important;color:#29465f!important;gap:8px!important}
-.summary-head i{font-size:15px!important}
-.summary-card .summary-value,.summary-card .summary-number,.summary-card .value,.summary-card strong,.summary-card b{font-size:15px!important;line-height:1.45!important}
-.summary-card .summary-sub,.summary-card small,.summary-card .muted{font-size:12px!important;line-height:1.5!important}
-/* Các tiêu đề nhóm KPI có nền màu */
-.summary-head{padding:7px 9px!important;margin:-2px -2px 8px!important;border-radius:8px!important;background:linear-gradient(90deg,#e8f3ff,#f4f8fc)!important;border-left:4px solid #2878b8!important}
-/* Thẻ/tiêu đề thống kê và bảng */
-.info-section-title,.section-title,.section-header,.chart-title,.table-title,.report-title{font-size:14px!important;line-height:1.5!important;font-weight:850!important;color:#173b59!important;background:linear-gradient(90deg,#e5f2ff,#f3f8fc)!important;border-left:4px solid #2878b8!important;border-radius:7px!important;padding:9px 11px!important}
-/* Tiêu đề thông tin xã và tiêu đề panel */
-.panel-kicker{font-size:12px!important;line-height:1.5!important;letter-spacing:.45px!important;color:#4b6579!important}
-#panel-title,.panel h2{font-size:25px!important;line-height:1.3!important;font-weight:900!important;color:#174d79!important}
-.info-section-title{font-size:14px!important;padding:9px 11px!important}
-.info-row,.info-row span,.info-row b{font-size:14px!important;line-height:1.55!important}
-/* Thẻ thông tin dịch bệnh có nền đầu mục dịu, không che số liệu */
-.summary-card:nth-child(4n+1) .summary-head{background:linear-gradient(90deg,#fff0ed,#fff8f6)!important;border-left-color:#e34b45!important;color:#9f2925!important}
-.summary-card:nth-child(4n+2) .summary-head{background:linear-gradient(90deg,#e8f7ef,#f5fbf7)!important;border-left-color:#2d9460!important;color:#17643e!important}
-.summary-card:nth-child(4n+3) .summary-head{background:linear-gradient(90deg,#fff3e4,#fff9f0)!important;border-left-color:#e68a24!important;color:#99520e!important}
-.summary-card:nth-child(4n) .summary-head{background:linear-gradient(90deg,#eeeaff,#f8f6ff)!important;border-left-color:#7561c5!important;color:#4e3d92!important}
-/* Nút công cụ dễ nhìn hơn */
-button,.tool-button,.map-control-button{font-weight:750}
-@media(max-width:760px){.summary-head{font-size:12px!important}.summary-card .summary-value,.summary-card .summary-number,.summary-card .value,.summary-card strong,.summary-card b{font-size:14px!important}.info-row,.info-row span,.info-row b{font-size:13px!important}#panel-title,.panel h2{font-size:22px!important}}
-</style>
-
-
-<script>
-(function(){
-  function syncRabiesKpi(){
-    const sourceRate=document.getElementById('kpiDaiDone');
-    const sourceStarted=document.getElementById('kpiDaiStartedVisible');
-    const rate=document.getElementById('dbDaiRate');
-    const communes=document.getElementById('dbDaiCommunes');
-    if(sourceRate && rate){ const t=(sourceRate.textContent||'').trim(); if(t && t!=='—% tổng đàn') rate.textContent=t; }
-    if(sourceStarted && communes){
-      const t=(sourceStarted.textContent||'').trim();
-      const m=t.match(/(\d+)\s*\/\s*45/);
-      if(m) communes.textContent=m[0]+' xã';
-      else { const n=t.match(/(\d+)\s*xã/i); if(n) communes.textContent=n[1]+'/45 xã'; }
-    }
-    const doses=document.getElementById('dbDaiDoses');
-    if(doses && sourceRate){
-      const host=sourceRate.closest('.vaccine-rabies-line');
-      const text=host ? host.innerText : '';
-      const m=text.match(/([\d.,]+)\s*(?:liều|con)/i);
-      if(m) doses.textContent=m[1];
-    }
-  }
-  syncRabiesKpi();
-  const target=document.getElementById('kpiDaiDone');
-  if(target && window.MutationObserver){ new MutationObserver(syncRabiesKpi).observe(target,{childList:true,subtree:true,characterData:true}); }
-  const started=document.getElementById('kpiDaiStartedVisible');
-  if(started && window.MutationObserver){ new MutationObserver(syncRabiesKpi).observe(started,{childList:true,subtree:true,characterData:true}); }
-  document.addEventListener('DOMContentLoaded',syncRabiesKpi);
-})();
-</script>
-
 <script id="kpi-details-preview-download">
 (function(){
  'use strict';
@@ -5351,57 +4939,66 @@ button,.tool-button,.map-control-button{font-weight:750}
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',addActions);else addActions();setTimeout(addActions,1200);setTimeout(addActions,3500);
 })();
 </script>
-
-
-<style id="kpi-line-height-one-final">
-/* Yêu cầu: thu gọn khoảng cách dòng chữ bên trong các thẻ KPI về 1 */
-.kpi-card h1,.kpi-card h2,.kpi-card h3,.kpi-card h4,.kpi-card p,.kpi-card span,.kpi-card small,.kpi-card label,
-.summary-card h1,.summary-card h2,.summary-card h3,.summary-card h4,.summary-card p,.summary-card span,.summary-card small,.summary-card label,
-.sidebar-kpi h1,.sidebar-kpi h2,.sidebar-kpi h3,.sidebar-kpi h4,.sidebar-kpi p,.sidebar-kpi span,.sidebar-kpi small,.sidebar-kpi label,
-.side-kpi-mini h1,.side-kpi-mini h2,.side-kpi-mini h3,.side-kpi-mini h4,.side-kpi-mini p,.side-kpi-mini span,.side-kpi-mini small,.side-kpi-mini label,
-.left-extra-kpi h1,.left-extra-kpi h2,.left-extra-kpi h3,.left-extra-kpi h4,.left-extra-kpi p,.left-extra-kpi span,.left-extra-kpi small,.left-extra-kpi label,
-.kpi-panel h1,.kpi-panel h2,.kpi-panel h3,.kpi-panel h4,.kpi-panel p,.kpi-panel span,.kpi-panel small,.kpi-panel label,
-.extra-kpi-card h1,.extra-kpi-card h2,.extra-kpi-card h3,.extra-kpi-card h4,.extra-kpi-card p,.extra-kpi-card span,.extra-kpi-card small,.extra-kpi-card label,
-.dashboard-card h1,.dashboard-card h2,.dashboard-card h3,.dashboard-card h4,.dashboard-card p,.dashboard-card span,.dashboard-card small,.dashboard-card label {
-  line-height:1!important;
-}
-</style>
-
-
-<style id="kpi-card-height-adjustment">
-/* Tăng nhẹ chiều dọc thẻ KPI để tiêu đề dài đủ chỗ, không làm thẻ quá cao */
-.sidebar-kpi > .summary-card, .kpi-card, .summary-card, .extra-kpi-card, .dashboard-card {
-  min-height: 142px !important;
-  height: auto !important;
-  box-sizing: border-box !important;
-  align-self: stretch !important;
-}
-.sidebar-kpi > .summary-card { padding-top: 14px !important; padding-bottom: 12px !important; }
-.kpi-card .kpi-title, .summary-card .kpi-title, .sidebar-kpi .kpi-title,
-.side-kpi-mini .kpi-title, .left-extra-kpi .kpi-title, .kpi-panel .kpi-title {
-  min-height: 2.4em !important;
-  max-height: none !important;
-  overflow: visible !important;
-}
-</style>
-
-<style id="tthc-sample-title-detail-inline">
-/* Thu nhỏ tiêu đề TTHC và mẫu xét nghiệm để nút Chi tiết nằm cùng dòng */
-.summary-card.card-tthc-extra .summary-head,
-.summary-card.card-sample-extra .summary-head{
- display:flex!important; flex-wrap:nowrap!important; align-items:center!important; gap:5px!important; min-width:0!important; width:100%!important;
-}
-.summary-card.card-tthc-extra .summary-head i,
-.summary-card.card-sample-extra .summary-head i{flex:0 0 auto!important;font-size:11px!important;}
-.summary-card.card-tthc-extra .summary-head b,
-.summary-card.card-sample-extra .summary-head b{
- flex:1 1 auto!important; min-width:0!important; font-size:10px!important; line-height:1.1!important; white-space:nowrap!important; overflow:hidden!important; text-overflow:ellipsis!important; margin:0!important;
-}
-.summary-card.card-tthc-extra .summary-head .kpi-detail-only-btn,
-.summary-card.card-sample-extra .summary-head .kpi-detail-only-btn{
- flex:0 0 auto!important; margin:0 0 0 auto!important; padding:3px 6px!important; font-size:10px!important; line-height:1.1!important; white-space:nowrap!important;
-}
-</style>
+<script id="webgis-rabies-map-layer">
+/* Lớp tiêm phòng dại: tô màu xã theo tỷ lệ số đã tiêm / tổng đàn trong diện tiêm. */
+(function(){
+  const API='https://script.google.com/macros/s/AKfycbyRuJ9Wfv4HtWjMRT2Hox2-mOhBVRjyqLaHhpQjohPEkfHWNyjM004KgO3o7_4nRJtj/exec?type=tiemphong';
+  const norm=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+  const num=v=>{if(v==null||v==='')return 0;let n=Number(String(v).replace(/\s/g,'').replace(/\./g,'').replace(',','.'));return Number.isFinite(n)?n:0;};
+  let rows=[], loaded=false, active=false;
+  const originalStyles=new WeakMap();
+  const aliases=(r,keys)=>{for(const k of Object.keys(r||{})){const n=norm(k);if(keys.some(x=>n===norm(x)))return r[k];}for(const k of Object.keys(r||{})){const n=norm(k);if(keys.some(x=>n.includes(norm(x))))return r[k];}return null;};
+  function communeName(r){return aliases(r,['Xã/phường','Xã, phường','Tên xã','Tên xã/phường','Địa bàn','Xã'])||'';}
+  function herd(r){return num(aliases(r,['KPI_Dại - Tổng đàn chó mèo','Tổng đàn chó mèo','Tổng đàn trong diện tiêm']) ?? aliases(r,['tổng đàn','chó mèo']));}
+  function done(r){return num(aliases(r,['KPI_Dại - Đã tiêm','Dại - Đã tiêm','Số được tiêm phòng','Số liều đã tiêm']) ?? aliases(r,['số được tiêm phòng']) ?? aliases(r,['dại','đã tiêm']));}
+  function styleFor(rate){
+    if(rate===null)return {color:'#7b8794',weight:1,opacity:.9,fillColor:'#dce3e8',fillOpacity:.65};
+    const color=rate>=80?'#238443':rate>=60?'#78c679':rate>=40?'#fddc6c':rate>0?'#f28e2b':'#d73027';
+    return {color:'#ffffff',weight:1.1,opacity:1,fillColor:color,fillOpacity:.78};
+  }
+  function featureName(layer){
+    const p=layer.feature&&layer.feature.properties||{};
+    for(const k of Object.keys(p)){const n=norm(k);if(['ten xa','ten xa phuong','xa phuong','ten don vi','name','commune'].includes(n))return p[k];}
+    return Object.values(p).find(v=>typeof v==='string'&&/xã|phường/i.test(v))||'';
+  }
+  function walk(layer,fn){
+    if(layer && layer.feature && typeof layer.setStyle==='function') fn(layer);
+    if(layer && typeof layer.eachLayer==='function') layer.eachLayer(child=>walk(child,fn));
+  }
+  function paint(){
+    const map=window.__webgisMap;
+    if(!map||!rows.length)return;
+    active=true;
+    const lookup=new Map();
+    rows.forEach(r=>{const n=norm(communeName(r));if(n)lookup.set(n,{h:herd(r),d:done(r)});});
+    map.eachLayer(layer=>walk(layer,l=>{
+      const name=norm(featureName(l)); if(!name)return;
+      if(!originalStyles.has(l))originalStyles.set(l,{...l.options});
+      const rec=lookup.get(name)||Array.from(lookup.entries()).find(([k])=>k===name||k.includes(name)||name.includes(k))?.[1];
+      if(!rec){l.setStyle(styleFor(null));return;}
+      l.setStyle(styleFor(rec.h>0?Math.min(100,rec.d/rec.h*100):null));
+      l.bindTooltip(`${featureName(l)}<br>Đã tiêm: ${rec.d.toLocaleString('vi-VN')} con<br>Tổng đàn trong diện tiêm: ${rec.h.toLocaleString('vi-VN')} con<br>Tỷ lệ: ${rec.h>0?(rec.d/rec.h*100).toFixed(1):'Chưa có dữ liệu'}${rec.h>0?'%':''}`,{sticky:true});
+    }));
+    const old=document.getElementById('rabiesMapLegend'); if(old)old.remove();
+    const legend=document.createElement('div');legend.id='rabiesMapLegend';legend.className='legend';
+    legend.style.cssText='position:absolute;left:12px;bottom:12px;z-index:700;';
+    legend.innerHTML='<h4>Tiến độ tiêm phòng dại</h4>'+[['#238443','≥ 80%'],['#78c679','60–79,9%'],['#fddc6c','40–59,9%'],['#f28e2b','Trên 0–39,9%'],['#d73027','0%'],['#dce3e8','Chưa có dữ liệu']].map(x=>`<div class="legend-row"><i style="background:${x[0]}"></i><span>${x[1]}</span></div>`).join('');
+    const holder=document.querySelector('.main-map');if(holder)holder.appendChild(legend);
+  }
+  function restore(){
+    const map=window.__webgisMap;if(!map)return;
+    map.eachLayer(layer=>walk(layer,l=>{const old=originalStyles.get(l);if(old&&typeof l.setStyle==='function')l.setStyle(old);}));
+    const legend=document.getElementById('rabiesMapLegend');if(legend)legend.remove();
+    active=false;
+  }
+  async function load(){try{const r=await fetch(API+'&_='+Date.now(),{cache:'no-store'});const j=await r.json();if(j&&j.success&&Array.isArray(j.data)){rows=j.data;loaded=true;if(document.getElementById('layerSelect')?.value==='TIEMDAI')paint();}}catch(e){console.warn('Không tải được dữ liệu lớp tiêm phòng dại',e);}}
+  function sync(){const sel=document.getElementById('layerSelect');if(!sel)return;if(sel.value==='TIEMDAI'){if(!loaded)load();else paint();}else if(active)restore();}
+  document.addEventListener('DOMContentLoaded',()=>{
+    const sel=document.getElementById('layerSelect');if(sel)sel.addEventListener('change',()=>setTimeout(sync,50));
+    let tries=0;const timer=setInterval(()=>{tries++;if(window.__webgisMap){clearInterval(timer);sync();}if(tries>40)clearInterval(timer);},500);
+  });
+})();
+</script>
 
 </body>
 </html>
@@ -5454,328 +5051,4 @@ button,.tool-button,.map-control-button{font-weight:750}
     box-sizing:border-box!important;
   }
 }
-</style>
-
-<style id="fullscreen-map-keep-commune-panel">
-/* Fullscreen ổn định: ghi đè mọi grid-column/grid-row và kích thước cũ của các breakpoint. */
-.webgis:fullscreen, .webgis:-webkit-full-screen {
-  position:fixed!important; inset:0!important; z-index:2147483000!important;
-  display:grid!important; grid-template-columns:minmax(0,1fr) 360px!important;
-  grid-template-rows:minmax(0,1fr)!important; grid-auto-flow:initial!important;
-  gap:0!important; width:100vw!important; height:100vh!important;
-  min-width:0!important; min-height:0!important; max-width:none!important; max-height:none!important;
-  margin:0!important; padding:0!important; overflow:hidden!important; box-sizing:border-box!important;
-  background:#fff!important; transform:none!important;
-}
-.webgis:fullscreen > .sidebar, .webgis:-webkit-full-screen > .sidebar,
-.webgis:fullscreen > .side-kpi-mini, .webgis:-webkit-full-screen > .side-kpi-mini,
-.webgis:fullscreen > .left-extra-kpi, .webgis:-webkit-full-screen > .left-extra-kpi {display:none!important}
-.webgis:fullscreen > .main-map, .webgis:-webkit-full-screen > .main-map {
-  display:flex!important; grid-column:1!important; grid-row:1!important; align-self:stretch!important;
-  position:relative!important; inset:auto!important; float:none!important;
-  width:100%!important; height:100vh!important; min-width:0!important; min-height:0!important;
-  max-width:none!important; max-height:none!important; margin:0!important; padding:0!important;
-  border:0!important; border-radius:0!important; overflow:hidden!important; box-sizing:border-box!important;
-}
-.webgis:fullscreen > .main-map > .map-toolbar, .webgis:-webkit-full-screen > .main-map > .map-toolbar {
-  flex:0 0 auto!important; width:100%!important; min-width:0!important; box-sizing:border-box!important;
-}
-.webgis:fullscreen > .main-map > #map, .webgis:-webkit-full-screen > .main-map > #map {
-  display:block!important; position:relative!important; flex:1 1 auto!important;
-  grid-column:auto!important; grid-row:auto!important; width:100%!important; height:auto!important;
-  min-width:0!important; min-height:0!important; max-width:none!important; max-height:none!important;
-  margin:0!important; padding:0!important; box-sizing:border-box!important;
-}
-.webgis:fullscreen > .panel, .webgis:-webkit-full-screen > .panel {
-  display:block!important; grid-column:2!important; grid-row:1!important; align-self:stretch!important;
-  position:relative!important; inset:auto!important; float:none!important;
-  width:360px!important; min-width:0!important; max-width:360px!important;
-  height:100vh!important; min-height:0!important; max-height:100vh!important;
-  margin:0!important; overflow:auto!important; box-sizing:border-box!important;
-  background:#fff!important; border-left:1px solid #d8e0e6!important; z-index:2!important;
-}
-.webgis:fullscreen .map-actions, .webgis:-webkit-full-screen .map-actions {z-index:20!important}
-.webgis:fullscreen .leaflet-container, .webgis:-webkit-full-screen .leaflet-container {width:100%!important;height:100%!important}
-.webgis.map-fullscreen-fallback {position:fixed!important;inset:0!important;z-index:2147483000!important;width:100vw!important;height:100vh!important;display:grid!important;grid-template-columns:minmax(0,1fr) 360px!important;grid-template-rows:minmax(0,1fr)!important;overflow:hidden!important;background:#fff!important}
-.webgis.map-fullscreen-fallback > .sidebar, .webgis.map-fullscreen-fallback > .left-extra-kpi {display:none!important}
-.webgis.map-fullscreen-fallback > .main-map {grid-column:1!important;grid-row:1!important;width:100%!important;height:100vh!important;min-height:0!important}
-.webgis.map-fullscreen-fallback > .panel {grid-column:2!important;grid-row:1!important;width:360px!important;max-width:360px!important;height:100vh!important;max-height:100vh!important}
-.webgis.map-fullscreen-fallback #map {height:calc(100vh - 42px)!important;min-height:0!important}
-@media(max-width:700px){
- .webgis:fullscreen, .webgis:-webkit-full-screen, .webgis.map-fullscreen-fallback {grid-template-columns:minmax(0,1fr) 300px!important}
- .webgis:fullscreen > .panel, .webgis:-webkit-full-screen > .panel, .webgis.map-fullscreen-fallback > .panel {width:300px!important;max-width:300px!important}
-}
-
-/* Chi tiết KPI tiêm phòng: tăng diện tích và hiển thị đủ từng loại vắc xin */
-.side-kpi-mini > .card-vaccine-kpi {
-  flex: 3.2 1 0% !important;
-  min-height: 245px !important;
-  height: auto !important;
-  max-height: none !important;
-  overflow: visible !important;
-  padding: 10px 12px !important;
-}
-.side-kpi-mini > .card-vaccine-kpi .summary-head {
-  font-size: 14px !important;
-  line-height: 1.35 !important;
-  min-height: 34px !important;
-  padding: 7px 9px !important;
-  margin-bottom: 7px !important;
-}
-.side-kpi-mini > .card-vaccine-kpi .vaccine-kpi-compact {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 0 !important;
-  overflow: visible !important;
-  font-size: 12px !important;
-}
-.side-kpi-mini > .card-vaccine-kpi .vaccine-kpi-compact > span:not([hidden]) {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: stretch !important;
-  gap: 3px !important;
-  padding: 7px 2px !important;
-  min-height: 0 !important;
-  height: auto !important;
-  overflow: visible !important;
-  border-bottom: 1px solid #dfe8f0 !important;
-  white-space: normal !important;
-}
-.side-kpi-mini > .card-vaccine-kpi .vaccine-kpi-compact > span > b,
-.side-kpi-mini > .card-vaccine-kpi .vaccine-kpi-compact .vaccine-type {
-  display: block !important;
-  font-size: 12px !important;
-  line-height: 1.35 !important;
-  color: #173f65 !important;
-  font-weight: 800 !important;
-  white-space: normal !important;
-  overflow-wrap: anywhere !important;
-}
-.side-kpi-mini > .card-vaccine-kpi .vaccine-kpi-compact > span > em,
-.side-kpi-mini > .card-vaccine-kpi .vaccine-kpi-compact .vaccine-progress {
-  display: block !important;
-  font-size: 11.5px !important;
-  line-height: 1.45 !important;
-  color: #46596b !important;
-  font-style: normal !important;
-  white-space: normal !important;
-  overflow-wrap: anywhere !important;
-}
-.side-kpi-mini > .card-vaccine-kpi .vaccine-kpi-compact [hidden] { display:none !important; }
-@media(max-width:1100px) {
-  .side-kpi-mini > .card-vaccine-kpi { min-height: 220px !important; }
-  .side-kpi-mini > .card-vaccine-kpi .vaccine-kpi-compact > span { padding: 5px 1px !important; }
-}
-
-.card-rabies-rate{border-top:4px solid #7c3aed;background:linear-gradient(145deg,#fff 0%,#f3edff 100%)}
-.card-rabies-rate .summary-head{background:#ede5ff;color:#4c1d95;border-radius:8px;padding:8px 10px}
-.card-rabies-rate .summary-main>span{color:#5b21b6;font-size:clamp(24px,2vw,34px);font-weight:800}
-.card-rabies-rate .summary-grid{grid-template-columns:1fr;gap:6px}
-.card-rabies-rate .summary-grid span{font-size:13px}
-.card-rabies-rate .summary-grid b{font-size:15px;color:#4c1d95}
-.rabies-rate-note{font-size:11px;line-height:1.4;color:#625477;margin-top:8px}
-
-/* FIX KPI: giữ toàn bộ chữ nằm gọn trong khung thẻ */
-.sidebar, .sidebar-kpi, .sidebar-kpi * { box-sizing: border-box; }
-.sidebar-kpi { min-width: 0; width: 100%; }
-.sidebar-kpi .summary-card {
-  width: 100% !important; min-width: 0 !important; max-width: 100% !important;
-  padding: 10px !important; overflow: hidden !important;
-}
-.sidebar-kpi .summary-head {
-  display: flex !important; align-items: flex-start; min-width: 0 !important;
-  max-width: 100% !important; white-space: normal !important;
-  overflow-wrap: anywhere !important; word-break: normal;
-}
-.sidebar-kpi .summary-head > * { min-width: 0; max-width: 100%; }
-.sidebar-kpi .summary-main { min-width: 0 !important; max-width: 100%; flex-wrap: wrap !important; }
-.sidebar-kpi .summary-main span { max-width: 100%; }
-.sidebar-kpi .summary-main small,
-.sidebar-kpi .summary-grid,
-.sidebar-kpi .summary-grid span,
-.sidebar-kpi .summary-grid b {
-  min-width: 0 !important; max-width: 100% !important;
-  white-space: normal !important; overflow-wrap: anywhere !important;
-  word-break: normal; text-overflow: clip !important;
-}
-.sidebar-kpi .summary-grid span { display: block; line-height: 1.45; }
-
-</style>
-
-
-<script id="webgisRabiesVaccinationMapLayer">
-/* Lớp bản đồ tỷ lệ tiêm phòng dại theo xã/phường; dữ liệu lấy từ API tiêm phòng hiện có. */
-(function(){
- 'use strict';
- const API='https://script.google.com/macros/s/AKfycbyRuJ9Wfv4HtWjMRT2Hox2-mOhBVRjyqLaHhpQjohPEkfHWNyjM004KgO3o7_4nRJtj/exec';
- const norm=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
- const num=v=>{if(v==null||v==='')return NaN;if(typeof v==='number')return Number.isFinite(v)?v:NaN;let s=String(v).trim().replace(/\s/g,'');if(s.includes('.')&&s.includes(','))s=s.replace(/\./g,'').replace(',','.');else if(s.includes(',')&&!s.includes('.'))s=s.replace(',','.');s=s.replace(/%$/,'');let n=Number(s);return Number.isFinite(n)?n:NaN;};
- const get=(r,keys)=>{const entries=Object.entries(r||{});for(const wanted of keys){const k=entries.find(([key,val])=>norm(key)===norm(wanted)&&val!==''&&val!=null);if(k)return k[1];}for(const wanted of keys){const w=norm(wanted);const k=entries.find(([key,val])=>norm(key).includes(w)&&val!==''&&val!=null);if(k)return k[1];}return null;};
- const nameFromFeature=f=>{const p=f?.properties||{};return get(p,['Tên xã','Tên xã/phường','Tên xã phường','TenXa','ten_xa','NAME_3','NAME','name','commune','Xa','Xa_Phuong']);};
- const map=()=>window.__webgisMap;
- let overlay=null, dataByName=new Map(), loaded=false, active=false, retryTimer=null;
- function rateFor(row){let r=num(get(row,['Tỷ lệ tiêm phòng (%)','Tỷ lệ tiêm phòng','Tỷ lệ % theo tổng đàn','Tỷ lệ','Phần trăm tiêm']));if(Number.isFinite(r))return Math.max(0,Math.min(100,r));let herd=num(get(row,['Tổng đàn chó mèo','Tổng đàn trong diện tiêm','Tổng đàn']));let done=num(get(row,['Số được tiêm phòng','Số liều đã tiêm','KPI_Dại - Đã tiêm','Đã tiêm']));return Number.isFinite(herd)&&herd>0&&Number.isFinite(done)?Math.max(0,Math.min(100,done/herd*100)):NaN;}
- function color(v){if(!Number.isFinite(v))return '#b8c0cc';if(v>=80)return '#218c54';if(v>=50)return '#f2c94c';if(v>0)return '#f28c38';return '#d9534f';}
- function popupContent(name,row,rate){const herd=get(row,['Tổng đàn chó mèo','Tổng đàn trong diện tiêm','Tổng đàn']);const done=get(row,['Số được tiêm phòng','Số liều đã tiêm','KPI_Dại - Đã tiêm','Đã tiêm']);return '<div style="min-width:190px;font:13px/1.5 Arial,sans-serif"><b style="font-size:15px;color:#5b21b6">'+String(name||'Chưa xác định').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))+'</b><hr style="margin:5px 0"><div>Tỷ lệ tiêm phòng dại: <b>'+(Number.isFinite(rate)?rate.toFixed(1)+'%':'Chưa có dữ liệu')+'</b></div><div>Đã tiêm: <b>'+(done??'Chưa có dữ liệu')+'</b></div><div>Tổng đàn trong diện tiêm: <b>'+(herd??'Chưa có dữ liệu')+'</b></div></div>';}
- function collectCommunes(m){const out=[];m.eachLayer(l=>{function visit(x){if(!x)return;if(typeof x.eachLayer==='function'&&!(window.L&&x instanceof L.Path)){x.eachLayer(visit);return;}if(x.feature&&x.feature.geometry&&nameFromFeature(x.feature))out.push(x.feature);}visit(l);});const seen=new Set();return out.filter(f=>{const n=norm(nameFromFeature(f));if(!n||seen.has(n))return false;seen.add(n);return true;});}
- function render(){const m=map();if(!m||!window.L)return false;if(overlay&&m.hasLayer(overlay))m.removeLayer(overlay);const features=collectCommunes(m);if(!features.length)return false;overlay=window.L.geoJSON({type:'FeatureCollection',features:features.map(f=>({...f,properties:{...(f.properties||{}),__communeName:nameFromFeature(f)}}))},{style:f=>{const row=dataByName.get(norm(f.properties.__communeName));const rate=row?rateFor(row):NaN;return {color:'#ffffff',weight:1.2,opacity:0.95,fillColor:color(rate),fillOpacity:0.68};},onEachFeature:(f,l)=>{const n=f.properties.__communeName;const row=dataByName.get(norm(n));const rate=row?rateFor(row):NaN;l.bindPopup(popupContent(n,row||{},rate));l.on('mouseover',function(){this.setStyle({weight:2.5,color:'#4c1d95',fillOpacity:.82});});l.on('mouseout',function(){overlay.resetStyle(this);});}});if(active)overlay.addTo(m);return true;}
- async function loadData(){try{const r=await fetch(API+'?type=tiemphong&_='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const j=await r.json();const rows=Array.isArray(j?.data)?j.data:[];dataByName.clear();rows.forEach(row=>{const name=get(row,['Tên xã','Tên xã/phường','Tên xã phường','Xã','Xã/phường','Địa bàn','Đơn vị']);if(name)dataByName.set(norm(name),row);});loaded=true;render();}catch(e){console.warn('Không tải được dữ liệu bản đồ tiêm phòng dại:',e);}}
- function toggle(){const m=map();if(!m)return;if(!loaded)loadData();active=document.getElementById('layerSelect')?.value==='TIEM_DAI';if(active){if(!render()){clearTimeout(retryTimer);retryTimer=setTimeout(render,800);}if(overlay&&!m.hasLayer(overlay))overlay.addTo(m);const legendId='rabiesVaccinationLegend';if(!document.getElementById(legendId)){const legend=window.L.control({position:'bottomright'});legend.onAdd=function(){const d=window.L.DomUtil.create('div',legendId);d.id=legendId;d.style.cssText='background:#fff;padding:10px 12px;border-radius:8px;box-shadow:0 1px 6px #0003;font:12px/1.6 Arial;';d.innerHTML='<b>Tỷ lệ tiêm phòng dại</b><br><span style="color:#218c54">■</span> ≥ 80%<br><span style="color:#f2c94c">■</span> 50–79,9%<br><span style="color:#f28c38">■</span> Trên 0–49,9%<br><span style="color:#d9534f">■</span> 0%<br><span style="color:#b8c0cc">■</span> Chưa có dữ liệu';return d;};legend.addTo(m);window.__rabiesVaccinationLegend=legend;}}else{if(overlay&&m.hasLayer(overlay))m.removeLayer(overlay);if(window.__rabiesVaccinationLegend){m.removeControl(window.__rabiesVaccinationLegend);window.__rabiesVaccinationLegend=null;}}}
- function init(){const sel=document.getElementById('layerSelect');if(!sel)return;sel.addEventListener('change',()=>setTimeout(toggle,100));if(sel.value==='TIEM_DAI')toggle();}
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
- window.addEventListener('load',()=>{if(document.getElementById('layerSelect')?.value==='TIEM_DAI')toggle();});
-})();
-</script>
-<style id="custom-colors-ksgm-bbtty">
-/* Phân biệt màu nền KPI Kiểm soát giết mổ và cơ sở buôn bán thuốc thú y */
-.summary-card.card-ksgm,
-.card-ksgm.summary-card {
-  background: linear-gradient(145deg,#e7f2ff 0%,#f5f9ff 100%) !important;
-  border: 1px solid #9fc5f3 !important;
-  border-top: 4px solid #2878c7 !important;
-}
-.summary-card.card-ksgm .summary-head,
-.card-ksgm .summary-head {
-  background: linear-gradient(90deg,#d4e8ff 0%,#edf5ff 100%) !important;
-  border-left-color: #2878c7 !important;
-  color: #174a7e !important;
-}
-.summary-card.card-drug,
-.card-drug.summary-card {
-  background: linear-gradient(145deg,#e9f8f5 0%,#f6fcfb 100%) !important;
-  border: 1px solid #9bd8cc !important;
-  border-top: 4px solid #168878 !important;
-}
-.summary-card.card-drug .summary-head,
-.card-drug .summary-head {
-  background: linear-gradient(90deg,#d3f1e9 0%,#effaf7 100%) !important;
-  border-left-color: #168878 !important;
-  color: #12675d !important;
-}
-.summary-card.card-ksgm .summary-value,
-.summary-card.card-ksgm .summary-number,
-.summary-card.card-ksgm .value,
-.summary-card.card-ksgm strong,
-.summary-card.card-ksgm b { color:#174a7e; }
-.summary-card.card-drug .summary-value,
-.summary-card.card-drug .summary-number,
-.summary-card.card-drug .value,
-.summary-card.card-drug strong,
-.summary-card.card-drug b { color:#12675d; }
-</style>
-
-<style id="kpi-text-spacing-fix">
-/* Chữ KPI tự xuống dòng, khoảng cách dòng thoáng và không tràn khung. */
-.sidebar-kpi .summary-card,.left-extra-kpi .summary-card,.side-kpi-mini .summary-card{min-width:0;box-sizing:border-box;overflow:hidden;}
-.sidebar-kpi .summary-head,.left-extra-kpi .summary-head,.side-kpi-mini .summary-head{display:flex;align-items:flex-start;gap:6px;min-width:0;flex-wrap:wrap;}
-.sidebar-kpi .summary-head b,.left-extra-kpi .summary-head b,.side-kpi-mini .summary-head b{min-width:0;flex:1 1 120px;white-space:normal;overflow-wrap:anywhere;word-break:normal;line-height:1.25;letter-spacing:normal;}
-.sidebar-kpi .summary-card p,.sidebar-kpi .summary-card span,.sidebar-kpi .summary-card small,.left-extra-kpi .summary-card p,.left-extra-kpi .summary-card span,.left-extra-kpi .summary-card small,.side-kpi-mini .summary-card p,.side-kpi-mini .summary-card span,.side-kpi-mini .summary-card small{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;line-height:1.3;letter-spacing:normal;}
-.kpi-detail-only-btn{flex:0 0 auto;white-space:nowrap;margin:3px 0 0 auto;}
-</style>
-
-<style id="kpi-single-detail-button-fix">
-.summary-card{min-width:0!important;box-sizing:border-box!important;overflow-wrap:anywhere!important}
-.summary-card .summary-head{display:flex!important;align-items:flex-start!important;flex-wrap:wrap!important;min-width:0!important;gap:6px!important;line-height:1.35!important}
-.summary-card .summary-head b{flex:1 1 130px!important;min-width:0!important;overflow-wrap:anywhere!important;white-space:normal!important}
-.summary-card .kpi-detail-only-btn{flex:0 0 auto!important;white-space:nowrap!important;margin-left:auto!important;max-width:100%!important}
-</style>
-
-<style id="fix-kpi-text-wrap-final">
-/* Chỉnh chữ trong thẻ KPI: không cắt dòng, không chồng chữ, không tràn khỏi khung */
-.kpi-card, .summary-card, .sidebar-kpi, .side-kpi-mini, .left-extra-kpi,
-.kpi-panel, .extra-kpi-card, .dashboard-card {
-  min-width:0!important;
-  box-sizing:border-box!important;
-}
-.kpi-card *, .summary-card *, .sidebar-kpi *, .side-kpi-mini *,
-.left-extra-kpi *, .kpi-panel *, .extra-kpi-card *, .dashboard-card * {
-  box-sizing:border-box;
-  min-width:0;
-  max-width:100%;
-  overflow-wrap:anywhere;
-  word-break:normal;
-}
-.kpi-card, .summary-card, .sidebar-kpi, .side-kpi-mini, .left-extra-kpi,
-.kpi-panel, .extra-kpi-card, .dashboard-card {
-  height:auto!important;
-  min-height:0!important;
-  overflow:visible!important;
-}
-.kpi-card h1,.kpi-card h2,.kpi-card h3,.kpi-card h4,
-.summary-card h1,.summary-card h2,.summary-card h3,.summary-card h4,
-.sidebar-kpi h1,.sidebar-kpi h2,.sidebar-kpi h3,.sidebar-kpi h4,
-.side-kpi-mini h1,.side-kpi-mini h2,.side-kpi-mini h3,.side-kpi-mini h4,
-.left-extra-kpi h1,.left-extra-kpi h2,.left-extra-kpi h3,.left-extra-kpi h4,
-.kpi-panel h1,.kpi-panel h2,.kpi-panel h3,.kpi-panel h4 {
-  white-space:normal!important;
-  line-height:1.2!important;
-  margin-top:0!important;
-  margin-bottom:8px!important;
-}
-.kpi-card p,.kpi-card span,.kpi-card small,.kpi-card label,
-.summary-card p,.summary-card span,.summary-card small,.summary-card label,
-.sidebar-kpi p,.sidebar-kpi span,.sidebar-kpi small,.sidebar-kpi label,
-.side-kpi-mini p,.side-kpi-mini span,.side-kpi-mini small,.side-kpi-mini label,
-.left-extra-kpi p,.left-extra-kpi span,.left-extra-kpi small,.left-extra-kpi label,
-.kpi-panel p,.kpi-panel span,.kpi-panel small,.kpi-panel label {
-  white-space:normal!important;
-  line-height:1.35!important;
-  overflow:visible!important;
-  text-overflow:clip!important;
-}
-.kpi-card .kpi-title,.summary-card .kpi-title,.sidebar-kpi .kpi-title,
-.side-kpi-mini .kpi-title,.left-extra-kpi .kpi-title,.kpi-panel .kpi-title {
-  display:flex!important;
-  align-items:flex-start!important;
-  gap:6px!important;
-  flex-wrap:wrap!important;
-  white-space:normal!important;
-  line-height:1.2!important;
-}
-.kpi-card .kpi-value,.summary-card .kpi-value,.sidebar-kpi .kpi-value,
-.side-kpi-mini .kpi-value,.left-extra-kpi .kpi-value,.kpi-panel .kpi-value {
-  line-height:1.15!important;
-  white-space:normal!important;
-}
-</style>
-<style id="kpi-card-width-adjustment">
-/* Bố trí 5 thẻ KPI trên một hàng ở màn hình rộng; thẻ tự co giãn vừa chiều ngang */
-.sidebar-kpi {
-  display:grid !important;
-  grid-template-columns:repeat(5, minmax(0, 1fr)) !important;
-  gap:8px !important;
-  align-items:stretch !important;
-}
-.sidebar-kpi > .summary-card {
-  box-sizing:border-box !important;
-  width:100% !important;
-  min-width:0 !important;
-  max-width:100% !important;
-  padding-left:8px !important;
-  padding-right:8px !important;
-}
-.sidebar-kpi .summary-head,
-.sidebar-kpi .summary-grid span,
-.sidebar-kpi .summary-main small {
-  min-width:0 !important;
-  overflow-wrap:anywhere !important;
-  word-break:normal !important;
-}
-@media (max-width: 1199px) {
-  .sidebar-kpi { grid-template-columns:repeat(3, minmax(0, 1fr)) !important; }
-}
-@media (max-width: 760px) {
-  .sidebar-kpi { grid-template-columns:repeat(2, minmax(0, 1fr)) !important; }
-}
-@media (max-width: 480px) {
-  .sidebar-kpi { grid-template-columns:1fr !important; }
-}
-</style>
-
-<style id="final-kpi-vaccine-title-detail-inline">
-/* Tiêm phòng: tiêu đề và nút Chi tiết trên cùng một dòng */
-.summary-card.card-vaccine-kpi .summary-head{display:flex!important;flex-wrap:nowrap!important;align-items:center!important;gap:6px!important;min-width:0!important;}
-.summary-card.card-vaccine-kpi .summary-head i{flex:0 0 auto!important;}
-.summary-card.card-vaccine-kpi .summary-head b{flex:1 1 auto!important;min-width:0!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;line-height:1.15!important;margin:0!important;}
-.summary-card.card-vaccine-kpi .summary-head .kpi-detail-only-btn{flex:0 0 auto!important;margin:0 0 0 auto!important;padding:4px 8px!important;font-size:11px!important;line-height:1.1!important;white-space:nowrap!important;}
 </style>
