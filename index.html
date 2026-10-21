@@ -3220,6 +3220,9 @@ document.addEventListener("DOMContentLoaded", function () {
   let trendRows = [];
   let trendLoadStarted = false;
   let trendLoadError = "";
+  // Biểu đồ tháng dùng cùng nguồn GIS_DICH_BENH_NGAY với biểu đồ diễn biến theo ngày.
+  // Không gọi sheet tổng hợp tháng riêng, tránh lệch nguồn và phải duy trì dữ liệu trùng lặp.
+  let monthlyLoadError = "";
 
   function normText(v){
     return String(v == null ? "" : v).normalize("NFD").replace(/[\u0300-\u036f]/g,"")
@@ -3412,45 +3415,41 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   }
+  function loadMonthlyRows(){
+    // Dữ liệu tháng được tổng hợp trực tiếp từ trendRows sau khi API type=trend tải xong.
+    if (trendRows.length) updateMonthlyChart((document.getElementById("trendDiseaseSelect")||{}).value||selected());
+  }
   function updateMonthlyChart(key){
-    const canvas = document.getElementById("chartMonthly");
-    const note = document.getElementById("monthlyNote");
-    if (!canvas || !window.Chart) return;
-    const cfg = diseaseConfig[key] || diseaseConfig.DTLCP;
-    const monthly = Array(12).fill(0);
-    let matched = 0, skipped = 0;
-    trendRows.forEach(row => {
-      if (trendDiseaseKey(row) !== key) return;
-      matched++;
-      // Ưu tiên đúng ngày tiêu hủy; chỉ dùng ngày ghi nhận/phát hiện nếu nguồn không có trường ngày tiêu hủy.
-      let dateRaw = firstValue(row, ["Ngày tiêu hủy", "Ngày tiêu huỷ", "Ngày chết/tiêu hủy", "Ngày chết, tiêu hủy", "Ngày", "Ngày ghi nhận", "Ngày phát hiện", "Ngày xảy ra", "Ngày cập nhật", "Ngày xảy ra ổ dịch", "Ngày bắt đầu"]);
-      if (dateRaw === null) dateRaw = fuzzyValue(row, "date");
-      const date = parseTrendDate(dateRaw);
-      const value = trendValue(row, key);
-      if (!date || value === null || !Number.isFinite(value)) { skipped++; return; }
-      monthly[date.getMonth()] += value;
+    const canvas=document.getElementById("chartMonthly"), note=document.getElementById("monthlyNote");
+    if(!canvas||!window.Chart)return;
+    const cfg=diseaseConfig[key]||diseaseConfig.DTLCP;
+    const candidates=[];
+    let rowsForDisease=[];
+    trendRows.forEach(row=>{
+      if(trendDiseaseKey(row)!==key)return;
+      const dateRaw=firstValue(row,["Ngày","Ngày ghi nhận","Ngày phát hiện","Ngày xảy ra","Ngày tiêu hủy","Ngày chết/tiêu hủy","Ngày chết, tiêu hủy","Ngày cập nhật","Ngày xảy ra ổ dịch","Ngày bắt đầu"]) ?? fuzzyValue(row,"date");
+      const date=parseTrendDate(dateRaw);
+      const value=trendValue(row,key);
+      if(date && value!==null && Number.isFinite(value)) rowsForDisease.push({date,value});
     });
-    const old = window.Chart.getChart(canvas);
-    if (old) old.destroy();
-    const colors = {DTLCP:"#e53935", CGC:"#2e7d32", VDNC:"#1976d2", DAI:"#6a35d1"};
-    const metric = key === "VDNC" ? "Số con mắc bệnh" : "Số con chết/tiêu hủy";
-    if (note) {
-      note.textContent = matched
-        ? `${cfg.label} · ${metric} theo tháng, cộng theo ngày tiêu hủy/ngày ghi nhận trong dữ liệu nguồn${skipped ? `; bỏ qua ${skipped} bản ghi thiếu ngày hoặc chỉ tiêu` : ""}.`
-        : `${cfg.label}: chưa có bản ghi phù hợp để tổng hợp theo tháng.`;
+    // Chỉ lấy năm mới nhất có dữ liệu của chính bệnh đang chọn, không trộn các năm.
+    const year=rowsForDisease.length?Math.max(...rowsForDisease.map(x=>x.date.getFullYear())):null;
+    const monthly=Array(12).fill(null); let found=0;
+    if(year!==null){
+      rowsForDisease.forEach(item=>{
+        if(item.date.getFullYear()!==year)return;
+        const m=item.date.getMonth();
+        if(monthly[m]===null)monthly[m]=0;
+        monthly[m]+=item.value;
+        found++;
+      });
     }
-    new Chart(canvas, {
-      type: "bar",
-      data: {
-        labels: ["Tháng 1","Tháng 2","Tháng 3","Tháng 4","Tháng 5","Tháng 6","Tháng 7","Tháng 8","Tháng 9","Tháng 10","Tháng 11","Tháng 12"],
-        datasets: [{ label: metric, data: monthly, backgroundColor: colors[key] || "#477fd1", borderRadius: 4, maxBarThickness: 36 }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: true, position: "bottom", labels: { boxWidth: 10, font: { size: 9 } } }, tooltip: { callbacks: { label: ctx => `${metric}: ${Number(ctx.raw || 0).toLocaleString("vi-VN")} con` } } },
-        scales: { x: { grid: { display: false }, ticks: { font: { size: 9 } } }, y: { beginAtZero: true, title: { display: true, text: "Số con" }, ticks: { precision: 0, font: { size: 9 } } } }
-      }
-    });
+    const labels=["Tháng 1","Tháng 2","Tháng 3","Tháng 4","Tháng 5","Tháng 6","Tháng 7","Tháng 8","Tháng 9","Tháng 10","Tháng 11","Tháng 12"];
+    const old=window.Chart.getChart(canvas);if(old)old.destroy();
+    const colors={DTLCP:"#e53935",CGC:"#2e7d32",VDNC:"#1976d2",DAI:"#6a35d1"};
+    const metric=key==="VDNC"?"Số con mắc bệnh":"Số con chết/tiêu hủy";
+    if(note) note.textContent=found?`${cfg.label} · ${metric} theo tháng năm ${year}, tổng hợp từ sheet GIS_DICH_BENH_NGAY; chỉ hiển thị dữ liệu của bệnh đang chọn.`:`${cfg.label}: chưa tìm thấy bản ghi có ngày và chỉ tiêu phù hợp trong sheet GIS_DICH_BENH_NGAY; không tự tạo số liệu.`;
+    new Chart(canvas,{type:"bar",data:{labels,datasets:[{label:`${metric}${year!==null?" – "+year:""}`,data:monthly,backgroundColor:colors[key]||"#477fd1",borderRadius:4,maxBarThickness:36}]},options:{responsive:true,maintainAspectRatio:false,spanGaps:false,plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:10,font:{size:9}}},tooltip:{callbacks:{label:ctx=>ctx.raw===null?"Chưa có số liệu":`${metric}: ${Number(ctx.raw||0).toLocaleString("vi-VN")} con`}}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{beginAtZero:true,title:{display:true,text:"Số con"},ticks:{precision:0,font:{size:9}}}}}});
   }
 
   function updateDamage(){
@@ -5295,16 +5294,16 @@ button,.tool-button,.map-control-button{font-weight:750}
  'use strict';
  const API='https://script.google.com/macros/s/AKfycbyRuJ9Wfv4HtWjMRT2Hox2-mOhBVRjyqLaHhpQjohPEkfHWNyjM004KgO3o7_4nRJtj/exec';
  const config={
-  'card-dtlcp':{title:'Dịch tả lợn Châu Phi',types:['report','trend','']},
-  'card-cgc':{title:'Cúm gia cầm',types:['report','trend','']},
-  'card-vdnc':{title:'Viêm da nổi cục',types:['report','trend','']},
-  'card-dai':{title:'Bệnh dại',types:['report','trend','']},
-  'card-phun':{title:'Thực hiện tháng tổng vệ sinh, khử trùng, tiêu độc',types:['phun','phun2']},
-  'card-vaccine-kpi':{title:'Tiêm phòng vắc xin',types:['tiemphong']},
-  'card-ksgm':{title:'Kiểm soát giết mổ',types:['ksgm']},
-  'card-drug':{title:'Cơ sở buôn bán thuốc thú y',types:['thuoc','thuoc_thu_y','']},
-  'card-tthc-extra':{title:'TTHC lĩnh vực thú y',types:['tthc','TTHC']},
-  'card-sample-extra':{title:'Mẫu xét nghiệm',types:['mauxetnghiem','xetnghiem','mau']}
+  'card-dtlcp':{title:'Dịch tả lợn Châu Phi',types:['detail:GIS_DTLCP']},
+  'card-cgc':{title:'Cúm gia cầm',types:['detail:GIS_CGC']},
+  'card-vdnc':{title:'Viêm da nổi cục',types:['detail:GIS_VDNC']},
+  'card-dai':{title:'Bệnh dại',types:['detail:GIS_DAI']},
+  'card-phun':{title:'Thực hiện tháng tổng vệ sinh, khử trùng, tiêu độc',types:['detail:GIS_PHUNPHONG']},
+  'card-vaccine-kpi':{title:'Tiêm phòng vắc xin',types:['detail:GIS_TIEM_PHONG_KPI']},
+  'card-ksgm':{title:'Kiểm soát giết mổ',types:['detail:GIS_KSGM']},
+  'card-drug':{title:'Cơ sở buôn bán thuốc thú y',types:['detail:GIS_CSBBTTY']},
+  'card-tthc-extra':{title:'TTHC lĩnh vực thú y',types:['detail:GIS_TTHC_TONGHOP']},
+  'card-sample-extra':{title:'Mẫu xét nghiệm',types:['detail:GIS_LAYMAU']}
  };
  const norm=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -5312,7 +5311,9 @@ button,.tool-button,.map-control-button{font-weight:750}
  async function fetchSource(types){
   let lastError='API chưa trả dữ liệu';
   for(const type of types){try{
-   const url=API+(type?'?type='+encodeURIComponent(type)+'&':'?')+'_='+Date.now();
+   let url;
+   if(type.startsWith('detail:')) url=API+'?type=detail&sheet='+encodeURIComponent(type.slice(7))+'&_='+Date.now();
+   else url=API+(type?'?type='+encodeURIComponent(type)+'&':'?')+'_='+Date.now();
    const res=await fetch(url,{cache:'no-store'}); if(!res.ok){lastError='HTTP '+res.status;continue;}
    const json=await res.json();
    const rows=Array.isArray(json)?json:(Array.isArray(json?.data)?json.data:(Array.isArray(json?.rows)?json.rows:[]));
@@ -5321,7 +5322,7 @@ button,.tool-button,.map-control-button{font-weight:750}
   }catch(e){lastError=e.message||lastError;}}
   throw new Error(lastError);
  }
- function ensureModal(){let ov=document.getElementById('kpiDetailOverlay');if(ov)return ov;ov=document.createElement('div');ov.id='kpiDetailOverlay';ov.innerHTML='<section id="kpiDetailDialog" role="dialog" aria-modal="true"><header id="kpiDetailHeader"><h3 id="kpiDetailTitle">Chi tiết KPI</h3><button type="button" class="kpi-action-btn" id="kpiDetailClose">Đóng ✕</button></header><div id="kpiDetailBody"></div><footer id="kpiDetailFooter"><span id="kpiDetailStatus" style="margin-right:auto;font-size:12px;color:#536b7b"></span><button type="button" class="kpi-action-btn" id="kpiDetailDownload" disabled>Tải CSV</button></footer></section>';document.body.appendChild(ov);ov.addEventListener('click',e=>{if(e.target===ov)ov.classList.remove('open')});ov.querySelector('#kpiDetailClose').onclick=()=>ov.classList.remove('open');document.addEventListener('keydown',e=>{if(e.key==='Escape')ov.classList.remove('open')});return ov}
+ function ensureModal(){let ov=document.getElementById('kpiDetailOverlay');if(ov)return ov;ov=document.createElement('div');ov.id='kpiDetailOverlay';ov.innerHTML='<section id="kpiDetailDialog" role="dialog" aria-modal="true"><header id="kpiDetailHeader"><h3 id="kpiDetailTitle">Chi tiết KPI</h3><button type="button" class="kpi-action-btn" id="kpiDetailClose">Đóng ✕</button></header><div id="kpiDetailBody"></div><footer id="kpiDetailFooter"><span id="kpiDetailStatus" style="margin-right:auto;font-size:12px;color:#536b7b"></span><button type="button" class="kpi-action-btn" id="kpiDetailDownload" disabled>Tải Excel</button></footer></section>';document.body.appendChild(ov);ov.addEventListener('click',e=>{if(e.target===ov)ov.classList.remove('open')});ov.querySelector('#kpiDetailClose').onclick=()=>ov.classList.remove('open');document.addEventListener('keydown',e=>{if(e.key==='Escape')ov.classList.remove('open')});return ov}
  function renderTable(body,rows){
   if(!rows.length){body.innerHTML='<p>Google Sheets/API chưa trả về dòng dữ liệu cho mục này.</p>';return {headers:[],data:[]};}
   // Build columns from the actual source rows; do not fabricate values from the KPI card.
@@ -5338,7 +5339,12 @@ button,.tool-button,.map-control-button{font-weight:750}
   ov.querySelector('#kpiDetailTitle').textContent='Chi tiết: '+cfg.title;body.innerHTML='<p>Đang tải số liệu trực tiếp từ Google Sheets qua API…</p>';status.textContent='Đang tải dữ liệu nguồn';download.disabled=true;ov.classList.add('open');
   try{
    const result=await fetchSource(cfg.types);const table=renderTable(body,result.rows);status.textContent='Nguồn API: '+(result.source||'Google Sheets')+' · '+result.rows.length.toLocaleString('vi-VN')+' dòng';download.disabled=!table.data.length;
-   download.onclick=()=>{const csv='\ufeff'+[table.headers,...table.data].map(r=>r.map(csvEscape).join(',')).join('\r\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=norm(cfg.title).replace(/\s+/g,'_')+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
+   download.onclick=()=>{
+    if(!window.XLSX||!window.XLSX.utils){status.textContent='Thư viện Excel chưa tải được';return;}
+    const aoa=[table.headers,...table.data];const ws=window.XLSX.utils.aoa_to_sheet(aoa);const wb=window.XLSX.utils.book_new();
+    window.XLSX.utils.book_append_sheet(wb,ws,(cfg.title||'Chi tiet').slice(0,31));
+    window.XLSX.writeFile(wb,norm(cfg.title).replace(/\s+/g,'_')+'.xlsx');
+   };
   }catch(e){body.innerHTML='<p style="color:#a12622">Không tải được dữ liệu nguồn từ Google Sheets/API: '+esc(e.message)+'. Kiểm tra nhánh API tương ứng và quyền truy cập của Apps Script.</p>';status.textContent='Không có dữ liệu nguồn';download.disabled=true;}
  }
  function addActions(){document.querySelectorAll('.summary-card').forEach(card=>{
