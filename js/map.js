@@ -76,12 +76,12 @@ const layerConfig = {
         name: "Kiểm soát giết mổ",
         field: "KSGM_Cơ sở",
         status: "KSGM_Trạng thái",
-        colors: ["#E8D8D2","#D7CCC8","#A1887F","#795548","#5D4037","#3E2723"]
+        colors: ["#F0E6FF","#D8BFFF","#BD91FF","#9A63F5","#7840D8","#5426A8"]
     },
     CSBBTTY: {
         name: "Cơ sở buôn bán thuốc thú y",
         field: "CSBBTTY_Cơ sở",
-        colors: ["#D7F3FF","#A7E6F7","#67D2E8","#29B6D1","#0288B8","#01579B"]
+        colors: ["#FFE4EC","#FFBFD2","#FF8FB2","#F45D91","#D93672","#A91F55"]
     }
 };
 
@@ -505,8 +505,8 @@ function getKsgmStyle(row) {
 
     if (!active && count <= 0) {
         return {
-            fillColor: layerConfig.KSGM.colors[0],
-            fillOpacity: 0.62,
+            fillColor: "#F1EDF8",
+            fillOpacity: 0.92,
             color: "#FFFFFF",
             weight: 0.85
         };
@@ -527,8 +527,8 @@ function getDrugStyle(row) {
 
     if (count <= 0) {
         return {
-            fillColor: layerConfig.CSBBTTY.colors[0],
-            fillOpacity: 0.62,
+            fillColor: "#F1EDF8",
+            fillOpacity: 0.92,
             color: "#FFFFFF",
             weight: 0.85
         };
@@ -667,7 +667,21 @@ function renderLabels() {
             pane: "mapLabels",
             icon: L.divIcon({
                 className: "map-label-wrap",
-                html: `<span class="map-label">${escapeHtml(name)}</span>`,
+                html: `<span class="map-label" style="
+                    color:#163A63;
+                    font-weight:800;
+                    -webkit-text-stroke:0.35px #FFFFFF;
+                    text-shadow:
+                        -2px -2px 0 #FFFFFF,
+                         2px -2px 0 #FFFFFF,
+                        -2px  2px 0 #FFFFFF,
+                         2px  2px 0 #FFFFFF,
+                         0   -2px 0 #FFFFFF,
+                         0    2px 0 #FFFFFF,
+                        -2px  0   0 #FFFFFF,
+                         2px  0   0 #FFFFFF,
+                         0    2px 4px rgba(0,0,0,0.65);
+                ">${escapeHtml(name)}</span>`,
                 iconSize: [width, 18],
                 iconAnchor: [width / 2, 9]
             })
@@ -1602,7 +1616,7 @@ function updateLegend() {
                 <div class="legend-row"><i style="background:${cfg.colors[4]}"></i><span>5 cơ sở</span></div>
                 <div class="legend-row"><i style="background:${cfg.colors[5]}"></i><span>6 cơ sở trở lên</span></div>
                 <hr>
-                <div class="legend-row"><i style="background:${cfg.colors[0]}"></i><span>0 cơ sở / chưa triển khai</span></div>
+                <div class="legend-row"><i style="background:#F1EDF8"></i><span>0 cơ sở / chưa triển khai</span></div>
             `;
             L.DomEvent.disableClickPropagation(div);
             return div;
@@ -1617,7 +1631,7 @@ function updateLegend() {
             <div class="legend-row"><i style="background:${cfg.colors[4]}"></i><span>5 cơ sở</span></div>
             <div class="legend-row"><i style="background:${cfg.colors[5]}"></i><span>6 cơ sở trở lên</span></div>
             <hr>
-            <div class="legend-row"><i style="background:${cfg.colors[0]}"></i><span>0 cơ sở</span></div>
+            <div class="legend-row"><i style="background:#F1EDF8"></i><span>0 cơ sở / chưa có số liệu</span></div>
         `;
 
         L.DomEvent.disableClickPropagation(div);
