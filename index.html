@@ -4984,10 +4984,48 @@ html, body { max-width:100%; }
         catch(e){}
       },180);
     }
-    document.addEventListener('fullscreenchange',resizeMap);
-    document.addEventListener('webkitfullscreenchange',resizeMap);
+    document.addEventListener('fullscreenchange',function(){ if(!document.fullscreenElement&&!document.webkitFullscreenElement) mapBox.classList.remove('map-fullscreen-fallback'); resizeMap(); });
+    document.addEventListener('webkitfullscreenchange',function(){ if(!document.fullscreenElement&&!document.webkitFullscreenElement) mapBox.classList.remove('map-fullscreen-fallback'); resizeMap(); });
+    window.addEventListener('resize',resizeMap);
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initFullscreenMap); else initFullscreenMap();
+})();
+</script>
+
+
+<!-- Fix các khe trắng/đường kẻ thành khung giữa các tile bản đồ Leaflet -->
+<style id="fix-leaflet-white-tile-seams">
+  #map, .main-map, .leaflet-container { overflow:hidden !important; }
+  .leaflet-tile-container {
+    line-height: 0 !important;
+    font-size: 0 !important;
+  }
+  .leaflet-tile {
+    outline: 1px solid transparent !important;
+    border: 0 !important;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+  .leaflet-container img.leaflet-tile {
+    max-width: none !important;
+    width: 256px;
+    height: 256px;
+  }
+  .leaflet-overlay-pane svg { overflow: visible; }
+</style>
+<script id="fix-leaflet-white-tile-seams-js">
+(function(){
+  function refreshMapTiles(){
+    try {
+      var m = window.webgisMap || window.map;
+      if (m && typeof m.invalidateSize === 'function') {
+        m.invalidateSize({pan:false, animate:false});
+      }
+    } catch(e) {}
+  }
+  window.addEventListener('resize', refreshMapTiles);
+  document.addEventListener('fullscreenchange', function(){ setTimeout(refreshMapTiles, 120); });
+  window.addEventListener('load', function(){ setTimeout(refreshMapTiles, 250); });
 })();
 </script>
 
@@ -5045,35 +5083,52 @@ html, body { max-width:100%; }
 </style>
 
 <style id="fullscreen-map-keep-commune-panel">
-/* Toàn màn hình: mở rộng toàn bộ khung WebGIS, giữ bản đồ và panel thông tin xã; ẩn các cột KPI tổng quan. */
+/* Fullscreen ổn định: ghi đè mọi grid-column/grid-row và kích thước cũ của các breakpoint. */
 .webgis:fullscreen, .webgis:-webkit-full-screen {
+  position:fixed!important; inset:0!important; z-index:2147483000!important;
   display:grid!important; grid-template-columns:minmax(0,1fr) 360px!important;
-  grid-template-rows:minmax(0,1fr)!important; gap:0!important;
-  width:100vw!important; height:100vh!important; min-height:100vh!important;
-  margin:0!important; padding:0!important; overflow:hidden!important;
-  background:#fff!important;
+  grid-template-rows:minmax(0,1fr)!important; grid-auto-flow:initial!important;
+  gap:0!important; width:100vw!important; height:100vh!important;
+  min-width:0!important; min-height:0!important; max-width:none!important; max-height:none!important;
+  margin:0!important; padding:0!important; overflow:hidden!important; box-sizing:border-box!important;
+  background:#fff!important; transform:none!important;
 }
 .webgis:fullscreen > .sidebar, .webgis:-webkit-full-screen > .sidebar,
 .webgis:fullscreen > .side-kpi-mini, .webgis:-webkit-full-screen > .side-kpi-mini,
 .webgis:fullscreen > .left-extra-kpi, .webgis:-webkit-full-screen > .left-extra-kpi {display:none!important}
 .webgis:fullscreen > .main-map, .webgis:-webkit-full-screen > .main-map {
-  display:flex!important; position:relative!important; inset:auto!important;
-  width:auto!important; height:100vh!important; min-width:0!important;
-  max-width:none!important; max-height:none!important; border:0!important;
+  display:flex!important; grid-column:1!important; grid-row:1!important; align-self:stretch!important;
+  position:relative!important; inset:auto!important; float:none!important;
+  width:100%!important; height:100vh!important; min-width:0!important; min-height:0!important;
+  max-width:none!important; max-height:none!important; margin:0!important; padding:0!important;
+  border:0!important; border-radius:0!important; overflow:hidden!important; box-sizing:border-box!important;
 }
-.webgis:fullscreen > .main-map #map, .webgis:-webkit-full-screen > .main-map #map {
-  height:calc(100vh - 42px)!important; min-height:0!important; flex:1 1 auto!important;
+.webgis:fullscreen > .main-map > .map-toolbar, .webgis:-webkit-full-screen > .main-map > .map-toolbar {
+  flex:0 0 auto!important; width:100%!important; min-width:0!important; box-sizing:border-box!important;
+}
+.webgis:fullscreen > .main-map > #map, .webgis:-webkit-full-screen > .main-map > #map {
+  display:block!important; position:relative!important; flex:1 1 auto!important;
+  grid-column:auto!important; grid-row:auto!important; width:100%!important; height:auto!important;
+  min-width:0!important; min-height:0!important; max-width:none!important; max-height:none!important;
+  margin:0!important; padding:0!important; box-sizing:border-box!important;
 }
 .webgis:fullscreen > .panel, .webgis:-webkit-full-screen > .panel {
-  display:block!important; position:relative!important; inset:auto!important;
+  display:block!important; grid-column:2!important; grid-row:1!important; align-self:stretch!important;
+  position:relative!important; inset:auto!important; float:none!important;
   width:360px!important; min-width:0!important; max-width:360px!important;
-  height:100vh!important; max-height:100vh!important; overflow:auto!important;
-  background:#fff!important; border-left:1px solid #d8e0e6!important;
-  z-index:2!important;
+  height:100vh!important; min-height:0!important; max-height:100vh!important;
+  margin:0!important; overflow:auto!important; box-sizing:border-box!important;
+  background:#fff!important; border-left:1px solid #d8e0e6!important; z-index:2!important;
 }
 .webgis:fullscreen .map-actions, .webgis:-webkit-full-screen .map-actions {z-index:20!important}
+.webgis:fullscreen .leaflet-container, .webgis:-webkit-full-screen .leaflet-container {width:100%!important;height:100%!important}
+.webgis.map-fullscreen-fallback {position:fixed!important;inset:0!important;z-index:2147483000!important;width:100vw!important;height:100vh!important;display:grid!important;grid-template-columns:minmax(0,1fr) 360px!important;grid-template-rows:minmax(0,1fr)!important;overflow:hidden!important;background:#fff!important}
+.webgis.map-fullscreen-fallback > .sidebar, .webgis.map-fullscreen-fallback > .left-extra-kpi {display:none!important}
+.webgis.map-fullscreen-fallback > .main-map {grid-column:1!important;grid-row:1!important;width:100%!important;height:100vh!important;min-height:0!important}
+.webgis.map-fullscreen-fallback > .panel {grid-column:2!important;grid-row:1!important;width:360px!important;max-width:360px!important;height:100vh!important;max-height:100vh!important}
+.webgis.map-fullscreen-fallback #map {height:calc(100vh - 42px)!important;min-height:0!important}
 @media(max-width:700px){
- .webgis:fullscreen, .webgis:-webkit-full-screen {grid-template-columns:minmax(0,1fr) 300px!important}
- .webgis:fullscreen > .panel, .webgis:-webkit-full-screen > .panel {width:300px!important;max-width:300px!important}
+ .webgis:fullscreen, .webgis:-webkit-full-screen, .webgis.map-fullscreen-fallback {grid-template-columns:minmax(0,1fr) 300px!important}
+ .webgis:fullscreen > .panel, .webgis:-webkit-full-screen > .panel, .webgis.map-fullscreen-fallback > .panel {width:300px!important;max-width:300px!important}
 }
 </style>
