@@ -2241,7 +2241,7 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
     <aside class="sidebar" aria-label="Tổng quan số liệu">
         <div class="sidebar-kpi">
             <div class="summary-card card-dtlcp">
-                <div class="summary-head"><i class="fa-solid fa-virus"></i><b>DTLCP</b></div>
+                <div class="summary-head"><i class="fa-solid fa-piggy-bank" aria-hidden="true"></i><b>DTLCP</b></div>
                 <div class="summary-main"><span id="dbDTLCPDang">0</span><small>xã đang có dịch</small></div>
                 <div class="summary-grid">
                     <span>Xã có dịch (lũy kế) <b id="dbDTLCPXa">0</b></span>
@@ -2251,7 +2251,7 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
             </div>
 
             <div class="summary-card card-cgc">
-                <div class="summary-head"><i class="fa-solid fa-drumstick-bite"></i><b>CGC</b></div>
+                <div class="summary-head"><i class="fa-solid fa-kiwi-bird" aria-hidden="true"></i><b>CGC</b></div>
                 <div class="summary-main"><span id="dbCGCDang">0</span><small>xã đang có dịch</small></div>
                 <div class="summary-grid">
                     <span>Xã có dịch (lũy kế) <b id="dbCGCXa">0</b></span>
@@ -5409,8 +5409,6 @@ button,.tool-button,.map-control-button{font-weight:750}
 }
 </style>
 
-</body>
-</html>
 
 <style id="extra-kpi-column-width-balance">
 /* Mở rộng cột KPI mới để cân đối hơn với các thẻ KPI ngang phía trên. */
@@ -5784,4 +5782,364 @@ button,.tool-button,.map-control-button{font-weight:750}
 .summary-card.card-vaccine-kpi .summary-head i{flex:0 0 auto!important;}
 .summary-card.card-vaccine-kpi .summary-head b{flex:1 1 auto!important;min-width:0!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;line-height:1.15!important;margin:0!important;}
 .summary-card.card-vaccine-kpi .summary-head .kpi-detail-only-btn{flex:0 0 auto!important;margin:0 0 0 auto!important;padding:4px 8px!important;font-size:11px!important;line-height:1.1!important;white-space:nowrap!important;}
+</style>
+
+
+<style id="kpi-safe-final-polish-20261023">
+/* Chỉ tinh chỉnh KPI; không thay đổi lưới .webgis, kích thước bản đồ, panel, biểu đồ hay API. */
+.sidebar-kpi > .summary-card {
+  height:auto !important;
+  min-height:146px !important;
+  max-height:none !important;
+  overflow:visible !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:stretch !important;
+  padding:10px !important;
+  border-radius:10px !important;
+}
+.sidebar-kpi > .summary-card .summary-head {
+  display:flex !important;
+  align-items:flex-start !important;
+  flex-wrap:nowrap !important;
+  gap:7px !important;
+  min-height:0 !important;
+  height:auto !important;
+  max-height:none !important;
+  margin:0 0 7px !important;
+  padding:5px 7px !important;
+  overflow:visible !important;
+  font-size:12px !important;
+  line-height:1.3 !important;
+}
+.sidebar-kpi > .summary-card .summary-head i { flex:0 0 auto !important; margin-top:1px !important; }
+.sidebar-kpi > .summary-card .summary-head b {
+  flex:1 1 auto !important; min-width:0 !important; white-space:normal !important;
+  overflow:visible !important; overflow-wrap:normal !important; word-break:normal !important;
+  line-height:1.3 !important; margin:0 !important;
+}
+.sidebar-kpi > .summary-card .summary-main {
+  display:flex !important; align-items:baseline !important; flex-wrap:wrap !important;
+  gap:4px 6px !important; margin:3px 0 7px !important;
+}
+.sidebar-kpi > .summary-card .summary-main span {
+  font-size:25px !important; line-height:1.1 !important; font-weight:900 !important;
+  white-space:nowrap !important; font-variant-numeric:tabular-nums;
+}
+.sidebar-kpi > .summary-card .summary-main small { font-size:10px !important; line-height:1.3 !important; }
+.sidebar-kpi > .summary-card .summary-grid {
+  display:flex !important; flex-direction:column !important; gap:5px !important;
+  font-size:10.5px !important; line-height:1.35 !important; min-width:0 !important;
+}
+.sidebar-kpi > .summary-card .summary-grid > span:not([hidden]) {
+  display:flex !important; align-items:baseline !important; justify-content:space-between !important;
+  gap:8px !important; width:100% !important; min-width:0 !important;
+  white-space:normal !important; overflow:visible !important; overflow-wrap:normal !important;
+  line-height:1.35 !important;
+}
+.sidebar-kpi > .summary-card .summary-grid > span:not([hidden]) > b {
+  flex:0 0 auto !important; white-space:nowrap !important; text-align:right !important;
+  font-size:10.5px !important; font-variant-numeric:tabular-nums;
+}
+
+/* TTHC: đủ ba nhóm, số liệu căn phải; ẩn riêng dòng nguồn dưới thẻ. */
+.card-tthc-extra, .card-sample-extra {
+  height:auto !important; min-height:0 !important; max-height:none !important;
+  overflow:visible !important; box-sizing:border-box !important;
+}
+.card-tthc-extra .summary-head, .card-sample-extra .summary-head {
+  display:flex !important; align-items:center !important; flex-wrap:nowrap !important;
+  gap:7px !important; min-height:0 !important; height:auto !important; max-height:none !important;
+  margin:0 0 5px !important; padding:5px 7px !important; overflow:visible !important;
+  font-size:12px !important; line-height:1.3 !important;
+}
+.card-tthc-extra .summary-head b, .card-sample-extra .summary-head b {
+  min-width:0 !important; white-space:normal !important; overflow:visible !important;
+  overflow-wrap:normal !important; line-height:1.3 !important;
+}
+.card-tthc-extra .extra-kpi-lines, .card-sample-extra .extra-kpi-lines {
+  flex:0 0 auto !important; min-height:0 !important; overflow:visible !important;
+}
+.card-tthc-extra .extra-kpi-row, .card-sample-extra .extra-kpi-row {
+  display:flex !important; align-items:baseline !important; justify-content:space-between !important;
+  gap:10px !important; padding:6px 0 !important; font-size:11px !important; line-height:1.35 !important;
+}
+.card-tthc-extra .extra-kpi-row span, .card-sample-extra .extra-kpi-row span {
+  flex:1 1 auto !important; min-width:0 !important; white-space:normal !important;
+  overflow-wrap:normal !important; word-break:normal !important; line-height:1.35 !important;
+}
+.card-tthc-extra .extra-kpi-row b, .card-sample-extra .extra-kpi-row b {
+  flex:0 0 auto !important; white-space:nowrap !important; text-align:right !important;
+  font-size:11.5px !important; font-variant-numeric:tabular-nums;
+}
+#kpiTTHCNote { display:none !important; }
+.card-tthc-extra .summary-main, .card-sample-extra .summary-main { margin:3px 0 6px !important; }
+.card-tthc-extra .summary-main span, .card-sample-extra .summary-main span { font-size:24px !important; line-height:1.1 !important; }
+
+/* Tiêm phòng: tên loại vắc xin bên trái, tiến độ bên phải; Dại có dòng phụ riêng. */
+.side-kpi-mini { min-width:0 !important; }
+.side-kpi-mini > .card-vaccine-kpi {
+  flex:2.5 1 0% !important; min-height:245px !important; height:auto !important;
+  max-height:none !important; overflow:visible !important; padding:10px !important;
+}
+.side-kpi-mini > .card-ksgm, .side-kpi-mini > .card-drug {
+  flex:1 1 0% !important; min-height:90px !important; height:auto !important;
+  max-height:none !important; overflow:visible !important; padding:10px !important;
+}
+.side-kpi-mini .card-vaccine-kpi .summary-head {
+  display:flex !important; align-items:center !important; flex-wrap:nowrap !important;
+  min-height:0 !important; height:auto !important; max-height:none !important;
+  padding:6px 8px !important; margin:0 0 6px !important; font-size:12px !important;
+  line-height:1.3 !important; overflow:visible !important;
+}
+.side-kpi-mini .card-vaccine-kpi .summary-head b { min-width:0 !important; white-space:normal !important; }
+.side-kpi-mini .card-vaccine-kpi .vaccine-kpi-compact {
+  display:flex !important; flex-direction:column !important; gap:0 !important;
+  width:100% !important; min-width:0 !important; overflow:visible !important;
+  font-size:10.5px !important; line-height:1.3 !important;
+}
+.side-kpi-mini .card-vaccine-kpi .vaccine-kpi-compact > span:not([hidden]) {
+  display:grid !important; grid-template-columns:minmax(0,1fr) auto !important;
+  grid-template-rows:auto auto !important; align-items:baseline !important;
+  column-gap:8px !important; row-gap:3px !important; width:100% !important;
+  min-width:0 !important; padding:7px 1px !important; height:auto !important;
+  overflow:visible !important; border-bottom:1px solid #e7edf3 !important;
+}
+.side-kpi-mini .card-vaccine-kpi .vaccine-kpi-compact .vaccine-type {
+  display:block !important; grid-column:1 !important; grid-row:1 !important;
+  min-width:0 !important; max-width:100% !important; white-space:normal !important;
+  overflow-wrap:normal !important; word-break:normal !important; text-align:left !important;
+  font-size:10.5px !important; line-height:1.3 !important; font-weight:750 !important;
+}
+.side-kpi-mini .card-vaccine-kpi .vaccine-kpi-compact .vaccine-progress {
+  display:block !important; grid-column:2 !important; grid-row:1 !important;
+  min-width:0 !important; max-width:100% !important; white-space:normal !important;
+  overflow-wrap:anywhere !important; text-align:right !important; font-size:10px !important;
+  line-height:1.3 !important; font-weight:800 !important; font-variant-numeric:tabular-nums;
+}
+.side-kpi-mini .card-vaccine-kpi .vaccine-kpi-compact .vaccine-rabies-line em {
+  display:block !important; grid-column:1 / -1 !important; grid-row:2 !important;
+  width:100% !important; text-align:right !important; white-space:normal !important;
+  font-size:9.5px !important; line-height:1.3 !important; font-style:normal !important;
+}
+.side-kpi-mini .card-vaccine-kpi .vaccine-kpi-compact > span:last-of-type { border-bottom:0 !important; }
+
+/* Màn hình vừa/nhỏ: giữ thứ tự các khu vực và cho thẻ tự tăng chiều cao theo nội dung. */
+@media (min-width:761px) and (max-width:1100px) {
+  .sidebar-kpi > .summary-card { height:auto !important; min-height:142px !important; }
+  .side-kpi-mini { overflow:visible !important; height:auto !important; max-height:none !important; }
+  .side-kpi-mini > .card-vaccine-kpi { min-height:245px !important; }
+}
+@media (max-width:760px) {
+  .sidebar-kpi > .summary-card { height:auto !important; min-height:122px !important; }
+  .left-extra-kpi .summary-card { min-height:0 !important; height:auto !important; }
+  .side-kpi-mini { overflow:visible !important; height:auto !important; max-height:none !important; }
+  .side-kpi-mini > .card-vaccine-kpi { min-height:0 !important; }
+  .side-kpi-mini > .card-ksgm, .side-kpi-mini > .card-drug { min-height:105px !important; }
+}
+@media (max-width:480px) {
+  .card-tthc-extra .extra-kpi-row, .card-sample-extra .extra-kpi-row { gap:7px !important; }
+  .card-tthc-extra .extra-kpi-row span, .card-sample-extra .extra-kpi-row span { font-size:10.5px !important; }
+}
+
+/* FIX TIEM PHONG: khong de nhan va ket qua chen len nhau; phan cap chu ro rang. */
+.side-kpi-mini > .card-vaccine-kpi {
+  min-width:0 !important;
+  padding:10px 11px !important;
+}
+.side-kpi-mini .card-vaccine-kpi .vaccine-kpi-compact > span:not([hidden]) {
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) !important;
+  grid-template-rows:auto auto !important;
+  align-items:start !important;
+  row-gap:4px !important;
+  padding:7px 0 !important;
+  min-height:0 !important;
+}
+.side-kpi-mini .card-vaccine-kpi .vaccine-kpi-compact .vaccine-type {
+  grid-column:1 !important;
+  grid-row:1 !important;
+  display:block !important;
+  width:100% !important;
+  max-width:100% !important;
+  font-size:11px !important;
+  line-height:1.3 !important;
+  font-weight:700 !important;
+  white-space:normal !important;
+  overflow-wrap:break-word !important;
+  word-break:normal !important;
+  text-align:left !important;
+}
+.side-kpi-mini .card-vaccine-kpi .vaccine-kpi-compact .vaccine-progress {
+  grid-column:1 !important;
+  grid-row:2 !important;
+  display:block !important;
+  width:100% !important;
+  max-width:100% !important;
+  font-size:10.5px !important;
+  line-height:1.35 !important;
+  font-weight:600 !important;
+  white-space:normal !important;
+  overflow-wrap:break-word !important;
+  word-break:normal !important;
+  text-align:left !important;
+}
+.side-kpi-mini .card-vaccine-kpi .vaccine-kpi-compact .vaccine-rabies-line em {
+  grid-column:1 !important;
+  grid-row:3 !important;
+  display:block !important;
+  width:100% !important;
+  margin-top:1px !important;
+  font-size:10px !important;
+  line-height:1.3 !important;
+  font-weight:400 !important;
+  text-align:left !important;
+  overflow-wrap:break-word !important;
+}
+
+</style>
+
+
+
+<style id="user-requested-kpi-alignment-20261023">
+/* Chỉ căn chỉnh các KPI được khoanh đỏ; không thay đổi bố cục hay logic dữ liệu. */
+@media (min-width: 761px) {
+  .sidebar-kpi > .summary-card .summary-grid > span {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto auto !important;
+    align-items: center !important;
+    column-gap: 5px !important;
+    min-width: 0 !important;
+    line-height: 1.25 !important;
+    white-space: nowrap !important;
+  }
+  .sidebar-kpi > .summary-card .summary-grid > span b {
+    display: inline-block !important;
+    min-width: 14px !important;
+    text-align: right !important;
+    font-weight: 800 !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+  }
+  .sidebar-kpi > .summary-card .summary-grid > span:not(:has(b)) { display:none !important; }
+  .sidebar-kpi > .summary-card .summary-grid.phun-rounds > span:nth-child(n+3) { display:none !important; }
+  .sidebar-kpi > .summary-card .summary-grid > span { min-height: 17px !important; }
+}
+.kpi-animal-icon {
+  display:inline-flex !important; align-items:center !important; justify-content:center !important;
+  width:16px !important; height:18px !important; font-size:15px !important; line-height:1 !important;
+  flex:0 0 16px !important;
+}
+.card-dtlcp .summary-head > i { font-size:15px !important; }
+@media (max-width: 760px) {
+  .sidebar-kpi > .summary-card .summary-grid > span {
+    display:flex !important; justify-content:space-between !important; align-items:center !important;
+    gap:6px !important; white-space:normal !important; line-height:1.3 !important;
+  }
+  .sidebar-kpi > .summary-card .summary-grid > span b { font-weight:800 !important; white-space:nowrap !important; }
+  .sidebar-kpi > .summary-card .summary-grid.phun-rounds > span:nth-child(n+3) { display:none !important; }
+}
+</style>
+
+<style id="report-controls-polish-20261023">
+/* Chỉ làm đẹp khung chọn kỳ và ngày báo cáo; không thay đổi chức năng */
+.report-controls {
+  gap: 12px !important;
+  align-items: flex-end !important;
+  padding: 5px 0;
+}
+.report-controls label {
+  gap: 6px !important;
+  color: #52677d !important;
+  font-weight: 700 !important;
+}
+.report-controls select,
+.report-controls input[type="date"],
+.report-controls input[type="number"] {
+  height: 38px !important;
+  min-height: 38px;
+  box-sizing: border-box;
+  border: 1px solid #c7d6e8 !important;
+  border-radius: 9px !important;
+  background: linear-gradient(180deg, #ffffff 0%, #f7faff 100%) !important;
+  color: #24415f !important;
+  font: 600 12px/1.2 inherit;
+  padding: 0 11px !important;
+  box-shadow: 0 1px 2px rgba(24, 55, 90, .05);
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.report-controls select { min-width: 165px; cursor: pointer; }
+.report-controls input[type="date"] { width: 150px !important; }
+.report-controls select:focus,
+.report-controls input[type="date"]:focus,
+.report-controls input[type="number"]:focus {
+  outline: none;
+  border-color: #3978ce !important;
+  box-shadow: 0 0 0 3px rgba(57, 120, 206, .13);
+}
+.report-controls button { border-radius: 9px !important; min-height: 38px !important; }
+@media (max-width: 760px) {
+  .report-controls { align-items: flex-start !important; gap: 8px !important; }
+  .report-controls label { gap: 5px !important; }
+}
+</style>
+
+<style id="kpi-title-background-uniform-20261023">
+/* Đồng bộ chiều cao và căn giữa nền tiêu đề của các thẻ KPI hàng ngang */
+.sidebar-kpi > .summary-card .summary-head {
+  box-sizing: border-box !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  padding: 0 8px !important;
+  margin: 0 0 7px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  overflow: hidden !important;
+  border-radius: 8px !important;
+}
+.sidebar-kpi > .summary-card .summary-head > i {
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+  line-height: 1 !important;
+}
+.sidebar-kpi > .summary-card .summary-head > b {
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  line-height: 1.15 !important;
+}
+.sidebar-kpi > .summary-card .summary-head > button,
+.sidebar-kpi > .summary-card .summary-head > a {
+  flex: 0 0 auto !important;
+  align-self: center !important;
+  margin: 0 !important;
+}
+@media (max-width: 760px) {
+  .sidebar-kpi > .summary-card .summary-head { height: 34px !important; min-height: 34px !important; max-height: 34px !important; }
+}
+</style>
+</body>
+</html>
+
+<style id="kpi-number-unit-tight-20261023">
+/* Căn số liệu sát đơn vị con/kg trong các thẻ KPI dịch bệnh. */
+@media (min-width: 761px) {
+  .sidebar-kpi > .summary-card .summary-grid > span {
+    display: flex !important;
+    align-items: center !important;
+    gap: 3px !important;
+    white-space: nowrap !important;
+  }
+  .sidebar-kpi > .summary-card .summary-grid > span b {
+    margin-left: auto !important;
+    margin-right: 2px !important;
+    flex: 0 0 auto !important;
+    min-width: 14px !important;
+    text-align: right !important;
+  }
+}
 </style>
