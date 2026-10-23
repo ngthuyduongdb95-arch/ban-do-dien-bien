@@ -2283,10 +2283,10 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
 
             <div class="summary-card card-phun" id="cardPhunRestored">
                 <div class="summary-head"><i class="fa-solid fa-spray-can-sparkles"></i><b>PHUN PHÒNG</b></div>
-                <div class="summary-main"><span id="dbPhunXa">0</span><small>xã triển khai</small></div>
-                <div class="summary-grid phun-rounds">
-                    <span>Đợt 1 <b id="dbPhunDot1">—</b></span>
-                    <span>Đợt 2 <b id="dbPhunDot2">—</b></span>
+                <div class="summary-grid phun-rounds phun-status-kpi">
+                    <span>Đợt 1 <b id="dbPhunDot1">— xã triển khai</b></span>
+                    <span>Đợt 2 <b id="dbPhunDot2">— xã đang triển khai</b></span>
+                    <span>Triển khai xong <b id="dbPhunDone">— xã</b></span>
                     <span hidden id="dbPhunHo">—</span><span hidden id="dbPhunVong">—</span>
                 </div>
             </div>
@@ -6183,6 +6183,53 @@ button,.tool-button,.map-control-button{font-weight:750}
   .chart-card:has(#chartDamageXa) .chart-body { height: 260px; min-height: 260px; }
 }
 </style>
+
+<script id="phun-kpi-progress-summary-final">
+(function(){
+  'use strict';
+  const API='https://script.google.com/macros/s/AKfycbyRuJ9Wfv4HtWjMRT2Hox2-mOhBVRjyqLaHhpQjohPEkfHWNyjM004KgO3o7_4nRJtj/exec';
+  const norm=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+  const pick=(row,patterns)=>{const keys=Object.keys(row||{});for(const re of patterns){const k=keys.find(x=>re.test(norm(x)));if(k && row[k]!==undefined && row[k]!==null && String(row[k]).trim()!=='')return row[k];}return '';};
+  const commune=r=>String(pick(r,[/^(xa|xa phuong|ten xa|ten xa phuong|don vi|dia ban|commune)$/,/ten xa|xa phuong|don vi|dia ban|commune/])||'').trim();
+  function roundNumber(v){const t=norm(v);let m=t.match(/(?:vong|dot|lan)\s*([1-4])/);if(m)return Number(m[1]);const n=String(v??'').trim().match(/^([1-4])$/);return n?Number(n[1]):null;}
+  async function update(){
+    try{
+      const url=API+'?type=detail&sheet=GIS_PHUNPHONG&_='+Date.now();
+      const res=await fetch(url,{cache:'no-store'});if(!res.ok)throw new Error('HTTP '+res.status);
+      const json=await res.json();const rows=Array.isArray(json)?json:(Array.isArray(json?.data)?json.data:(Array.isArray(json?.rows)?json.rows:[]));
+      if(!rows.length)throw new Error('Nguồn chưa có dữ liệu');
+      const byCommune=new Map();
+      rows.forEach(r=>{
+        const name=commune(r);if(!name)return;
+        const roundRaw=pick(r,[/phun.*vong/,/vong.*phun/,/^vong$/, /^dot$/, /so vong/, /round/]);
+        const statusRaw=pick(r,[/phun.*tien do/,/tien do phun/,/trang thai phun/,/^tien do$/]);
+        const round=roundNumber(roundRaw) ?? roundNumber(statusRaw);
+        const status=norm(statusRaw+' '+roundRaw);
+        const completed=round===4 || /trien khai xong|hoan thanh|da xong/.test(status);
+        const active=round===1||round===2||round===3||/dang trien khai|dang thuc hien/.test(status);
+        const old=byCommune.get(name)||{round:null,active:false,completed:false};
+        if(round!==null)old.round=Math.max(old.round||0,round);
+        old.active=old.active||active;old.completed=old.completed||completed;
+        byCommune.set(name,old);
+      });
+      const vals=[...byCommune.values()];
+      // Đợt 1: xã có ghi nhận triển khai; Đợt 2: xã đang ở vòng 1–3; xong: vòng 4.
+      const dot1=vals.filter(x=>x.round!==null && x.round>=1).length;
+      const active=vals.filter(x=>x.active && !x.completed).length;
+      const done=vals.filter(x=>x.completed).length;
+      const set=(id,text)=>{const el=document.getElementById(id);if(el)el.textContent=text;};
+      set('dbPhunDot1',dot1+' xã triển khai');set('dbPhunDot2',active+' xã đang triển khai');set('dbPhunDone',done+' xã');
+    }catch(e){console.warn('Không cập nhật được KPI phun phòng từ GIS_PHUNPHONG:',e);}
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',update);else update();
+})();
+</script>
+<style id="phun-kpi-progress-summary-style">
+#cardPhunRestored .summary-grid.phun-status-kpi{display:flex;flex-direction:column;gap:5px;margin-top:8px}
+#cardPhunRestored .summary-grid.phun-status-kpi>span{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;line-height:1.3;min-width:0}
+#cardPhunRestored .summary-grid.phun-status-kpi>span>b{font-weight:700;text-align:right;white-space:normal}
+</style>
+
 </body>
 </html>
 
