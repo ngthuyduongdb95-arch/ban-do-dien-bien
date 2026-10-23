@@ -5351,26 +5351,27 @@ button,.tool-button,.map-control-button{font-weight:750}
   throw new Error(lastError);
  }
  function ensureModal(){let ov=document.getElementById('kpiDetailOverlay');if(ov)return ov;ov=document.createElement('div');ov.id='kpiDetailOverlay';ov.innerHTML='<section id="kpiDetailDialog" role="dialog" aria-modal="true"><header id="kpiDetailHeader"><h3 id="kpiDetailTitle">Chi tiết KPI</h3><button type="button" class="kpi-action-btn" id="kpiDetailClose">Đóng ✕</button></header><div id="kpiDetailBody"></div><footer id="kpiDetailFooter"><span id="kpiDetailStatus" style="margin-right:auto;font-size:12px;color:#536b7b"></span><button type="button" class="kpi-action-btn" id="kpiDetailDownload" disabled>Tải Excel</button></footer></section>';document.body.appendChild(ov);ov.addEventListener('click',e=>{if(e.target===ov)ov.classList.remove('open')});ov.querySelector('#kpiDetailClose').onclick=()=>ov.classList.remove('open');document.addEventListener('keydown',e=>{if(e.key==='Escape')ov.classList.remove('open')});return ov}
- function renderTable(body,rows,isVaccine=false){
+ function renderTable(body,rows,detailMode='default'){
   if(!rows.length){body.innerHTML='<p>Google Sheets/API chưa trả về dòng dữ liệu cho mục này.</p>';return {headers:[],data:[]};}
-  // Lấy nguyên trạng các cột từ API để bảo đảm bảng Excel vẫn có đủ dữ liệu gốc.
+  // Giữ nguyên toàn bộ cột nguồn để nút Tải Excel vẫn xuất đủ dữ liệu.
   const headers=[];rows.forEach(r=>Object.keys(r||{}).forEach(k=>{if(!headers.includes(k))headers.push(k)}));
   const data=rows.map(r=>headers.map(h=>r?.[h]??''));
-  if(isVaccine){
-   const normHeader=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').toLowerCase();
-   const communeHeader=headers.find(h=>/^(xa|xa phuong|ten xa|ten xa phuong|don vi|dia ban|commune|id)$/i.test(normHeader(h).replace(/[_-]+/g,' ').trim())) || headers.find(h=>/ten xa|xa phuong|don vi|dia ban|commune/i.test(normHeader(h))) || headers[0];
-   const groups=new Map();
+  const normHeader=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').toLowerCase().replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
+  const communeHeader=headers.find(h=>/^(xa|xa phuong|ten xa|ten xa phuong|don vi|dia ban|commune|id)$/i.test(normHeader(h))) || headers.find(h=>/ten xa|xa phuong|don vi|dia ban|commune/i.test(normHeader(h))) || headers[0];
+  if(detailMode==='vaccine' || detailMode==='phun'){
+   const definitions=detailMode==='vaccine'
+    ? [{title:'Đợt 1',test:h=>/dot\s*1\b/.test(h)},{title:'Đợt 2',test:h=>/dot\s*2\b/.test(h)},{title:'Bệnh Dại',test:h=>/\bdai\b/.test(h)},{title:'Viêm da nổi cục (VDNC)',test:h=>/\bvdnc\b|viem da noi cuc/.test(h)}]
+    : [{title:'Đợt 1',test:h=>/dot\s*1\b/.test(h)},{title:'Đợt 2',test:h=>/dot\s*2\b/.test(h)}];
+   const groups=definitions.map(d=>({title:d.title,cols:[]}));
+   const other=[];
    headers.forEach(h=>{
     if(h===communeHeader)return;
-    const raw=String(h); const match=raw.match(/^(.*?)(?:[_\s-]+)?(Đợt\s*\d+)(.*)$/i);
-    let group=match?match[1].replace(/[_\s-]+$/,'').trim():'Thông tin khác';
-    if(!group)group=match?match[2]:'Thông tin khác';
-    if(!groups.has(group))groups.set(group,[]);groups.get(group).push({header:h,label:match?(match[2]+(match[3]||'' )).replace(/^\s+/,'').trim():raw});
+    const nh=normHeader(h);
+    const idx=definitions.findIndex(d=>d.test(nh));
+    if(idx>=0)groups[idx].cols.push({header:h,label:String(h)}); else other.push({header:h,label:String(h)});
    });
-   const cards=[...groups.entries()].filter(([,cols])=>cols.length);
-   if(cards.length){
-    body.innerHTML='<div class="vaccine-detail-cards">'+cards.map(([title,cols],idx)=>'<section class="vaccine-detail-card"><h4>'+esc(title)+'</h4><div class="vaccine-detail-table-wrap"><table class="kpi-detail-table"><thead><tr><th> Xã/phường </th>'+cols.map(c=>'<th>'+esc(c.label)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr><td>'+esc(r?.[communeHeader]??'')+'</td>'+cols.map(c=>'<td>'+esc(r?.[c.header]??'—')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div></section>').join('')+'</div>';
-   } else { body.innerHTML='<div class="overflow:auto"><table class="kpi-detail-table"><thead><tr>'+headers.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>'+data.map(row=>'<tr>'+row.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>'; }
+   if(other.length)groups.push({title:'Thông tin khác',cols:other});
+   body.innerHTML='<div class="vaccine-detail-cards">'+groups.filter(g=>g.cols.length).map(g=>'<section class="vaccine-detail-card"><h4>'+esc(g.title)+'</h4><div class="vaccine-detail-table-wrap"><table class="kpi-detail-table"><thead><tr><th>Xã/phường</th>'+g.cols.map(c=>'<th>'+esc(c.label)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr><td>'+esc(r?.[communeHeader]??'')+'</td>'+g.cols.map(c=>'<td>'+esc(r?.[c.header]??'—')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div></section>').join('')+'</div>';
   } else {
    body.innerHTML='<div style="overflow:auto;max-height:62vh"><table class="kpi-detail-table"><thead><tr>'+headers.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>'+data.map(row=>'<tr>'+row.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
   }
@@ -5383,7 +5384,7 @@ button,.tool-button,.map-control-button{font-weight:750}
   const ov=ensureModal(),body=ov.querySelector('#kpiDetailBody'),status=ov.querySelector('#kpiDetailStatus'),download=ov.querySelector('#kpiDetailDownload');
   ov.querySelector('#kpiDetailTitle').textContent='Chi tiết: '+cfg.title;body.innerHTML='<p>Đang tải số liệu trực tiếp từ Google Sheets qua API…</p>';status.textContent='Đang tải dữ liệu nguồn';download.disabled=true;ov.classList.add('open');
   try{
-   const result=await fetchSource(cfg.types);const table=renderTable(body,result.rows,key==='card-vaccine-kpi');status.textContent='Nguồn API: '+(result.source||'Google Sheets')+' · '+result.rows.length.toLocaleString('vi-VN')+' dòng';download.disabled=!table.data.length;
+   const result=await fetchSource(cfg.types);const table=renderTable(body,result.rows,key==='card-vaccine-kpi'?'vaccine':(key==='card-phun'?'phun':'default'));status.textContent='Nguồn API: '+(result.source||'Google Sheets')+' · '+result.rows.length.toLocaleString('vi-VN')+' dòng';download.disabled=!table.data.length;
    download.onclick=()=>{
     if(!window.XLSX||!window.XLSX.utils){status.textContent='Thư viện Excel chưa tải được';return;}
     const aoa=[table.headers,...table.data];const ws=window.XLSX.utils.aoa_to_sheet(aoa);const wb=window.XLSX.utils.book_new();
@@ -6215,4 +6216,16 @@ button,.tool-button,.map-control-button{font-weight:750}
 #kpiDetailBody .vaccine-detail-card .kpi-detail-table td,#kpiDetailBody .vaccine-detail-card .kpi-detail-table th{padding:7px 9px;border:1px solid #e1e9f1;text-align:center;vertical-align:middle}
 #kpiDetailBody .vaccine-detail-card .kpi-detail-table tbody tr:nth-child(even){background:#f8fbfe}
 @media(max-width:600px){#kpiDetailBody .vaccine-detail-cards{grid-template-columns:1fr;padding:8px}}
+</style>
+
+
+<style id="vaccine-phun-detail-cards-final">
+#kpiDetailBody .vaccine-detail-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start;max-height:65vh;overflow:auto;padding:12px;background:#f5f8fb}
+#kpiDetailBody .vaccine-detail-card{min-width:0;background:#fff;border:1px solid #d7e3ed;border-radius:12px;box-shadow:0 2px 8px rgba(25,65,95,.06);overflow:hidden}
+#kpiDetailBody .vaccine-detail-card h4{margin:0;padding:11px 14px;background:#eaf3fb;color:#174d79;border-bottom:1px solid #d7e3ed;font-size:14px;font-weight:750}
+#kpiDetailBody .vaccine-detail-table-wrap{overflow:auto;max-height:42vh}
+#kpiDetailBody .vaccine-detail-card .kpi-detail-table{width:100%;min-width:280px;border-collapse:collapse;font-size:12px}
+#kpiDetailBody .vaccine-detail-card .kpi-detail-table th,#kpiDetailBody .vaccine-detail-card .kpi-detail-table td{padding:7px 9px;border:1px solid #e0e8ef;white-space:normal;overflow-wrap:anywhere;vertical-align:top}
+#kpiDetailBody .vaccine-detail-card .kpi-detail-table th{background:#f2f6fa;color:#29465e;position:sticky;top:0;z-index:1}
+@media(max-width:720px){#kpiDetailBody .vaccine-detail-cards{grid-template-columns:1fr}}
 </style>
