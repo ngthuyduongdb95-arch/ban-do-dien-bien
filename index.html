@@ -5360,17 +5360,16 @@ button,.tool-button,.map-control-button{font-weight:750}
   const communeHeader=headers.find(h=>/^(xa|xa phuong|ten xa|ten xa phuong|don vi|dia ban|commune|id)$/i.test(normHeader(h))) || headers.find(h=>/ten xa|xa phuong|don vi|dia ban|commune/i.test(normHeader(h))) || headers[0];
   if(detailMode==='vaccine' || detailMode==='phun'){
    const definitions=detailMode==='vaccine'
-    ? [{title:'Đợt 1',test:h=>/dot\s*1\b/.test(h)},{title:'Đợt 2',test:h=>/dot\s*2\b/.test(h)},{title:'Bệnh Dại',test:h=>/\bdai\b/.test(h)},{title:'Viêm da nổi cục (VDNC)',test:h=>/\bvdnc\b|viem da noi cuc/.test(h)}]
-    : [{title:'Đợt 1',test:h=>/dot\s*1\b/.test(h)},{title:'Đợt 2',test:h=>/dot\s*2\b/.test(h)}];
+    ? [{title:'Tiêm đăng ký đợt 1',test:h=>/dot\s*1\b/.test(h)},{title:'Tiêm đăng ký đợt 2',test:h=>/dot\s*2\b/.test(h)},{title:'Bệnh Dại',test:h=>/\bdai\b/.test(h)},{title:'Viêm da nổi cục (VDNC)',test:h=>/\bvdnc\b|viem da noi cuc/.test(h)}]
+    : [{title:'Phun phòng đợt 1',test:h=>/dot\s*1\b/.test(h)},{title:'Phun phòng đợt 2',test:h=>/dot\s*2\b/.test(h)}];
+   // Mỗi nhóm là một thẻ độc lập; không tạo thêm bảng/thẻ "Thông tin khác".
    const groups=definitions.map(d=>({title:d.title,cols:[]}));
-   const other=[];
    headers.forEach(h=>{
     if(h===communeHeader)return;
     const nh=normHeader(h);
     const idx=definitions.findIndex(d=>d.test(nh));
-    if(idx>=0)groups[idx].cols.push({header:h,label:String(h)}); else other.push({header:h,label:String(h)});
+    if(idx>=0)groups[idx].cols.push({header:h,label:String(h)});
    });
-   if(other.length)groups.push({title:'Thông tin khác',cols:other});
    body.innerHTML='<div class="vaccine-detail-cards">'+groups.filter(g=>g.cols.length).map(g=>'<section class="vaccine-detail-card"><h4>'+esc(g.title)+'</h4><div class="vaccine-detail-table-wrap"><table class="kpi-detail-table"><thead><tr><th>Xã/phường</th>'+g.cols.map(c=>'<th>'+esc(c.label)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr><td>'+esc(r?.[communeHeader]??'')+'</td>'+g.cols.map(c=>'<td>'+esc(r?.[c.header]??'—')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div></section>').join('')+'</div>';
   } else {
    body.innerHTML='<div style="overflow:auto;max-height:62vh"><table class="kpi-detail-table"><thead><tr>'+headers.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>'+data.map(row=>'<tr>'+row.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
@@ -6230,6 +6229,16 @@ button,.tool-button,.map-control-button{font-weight:750}
 #cardPhunRestored .summary-grid.phun-status-kpi>span>b{font-weight:700;text-align:right;white-space:normal}
 </style>
 
+
+<style id="vaccine-detail-four-cards-layout">
+#kpiDetailBody .vaccine-detail-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start;padding:2px 1px 10px}
+#kpiDetailBody .vaccine-detail-card{min-width:0;border:1px solid #d8e4ed;border-radius:10px;background:#fff;box-shadow:0 2px 7px rgba(25,55,80,.06);overflow:hidden}
+#kpiDetailBody .vaccine-detail-card h4{margin:0;padding:10px 12px;background:linear-gradient(90deg,#eaf4fc,#f6f9fc);border-bottom:1px solid #d8e4ed;color:#194b70;font-size:13px;font-weight:800;line-height:1.35}
+#kpiDetailBody .vaccine-detail-table-wrap{max-height:42vh;overflow:auto}
+#kpiDetailBody .vaccine-detail-card .kpi-detail-table{width:100%;min-width:0;border-collapse:collapse}
+#kpiDetailBody .vaccine-detail-card .kpi-detail-table th,#kpiDetailBody .vaccine-detail-card .kpi-detail-table td{padding:7px 8px;font-size:12px;line-height:1.35;white-space:normal;overflow-wrap:anywhere}
+@media(max-width:700px){#kpiDetailBody .vaccine-detail-cards{grid-template-columns:minmax(0,1fr)}}
+</style>
 </body>
 </html>
 
