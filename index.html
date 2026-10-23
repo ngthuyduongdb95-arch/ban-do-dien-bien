@@ -2546,7 +2546,7 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
   }
   function install(){
     var map=getMap();
-    if(!map || !window.L || map.__communeClickKpiFixInstalled) return false;
+    if(!map || !window.L || typeof map.on !== 'function' || typeof map.eachLayer !== 'function' || map.__communeClickKpiFixInstalled) return false;
     map.__communeClickKpiFixInstalled=true;
     map.on('click',function(e){
       var layer=findPolygonAt(map,e.latlng); if(!layer) return;
@@ -2572,23 +2572,43 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
   }
 })();
 </script>
-<!-- Tải docx qua ESM CDN để tránh lỗi MIME application/node khi nạp tệp .cjs -->
-<script type="module">
-(async function(){
-  try {
-    const docxModule = await import('https://esm.sh/docx@9.5.1?bundle');
-    window.docx = docxModule;
-  } catch (err) {
-    console.error('Không tải được thư viện docx:', err);
-    window.__docxLibraryError = 'Không tải được thư viện tạo Word. Kiểm tra kết nối Internet/CDN.';
+<!-- Thư viện Word và biểu đồ Word gốc: dùng bản UMD để tránh lỗi import module từ esm.sh -->
+<script>
+(function(){
+  var bases = [
+    'https://cdn.jsdelivr.net/npm/docx@9.8.0/dist/',
+    'https://unpkg.com/docx@9.8.0/dist/'
+  ];
+  function loadFile(file, check, nextBase, done){
+    var idx = nextBase || 0;
+    if (check()) { done(true); return; }
+    if (idx >= bases.length) { done(false); return; }
+    var script = document.createElement('script');
+    script.src = bases[idx] + file;
+    script.async = false;
+    script.onload = function(){
+      if (check()) done(true);
+      else { script.remove(); loadFile(file, check, idx + 1, done); }
+    };
+    script.onerror = function(){ script.remove(); loadFile(file, check, idx + 1, done); };
+    document.head.appendChild(script);
   }
-  try {
-    const chartsModule = await import('https://esm.sh/docx@9.5.1/charts?bundle');
-    window.docxCharts = chartsModule;
-  } catch (err) {
-    console.error('Không tải được thư viện biểu đồ Word:', err);
-    window.__docxLibraryError = 'Không tải được thư viện biểu đồ Word.';
-  }
+  loadFile('index.umd.cjs', function(){ return !!(window.docx && window.docx.Document && window.docx.Packer); }, 0, function(ok){
+    if(!ok){
+      window.__docxLibraryError = 'Không tải được thư viện tạo Word từ cả hai CDN.';
+      console.error(window.__docxLibraryError);
+      return;
+    }
+    loadFile('charts.umd.cjs', function(){ return !!(window.docxCharts && window.docxCharts.ChartRun); }, 0, function(chartsOk){
+      if(!chartsOk){
+        window.__docxLibraryError = 'Không tải được module biểu đồ Word (docx/charts) từ jsDelivr và unpkg. Kiểm tra mạng/CDN rồi tải lại trang.';
+        console.error(window.__docxLibraryError);
+      } else {
+        window.__docxLibraryError = '';
+        console.info('Đã tải thư viện Word và biểu đồ Word có thể chỉnh sửa.');
+      }
+    });
+  });
 })();
 </script>
 <script>
@@ -3515,7 +3535,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const canvas=document.getElementById(id);
       const chart=canvas && window.Chart ? window.Chart.getChart(canvas) : null;
       if(!chart){ alert("Biểu đồ chưa có dữ liệu để tải. Vui lòng chờ biểu đồ hiển thị rồi thử lại."); return; }
-      if(!window.docx || !window.docxCharts || !window.docxCharts.ChartRun){ alert((window.__docxLibraryError || "Chưa tải được thư viện tạo biểu đồ Word.")+" Kiểm tra kết nối Internet/quyền truy cập CDN rồi tải lại trang bằng Ctrl+F5."); return; }
+      if(!window.docx || !window.docx.Packer || !window.docxCharts || !window.docxCharts.ChartRun){ alert((window.__docxLibraryError || "Chưa tải được thư viện biểu đồ Word có thể chỉnh sửa.")+" Kiểm tra kết nối Internet/quyền truy cập CDN rồi tải lại trang bằng Ctrl+F5."); return; }
       const {Document,Paragraph,TextRun,Packer,AlignmentType}=window.docx;
       const {ChartRun}=window.docxCharts;
       const diseaseSelect=document.getElementById("layerSelect");
@@ -3527,17 +3547,26 @@ document.addEventListener("DOMContentLoaded", function () {
       if(!labels.length || !series.length){ alert("Biểu đồ chưa có dữ liệu hợp lệ để xuất Word."); return; }
       const metricNote=id==="chartTrend" ? (diseaseSelect && diseaseSelect.value==="VDNC" ? "Chỉ tiêu: số con mắc bệnh; tổng hợp theo kỳ 10 ngày (01–10, 11–20, 21–cuối tháng)." : "Chỉ tiêu: số con chết/tiêu hủy; tổng hợp theo kỳ 10 ngày (01–10, 11–20, 21–cuối tháng).") : "Nguồn: dữ liệu đang hiển thị trên WebGIS.";
       try{
+        // Tạo biểu đồ Word gốc (native chart) kèm bảng dữ liệu nhúng; người dùng có thể bấm chuột phải > Edit Data trong Word.
+        const nativeType = chartType === "line" ? "line" : (chartType === "pie" ? "pie" : (chartType === "doughnut" ? "doughnut" : "column"));
+        const nativeChart = new ChartRun({
+          type: nativeType,
+          title: chartTitle,
+          categories: labels,
+          series: series,
+          ...(nativeType === "column" ? { grouping: "clustered" } : {}),
+        });
         const doc=new Document({sections:[{children:[
           new Paragraph({alignment:AlignmentType.CENTER,children:[new TextRun({text:chartTitle,bold:true,size:30,font:"Times New Roman"})],spacing:{after:180}}),
           new Paragraph({children:[new TextRun({text:metricNote,size:22,font:"Times New Roman"})],spacing:{after:180}}),
-          new Paragraph({children:[new ChartRun({type:chartType,title:chartTitle,categories:labels,series,options:{markers:true,showLegend:series.length>1}})]}),
-          new Paragraph({children:[new TextRun({text:"Lưu ý: Chọn biểu đồ trong Word để chỉnh sửa; dùng chuột phải → Chỉnh sửa dữ liệu để thay đổi số liệu và đường biểu diễn.",size:20,font:"Times New Roman",italics:true})],spacing:{before:180}})
+          new Paragraph({alignment:AlignmentType.CENTER,children:[nativeChart]}),
+          new Paragraph({children:[new TextRun({text:"Biểu đồ Word có dữ liệu nhúng: nhấp chuột phải vào biểu đồ và chọn Edit Data (Chỉnh sửa dữ liệu) để thay đổi số liệu, nhãn hoặc chuỗi.",size:20,font:"Times New Roman",italics:true})],spacing:{before:180}})
         ]}]});
         const blob=await Packer.toBlob(doc);
         const url=URL.createObjectURL(blob); const a=document.createElement("a");
         const safe=(chartTitle||id).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^A-Za-z0-9_-]+/g,"_");
         a.href=url; a.download=safe+".docx"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),2000);
-      }catch(err){ console.error("Lỗi xuất biểu đồ Word có thể chỉnh sửa:",err); alert("Không tạo được biểu đồ Word. Mở F12 > Console để xem lỗi."); }
+      }catch(err){ console.error("Lỗi xuất biểu đồ Word:",err); alert("Không tạo được biểu đồ Word. Vui lòng thử lại sau khi biểu đồ hiển thị đầy đủ."); }
     }));
     async function loadComparisonData(){
       const ids=["cmpXaPrev","cmpXaCurrent","cmpXaChange","cmpODPrev","cmpODCurrent","cmpODChange","cmpMacPrev","cmpMacCurrent","cmpMacChange","cmpTieuHuyPrev","cmpTieuHuyCurrent","cmpTieuHuyChange"];
@@ -6125,6 +6154,16 @@ button,.tool-button,.map-control-button{font-weight:750}
 <style id="sync-chart-disease-with-layer-select">
 /* Bộ chọn bệnh bên dưới được ẩn: lớp dữ liệu trên đầu trang là điều khiển duy nhất. */
 #chartSection .chart-toolbar[aria-label="Chọn bệnh diễn biến"] { display: none !important; }
+</style>
+
+<style id="damage-xa-chart-size-adjustment">
+/* Chỉ tăng kích thước biểu đồ Thiệt hại theo xã/phường; giữ nguyên các biểu đồ khác */
+.chart-card:has(#chartDamageXa) { height: 340px; min-height: 340px; }
+.chart-card:has(#chartDamageXa) .chart-body { height: 250px; min-height: 250px; }
+@media (max-width: 760px) {
+  .chart-card:has(#chartDamageXa) { height: 350px; min-height: 350px; }
+  .chart-card:has(#chartDamageXa) .chart-body { height: 260px; min-height: 260px; }
+}
 </style>
 </body>
 </html>
