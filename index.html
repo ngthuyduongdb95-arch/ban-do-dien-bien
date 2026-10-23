@@ -3321,8 +3321,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
   function updateTrend(){
-    const selector = document.getElementById("trendDiseaseSelect");
-    const key = selector && selector.value ? selector.value : selected();
+    const key = selected(); // Đồng bộ biểu đồ theo lớp dữ liệu đã chọn ở đầu trang; không cần bộ chọn bệnh riêng bên dưới.
     const cfg = diseaseConfig[key] || diseaseConfig.DTLCP;
     const note = document.getElementById("trendNote");
     const trendCanvas = document.getElementById("chartTrend");
@@ -3510,7 +3509,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.addEventListener("DOMContentLoaded",function(){
     const trendDiseaseSelect=document.getElementById("trendDiseaseSelect");
     if(trendDiseaseSelect) trendDiseaseSelect.addEventListener("change",updateTrend);
-    const layer=document.getElementById("layerSelect"); if(layer) layer.addEventListener("change",updateDamage);
+    const layer=document.getElementById("layerSelect"); if(layer) layer.addEventListener("change",function(){ updateTrend(); updateDamage(); });
     document.querySelectorAll("[data-download-chart]").forEach(b=>b.addEventListener("click",async function(){
       const id=this.dataset.downloadChart;
       const canvas=document.getElementById(id);
@@ -3519,7 +3518,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if(!window.docx || !window.docxCharts || !window.docxCharts.ChartRun){ alert((window.__docxLibraryError || "Chưa tải được thư viện tạo biểu đồ Word.")+" Kiểm tra kết nối Internet/quyền truy cập CDN rồi tải lại trang bằng Ctrl+F5."); return; }
       const {Document,Paragraph,TextRun,Packer,AlignmentType}=window.docx;
       const {ChartRun}=window.docxCharts;
-      const diseaseSelect=document.getElementById("trendDiseaseSelect");
+      const diseaseSelect=document.getElementById("layerSelect");
       const diseaseName=diseaseSelect && id==="chartTrend" ? diseaseSelect.options[diseaseSelect.selectedIndex].text : "";
       const chartTitle=id==="chartTrend" ? ("Diễn biến dịch bệnh – "+diseaseName) : (id==="chartDamageXa" ? "Thiệt hại theo xã" : "Biểu đồ WebGIS");
       const labels=(chart.data.labels||[]).map(v=>String(v));
@@ -6121,6 +6120,11 @@ button,.tool-button,.map-control-button{font-weight:750}
 @media (max-width: 760px) {
   .sidebar-kpi > .summary-card .summary-head { height: 34px !important; min-height: 34px !important; max-height: 34px !important; }
 }
+</style>
+
+<style id="sync-chart-disease-with-layer-select">
+/* Bộ chọn bệnh bên dưới được ẩn: lớp dữ liệu trên đầu trang là điều khiển duy nhất. */
+#chartSection .chart-toolbar[aria-label="Chọn bệnh diễn biến"] { display: none !important; }
 </style>
 </body>
 </html>
