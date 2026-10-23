@@ -5351,12 +5351,29 @@ button,.tool-button,.map-control-button{font-weight:750}
   throw new Error(lastError);
  }
  function ensureModal(){let ov=document.getElementById('kpiDetailOverlay');if(ov)return ov;ov=document.createElement('div');ov.id='kpiDetailOverlay';ov.innerHTML='<section id="kpiDetailDialog" role="dialog" aria-modal="true"><header id="kpiDetailHeader"><h3 id="kpiDetailTitle">Chi tiết KPI</h3><button type="button" class="kpi-action-btn" id="kpiDetailClose">Đóng ✕</button></header><div id="kpiDetailBody"></div><footer id="kpiDetailFooter"><span id="kpiDetailStatus" style="margin-right:auto;font-size:12px;color:#536b7b"></span><button type="button" class="kpi-action-btn" id="kpiDetailDownload" disabled>Tải Excel</button></footer></section>';document.body.appendChild(ov);ov.addEventListener('click',e=>{if(e.target===ov)ov.classList.remove('open')});ov.querySelector('#kpiDetailClose').onclick=()=>ov.classList.remove('open');document.addEventListener('keydown',e=>{if(e.key==='Escape')ov.classList.remove('open')});return ov}
- function renderTable(body,rows){
+ function renderTable(body,rows,isVaccine=false){
   if(!rows.length){body.innerHTML='<p>Google Sheets/API chưa trả về dòng dữ liệu cho mục này.</p>';return {headers:[],data:[]};}
-  // Build columns from the actual source rows; do not fabricate values from the KPI card.
+  // Lấy nguyên trạng các cột từ API để bảo đảm bảng Excel vẫn có đủ dữ liệu gốc.
   const headers=[];rows.forEach(r=>Object.keys(r||{}).forEach(k=>{if(!headers.includes(k))headers.push(k)}));
   const data=rows.map(r=>headers.map(h=>r?.[h]??''));
-  body.innerHTML='<div style="overflow:auto;max-height:62vh"><table class="kpi-detail-table"><thead><tr>'+headers.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>'+data.map(row=>'<tr>'+row.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
+  if(isVaccine){
+   const normHeader=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').toLowerCase();
+   const communeHeader=headers.find(h=>/^(xa|xa phuong|ten xa|ten xa phuong|don vi|dia ban|commune|id)$/i.test(normHeader(h).replace(/[_-]+/g,' ').trim())) || headers.find(h=>/ten xa|xa phuong|don vi|dia ban|commune/i.test(normHeader(h))) || headers[0];
+   const groups=new Map();
+   headers.forEach(h=>{
+    if(h===communeHeader)return;
+    const raw=String(h); const match=raw.match(/^(.*?)(?:[_\s-]+)?(Đợt\s*\d+)(.*)$/i);
+    let group=match?match[1].replace(/[_\s-]+$/,'').trim():'Thông tin khác';
+    if(!group)group=match?match[2]:'Thông tin khác';
+    if(!groups.has(group))groups.set(group,[]);groups.get(group).push({header:h,label:match?(match[2]+(match[3]||'' )).replace(/^\s+/,'').trim():raw});
+   });
+   const cards=[...groups.entries()].filter(([,cols])=>cols.length);
+   if(cards.length){
+    body.innerHTML='<div class="vaccine-detail-cards">'+cards.map(([title,cols],idx)=>'<section class="vaccine-detail-card"><h4>'+esc(title)+'</h4><div class="vaccine-detail-table-wrap"><table class="kpi-detail-table"><thead><tr><th> Xã/phường </th>'+cols.map(c=>'<th>'+esc(c.label)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr><td>'+esc(r?.[communeHeader]??'')+'</td>'+cols.map(c=>'<td>'+esc(r?.[c.header]??'—')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div></section>').join('')+'</div>';
+   } else { body.innerHTML='<div class="overflow:auto"><table class="kpi-detail-table"><thead><tr>'+headers.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>'+data.map(row=>'<tr>'+row.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>'; }
+  } else {
+   body.innerHTML='<div style="overflow:auto;max-height:62vh"><table class="kpi-detail-table"><thead><tr>'+headers.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>'+data.map(row=>'<tr>'+row.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
+  }
   return {headers,data};
  }
  function csvEscape(v){return '"'+String(v??'').replace(/"/g,'""')+'"'}
@@ -5366,7 +5383,7 @@ button,.tool-button,.map-control-button{font-weight:750}
   const ov=ensureModal(),body=ov.querySelector('#kpiDetailBody'),status=ov.querySelector('#kpiDetailStatus'),download=ov.querySelector('#kpiDetailDownload');
   ov.querySelector('#kpiDetailTitle').textContent='Chi tiết: '+cfg.title;body.innerHTML='<p>Đang tải số liệu trực tiếp từ Google Sheets qua API…</p>';status.textContent='Đang tải dữ liệu nguồn';download.disabled=true;ov.classList.add('open');
   try{
-   const result=await fetchSource(cfg.types);const table=renderTable(body,result.rows);status.textContent='Nguồn API: '+(result.source||'Google Sheets')+' · '+result.rows.length.toLocaleString('vi-VN')+' dòng';download.disabled=!table.data.length;
+   const result=await fetchSource(cfg.types);const table=renderTable(body,result.rows,key==='card-vaccine-kpi');status.textContent='Nguồn API: '+(result.source||'Google Sheets')+' · '+result.rows.length.toLocaleString('vi-VN')+' dòng';download.disabled=!table.data.length;
    download.onclick=()=>{
     if(!window.XLSX||!window.XLSX.utils){status.textContent='Thư viện Excel chưa tải được';return;}
     const aoa=[table.headers,...table.data];const ws=window.XLSX.utils.aoa_to_sheet(aoa);const wb=window.XLSX.utils.book_new();
@@ -6185,4 +6202,17 @@ button,.tool-button,.map-control-button{font-weight:750}
     text-align: right !important;
   }
 }
+</style>
+
+<style id="vaccine-detail-content-cards-20261023">
+#kpiDetailBody .vaccine-detail-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:12px;align-items:start;padding:12px;background:#f5f8fc;max-height:68vh;overflow:auto}
+#kpiDetailBody .vaccine-detail-card{min-width:0;background:#fff;border:1px solid #d7e3ef;border-radius:12px;box-shadow:0 2px 7px rgba(30,65,100,.06);overflow:hidden}
+#kpiDetailBody .vaccine-detail-card h4{margin:0;padding:11px 13px;background:#eaf3fc;border-bottom:1px solid #d7e3ef;color:#174c7c;font-size:14px;font-weight:750;line-height:1.35}
+#kpiDetailBody .vaccine-detail-table-wrap{overflow:auto;max-height:42vh}
+#kpiDetailBody .vaccine-detail-card .kpi-detail-table{width:100%;min-width:300px;border-collapse:collapse;font-size:12px}
+#kpiDetailBody .vaccine-detail-card .kpi-detail-table th{position:sticky;top:0;background:#f0f5fa;color:#25445e;white-space:normal;min-width:76px}
+#kpiDetailBody .vaccine-detail-card .kpi-detail-table th:first-child,#kpiDetailBody .vaccine-detail-card .kpi-detail-table td:first-child{min-width:125px;text-align:left;font-weight:650}
+#kpiDetailBody .vaccine-detail-card .kpi-detail-table td,#kpiDetailBody .vaccine-detail-card .kpi-detail-table th{padding:7px 9px;border:1px solid #e1e9f1;text-align:center;vertical-align:middle}
+#kpiDetailBody .vaccine-detail-card .kpi-detail-table tbody tr:nth-child(even){background:#f8fbfe}
+@media(max-width:600px){#kpiDetailBody .vaccine-detail-cards{grid-template-columns:1fr;padding:8px}}
 </style>
