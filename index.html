@@ -5359,10 +5359,10 @@ button,.tool-button,.map-control-button{font-weight:750}
   const normHeader=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').toLowerCase().replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
   const communeHeader=headers.find(h=>/^(xa|xa phuong|ten xa|ten xa phuong|don vi|dia ban|commune|id)$/i.test(normHeader(h))) || headers.find(h=>/ten xa|xa phuong|don vi|dia ban|commune/i.test(normHeader(h))) || headers[0];
   if(detailMode==='vaccine' || detailMode==='phun'){
+   // Tiêm phòng: 4 tab; phun phòng: 4 tab tương ứng Vòng 1–4 trong dữ liệu nguồn.
    const definitions=detailMode==='vaccine'
-    ? [{title:'Tiêm đăng ký đợt 1',test:h=>/dot\s*1\b/.test(h)},{title:'Tiêm đăng ký đợt 2',test:h=>/dot\s*2\b/.test(h)},{title:'Bệnh Dại',test:h=>/\bdai\b/.test(h)},{title:'Viêm da nổi cục (VDNC)',test:h=>/\bvdnc\b|viem da noi cuc/.test(h)}]
-    : [{title:'Phun phòng đợt 1',test:h=>/dot\s*1\b/.test(h)},{title:'Phun phòng đợt 2',test:h=>/dot\s*2\b/.test(h)}];
-   // Mỗi nhóm là một thẻ độc lập; không tạo thêm bảng/thẻ "Thông tin khác".
+    ? [{title:'Đợt 1',test:h=>/dot\s*1\b/.test(h)},{title:'Đợt 2',test:h=>/dot\s*2\b/.test(h)},{title:'Bệnh Dại',test:h=>/\bdai\b/.test(h)},{title:'Viêm da nổi cục (VDNC)',test:h=>/\bvdnc\b|viem da noi cuc/.test(h)}]
+    : [{title:'Vòng 1',test:h=>/vong\s*1\b/.test(h)},{title:'Vòng 2',test:h=>/vong\s*2\b/.test(h)},{title:'Vòng 3',test:h=>/vong\s*3\b/.test(h)},{title:'Vòng 4',test:h=>/vong\s*4\b/.test(h)}];
    const groups=definitions.map(d=>({title:d.title,cols:[]}));
    headers.forEach(h=>{
     if(h===communeHeader)return;
@@ -5370,7 +5370,16 @@ button,.tool-button,.map-control-button{font-weight:750}
     const idx=definitions.findIndex(d=>d.test(nh));
     if(idx>=0)groups[idx].cols.push({header:h,label:String(h)});
    });
-   body.innerHTML='<div class="vaccine-detail-cards">'+groups.filter(g=>g.cols.length).map(g=>'<section class="vaccine-detail-card"><h4>'+esc(g.title)+'</h4><div class="vaccine-detail-table-wrap"><table class="kpi-detail-table"><thead><tr><th>Xã/phường</th>'+g.cols.map(c=>'<th>'+esc(c.label)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr><td>'+esc(r?.[communeHeader]??'')+'</td>'+g.cols.map(c=>'<td>'+esc(r?.[c.header]??'—')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div></section>').join('')+'</div>';
+   const makeTable=g=>g.cols.length
+    ? '<div class="vaccine-detail-table-wrap"><table class="kpi-detail-table"><thead><tr><th>Xã/phường</th>'+g.cols.map(c=>'<th>'+esc(c.label)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr><td>'+esc(r?.[communeHeader]??'')+'</td>'+g.cols.map(c=>'<td>'+esc(r?.[c.header]??'—')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>'
+    : '<p class="vaccine-tab-empty">Không tìm thấy cột dữ liệu cho mục này trong nguồn API.</p>';
+   body.innerHTML='<div class="vaccine-detail-tabs"><div class="vaccine-detail-tablist" role="tablist">'+groups.map((g,i)=>'<button type="button" class="vaccine-detail-tab'+(i===0?' active':'')+'" role="tab" aria-selected="'+(i===0?'true':'false')+'" data-tab-index="'+i+'">'+esc(g.title)+'</button>').join('')+'</div>'+groups.map((g,i)=>'<section class="vaccine-detail-tabpanel" role="tabpanel" data-panel-index="'+i+'" '+(i===0?'':'hidden')+'><h4>'+esc(g.title)+'</h4>'+makeTable(g)+'</section>').join('')+'</div>';
+   const tabRoot=body.querySelector('.vaccine-detail-tabs');
+   tabRoot?.querySelectorAll('.vaccine-detail-tab').forEach(btn=>btn.addEventListener('click',()=>{
+    const idx=btn.getAttribute('data-tab-index');
+    tabRoot.querySelectorAll('.vaccine-detail-tab').forEach(b=>{const active=b===btn;b.classList.toggle('active',active);b.setAttribute('aria-selected',active?'true':'false');});
+    tabRoot.querySelectorAll('.vaccine-detail-tabpanel').forEach(panel=>{panel.hidden=panel.getAttribute('data-panel-index')!==idx;});
+   }));
   } else {
    body.innerHTML='<div style="overflow:auto;max-height:62vh"><table class="kpi-detail-table"><thead><tr>'+headers.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>'+data.map(row=>'<tr>'+row.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
   }
@@ -6238,6 +6247,22 @@ button,.tool-button,.map-control-button{font-weight:750}
 #kpiDetailBody .vaccine-detail-card .kpi-detail-table{width:100%;min-width:0;border-collapse:collapse}
 #kpiDetailBody .vaccine-detail-card .kpi-detail-table th,#kpiDetailBody .vaccine-detail-card .kpi-detail-table td{padding:7px 8px;font-size:12px;line-height:1.35;white-space:normal;overflow-wrap:anywhere}
 @media(max-width:700px){#kpiDetailBody .vaccine-detail-cards{grid-template-columns:minmax(0,1fr)}}
+</style>
+
+<style id="vaccine-detail-tabs-final-20261024">
+#kpiDetailBody .vaccine-detail-tabs{padding:12px;background:#f5f8fb;max-height:66vh;overflow:auto}
+#kpiDetailBody .vaccine-detail-tablist{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px;padding:0 0 9px;border-bottom:1px solid #d8e4ee}
+#kpiDetailBody .vaccine-detail-tab{appearance:none;border:1px solid #cbd9e6;border-radius:8px;background:#fff;color:#294b66;padding:8px 13px;font:700 12px/1.25 inherit;cursor:pointer}
+#kpiDetailBody .vaccine-detail-tab.active{background:#1768b2;color:#fff;border-color:#1768b2;box-shadow:0 2px 6px rgba(23,104,178,.2)}
+#kpiDetailBody .vaccine-detail-tabpanel{border:1px solid #d7e3ed;border-radius:10px;background:#fff;overflow:hidden}
+#kpiDetailBody .vaccine-detail-tabpanel[hidden]{display:none!important}
+#kpiDetailBody .vaccine-detail-tabpanel h4{margin:0;padding:11px 14px;background:#eaf3fb;color:#174d79;border-bottom:1px solid #d7e3ed;font-size:14px;font-weight:800}
+#kpiDetailBody .vaccine-detail-tabpanel .vaccine-detail-table-wrap{overflow:auto;max-height:48vh}
+#kpiDetailBody .vaccine-detail-tabpanel .kpi-detail-table{width:100%;min-width:280px;border-collapse:collapse;font-size:12px}
+#kpiDetailBody .vaccine-detail-tabpanel .kpi-detail-table th,#kpiDetailBody .vaccine-detail-tabpanel .kpi-detail-table td{padding:8px 10px;border:1px solid #e0e8ef;white-space:normal;overflow-wrap:anywhere;vertical-align:top}
+#kpiDetailBody .vaccine-detail-tabpanel .kpi-detail-table th{position:sticky;top:0;background:#f2f6fa;color:#29465e;z-index:1}
+#kpiDetailBody .vaccine-tab-empty{padding:16px;margin:0;color:#697d8e;font-size:12px}
+@media(max-width:600px){#kpiDetailBody .vaccine-detail-tabs{padding:8px}#kpiDetailBody .vaccine-detail-tab{padding:7px 9px}}
 </style>
 </body>
 </html>
