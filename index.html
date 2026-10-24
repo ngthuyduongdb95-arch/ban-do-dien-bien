@@ -5359,20 +5359,31 @@ button,.tool-button,.map-control-button{font-weight:750}
   const normHeader=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').toLowerCase().replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
   const communeHeader=headers.find(h=>/^(xa|xa phuong|ten xa|ten xa phuong|don vi|dia ban|commune|id)$/i.test(normHeader(h))) || headers.find(h=>/ten xa|xa phuong|don vi|dia ban|commune/i.test(normHeader(h))) || headers[0];
   if(detailMode==='vaccine' || detailMode==='phun'){
-   // Tiêm phòng: 4 tab; phun phòng: 4 tab tương ứng Vòng 1–4 trong dữ liệu nguồn.
+   // Nguồn dữ liệu giữ đúng theo từng bảng: TIÊM PHÒNG có 4 nhóm cột;
+   // PHUN PHÒNG có dữ liệu theo dòng, lọc theo cột Vòng/Đợt phun và chỉ có Đợt 1–2.
    const definitions=detailMode==='vaccine'
-    ? [{title:'Đợt 1',test:h=>/dot\s*1\b/.test(h)},{title:'Đợt 2',test:h=>/dot\s*2\b/.test(h)},{title:'Bệnh Dại',test:h=>/\bdai\b/.test(h)},{title:'Viêm da nổi cục (VDNC)',test:h=>/\bvdnc\b|viem da noi cuc/.test(h)}]
-    : [{title:'Vòng 1',test:h=>/vong\s*1\b/.test(h)},{title:'Vòng 2',test:h=>/vong\s*2\b/.test(h)},{title:'Vòng 3',test:h=>/vong\s*3\b/.test(h)},{title:'Vòng 4',test:h=>/vong\s*4\b/.test(h)}];
-   const groups=definitions.map(d=>({title:d.title,cols:[]}));
-   headers.forEach(h=>{
-    if(h===communeHeader)return;
-    const nh=normHeader(h);
-    const idx=definitions.findIndex(d=>d.test(nh));
-    if(idx>=0)groups[idx].cols.push({header:h,label:String(h)});
-   });
-   const makeTable=g=>g.cols.length
-    ? '<div class="vaccine-detail-table-wrap"><table class="kpi-detail-table"><thead><tr><th>Xã/phường</th>'+g.cols.map(c=>'<th>'+esc(c.label)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr><td>'+esc(r?.[communeHeader]??'')+'</td>'+g.cols.map(c=>'<td>'+esc(r?.[c.header]??'—')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>'
-    : '<p class="vaccine-tab-empty">Không tìm thấy cột dữ liệu cho mục này trong nguồn API.</p>';
+    ? [{title:'Tiêm đăng ký đợt 1',test:h=>/dot\s*1\b/.test(h) && /(dang ky|dang ki|ke hoach|vaccine|vac xin|tiem)/.test(h) || /tiem.*(dang ky|dang ki).*dot\s*1\b/.test(h)},
+       {title:'Tiêm định kỳ đợt 2',test:h=>/dot\s*2\b/.test(h) && /(dinh ky|tiem|vac xin|vaccine)/.test(h)},
+       {title:'Tiêm Dại',test:h=>/\bdai\b/.test(h)},
+       {title:'Tiêm VDNC',test:h=>/\bvdnc\b|viem da noi cuc/.test(h)}]
+    : [{title:'Đợt 1',round:1},{title:'Đợt 2',round:2}];
+   const groups=definitions.map(d=>({title:d.title,cols:[],rows:rows}));
+   if(detailMode==='vaccine'){
+    headers.forEach(h=>{
+     if(h===communeHeader)return;
+     const nh=normHeader(h);
+     const idx=definitions.findIndex(d=>d.test(nh));
+     if(idx>=0)groups[idx].cols.push({header:h,label:String(h)});
+    });
+   } else {
+    const roundHeader=headers.find(h=>/vong phun|phun vong|^vong$|dot phun|^dot$|so vong|round/i.test(normHeader(h)))
+      || headers.find(h=>/vong|dot phun|round/i.test(normHeader(h)));
+    const getRound=v=>{const t=normHeader(v);const m=t.match(/(?:vong|dot|lan)\s*([1-4])/);if(m)return Number(m[1]);const n=String(v??'').trim().match(/^([1-4])$/);return n?Number(n[1]):null;};
+    groups.forEach(g=>{g.rows=roundHeader?rows.filter(r=>getRound(r?.[roundHeader])===g.round):[];g.cols=headers.filter(h=>h!==communeHeader).map(h=>({header:h,label:String(h)}));});
+   }
+   const makeTable=g=>g.rows.length && (detailMode==='phun'?g.cols.length:g.cols.length)
+    ? '<div class="vaccine-detail-table-wrap"><table class="kpi-detail-table"><thead><tr><th>Xã/phường</th>'+g.cols.map(c=>'<th>'+esc(c.label)+'</th>').join('')+'</tr></thead><tbody>'+g.rows.map(r=>'<tr><td>'+esc(r?.[communeHeader]??'')+'</td>'+g.cols.map(c=>'<td>'+esc(r?.[c.header]??'—')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>'
+    : '<p class="vaccine-tab-empty">'+(detailMode==='phun'?'Không có dòng dữ liệu thuộc đợt này trong sheet GIS_PHUNPHONG.':'Không tìm thấy cột dữ liệu cho mục này trong sheet tiêm phòng.')+'</p>';
    body.innerHTML='<div class="vaccine-detail-tabs"><div class="vaccine-detail-tablist" role="tablist">'+groups.map((g,i)=>'<button type="button" class="vaccine-detail-tab'+(i===0?' active':'')+'" role="tab" aria-selected="'+(i===0?'true':'false')+'" data-tab-index="'+i+'">'+esc(g.title)+'</button>').join('')+'</div>'+groups.map((g,i)=>'<section class="vaccine-detail-tabpanel" role="tabpanel" data-panel-index="'+i+'" '+(i===0?'':'hidden')+'><h4>'+esc(g.title)+'</h4>'+makeTable(g)+'</section>').join('')+'</div>';
    const tabRoot=body.querySelector('.vaccine-detail-tabs');
    tabRoot?.querySelectorAll('.vaccine-detail-tab').forEach(btn=>btn.addEventListener('click',()=>{
