@@ -6253,21 +6253,29 @@ button,.tool-button,.map-control-button{font-weight:750}
   const roundNumber=v=>{const t=norm(v);let m=t.match(/(?:vong|dot|lan)\s*([1-4])/);if(m)return Number(m[1]);m=String(v??'').trim().match(/^([1-4])(?:\.0+)?$/);return m?Number(m[1]):null;};
   async function update(){
     try{
-      const url=API+'?type=detail&sheet=TIEN_DO_PHUN_PHONG&_='+Date.now();
-      const res=await fetch(url,{cache:'no-store'});if(!res.ok)throw new Error('HTTP '+res.status);
-      const json=await res.json();const rows=Array.isArray(json)?json:(Array.isArray(json?.data)?json.data:(Array.isArray(json?.rows)?json.rows:[]));
-      if(!rows.length)throw new Error('Nguồn TIEN_DO_PHUN_PHONG chưa có dữ liệu');
+      // Ưu tiên nhánh API phun đã được cho phép; chỉ dự phòng sang endpoint sheet chi tiết nếu cần.
+      let rows=[],lastError='Nguồn TIEN_DO_PHUN_PHONG chưa có dữ liệu';
+      for(const url of [API+'?type=phun&_='+Date.now(), API+'?type=detail&sheet=TIEN_DO_PHUN_PHONG&_='+Date.now()]){
+        try{
+          const res=await fetch(url,{cache:'no-store'});if(!res.ok){lastError='HTTP '+res.status;continue;}
+          const json=await res.json();const candidate=Array.isArray(json)?json:(Array.isArray(json?.data)?json.data:(Array.isArray(json?.rows)?json.rows:[]));
+          if(candidate.length){rows=candidate;break;} if(json?.error)lastError=json.error;
+        }catch(e){lastError=e.message||lastError;}
+      }
+      if(!rows.length)throw new Error(lastError);
       const valid=rows.filter(r=>commune(r));
-      const dot1=valid.filter(r=>String(value(r,/dot 1 vong phun/)??'').trim()!=='' || String(value(r,/dot 1 so ho phun/)??'').trim()!=='' || String(value(r,/dot 1 dien tich phun/)??'').trim()!=='').length;
+      const hasValue=v=>v!==null && v!==undefined && String(v).trim()!=='' && String(v).trim()!=='—' && String(v).trim()!=='-';
+      const dot1=valid.filter(r=>hasValue(value(r,/dot 1 vong phun/)) || hasValue(value(r,/dot 1 so ho phun/)) || hasValue(value(r,/dot 1 dien tich phun/))).length;
       let active=0,done=0;
       valid.forEach(r=>{
-        const round=roundNumber(value(r,/dot 2 vong dang trien khai/));
-        const status=norm(value(r,/dot 2 trang thai phun/));
-        if(round===4 || /trien khai xong|hoan thanh|da xong/.test(status)) done++;
-        else if((round>=1 && round<=3) || /dang trien khai|dang thuc hien/.test(status)) active++;
+        const round2=roundNumber(value(r,/dot 2 vong dang trien khai/));
+        const status2=norm(value(r,/dot 2 trang thai phun/));
+        // Vòng 1–3 ở Đợt 2 là đang triển khai; vòng 4 hoặc trạng thái hoàn thành là xong.
+        if(round2===4 || /trien khai xong|hoan thanh|da xong/.test(status2)) done++;
+        else if((round2>=1 && round2<=3) || /dang trien khai|dang thuc hien/.test(status2)) active++;
       });
       const set=(id,text)=>{const el=document.getElementById(id);if(el)el.textContent=text;};
-      set('dbPhunDot1',dot1+' xã triển khai');set('dbPhunDot2',active+' xã đang triển khai');set('dbPhunDone',done+' xã');
+      set('dbPhunDot1',dot1+' xã triển khai');set('dbPhunDot2',active+' xã đang triển khai');set('dbPhunDone',done+' xã triển khai xong');
     }catch(e){console.warn('Không cập nhật được KPI phun phòng từ TIEN_DO_PHUN_PHONG:',e);}
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',update);else update();
@@ -6350,4 +6358,22 @@ button,.tool-button,.map-control-button{font-weight:750}
 #kpiDetailBody .vaccine-detail-card .kpi-detail-table th,#kpiDetailBody .vaccine-detail-card .kpi-detail-table td{padding:7px 9px;border:1px solid #e0e8ef;white-space:normal;overflow-wrap:anywhere;vertical-align:top}
 #kpiDetailBody .vaccine-detail-card .kpi-detail-table th{background:#f2f6fa;color:#29465e;position:sticky;top:0;z-index:1}
 @media(max-width:720px){#kpiDetailBody .vaccine-detail-cards{grid-template-columns:1fr}}
+</style>
+
+
+<style id="phun-detail-table-polish-20261024">
+/* Bảng chi tiết phun phòng: cột rõ ràng, dễ đọc, cuộn ngang khi cần thay vì bóp chữ quá hẹp. */
+#kpiDetailBody .vaccine-detail-tabpanel .vaccine-detail-table-wrap{max-height:50vh;overflow:auto;overscroll-behavior:contain;background:#fff}
+#kpiDetailBody .vaccine-detail-tabpanel .kpi-detail-table{width:max-content;min-width:100%;border-collapse:separate;border-spacing:0;font-size:12px;table-layout:auto}
+#kpiDetailBody .vaccine-detail-tabpanel .kpi-detail-table th,
+#kpiDetailBody .vaccine-detail-tabpanel .kpi-detail-table td{padding:9px 12px;border-right:1px solid #dce6ef;border-bottom:1px solid #dce6ef;white-space:normal;overflow-wrap:normal;word-break:normal;vertical-align:middle;line-height:1.4}
+#kpiDetailBody .vaccine-detail-tabpanel .kpi-detail-table th{position:sticky;top:0;background:#eaf2f9;color:#23445f;font-weight:800;text-align:center;z-index:2;min-width:105px}
+#kpiDetailBody .vaccine-detail-tabpanel .kpi-detail-table th:first-child,
+#kpiDetailBody .vaccine-detail-tabpanel .kpi-detail-table td:first-child{position:sticky;left:0;min-width:145px;max-width:190px;text-align:left;background:#f7fbff;font-weight:700;z-index:1}
+#kpiDetailBody .vaccine-detail-tabpanel .kpi-detail-table th:first-child{z-index:3;background:#eaf2f9}
+#kpiDetailBody .vaccine-detail-tabpanel .kpi-detail-table tbody tr:nth-child(even) td{background:#f8fbfe}
+#kpiDetailBody .vaccine-detail-tabpanel .kpi-detail-table tbody tr:hover td{background:#edf6ff}
+#kpiDetailBody .vaccine-detail-tabpanel .kpi-detail-table td:first-child{white-space:normal}
+#cardPhunRestored .phun-status-kpi b{font-variant-numeric:tabular-nums}
+@media(max-width:700px){#kpiDetailBody .vaccine-detail-tabpanel .kpi-detail-table th,#kpiDetailBody .vaccine-detail-tabpanel .kpi-detail-table td{padding:7px 9px}}
 </style>
