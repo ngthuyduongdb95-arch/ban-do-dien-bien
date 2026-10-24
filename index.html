@@ -5434,11 +5434,24 @@ button,.tool-button,.map-control-button{font-weight:750}
   try{
    let result,table;
    if(key==='card-phun'){
-    // Hai đợt phun là hai nguồn API riêng: phun = sheet Đợt 1, phun2 = sheet Đợt 2.
-    const [r1,r2]=await Promise.all([fetchSource(['phun']),fetchSource(['phun2'])]);
+    // Hai đợt gọi độc lập: lỗi mạng ở một nguồn không được làm mất dữ liệu của nguồn còn lại.
+    const settled=await Promise.allSettled([fetchSource(['phun']),fetchSource(['phun2'])]);
+    const readSettled=(item,label)=>{
+      if(item.status==='fulfilled') return item.value;
+      console.warn('Không tải được nguồn phun '+label+':',item.reason);
+      return {rows:[],source:label,error:item.reason?.message||'Không kết nối được API'};
+    };
+    const r1=readSettled(settled[0],'Đợt 1'),r2=readSettled(settled[1],'Đợt 2');
     result={source:'Phun phòng đợt 1 và đợt 2',rows:[...r1.rows,...r2.rows]};
     table=renderPhunTabs(body,r1.rows,r2.rows);
-    status.textContent='Nguồn API: phun (Đợt 1) · '+table.counts[0].toLocaleString('vi-VN')+' dòng; phun2 (Đợt 2) · '+table.counts[1].toLocaleString('vi-VN')+' dòng';
+    const part1='Đợt 1: '+table.counts[0].toLocaleString('vi-VN')+' dòng';
+    const part2='Đợt 2: '+table.counts[1].toLocaleString('vi-VN')+' dòng';
+    status.textContent='Nguồn API: '+part1+'; '+part2;
+    if(!r1.rows.length || !r2.rows.length){
+      const note=document.createElement('p'); note.className='vaccine-tab-empty';
+      note.textContent='Lưu ý: '+(!r1.rows.length?'chưa tải được dữ liệu Đợt 1'+(r1.error?' ('+r1.error+')':'')+'. ':'')+(!r2.rows.length?'chưa tải được dữ liệu Đợt 2'+(r2.error?' ('+r2.error+')':'')+'.':'');
+      body.appendChild(note);
+    }
    }else{
     result=await fetchSource(cfg.types);table=renderTable(body,result.rows,key==='card-vaccine-kpi'?'vaccine':'default');
     status.textContent='Nguồn API: '+(result.source||'Google Sheets')+' · '+result.rows.length.toLocaleString('vi-VN')+' dòng';
@@ -6248,37 +6261,56 @@ button,.tool-button,.map-control-button{font-weight:750}
   'use strict';
   const API='https://script.google.com/macros/s/AKfycbyRuJ9Wfv4HtWjMRT2Hox2-mOhBVRjyqLaHhpQjohPEkfHWNyjM004KgO3o7_4nRJtj/exec';
   const norm=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
-  const value=(r,re)=>{const k=Object.keys(r||{}).find(x=>re.test(norm(x)));return k?r[k]:'';};
-  const commune=r=>String(value(r,/^(xa phuong|xa|ten xa phuong|ten xa|commune)$/)||'').trim();
+  const get=(r,patterns)=>{const keys=Object.keys(r||{});for(const re of patterns){const k=keys.find(x=>re.test(norm(x)));if(k!==undefined && r[k]!==undefined && r[k]!==null && String(r[k]).trim()!=='')return r[k];}return '';};
+  const rowsFrom=json=>Array.isArray(json)?json:(Array.isArray(json?.data)?json.data:(Array.isArray(json?.rows)?json.rows:(Array.isArray(json?.records)?json.records:(Array.isArray(json?.items)?json.items:[]))));
+  const num=v=>{if(v===null||v===undefined||String(v).trim()==='')return null;const m=String(v).replace(/,/g,'').match(/-?\d+(?:\.\d+)?/);return m?Number(m[0]):null;};
   const roundNumber=v=>{const t=norm(v);let m=t.match(/(?:vong|dot|lan)\s*([1-4])/);if(m)return Number(m[1]);m=String(v??'').trim().match(/^([1-4])(?:\.0+)?$/);return m?Number(m[1]):null;};
+  const nonempty=v=>v!==null&&v!==undefined&&String(v).trim()!==''&&!/^[-—]+$/.test(String(v).trim());
+  async function request(url){
+    const res=await fetch(url,{cache:'no-store'});if(!res.ok)throw new Error('HTTP '+res.status);
+    const json=await res.json();const rows=rowsFrom(json);
+    if(rows.length)return rows;
+    const msg=json?.error||json?.message||json?.msg;
+    if(msg)throw new Error(String(msg));
+    return [];
+  }
+  async function loadRows(){
+    let last='API chưa trả về dòng dữ liệu';
+    // type=phun là nguồn tiến độ tổng hợp; phun2 là dự phòng của endpoint hiện có.
+    for(let attempt=0;attempt<2;attempt++){
+      for(const type of ['phun','phun2']){
+        try{const rows=await request(API+'?type='+type+'&_='+Date.now());if(rows.length)return rows;}
+        catch(e){last=e.message||last;}
+      }
+      await new Promise(resolve=>setTimeout(resolve,700));
+    }
+    throw new Error(last);
+  }
   async function update(){
     try{
-      // Ưu tiên nhánh API phun đã được cho phép; chỉ dự phòng sang endpoint sheet chi tiết nếu cần.
-      let rows=[],lastError='Nguồn TIEN_DO_PHUN_PHONG chưa có dữ liệu';
-      for(const url of [API+'?type=phun&_='+Date.now(), API+'?type=detail&sheet=TIEN_DO_PHUN_PHONG&_='+Date.now()]){
-        try{
-          const res=await fetch(url,{cache:'no-store'});if(!res.ok){lastError='HTTP '+res.status;continue;}
-          const json=await res.json();const candidate=Array.isArray(json)?json:(Array.isArray(json?.data)?json.data:(Array.isArray(json?.rows)?json.rows:[]));
-          if(candidate.length){rows=candidate;break;} if(json?.error)lastError=json.error;
-        }catch(e){lastError=e.message||lastError;}
-      }
-      if(!rows.length)throw new Error(lastError);
-      const valid=rows.filter(r=>commune(r));
-      const hasValue=v=>v!==null && v!==undefined && String(v).trim()!=='' && String(v).trim()!=='—' && String(v).trim()!=='-';
-      const dot1=valid.filter(r=>hasValue(value(r,/dot 1 vong phun/)) || hasValue(value(r,/dot 1 so ho phun/)) || hasValue(value(r,/dot 1 dien tich phun/))).length;
+      const rows=await loadRows();
+      const valid=rows.filter(r=>nonempty(get(r,[/^xa phuong$/,/^ten xa phuong$/,/^ten xa$/,/^xa$/,/^commune$/,/^ten xa phuong$/])));
+      const dot1=valid.filter(r=>{
+        const v=get(r,[/^dot 1 vong phun$/,/^dot 1 so ho phun$/,/^dot 1 dien tich phun/]);
+        return nonempty(v);
+      }).length;
       let active=0,done=0;
       valid.forEach(r=>{
-        const round2=roundNumber(value(r,/dot 2 vong dang trien khai/));
-        const status2=norm(value(r,/dot 2 trang thai phun/));
-        // Vòng 1–3 ở Đợt 2 là đang triển khai; vòng 4 hoặc trạng thái hoàn thành là xong.
-        if(round2===4 || /trien khai xong|hoan thanh|da xong/.test(status2)) done++;
-        else if((round2>=1 && round2<=3) || /dang trien khai|dang thuc hien/.test(status2)) active++;
+        const round2=roundNumber(get(r,[/^dot 2 vong dang trien khai$/,/^dot 2 vong phun$/,/^vong dang trien khai$/]));
+        const status2=norm(get(r,[/^dot 2 trang thai phun$/,/^trang thai phun$/,/^tien do phun$/]));
+        if(round2===4||/trien khai xong|hoan thanh|da xong/.test(status2)) done++;
+        else if((round2>=1&&round2<=3)||/dang trien khai|dang thuc hien/.test(status2)) active++;
       });
       const set=(id,text)=>{const el=document.getElementById(id);if(el)el.textContent=text;};
-      set('dbPhunDot1',dot1+' xã triển khai');set('dbPhunDot2',active+' xã đang triển khai');set('dbPhunDone',done+' xã triển khai xong');
+      set('dbPhunDot1',dot1+' xã triển khai');
+      set('dbPhunDot2',active+' xã đang triển khai');
+      set('dbPhunDone',done+' xã triển khai xong');
+      console.info('KPI phun phòng đã cập nhật:',{soXa:valid.length, dot1, active, done});
     }catch(e){console.warn('Không cập nhật được KPI phun phòng từ TIEN_DO_PHUN_PHONG:',e);}
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',update);else update();
+  // Retry once more after the initial Sheets/API setup has completed.
+  window.addEventListener('load',()=>setTimeout(update,1200),{once:true});
 })();
 </script>
 <style id="phun-kpi-progress-summary-style">
