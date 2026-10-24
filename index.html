@@ -5333,7 +5333,7 @@ button,.tool-button,.map-control-button{font-weight:750}
   'card-tthc-extra':{title:'TTHC lĩnh vực thú y',types:['detail:GIS_TTHC_TONGHOP']},
   'card-sample-extra':{title:'Mẫu xét nghiệm',types:['detail:GIS_LAYMAU']}
  };
- const norm=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+ const norm=v=>String(v??'').toLowerCase().replace(/đ/g,'d').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const clean=v=>String(v??'').replace(/\s+/g,' ').trim();
  async function fetchSource(types){
@@ -6260,7 +6260,7 @@ button,.tool-button,.map-control-button{font-weight:750}
 (function(){
   'use strict';
   const API='https://script.google.com/macros/s/AKfycbyRuJ9Wfv4HtWjMRT2Hox2-mOhBVRjyqLaHhpQjohPEkfHWNyjM004KgO3o7_4nRJtj/exec';
-  const norm=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+  const norm=v=>String(v??'').toLowerCase().replace(/đ/g,'d').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
   const get=(r,patterns)=>{const keys=Object.keys(r||{});for(const re of patterns){const k=keys.find(x=>re.test(norm(x)));if(k!==undefined && r[k]!==undefined && r[k]!==null && String(r[k]).trim()!=='')return r[k];}return '';};
   const rowsFrom=json=>Array.isArray(json)?json:(Array.isArray(json?.data)?json.data:(Array.isArray(json?.rows)?json.rows:(Array.isArray(json?.records)?json.records:(Array.isArray(json?.items)?json.items:[]))));
   const num=v=>{if(v===null||v===undefined||String(v).trim()==='')return null;const m=String(v).replace(/,/g,'').match(/-?\d+(?:\.\d+)?/);return m?Number(m[0]):null;};
