@@ -5326,7 +5326,7 @@ button,.tool-button,.map-control-button{font-weight:750}
   'card-cgc':{title:'Cúm gia cầm',types:['detail:GIS_CGC']},
   'card-vdnc':{title:'Viêm da nổi cục',types:['detail:GIS_VDNC']},
   'card-dai':{title:'Bệnh dại',types:['detail:GIS_DAI']},
-  'card-phun':{title:'Thực hiện tháng tổng vệ sinh, khử trùng, tiêu độc',types:['detail:TIEN_DO_PHUN_PHONG']},
+  'card-phun':{title:'Thực hiện tháng tổng vệ sinh, khử trùng, tiêu độc',types:['phun']},
   'card-vaccine-kpi':{title:'Tiêm phòng vắc xin',types:['detail:GIS_TIEM_PHONG_KPI']},
   'card-ksgm':{title:'Kiểm soát giết mổ',types:['detail:GIS_KSGM']},
   'card-drug':{title:'Cơ sở buôn bán thuốc thú y',types:['detail:GIS_CSBBTTY']},
@@ -5345,7 +5345,7 @@ button,.tool-button,.map-control-button{font-weight:750}
    const res=await fetch(url,{cache:'no-store'}); if(!res.ok){lastError='HTTP '+res.status;continue;}
    const json=await res.json();
    const rows=Array.isArray(json)?json:(Array.isArray(json?.data)?json.data:(Array.isArray(json?.rows)?json.rows:[]));
-   if(rows.length)return {rows,source:type||'mặc định'};
+   if(rows.length)return {rows,source:(type==='phun'?'TIEN_DO_PHUN_PHONG':(type||'mặc định'))};
    if(json?.error)lastError=json.error;
   }catch(e){lastError=e.message||lastError;}}
   throw new Error(lastError);
@@ -5407,6 +5407,24 @@ button,.tool-button,.map-control-button{font-weight:750}
   }
   return {headers,data};
  }
+ function renderPhunTabs(body, round1Rows, round2Rows){
+  const cleanRows=rows=>Array.isArray(rows)?rows.filter(r=>r&&typeof r==='object'):[];
+  const groups=[{title:'Đợt 1',rows:cleanRows(round1Rows)},{title:'Đợt 2',rows:cleanRows(round2Rows)}];
+  const normH=v=>norm(v).replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
+  const headersFor=rows=>{const out=[];rows.forEach(r=>Object.keys(r).forEach(k=>{if(!out.includes(k))out.push(k)}));return out;};
+  const communeFor=headers=>headers.find(h=>/^(xa|xa phuong|ten xa|ten xa phuong|ten xa phuong|don vi|dia ban|commune|ten xa phuong)$/.test(normH(h)))||headers.find(h=>/xa phuong|ten xa|commune|dia ban/.test(normH(h)))||headers[1]||headers[0];
+  const tableFor=g=>{
+   if(!g.rows.length)return '<p class="vaccine-tab-empty">Không có dữ liệu nguồn cho '+esc(g.title.toLowerCase())+'.</p>';
+   const headers=headersFor(g.rows),commune=communeFor(headers),shown=headers.filter(h=>h!==commune && !/^stt$/.test(normH(h)));
+   return '<div class="vaccine-detail-table-wrap"><table class="kpi-detail-table"><thead><tr><th>Xã/phường</th>'+shown.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>'+g.rows.map(r=>'<tr><td>'+esc(r?.[commune]??'')+'</td>'+shown.map(h=>'<td>'+esc(r?.[h]??'—')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
+  };
+  body.innerHTML='<div class="vaccine-detail-tabs"><div class="vaccine-detail-tablist" role="tablist">'+groups.map((g,i)=>'<button type="button" class="vaccine-detail-tab'+(i===0?' active':'')+'" role="tab" aria-selected="'+(i===0?'true':'false')+'" data-tab-index="'+i+'">'+esc(g.title)+'</button>').join('')+'</div>'+groups.map((g,i)=>'<section class="vaccine-detail-tabpanel" role="tabpanel" data-panel-index="'+i+'" '+(i===0?'':'hidden')+'><h4>'+esc(g.title)+'</h4>'+tableFor(g)+'</section>').join('')+'</div>';
+  const tabRoot=body.querySelector('.vaccine-detail-tabs');
+  tabRoot?.querySelectorAll('.vaccine-detail-tab').forEach(btn=>btn.addEventListener('click',()=>{const idx=btn.getAttribute('data-tab-index');tabRoot.querySelectorAll('.vaccine-detail-tab').forEach(b=>{const active=b===btn;b.classList.toggle('active',active);b.setAttribute('aria-selected',active?'true':'false')});tabRoot.querySelectorAll('.vaccine-detail-tabpanel').forEach(panel=>{panel.hidden=panel.getAttribute('data-panel-index')!==idx})}));
+  const union=[];groups.forEach(g=>g.rows.forEach(r=>Object.keys(r).forEach(k=>{if(!union.includes(k))union.push(k)})));
+  const headers=['Đợt',...union],data=[];groups.forEach(g=>g.rows.forEach(r=>data.push([g.title,...union.map(h=>r?.[h]??'')])));
+  return {headers,data,counts:groups.map(g=>g.rows.length)};
+ }
  function csvEscape(v){return '"'+String(v??'').replace(/"/g,'""')+'"'}
  async function openDetails(card){
   const key=Object.keys(config).find(k=>card.classList.contains(k));
@@ -5414,7 +5432,18 @@ button,.tool-button,.map-control-button{font-weight:750}
   const ov=ensureModal(),body=ov.querySelector('#kpiDetailBody'),status=ov.querySelector('#kpiDetailStatus'),download=ov.querySelector('#kpiDetailDownload');
   ov.querySelector('#kpiDetailTitle').textContent='Chi tiết: '+cfg.title;body.innerHTML='<p>Đang tải số liệu trực tiếp từ Google Sheets qua API…</p>';status.textContent='Đang tải dữ liệu nguồn';download.disabled=true;ov.classList.add('open');
   try{
-   const result=await fetchSource(cfg.types);const table=renderTable(body,result.rows,key==='card-vaccine-kpi'?'vaccine':(key==='card-phun'?'phun':'default'));status.textContent='Nguồn API: '+(result.source||'Google Sheets')+' · '+result.rows.length.toLocaleString('vi-VN')+' dòng';download.disabled=!table.data.length;
+   let result,table;
+   if(key==='card-phun'){
+    // Hai đợt phun là hai nguồn API riêng: phun = sheet Đợt 1, phun2 = sheet Đợt 2.
+    const [r1,r2]=await Promise.all([fetchSource(['phun']),fetchSource(['phun2'])]);
+    result={source:'Phun phòng đợt 1 và đợt 2',rows:[...r1.rows,...r2.rows]};
+    table=renderPhunTabs(body,r1.rows,r2.rows);
+    status.textContent='Nguồn API: phun (Đợt 1) · '+table.counts[0].toLocaleString('vi-VN')+' dòng; phun2 (Đợt 2) · '+table.counts[1].toLocaleString('vi-VN')+' dòng';
+   }else{
+    result=await fetchSource(cfg.types);table=renderTable(body,result.rows,key==='card-vaccine-kpi'?'vaccine':'default');
+    status.textContent='Nguồn API: '+(result.source||'Google Sheets')+' · '+result.rows.length.toLocaleString('vi-VN')+' dòng';
+   }
+   download.disabled=!table.data.length;
    download.onclick=()=>{
     if(!window.XLSX||!window.XLSX.utils){status.textContent='Thư viện Excel chưa tải được';return;}
     const aoa=[table.headers,...table.data];const ws=window.XLSX.utils.aoa_to_sheet(aoa);const wb=window.XLSX.utils.book_new();
