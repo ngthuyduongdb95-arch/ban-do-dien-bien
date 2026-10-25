@@ -2384,11 +2384,10 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
             <div class="summary-card card-vaccine-kpi" aria-label="KPI tiêm phòng">
                 <div class="summary-head"><i class="fa-solid fa-syringe"></i><b>TIÊM PHÒNG</b></div>
                 <div class="summary-grid vaccine-kpi-compact">
-                    <span><strong class="vaccine-type">Định kỳ đợt 1</strong><b class="vaccine-progress" id="kpiTpd1Done">—/45 xã hoàn thành</b></span>
-                    <span><strong class="vaccine-type">Định kỳ đợt 2</strong><b class="vaccine-progress" id="kpiTpd2Done">—/45 xã hoàn thành</b></span>
-                    <!-- KPI tiêm phòng chỉ hiển thị 2 đợt định kỳ; các trường KPI khác giữ lại ẩn để không ảnh hưởng logic dữ liệu -->
-                    <span class="vaccine-rabies-line" hidden><strong class="vaccine-type">Bệnh Dại</strong><b class="vaccine-progress" id="kpiDaiDone">—% tổng đàn</b><em id="kpiDaiStartedVisible">Đang triển khai: — xã</em></span>
-                    <span hidden><strong class="vaccine-type">Viêm da nổi cục</strong><b class="vaccine-progress" id="kpiVdncDone">—/45 xã hoàn thành</b></span>
+                    <span><strong class="vaccine-type">Tiêm định kỳ đợt 1</strong><b class="vaccine-progress" id="kpiTpd1Done">—/45 xã hoàn thành</b></span>
+                    <span><strong class="vaccine-type">Tiêm định kỳ đợt 2</strong><b class="vaccine-progress" id="kpiTpd2Done">—/45 xã hoàn thành</b><em class="vaccine-progress" id="kpiTpd2StartedVisible">—/45 xã đang triển khai</em></span>
+                    <span class="vaccine-rabies-line"><strong class="vaccine-type">Tiêm dại</strong><b class="vaccine-progress" id="kpiDaiDone">—% tổng đàn</b><em id="kpiDaiStartedVisible">—</em></span>
+                    <span><strong class="vaccine-type">Viêm da nổi cục (VDNC)</strong><b class="vaccine-progress" id="kpiVdncDone">—/45 xã hoàn thành</b></span>
                     <span hidden id="kpiTpd1Plan">—</span><span hidden id="kpiTpd1Rate">—</span>
                     <span hidden id="kpiTpd2Started">—/45</span><span hidden id="kpiTpd2Rate">—</span>
                     <span hidden id="kpiDaiStarted">—/45</span><span hidden id="kpiDaiRate">—</span>
@@ -4725,7 +4724,7 @@ html, body { max-width:100%; }
 </script>
 
 <script id="webgisVaccineKpiLoader">
-/* KPI tiêm phòng: đọc API chuyên biệt; không dùng dữ liệu lớp bản đồ GIS_TONGHOP. */
+/* KPI tiêm phòng: dùng đúng nguồn GIS_TIEM_PHONG_KPI như bảng chi tiết. */
 (function(){
   'use strict';
   const API='https://script.google.com/macros/s/AKfycbyRuJ9Wfv4HtWjMRT2Hox2-mOhBVRjyqLaHhpQjohPEkfHWNyjM004KgO3o7_4nRJtj/exec';
@@ -4836,6 +4835,7 @@ html, body { max-width:100%; }
     updateText('kpiTpd1Plan',String(d1.plan)); updateText('kpiTpd1Rate',d1.rate.toFixed(1)+'%');
     updateText('kpiTpd1Started',d1.started+'/45');
     updateText('kpiTpd2Done',vaccineStatus(d2));
+    updateText('kpiTpd2StartedVisible',d2.started+'/45 xã đang triển khai');
     updateText('kpiTpd2Started',d2.started+'/45'); updateText('kpiTpd2Rate',d2.rate.toFixed(1)+'%');
     updateText('kpiDaiRate',rabies.rate.toFixed(1)+'% tổng đàn');
     updateText('kpiDaiDone',rabies.rate.toFixed(1)+'% tổng đàn');
@@ -4846,7 +4846,14 @@ html, body { max-width:100%; }
     if(visible) visible.textContent=vaccineStatus(rabies);
     const card=$('.card-vaccine-kpi'); if(card){card.dataset.kpiLoaded='true';card.title='Nguồn: TIEN_DO_TIEM_PHONG; '+rows.length+' xã/phường';}
   }
-  async function load(){try{const r=await fetch(API+'?type=tiemphong&_='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const j=await r.json();if(!j||j.success!==true)throw new Error(j?.error||'API tiêm phòng trả lỗi');render(Array.isArray(j.data)?j.data:[]);}catch(e){console.error('Không tải được KPI tiêm phòng:',e);const card=$('.card-vaccine-kpi');if(card)card.title='Không tải được dữ liệu tiêm phòng. Kiểm tra API type=tiemphong.';}}
+  async function load(){try{
+    const r=await fetch(API+'?type=detail&sheet=GIS_TIEM_PHONG_KPI&_='+Date.now(),{cache:'no-store'});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const j=await r.json();
+    const rows=Array.isArray(j)?j:(Array.isArray(j?.data)?j.data:(Array.isArray(j?.rows)?j.rows:[]));
+    if(!rows.length)throw new Error(j?.error||'API không trả dữ liệu GIS_TIEM_PHONG_KPI');
+    render(rows);
+  }catch(e){console.error('Không tải được KPI tiêm phòng từ nguồn bảng chi tiết:',e);const card=$('.card-vaccine-kpi');if(card)card.title='Không tải được dữ liệu KPI từ GIS_TIEM_PHONG_KPI: '+e.message;}}
   document.addEventListener('DOMContentLoaded',load);
   window.addEventListener('webgis:refresh-vaccine-kpi',load);
 })();
@@ -5372,7 +5379,7 @@ button,.tool-button,.map-control-button{font-weight:750}
   'card-vdnc':{title:'Viêm da nổi cục',types:['detail:GIS_VDNC']},
   'card-dai':{title:'Bệnh dại',types:['detail:GIS_DAI']},
   'card-phun':{title:'Thực hiện tháng tổng vệ sinh, khử trùng, tiêu độc',types:['detail:GIS_PHUNPHONG']},
-  'card-vaccine-kpi':{title:'Tiêm phòng vắc xin',types:['detail:GIS_TIEM_PHONG_KPI']},
+  'card-vaccine-kpi':{title:'Tiêm phòng vắc xin',types:['detail:GIS_TIEM_PHONG_KPI','tiemphong']},
   'card-ksgm':{title:'Kiểm soát giết mổ',types:['detail:GIS_KSGM']},
   'card-drug':{title:'Cơ sở buôn bán thuốc thú y',types:['detail:GIS_CSBBTTY']},
   'card-tthc-extra':{title:'TTHC lĩnh vực thú y',types:['detail:GIS_TTHC_TONGHOP']},
@@ -5403,26 +5410,49 @@ button,.tool-button,.map-control-button{font-weight:750}
   const data=rows.map(r=>headers.map(h=>r?.[h]??''));
   if(isVaccine){
    const normHeader=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').toLowerCase().replace(/[_-]+/g,' ');
-   const communeHeader=headers.find(h=>/^(xa|xa phuong|ten xa|ten xa phuong|don vi|dia ban|commune|id)$/i.test(normHeader(h).trim())) || headers.find(h=>/ten xa|xa phuong|don vi|dia ban|commune/i.test(normHeader(h))) || headers[0];
+   // Ưu tiên tên xã thật; tuyệt đối không chọn ID làm nhãn địa bàn khi có cột Tên xã.
+   const cleanHeader=h=>normHeader(h).replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+   const communeHeader=headers.find(h=>/^(ten xa|xa|ten xa phuong|xa phuong|xa phuong ten|commune|commune name)$/.test(cleanHeader(h)))
+     || headers.find(h=>/(^| )ten xa( phuong)?( |$)|(^| )xa phuong( |$)|(^| )commune( |$)/.test(cleanHeader(h)))
+     || headers.find(h=>/^dia ban( xa| xa phuong)?$/.test(cleanHeader(h)))
+     || headers[0];
    const tabs=[
-    {id:'dot1',label:'Tiêm định kỳ đợt 1',match:h=>/(dot\s*1|dinh ky dot 1|tiem dot 1|dot 1 dinh ky)/i.test(normHeader(h))},
-    {id:'dot2',label:'Tiêm định kỳ đợt 2',match:h=>/(dot\s*2|dinh ky dot 2|tiem dot 2|dot 2 dinh ky)/i.test(normHeader(h))},
+    {id:'dot1',label:'Tiêm định kỳ đợt 1',match:h=>{const n=cleanHeader(h);return /(^| )(dot 1|dot 01|d1)( |$)/i.test(n)&&!/(^| )(dai|rabies|vdnc)( |$)|viem da noi cuc/i.test(n)}},
+    {id:'dot2',label:'Tiêm định kỳ đợt 2',match:h=>{const n=cleanHeader(h);return /(^| )(dot 2|dot 02|d2)( |$)/i.test(n)&&!/(^| )(dai|rabies|vdnc)( |$)|viem da noi cuc/i.test(n)}},
     {id:'dai',label:'Tiêm dại',match:h=>/(dai|rabies)/i.test(normHeader(h))},
     {id:'vdnc',label:'Viêm da nổi cục',match:h=>/(vdnc|viem da noi cuc)/i.test(normHeader(h))}
    ];
    const assigned=new Set([communeHeader]);
-   tabs.forEach(t=>{t.cols=headers.filter(h=>h!==communeHeader&&t.match(h));t.cols.forEach(h=>assigned.add(h));});
+   tabs.forEach(t=>{t.cols=headers.filter(h=>h!==communeHeader&&t.match(h));
+    // Ẩn nhóm cột KPI_ ở hai tab Tiêm dại và VDNC theo yêu cầu; giữ các cột TIEM_PHONG_.
+    if(t.id==='dai'||t.id==='vdnc') t.cols=t.cols.filter(h=>{const raw=String(h==null?'':h).replace(/^\uFEFF/,'').trim();const normalized=cleanHeader(raw);const isRabiesHerd=t.id==='dai'&&/(tong dan cho meo|tong dan trong dien tiem)/i.test(normalized);if(isRabiesHerd)return true;return !(/^kpi(?:\s|$)/i.test(normalized)||/^kpi[_\s-]/i.test(raw)||/\bKPI[_\s-]/i.test(raw));});
+    t.cols.forEach(h=>assigned.add(h));});
+   // Fallback for headers with compact spelling such as Dot1/Dot2 or D1/D2.
+   const compactHeader=h=>cleanHeader(h).replace(/\s+/g,'');
+   [['dot1',/(dot0?1|d1)/],['dot2',/(dot0?2|d2)/]].forEach(([id,re])=>{
+    const tab=tabs.find(t=>t.id===id);
+    headers.forEach(h=>{
+     const n=compactHeader(h);
+     if(h!==communeHeader&&!assigned.has(h)&&re.test(n)&&!/(dai|rabies|vdnc|viemdanoicuc)/.test(n)){tab.cols.push(h);assigned.add(h);}
+    });
+   });
    // Nếu API đặt tên cột theo dạng chỉ có “Đợt 1/2”, các cột vẫn được phân đúng tab; cột chưa nhận diện được không bị xóa khỏi dữ liệu Excel.
    const other=headers.filter(h=>h!==communeHeader&&!assigned.has(h));
    if(other.length){
-    const likely1=other.filter(h=>/dot\s*1/i.test(normHeader(h))); const likely2=other.filter(h=>/dot\s*2/i.test(normHeader(h)));
+    const likely1=other.filter(h=>/(dot\s*0?1|dot0?1|dinhkydot0?1|tiemdot0?1|\bd1\b)/i.test(normHeader(h))); const likely2=other.filter(h=>/(dot\s*0?2|dot0?2|dinhkydot0?2|tiemdot0?2|\bd2\b)/i.test(normHeader(h)));
     likely1.forEach(h=>{tabs[0].cols.push(h);assigned.add(h)});likely2.forEach(h=>{tabs[1].cols.push(h);assigned.add(h)});
    }
-   const tableHtml=(cols)=>cols.length?'<div class="vaccine-detail-table-wrap"><table class="kpi-detail-table"><thead><tr><th>Xã/phường</th>'+cols.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr><td>'+esc(r?.[communeHeader]??'')+'</td>'+cols.map(h=>'<td>'+esc(r?.[h]??'—')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>':'<p class="vaccine-tab-empty">Không có cột dữ liệu phù hợp với mục này trong dữ liệu API.</p>';
-   body.innerHTML='<div class="vaccine-detail-tabs" role="tablist" aria-label="Nhóm tiêm phòng">'+tabs.map((t,i)=>'<button type="button" class="vaccine-detail-tab'+(i===0?' active':'')+'" role="tab" aria-selected="'+(i===0?'true':'false')+'" data-vaccine-tab="'+t.id+'">'+esc(t.label)+'</button>').join('')+'</div>'+tabs.map((t,i)=>'<section class="vaccine-detail-pane" data-vaccine-pane="'+t.id+'" '+(i===0?'':'hidden')+'>'+tableHtml(t.cols)+'</section>').join('');
+   const displayCell=(h,v)=>{if(v===null||v===undefined||v==='')return '—';const hn=normHeader(h);if(/ty le|ti le|\(%\)|phan tram|percent|rate/.test(hn)){const n=Number(String(v).trim().replace(',','.'));if(Number.isFinite(n))return (n<=1?n*100:n).toLocaleString('vi-VN',{maximumFractionDigits:2})+'%';}return String(v)};
+   const tableHtml=(cols,tabId)=>{let ordered=cols.slice();if(tabId==='dai'){const herdIdx=ordered.findIndex(h=>/(tong dan cho meo|tong dan trong dien tiem)/i.test(cleanHeader(h)));if(herdIdx>0){const herd=ordered.splice(herdIdx,1)[0];ordered.unshift(herd);}}return ordered.length?'<div class="vaccine-detail-table-wrap"><table class="kpi-detail-table"><thead><tr><th>Xã/phường</th>'+ordered.map(h=>'<th>'+esc(/tong dan cho meo|tong dan trong dien tiem/i.test(cleanHeader(h))?'Tổng đàn':h)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr><td>'+esc(r?.[communeHeader]??'')+'</td>'+ordered.map(h=>'<td>'+esc(displayCell(h,r?.[h]))+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>':'<p class="vaccine-tab-empty">Không có cột dữ liệu phù hợp với mục này trong dữ liệu API.</p>';};
+   body.innerHTML='<div class="vaccine-detail-tabs" role="tablist" aria-label="Nhóm tiêm phòng">'+tabs.map((t,i)=>'<button type="button" class="vaccine-detail-tab'+(i===0?' active':'')+'" role="tab" aria-selected="'+(i===0?'true':'false')+'" data-vaccine-tab="'+t.id+'">'+esc(t.label)+'</button>').join('')+'</div>'+tabs.map((t,i)=>'<section class="vaccine-detail-pane" data-vaccine-pane="'+t.id+'" '+(i===0?'':'hidden')+'>'+tableHtml(t.cols,t.id)+'</section>').join('');
    body.querySelectorAll('[data-vaccine-tab]').forEach(btn=>btn.addEventListener('click',()=>{const id=btn.dataset.vaccineTab;body.querySelectorAll('[data-vaccine-tab]').forEach(b=>{const active=b===btn;b.classList.toggle('active',active);b.setAttribute('aria-selected',active?'true':'false')});body.querySelectorAll('[data-vaccine-pane]').forEach(p=>p.hidden=p.dataset.vaccinePane!==id)}));
   }else {
-   body.innerHTML='<div style="overflow:auto;max-height:62vh"><table class="kpi-detail-table"><thead><tr>'+headers.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>'+data.map(row=>'<tr>'+row.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
+   // Ưu tiên đưa cột tên xã/phường lên đầu; không nhầm ID/STT thành tên xã.
+   const normCol=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').toLowerCase().replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim();
+   const communeHeader=headers.find(h=>/^(ten xa|xa|ten xa phuong|xa phuong|xa phuong ten|dia ban xa|commune|commune name)$/.test(normCol(h)))
+     || headers.find(h=>/(^| )(ten xa|xa phuong|commune)( |$)/.test(normCol(h)));
+   const orderedHeaders=communeHeader?[communeHeader,...headers.filter(h=>h!==communeHeader)]:headers;
+   body.innerHTML='<div style="overflow:auto;max-height:62vh"><table class="kpi-detail-table"><thead><tr>'+orderedHeaders.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+orderedHeaders.map(h=>'<td>'+esc(r?.[h]??'')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
   }
   return {headers,data};
  }
