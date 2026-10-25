@@ -2181,6 +2181,17 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
   min-width: 0 !important;
 }
 </style>
+
+<style id="sample-detail-table-layout-fix">
+#kpiDetailBody .sample-detail-table{width:max-content;min-width:100%;table-layout:auto;border-collapse:separate;border-spacing:0;font-size:12px}
+#kpiDetailBody .sample-detail-table th,#kpiDetailBody .sample-detail-table td{padding:8px 10px;vertical-align:middle;white-space:normal;overflow-wrap:anywhere;line-height:1.35;border-right:1px solid #dce6ef;border-bottom:1px solid #dce6ef}
+#kpiDetailBody .sample-detail-table th{position:sticky;top:0;z-index:2;background:#eaf2f9;color:#174a70;text-align:center;font-weight:800;min-width:105px;max-width:220px}
+#kpiDetailBody .sample-detail-table td{min-width:105px;max-width:260px;text-align:left}
+#kpiDetailBody .sample-detail-table .sample-count-cell{min-width:120px;max-width:140px;width:120px;text-align:center;font-weight:700;white-space:normal}
+#kpiDetailBody .sample-detail-table .sample-count-col{width:120px}
+#kpiDetailBody .sample-detail-table tbody tr:nth-child(even){background:#f7fafc}
+#kpiDetailBody .sample-detail-table tbody tr:hover{background:#edf6ff}
+</style>
 </head>
 <body>
 <header class="header">
@@ -5374,7 +5385,7 @@ button,.tool-button,.map-control-button{font-weight:750}
   throw new Error(lastError);
  }
  function ensureModal(){let ov=document.getElementById('kpiDetailOverlay');if(ov)return ov;ov=document.createElement('div');ov.id='kpiDetailOverlay';ov.innerHTML='<section id="kpiDetailDialog" role="dialog" aria-modal="true"><header id="kpiDetailHeader"><h3 id="kpiDetailTitle">Chi tiết KPI</h3><button type="button" class="kpi-action-btn" id="kpiDetailClose">Đóng ✕</button></header><div id="kpiDetailBody"></div><footer id="kpiDetailFooter"><span id="kpiDetailStatus" style="margin-right:auto;font-size:12px;color:#536b7b"></span><button type="button" class="kpi-action-btn" id="kpiDetailDownload" disabled>Tải Excel</button></footer></section>';document.body.appendChild(ov);ov.addEventListener('click',e=>{if(e.target===ov)ov.classList.remove('open')});ov.querySelector('#kpiDetailClose').onclick=()=>ov.classList.remove('open');document.addEventListener('keydown',e=>{if(e.key==='Escape')ov.classList.remove('open')});return ov}
- function renderTable(body,rows,isVaccine=false){
+ function renderTable(body,rows,isVaccine=false,isSample=false){
   if(!rows.length){body.innerHTML='<p>Google Sheets/API chưa trả về dòng dữ liệu cho mục này.</p>';return {headers:[],data:[]};}
   // Lấy nguyên trạng các cột từ API để bảo đảm bảng Excel vẫn có đủ dữ liệu gốc.
   const headers=[];rows.forEach(r=>Object.keys(r||{}).forEach(k=>{if(!headers.includes(k))headers.push(k)}));
@@ -5418,8 +5429,52 @@ button,.tool-button,.map-control-button{font-weight:750}
    body.innerHTML='<div class="vaccine-detail-tabs" role="tablist" aria-label="Nhóm tiêm phòng">'+tabs.map((t,i)=>'<button type="button" class="vaccine-detail-tab'+(i===0?' active':'')+'" role="tab" aria-selected="'+(i===0?'true':'false')+'" data-vaccine-tab="'+t.id+'">'+esc(t.label)+'</button>').join('')+'</div>'+tabs.map((t,i)=>'<section class="vaccine-detail-pane" data-vaccine-pane="'+t.id+'" '+(i===0?'':'hidden')+'>'+tableHtml(t.cols,t.id)+'</section>').join('');
    body.querySelectorAll('[data-vaccine-tab]').forEach(btn=>btn.addEventListener('click',()=>{const id=btn.dataset.vaccineTab;body.querySelectorAll('[data-vaccine-tab]').forEach(b=>{const active=b===btn;b.classList.toggle('active',active);b.setAttribute('aria-selected',active?'true':'false')});body.querySelectorAll('[data-vaccine-pane]').forEach(p=>p.hidden=p.dataset.vaccinePane!==id)}));
   }else {
-   // Ưu tiên đưa cột tên xã/phường lên đầu; không nhầm ID/STT thành tên xã.
+   // Mẫu xét nghiệm: tách riêng từng bệnh thành một tab, vẫn giữ nguyên toàn bộ cột dữ liệu nguồn.
    const normCol=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').toLowerCase().replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim();
+   const diseaseHeader=headers.find(h=>/(ten benh|benh dich|loai benh|chi tieu xet nghiem|benh|loai mau|ten mau)/.test(normCol(h)));
+   if(isSample){
+    // Cấu hình cột hiển thị cho bảng mẫu xét nghiệm (không sửa dữ liệu nguồn).
+    const isExcludedSampleColumn=h=>{
+     const n=normCol(h);
+     // Bỏ chính xác các cột người dùng yêu cầu ẩn; chuẩn hóa để nhận cả tiêu đề có dấu/không dấu.
+     return n==='doi tuong'
+       || n==='don vi xet nghiem'
+       || n==='ngay nhan ket qua'
+       || n==='loai'
+       || n==='loai mau'
+       || n==='muc dich lay mau'
+       || n==='ket qua'
+       || n==='ket qua chi tiet'
+       || n==='ghi chu'
+       || n==='ky bao cao'
+       || n==='nam'
+       || n==='nguon';
+    };
+    // Nhận diện các biến thể tên của ba cột thống kê và buộc chúng xuống cuối bảng.
+    const sampleCountType=h=>{
+     const n=normCol(h);
+     if(/(^| )(so mau )?duong tinh( mau)?$/.test(n)||/(^| )so duong tinh$/.test(n))return 'positive';
+     if(/(^| )(so mau )?am tinh$/.test(n)||/(^| )so am tinh$/.test(n))return 'negative';
+     if(/(^| )(so mau )?(chua co ket qua|chua ket qua|chua kq|cho ket qua|dang cho ket qua)$/.test(n)||/so mau chua/.test(n))return 'pending';
+     return '';
+    };
+    const countOrder={positive:0,negative:1,pending:2};
+    const countHeaders=headers.filter(h=>sampleCountType(h)).sort((a,b)=>countOrder[sampleCountType(a)]-countOrder[sampleCountType(b)]);
+    // Bảng hiển thị và Excel dùng chung một thứ tự cột: ba cột thống kê luôn nằm cuối.
+    const sampleHeaders=headers.filter(h=>!isExcludedSampleColumn(h)&&!sampleCountType(h)).concat(countHeaders);
+    const diseaseName=r=>String(diseaseHeader?(r?.[diseaseHeader]??''):'').trim()||'Chưa xác định bệnh';
+    const classify=name=>{const n=normCol(name);if(/dtlcp|dich ta lon chau phi|dich ta lon chauphi/.test(n))return 'DTLCP';if(/cgc|cum gia cam|h5n1/.test(n))return 'CGC';if(/vdnc|viem da noi cuc/.test(n))return 'VDNC';if(/dai|rabies/.test(n))return 'Dại';if(/lmlm|lo mom long mong/.test(n))return 'LMLM';return name==='Chưa xác định bệnh'?'Chưa xác định bệnh':'Bệnh khác';};
+    const labels=[['dtlcp','DTLCP'],['cgc','Cúm gia cầm (CGC)'],['vdnc','Viêm da nổi cục (VDNC)'],['dai','Bệnh dại'],['lmlm','Lở mồm long móng (LMLM)'],['other','Bệnh khác'],['unknown','Chưa xác định bệnh']];
+    const groups=new Map(labels.map(([id,label])=>[id,{id,label,rows:[]} ]));
+    rows.forEach(r=>{const raw=diseaseName(r),c=classify(raw);const id=c==='DTLCP'?'dtlcp':c==='CGC'?'cgc':c==='VDNC'?'vdnc':c==='Dại'?'dai':c==='LMLM'?'lmlm':c==='Chưa xác định bệnh'?'unknown':'other';groups.get(id).rows.push(r)});
+    const tabs=[...groups.values()].filter(t=>t.rows.length);
+    const sampleCountLabel=h=>{const t=sampleCountType(h);return t==='positive'?'Số mẫu dương tính':t==='negative'?'Số mẫu âm tính':t==='pending'?'Số mẫu chưa có kết quả':h;};
+    const tableFor=rs=>'<div class="sample-detail-table-wrap" style="overflow:auto;max-height:62vh;width:100%"><table class="kpi-detail-table sample-detail-table"><colgroup>'+sampleHeaders.map(h=>'<col class="'+(sampleCountType(h)?'sample-count-col':'sample-data-col')+'">').join('')+'</colgroup><thead><tr>'+sampleHeaders.map(h=>'<th class="'+(sampleCountType(h)?'sample-count-cell':'')+'">'+esc(sampleCountLabel(h))+'</th>').join('')+'</tr></thead><tbody>'+rs.map(r=>'<tr>'+sampleHeaders.map(h=>'<td class="'+(sampleCountType(h)?'sample-count-cell':'')+'">'+esc(r?.[h]??'')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
+    body.innerHTML='<div class="vaccine-detail-tabs sample-detail-tabs" role="tablist" aria-label="Mẫu xét nghiệm theo bệnh">'+tabs.map((t,i)=>'<button type="button" class="vaccine-detail-tab'+(i===0?' active':'')+'" role="tab" aria-selected="'+(i===0?'true':'false')+'" data-sample-tab="'+t.id+'">'+esc(t.label)+' <span>('+t.rows.length+')</span></button>').join('')+'</div>'+tabs.map((t,i)=>'<section class="vaccine-detail-pane" data-sample-pane="'+t.id+'" '+(i===0?'':'hidden')+'>'+tableFor(t.rows)+'</section>').join('');
+    body.querySelectorAll('[data-sample-tab]').forEach(btn=>btn.addEventListener('click',()=>{const id=btn.dataset.sampleTab;body.querySelectorAll('[data-sample-tab]').forEach(b=>{const active=b===btn;b.classList.toggle('active',active);b.setAttribute('aria-selected',active?'true':'false')});body.querySelectorAll('[data-sample-pane]').forEach(p=>p.hidden=p.dataset.samplePane!==id)}));
+    return {headers:sampleHeaders,data:rows.map(r=>sampleHeaders.map(h=>r?.[h]??'')),sheets:tabs.map(t=>({name:t.label.replace(/[\\/?*\[\]:]/g,' ').slice(0,31),headers:sampleHeaders,data:t.rows.map(r=>sampleHeaders.map(h=>r?.[h]??''))}))};
+   }
+   // Bảng chi tiết thông thường giữ nguyên cấu trúc và thứ tự dữ liệu.
    const communeHeader=headers.find(h=>/^(ten xa|xa|ten xa phuong|xa phuong|xa phuong ten|dia ban xa|commune|commune name)$/.test(normCol(h)))
      || headers.find(h=>/(^| )(ten xa|xa phuong|commune)( |$)/.test(normCol(h)));
    const orderedHeaders=communeHeader?[communeHeader,...headers.filter(h=>h!==communeHeader)]:headers;
@@ -5434,11 +5489,12 @@ button,.tool-button,.map-control-button{font-weight:750}
   const ov=ensureModal(),body=ov.querySelector('#kpiDetailBody'),status=ov.querySelector('#kpiDetailStatus'),download=ov.querySelector('#kpiDetailDownload');
   ov.querySelector('#kpiDetailTitle').textContent='Chi tiết: '+cfg.title;body.innerHTML='<p>Đang tải số liệu trực tiếp từ Google Sheets qua API…</p>';status.textContent='Đang tải dữ liệu nguồn';download.disabled=true;ov.classList.add('open');
   try{
-   const result=await fetchSource(cfg.types);const table=renderTable(body,result.rows,key==='card-vaccine-kpi');status.textContent='Nguồn API: '+(result.source||'Google Sheets')+' · '+result.rows.length.toLocaleString('vi-VN')+' dòng';download.disabled=!table.data.length;
+   const result=await fetchSource(cfg.types);const table=renderTable(body,result.rows,key==='card-vaccine-kpi',key==='card-sample-extra');status.textContent='Nguồn API: '+(result.source||'Google Sheets')+' · '+result.rows.length.toLocaleString('vi-VN')+' dòng';download.disabled=!table.data.length;
    download.onclick=()=>{
     if(!window.XLSX||!window.XLSX.utils){status.textContent='Thư viện Excel chưa tải được';return;}
-    const aoa=[table.headers,...table.data];const ws=window.XLSX.utils.aoa_to_sheet(aoa);const wb=window.XLSX.utils.book_new();
-    window.XLSX.utils.book_append_sheet(wb,ws,(cfg.title||'Chi tiet').slice(0,31));
+    const wb=window.XLSX.utils.book_new();
+    if(table.sheets&&table.sheets.length){table.sheets.forEach(sh=>{const ws=window.XLSX.utils.aoa_to_sheet([sh.headers,...sh.data]);window.XLSX.utils.book_append_sheet(wb,ws,sh.name||'Mau xet nghiem')});}
+    else {const aoa=[table.headers,...table.data];const ws=window.XLSX.utils.aoa_to_sheet(aoa);window.XLSX.utils.book_append_sheet(wb,ws,(cfg.title||'Chi tiet').slice(0,31));}
     window.XLSX.writeFile(wb,norm(cfg.title).replace(/\s+/g,'_')+'.xlsx');
    };
   }catch(e){body.innerHTML='<p style="color:#a12622">Không tải được dữ liệu nguồn từ Google Sheets/API: '+esc(e.message)+'. Kiểm tra nhánh API tương ứng và quyền truy cập của Apps Script.</p>';status.textContent='Không có dữ liệu nguồn';download.disabled=true;}
