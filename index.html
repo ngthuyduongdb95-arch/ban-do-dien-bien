@@ -2385,7 +2385,7 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
                 <div class="summary-head"><i class="fa-solid fa-syringe"></i><b>TIÊM PHÒNG</b></div>
                 <div class="summary-grid vaccine-kpi-compact">
                     <span><strong class="vaccine-type">Tiêm định kỳ đợt 1</strong><b class="vaccine-progress" id="kpiTpd1Done">—/45 xã hoàn thành</b></span>
-                    <span><strong class="vaccine-type">Tiêm định kỳ đợt 2</strong><b class="vaccine-progress" id="kpiTpd2Done">—/45 xã hoàn thành</b><em class="vaccine-progress" id="kpiTpd2StartedVisible">—/45 xã đang triển khai</em></span>
+                    <span><strong class="vaccine-type">Tiêm định kỳ đợt 2</strong><b class="vaccine-progress" id="kpiTpd2Done">—/45 xã hoàn thành</b><em class="vaccine-progress" id="kpiTpd2StartedVisible" hidden></em></span>
                     <span class="vaccine-rabies-line"><strong class="vaccine-type">Tiêm dại</strong><b class="vaccine-progress" id="kpiDaiDone">—% tổng đàn</b><em id="kpiDaiStartedVisible">—</em></span>
                     <span><strong class="vaccine-type">Viêm da nổi cục (VDNC)</strong><b class="vaccine-progress" id="kpiVdncDone">—/45 xã hoàn thành</b></span>
                     <span hidden id="kpiTpd1Plan">—</span><span hidden id="kpiTpd1Rate">—</span>
@@ -4773,21 +4773,15 @@ html, body { max-width:100%; }
   }
   function updateText(id,text){const el=$(id);if(el)el.textContent=text;}
   function percent(done,plan){return plan>0?done/plan*100:0;}
-  // Hiển thị trạng thái theo tiến độ thực tế của từng đợt/vắc xin.
+  // Hiển thị một trạng thái duy nhất: nếu còn xã dưới 100% thì chỉ hiện số xã đang triển khai;
+  // chỉ khi tất cả xã có kế hoạch đều đạt 100% mới hiện số xã hoàn thành.
   function vaccineStatus(m){
-    if(!m || (m.complete===0 && m.started===0)) return 'Chưa triển khai';
+    if(!m) return 'Chưa có dữ liệu';
     const complete=Math.max(0,Number(m.complete)||0);
     const started=Math.max(0,Number(m.started)||0);
-    const notStarted=Math.max(0,45-complete-started);
-    if(complete>=45) return '45/45 xã hoàn thành';
-    if(complete===0 && started>0){
-      return 'Đang triển khai: '+started+' xã'+(notStarted>0?' · Chưa triển khai: '+notStarted+' xã':'');
-    }
-    if(complete>0 && started>0){
-      return complete+' xã hoàn thành · '+started+' xã đang triển khai'+(notStarted>0?' · '+notStarted+' xã chưa triển khai':'');
-    }
-    // Khi không còn xã đang triển khai, vẫn nêu rõ số xã đã hoàn thành và số xã chưa triển khai.
-    return complete+'/45 xã hoàn thành'+(notStarted>0?' · '+notStarted+' xã chưa triển khai':'');
+    if(started>0) return started+' xã đang triển khai';
+    if(complete>0) return complete+' xã hoàn thành';
+    return 'Chưa có dữ liệu';
   }
   function countRows(rows, round){
     let plan=0,done=0,complete=0,started=0,hasPlan=0;
@@ -4796,46 +4790,23 @@ html, body { max-width:100%; }
       plan+=p; done+=d;
       if(p<=0)return;
       hasPlan++;
-      // Một xã chỉ hoàn thành khi TỪNG loại vắc xin có kế hoạch đều đạt kế hoạch.
-      // Không cho số tiêm vượt kế hoạch ở loại này bù cho loại khác còn thiếu.
-      const headers=keysOf(r);
-      const normHeader=h=>norm(h).replace(/\bke hoach\b/g,' ').replace(/\bkh\b/g,' ').replace(/\bda tiem\b/g,' ').replace(/\bso duoc tiem\b/g,' ').replace(/\bthuc hien\b/g,' ').replace(/\s+/g,' ').trim();
-      const plans=[];
-      headers.forEach(k=>{
-        const n=norm(k);
-        const inRound=round===0?n.includes('vdnc'):n.includes('dot '+round)&&!n.includes('vdnc');
-        if(!inRound)return;
-        const isPlan=/(^| )(kh|ke hoach)( |$)/.test(n)||n.endsWith(' kh');
-        if(!isPlan)return;
-        const base=normHeader(k);
-        const doneKey=headers.find(other=>{
-          const no=norm(other);
-          const isDone=no.includes('da tiem')||no.includes('so duoc tiem')||no.includes('thuc hien');
-          return isDone&&normHeader(other)===base;
-        });
-        plans.push({p:num(r[k]),d:doneKey?num(r[doneKey]):0});
-      });
-      const planned=plans.filter(x=>x.p>0);
-      if(planned.length){
-        if(planned.every(x=>x.d>=x.p))complete++;
-        else if(planned.some(x=>x.d>0))started++;
-      }else if(d>=p){
-        // Dự phòng nếu API đã trả sẵn các cột KPI tổng hợp.
-        complete++;
-      }else if(d>0){started++;}
+      // Quy tắc KPI: tỷ lệ đạt 100% trở lên là hoàn thành;
+      // tỷ lệ dưới 100% được tính là đang triển khai.
+      if(d>=p) complete++;
+      else started++;
     });
     return {plan,done,complete,started,hasPlan,rate:percent(done,plan)};
   }
   function render(rows){
     if(!Array.isArray(rows)||!rows.length){console.warn('API tiêm phòng chưa trả về dòng dữ liệu.');return;}
     const d1=countRows(rows,1),d2=countRows(rows,2),vd=countRows(rows,0),rabies=countRows(rows,3);
-    // Cả đợt 1 và đợt 2 dùng chung quy tắc trạng thái động theo dữ liệu thực tế.
-    // Chưa có dữ liệu thực hiện được hiển thị là “Chưa triển khai” theo yêu cầu.
+    // Các KPI chỉ hiện một trạng thái: còn xã dưới 100% thì hiện xã đang triển khai;
+    // khi không còn xã nào dưới 100% thì chỉ hiện xã hoàn thành.
     updateText('kpiTpd1Done',vaccineStatus(d1));
     updateText('kpiTpd1Plan',String(d1.plan)); updateText('kpiTpd1Rate',d1.rate.toFixed(1)+'%');
     updateText('kpiTpd1Started',d1.started+'/45');
     updateText('kpiTpd2Done',vaccineStatus(d2));
-    updateText('kpiTpd2StartedVisible',d2.started+'/45 xã đang triển khai');
+    updateText('kpiTpd2StartedVisible','');
     updateText('kpiTpd2Started',d2.started+'/45'); updateText('kpiTpd2Rate',d2.rate.toFixed(1)+'%');
     updateText('kpiDaiRate',rabies.rate.toFixed(1)+'% tổng đàn');
     updateText('kpiDaiDone',rabies.rate.toFixed(1)+'% tổng đàn');
