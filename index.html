@@ -5092,8 +5092,33 @@ html, body { max-width:100%; }
  const fmt=n=>Number(n||0).toLocaleString('vi-VN');
  const val=(r,terms)=>{for(const [k,v] of Object.entries(r||{})){const nk=norm(k);if(terms.every(t=>nk.includes(norm(t)))&&v!==''&&v!=null)return v;}return null;};
  const text=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
- async function fetchRows(types){for(const type of types){try{const res=await fetch(API+'?type='+encodeURIComponent(type)+'&_='+Date.now(),{cache:'no-store'});if(!res.ok)continue;const j=await res.json();const rows=Array.isArray(j)?j:(Array.isArray(j?.data)?j.data:[]);if(rows.length)return {type,rows};}catch(e){}}return {type:'',rows:[]};}
- function procedureCategory(name){const n=norm(name);if(n.includes('chung chi')&&n.includes('hanh nghe'))return 'practice';if((n.includes('du dieu kien')||n.includes('du dk'))&&(n.includes('buon ban')||n.includes('thuoc thu y')))return 'drug';if(n.includes('kiem dich'))return 'quarantine';return ''; }
+ async function fetchRows(types){
+   let lastError='API không trả dữ liệu';
+   for(const type of types){
+    try{
+     const isDetail=type.startsWith('detail:');
+     const url=isDetail
+       ? API+'?type=detail&sheet='+encodeURIComponent(type.slice(7))+'&_='+Date.now()
+       : API+'?type='+encodeURIComponent(type)+'&_='+Date.now();
+     const res=await fetch(url,{cache:'no-store'});
+     if(!res.ok){lastError='HTTP '+res.status;continue;}
+     const j=await res.json();
+     const rows=Array.isArray(j)?j:(Array.isArray(j?.data)?j.data:(Array.isArray(j?.rows)?j.rows:[]));
+     if(rows.length)return {type,rows};
+     if(j?.error)lastError=j.error;
+    }catch(e){lastError=e.message||lastError;}
+   }
+   console.error('TTHC KPI: không lấy được dữ liệu từ API. Đã thử các nguồn:',types,lastError);
+   return {type:'',rows:[],error:lastError};
+ }
+ function procedureCategory(name){
+   const n=norm(name);
+   // Sheet thực tế dùng tên viết tắt: Cấp/Gia hạn/Cấp lại CCHN thú y.
+   if((n.includes('chung chi')&&n.includes('hanh nghe'))||(/\bcchn\b/.test(n)&&n.includes('thu y')))return 'practice';
+   if((n.includes('du dieu kien')||n.includes('du dk'))&&(n.includes('buon ban')||n.includes('thuoc thu y')))return 'drug';
+   if(n.includes('kiem dich'))return 'quarantine';
+   return '';
+ }
  function numericValue(v){if(typeof v==='number'&&Number.isFinite(v))return v;const s=String(v??'').trim().replace(/\s/g,'').replace(/\.(?=\d{3}(\D|$))/g,'').replace(/,/g,'.');const n=Number(s);return Number.isFinite(n)?n:0;}
  function countValue(r){const v=val(r,['tong so ho so'])??val(r,['so luong ho so'])??val(r,['so ho so'])??val(r,['tong so'])??val(r,['so luong']);return v==null?1:Math.max(0,numericValue(v));}
  function renderTTHC(rows,source){
@@ -5126,7 +5151,7 @@ html, body { max-width:100%; }
    if(lines && !counts.length){const row=document.createElement('div');row.className='extra-kpi-row';row.textContent=rows.length?'Chưa xác định được tên bệnh trong dữ liệu mẫu.':'Chưa có dữ liệu mẫu xét nghiệm.';lines.appendChild(row);}
    text('kpiMauXNNote',totalSamples?'Số mẫu dương tính / tổng số mẫu · Nguồn: '+source:'Chưa đọc được dữ liệu mẫu xét nghiệm từ GIS_LAYMAU.');
  }
- async function load(){const [tthc,samples]=await Promise.all([fetchRows(['tthc','TTHC']),fetchRows(['mauxetnghiem','xetnghiem','mau'])]);renderTTHC(tthc.rows,tthc.type);renderSamples(samples.rows,samples.type);}
+ async function load(){const [tthc,samples]=await Promise.all([fetchRows(['detail:GIS_TTHC_TONGHOP','detail:Giải quyết TTHC 2026','tthc','TTHC']),fetchRows(['detail:GIS_LAYMAU','mauxetnghiem','xetnghiem','mau'])]);renderTTHC(tthc.rows,tthc.type);if(!tthc.rows.length)text('kpiTTHCNote','Không lấy được dữ liệu TTHC: '+(tthc.error||'API chưa trả dữ liệu'));renderSamples(samples.rows,samples.type);}
  document.addEventListener('DOMContentLoaded',load);window.addEventListener('webgis:refresh-extra-kpi',load);
 })();
 </script>
