@@ -3850,15 +3850,26 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
     const n=Number(x); return Number.isFinite(n)?n:null;
   }
   function parseISODate(v){
-    if(!v) return null;
-    if(v instanceof Date && !isNaN(v)) return new Date(v.getFullYear(),v.getMonth(),v.getDate());
-    const x=String(v).trim(); let m=x.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
-    if(m) return new Date(+m[1],+m[2]-1,+m[3]);
-    m=x.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})/);
-    if(m) return new Date(+m[3],+m[2]-1,+m[1]);
-    const d=new Date(x); return isNaN(d)?null:new Date(d.getFullYear(),d.getMonth(),d.getDate());
+    if(v===null||v===undefined||v==='') return null;
+    if(v instanceof Date && !isNaN(v.getTime())) return new Date(v.getFullYear(),v.getMonth(),v.getDate());
+    const x=String(v).trim(); let m=x.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:$|[T\s])/);
+    let y,mo,da;
+    if(m){y=+m[1];mo=+m[2];da=+m[3];}
+    else {
+      m=x.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})(?:$|[T\s])/);
+      if(m){da=+m[1];mo=+m[2];y=+m[3];}
+    }
+    if(y!==undefined){
+      const d=new Date(y,mo-1,da);
+      // Không chấp nhận ngày không tồn tại như 31/02; tránh lọt sai kỳ báo cáo.
+      if(d.getFullYear()!==y||d.getMonth()!==mo-1||d.getDate()!==da)return null;
+      return d;
+    }
+    const d=new Date(x); return isNaN(d.getTime())?null:new Date(d.getFullYear(),d.getMonth(),d.getDate());
   }
-  function iso(v){return parseISODate(v)?.toISOString().slice(0,10)||'';}
+  // Serialize lịch ngày theo giờ địa phương, không dùng toISOString() vì tại Việt Nam
+  // 00:00 giờ địa phương có thể bị lùi về ngày hôm trước khi chuyển sang UTC.
+  function iso(v){const d=parseISODate(v);if(!d)return '';const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return `${y}-${m}-${day}`;}
   function diseaseCode(row){
     const raw=norm(getField(row,['Bệnh','Tên bệnh','Mã bệnh','Loại bệnh','Disease','Disease code','Ma benh'])||'');
     if(raw.includes('dtlcp')||raw.includes('dich ta lon chau phi')||raw.includes('lon chau phi')) return 'DTLCP';
@@ -4103,12 +4114,14 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
     if(!window.XLSX || !window.XLSX.utils) throw new Error('Chưa tải được thư viện Excel. Kiểm tra Internet rồi tải lại trang (Ctrl+F5).');
     const enc=x=>encodeURIComponent(x), base=API_URL;
     const year=(parseISODate(to)||new Date()).getFullYear(), ytdStart=String(year)+'-01-01'; // Tách rõ phát sinh trong kỳ và lũy kế từ 01/01 đến ngày kết thúc kỳ.
-    const [periodReport,ytdReport,trendResult,vaccineResult,spray1Result,spray2Result,ksgmResult,mainResult]=await Promise.all([
+    const [periodReport,ytdReport,trendResult,vaccineResult,spray1Result,spray2Result,ksgmResult,mainResult,tthcResult,sampleResult]=await Promise.all([
       fetchOptional(base+'?type=report&from='+enc(from)+'&to='+enc(to)),
       fetchOptional(base+'?type=report&from='+enc(ytdStart)+'&to='+enc(to)), // Lũy kế đầu năm đến ngày kết thúc kỳ
       fetchOptional(base+'?type=trend'),fetchOptional(base+'?type=tiemphong'),
       fetchOptional(base+'?type=phun'),fetchOptional(base+'?type=phun2'),
-      fetchOptional(base+'?type=ksgm'),fetchOptional(base)
+      fetchOptional(base+'?type=ksgm'),fetchOptional(base),
+      fetchOptional(base+'?type=tthc&from='+enc(from)+'&to='+enc(to)),
+      fetchOptional(base+'?type=mauxetnghiem&from='+enc(from)+'&to='+enc(to))
     ]);
     const isDetailRow = r => {
       const name=String(getField(r,['Tên xã/phường','Tên xã','Tên xã có bệnh','Xã/phường','Xã','Địa bàn','TEN_XA','TENXA','Commune'])||'').trim();
@@ -4127,12 +4140,20 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
       vaccineRows=arrayFromApi(vaccineResult).filter(isDetailRow).filter(r=>inSelectedPeriod(r,[
         'Ngày tiêm','Ngày thực hiện tiêm','Ngày triển khai','Ngày ghi nhận','Ngày cập nhật','Ngày báo cáo','Ngày thống kê','Ngày'
       ])),
-      // TIEN_DO_PHUN_PHONG là bảng tiến độ hiện tại, không có cột ngày nghiệp vụ.
-      // Không lọc bảng này theo kỳ giả tạo; báo cáo phải ghi rõ đây là ảnh chụp tiến độ.
-      spray1Rows=arrayFromApi(spray1Result).filter(isDetailRow),
-      spray2Rows=arrayFromApi(spray2Result).filter(isDetailRow),
+      // Chỉ đưa hoạt động vào kỳ khi nguồn có ngày nghiệp vụ nằm trong khoảng đã chọn.
+      // Bảng phun phòng chỉ có tiến độ hiện tại thì không được dùng thay cho phát sinh trong kỳ.
+      spray1Rows=arrayFromApi(spray1Result).filter(isDetailRow).filter(r=>inSelectedPeriod(r,[
+        'Ngày phun','Ngày thực hiện','Ngày triển khai','Ngày ghi nhận','Ngày cập nhật','Ngày báo cáo','Ngày thống kê','Ngày'
+      ])),
+      spray2Rows=arrayFromApi(spray2Result).filter(isDetailRow).filter(r=>inSelectedPeriod(r,[
+        'Ngày phun','Ngày thực hiện','Ngày triển khai','Ngày ghi nhận','Ngày cập nhật','Ngày báo cáo','Ngày thống kê','Ngày'
+      ])),
       ksgmRows=arrayFromApi(ksgmResult).filter(isDetailRow),
-      mainRows=(arrayFromApi(mainResult).length?arrayFromApi(mainResult):getLiveRows()).filter(isDetailRow);
+      mainRows=(arrayFromApi(mainResult).length?arrayFromApi(mainResult):getLiveRows()).filter(isDetailRow),
+      tthcSourceRows=arrayFromApi(tthcResult).filter(r=>r&&typeof r==='object'),
+      sampleSourceRows=arrayFromApi(sampleResult).filter(r=>r&&typeof r==='object'),
+      tthcPeriodRows=tthcSourceRows.filter(r=>inSelectedPeriod(r,['Ngày trả kết quả','Ngày trả KQ','Ngày tiếp nhận','Ngày nhận hồ sơ','Ngày giải quyết','Ngày cấp','Ngày thực hiện','Ngày cập nhật','Ngày'])),
+      samplePeriodRows=sampleSourceRows.filter(r=>inSelectedPeriod(r,['Ngày lấy mẫu','Ngày gửi mẫu','Ngày tiếp nhận mẫu','Ngày nhận mẫu','Ngày xét nghiệm','Ngày có kết quả','Ngày trả kết quả','Ngày cập nhật','Ngày']));
     const wb=window.XLSX.read(TEMPLATE_B64,{type:'base64',cellStyles:true,cellDates:true});
     const required=['DTLCP','TTHC','Dịch bệnh khác','TP VDNC','KSGM','Tiêm phòng dại','Tiêm phòng định kỳ đợt 2','Tiêm phòng định kỳ đợt 1','Phun phòng đợt 2','Phun phòng đợt 1'];
     required.forEach(n=>{if(!wb.Sheets[n])throw new Error('File mẫu Excel thiếu sheet: '+n);});
@@ -4318,14 +4339,8 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
     const ksgmSh=ws('KSGM');extendRows(ksgmSh,49,6,4);
     [...ksgmAgg.values()].sort((a,b)=>a.xa.localeCompare(b.xa,'vi')).slice(0,45).forEach((g,i)=>{const rr=4+i;put(ksgmSh,rr,0,i+1);putText(ksgmSh,rr,1,g.xa);put(ksgmSh,rr,2,g.pig);put(ksgmSh,rr,3,g.cow);put(ksgmSh,rr,4,g.poultry);put(ksgmSh,rr,5,g.goat);});
     // TTHC chỉ lấy dòng có đủ tên thủ tục và ngày trả kết quả từ dữ liệu đang được API cung cấp.
-    const tthcRows=mainRows.filter(r=>{
-      if(findTokens(r,[['ten tthc'],['ten thu tuc hanh chinh']])===null)return false;
-      const rawDate=findTokens(r,[['ngay tra kq'],['ngay tra ket qua']]);
-      if(rawDate===null)return false;
-      const d=parseISODate(rawDate),a=parseISODate(from),b=parseISODate(to);
-      return !!(d&&a&&b&&d>=a&&d<=b);
-    });
-    tthcRows.slice(0,14).forEach((r,i)=>{const rr=4+i;put(ws('TTHC'),rr,0,i+1);putText(ws('TTHC'),rr,1,findTokens(r,[['ten tthc'],['ten thu tuc hanh chinh']]));putText(ws('TTHC'),rr,2,findTokens(r,[['ngay tra kq'],['ngay tra ket qua']]));});
+    const tthcRows=tthcPeriodRows.filter(r=>findTokens(r,[['ten tthc'],['ten thu tuc hanh chinh'],['ten thu tuc'],['thu tuc']])!==null);
+    tthcRows.slice(0,14).forEach((r,i)=>{const rr=4+i;put(ws('TTHC'),rr,0,i+1);putText(ws('TTHC'),rr,1,findTokens(r,[['ten tthc'],['ten thu tuc hanh chinh'],['ten thu tuc'],['thu tuc']]));putText(ws('TTHC'),rr,2,findTokens(r,[['ngay tra kq'],['ngay tra ket qua'],['ngay tiep nhan'],['ngay giai quyet'],['ngay cap'],['ngay thuc hien'],['ngay cap nhat'],['ngay']]));});
     // DTLCP: bảng mẫu có cả chỉ tiêu phát sinh trong kỳ (p/periodGroups) và lũy kế từ 01/01 đến ngày kết thúc (y/ytdGroups). Không lấy KPI trên bản đồ thay thế cho dữ liệu báo cáo.
     const pSum=diseaseSummary(periodReport,'DTLCP'), ySum=diseaseSummary(ytdReport,'DTLCP');
     const periodGroups=buildCommuneGroups(getRowsFor('DTLCP',trendRows,iso(from),iso(to)),'DTLCP');
@@ -4361,8 +4376,39 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
       });
       if(names.length>spec.capacity)putText(otherSh,spec.first+spec.capacity-1,10,'Mẫu chỉ bố trí '+spec.capacity+' dòng; còn '+(names.length-spec.capacity)+' xã chưa thể trình bày trong mẫu này.');
     }
-    // Ghi chú nguồn trong các sheet không có API chi tiết tương ứng, thay vì tự điền số liệu mẫu.
-    putText(ws('TTHC'),1,0,'Từ ngày '+dateLabel(from)+' đến ngày '+dateLabel(to));
+    // TÁCH TAB DỊCH BỆNH THEO TỪNG KPI; mỗi tab dùng cùng nguồn GIS_DICH_BENH_NGAY (type=trend).
+    const diseaseTabSpecs=[
+      {code:'CGC',title:'Cúm gia cầm'},
+      {code:'VDNC',title:'Viêm da nổi cục'},
+      {code:'DAI',title:'Bệnh dại'}
+    ];
+    const diseaseTabNames=[];
+    for(const spec of diseaseTabSpecs){
+      const pg=buildCommuneGroups(getRowsFor(spec.code,trendRows,iso(from),iso(to)),spec.code);
+      const yg=buildCommuneGroups(getRowsFor(spec.code,trendRows,iso(ytdStart),iso(to)),spec.code);
+      const ps=diseaseSummary(periodReport,spec.code),ys=diseaseSummary(ytdReport,spec.code);
+      // Luôn tạo tab cho từng KPI dịch bệnh, kể cả kỳ không có phát sinh; khi đó tab ghi rõ 'Chưa có dữ liệu'.
+      const tab=spec.code==='DAI'?'Dại':spec.code;
+      const diseaseWs=makeDiseaseSheet(spec.code,'TÌNH HÌNH '+spec.title.toUpperCase()+' TRÊN ĐỊA BÀN TỈNH ĐIỆN BIÊN',from,to,ps,ys,pg,yg,false);
+      diseaseWs['A3']={t:'s',v:'Nguồn: GIS_DICH_BENH_NGAY (API type=trend) · lọc theo ngày phát hiện/xảy ra/ghi nhận trong kỳ; lũy kế từ 01/01 đến ngày kết thúc.'};
+      wb.Sheets[tab]=diseaseWs; wb.SheetNames.push(tab); diseaseTabNames.push(tab);
+    }
+    // Tab mẫu xét nghiệm bám đúng KPI MẪU XÉT NGHIỆM và nguồn API type=mauxetnghiem.
+    const sampleSheetRows=[['BÁO CÁO MẪU XÉT NGHIỆM THEO KHOẢNG NGÀY'],['Từ ngày '+dateLabel(from)+' đến ngày '+dateLabel(to)],[],['TT','Bệnh/chỉ tiêu xét nghiệm','Tổng số mẫu','Số mẫu dương tính','Số mẫu âm tính/chưa dương tính','Ngày lấy/gửi/nhận mẫu','Xã/phường','Mã mẫu','Kết quả xét nghiệm']];
+    const sampleGroups=new Map();
+    const sampleLabelOf=r=>String(getField(r,['Tên bệnh','Bệnh dịch','Loại bệnh','Chỉ tiêu xét nghiệm','Bệnh','Loại mẫu','Tên mẫu'])||'').trim();
+    const sampleIsPositive=r=>{const explicit=getField(r,['Số mẫu dương tính','Mẫu dương tính','Dương tính']);if(explicit!==undefined){const n=numVal(explicit);if(n!==null)return n>0;}const result=norm(getField(r,['Kết quả xét nghiệm','Kết quả','Nhận xét','Kết luận','Result'])||'');return result.includes('duong tinh')||result==='positive'||result==='pos';};
+    samplePeriodRows.forEach(r=>{const label=sampleLabelOf(r);if(!label)return;if(!sampleGroups.has(label))sampleGroups.set(label,{total:0,positive:0});const g=sampleGroups.get(label);g.total++;if(sampleIsPositive(r))g.positive++;});
+    [...sampleGroups.entries()].sort((a,b)=>a[0].localeCompare(b[0],'vi')).forEach(([label,g])=>sampleSheetRows.push(['',label,g.total,g.positive,g.total-g.positive]));
+    samplePeriodRows.forEach((r,i)=>sampleSheetRows.push([i+1,sampleLabelOf(r),1,sampleIsPositive(r)?1:0,sampleIsPositive(r)?0:1,getField(r,['Ngày lấy mẫu','Ngày gửi mẫu','Ngày tiếp nhận mẫu','Ngày nhận mẫu','Ngày xét nghiệm','Ngày có kết quả','Ngày trả kết quả','Ngày cập nhật','Ngày']),communeName(r),getField(r,['Mã mẫu','Số mẫu','Mã số mẫu','Ký hiệu mẫu']),getField(r,['Kết quả xét nghiệm','Kết quả','Nhận xét','Kết luận','Result'])]));
+    if(!samplePeriodRows.length) sampleSheetRows.push(['','Chưa có dữ liệu mẫu xét nghiệm trong khoảng ngày đã chọn.']);
+    {
+      const sampleWs=createStyledSheet(sampleSheetRows,'Mẫu xét nghiệm',[6,30,14,16,22,20,24,20,30],[0,8],[3],[sampleSheetRows.length-1]);
+      sampleWs['A3']={t:'s',v:'Nguồn: API type=mauxetnghiem · lọc theo ngày lấy/gửi/tiếp nhận/xét nghiệm/kết quả trong kỳ.'};
+      addMerge(sampleWs,0,0,0,8);addMerge(sampleWs,1,0,1,8);wb.Sheets['Mẫu xét nghiệm']=sampleWs;wb.SheetNames.push('Mẫu xét nghiệm');
+    }
+    // Ghi chú nguồn dữ liệu và khoảng ngày ngay trên từng tab.
+    putText(ws('TTHC'),1,0,'Nguồn: API type=tthc · Từ ngày '+dateLabel(from)+' đến ngày '+dateLabel(to));
     // Định dạng tỷ lệ: giá trị được lưu theo thang 0–100, vì vậy dùng mẫu 0.0"%" (không nhân 100 lần nữa).
     function normalizeRate(value){const n=numVal(value);if(n===null)return null;return n>1?n/100:n;}
     function setNumberFormat(sheetName,rows,cols,fmt){const sh=ws(sheetName);for(const r of rows)for(const c of cols){const a=window.XLSX.utils.encode_cell({r,c});if(sh[a]&&typeof sh[a].v==='number')sh[a].z=fmt;}}
@@ -4380,8 +4426,82 @@ body{overflow:auto !important; min-height:100vh; height:auto !important;}
     formatSheet('Tiêm phòng định kỳ đợt 2','A1:P50',[23,18,18,16,21,18,16,18,18,16,18,18,16,19,18,16],[3],[0]);
     formatSheet('Phun phòng đợt 1','A1:H49',[6,24,14,16,20,24,32,10],[3],[0]);
     formatSheet('Phun phòng đợt 2','A1:H48',[6,24,14,16,20,24,32,10],[2],[0]);
+    // Chỉ giữ các tab tiêm/phun có hoạt động thực tế trong khoảng ngày đã chọn.
+    // Các đợt đã hoàn thành ở kỳ trước sẽ không xuất hiện lại nếu kỳ này không có phát sinh.
+    const normReportKey=v=>norm(v).replace(/[_-]+/g,' ');
+    const hasRoundActivity=(round)=>vaccineRows.some(r=>Object.entries(r||{}).some(([k,v])=>{
+      const nk=normReportKey(k), value=numVal(v);
+      return nk.includes('dot '+round) && (nk.includes('ke hoach')||nk.includes(' kh')||nk.includes('da tiem')||nk.includes('so duoc tiem')||nk.includes('thuc hien')) && value!==null && value>0;
+    }));
+    const hasVdncActivity=vaccineRows.some(r=>Object.entries(r||{}).some(([k,v])=>{
+      const nk=normReportKey(k), value=numVal(v);
+      return nk.includes('vdnc') && (nk.includes('ke hoach')||nk.includes('tong dan')||nk.includes('da tiem')||nk.includes('so duoc tiem')) && value!==null && value>0;
+    }));
+    const hasRabiesActivity=vaccineRows.some(r=>Object.entries(r||{}).some(([k,v])=>{
+      const nk=normReportKey(k), value=numVal(v);
+      return nk.includes('dai') && (nk.includes('da tiem')||nk.includes('so duoc tiem')||nk.includes('so lieu da tiem')) && value!==null && value>0;
+    }));
+    const removeSheet=name=>{if(wb.Sheets[name])delete wb.Sheets[name];wb.SheetNames=wb.SheetNames.filter(n=>n!==name);};
+    // Giữ cố định các tab KPI: không xóa tab khi kỳ báo cáo không có phát sinh.
+    // Dữ liệu của từng tab vẫn được lọc theo kỳ; tab rỗng sẽ ghi chú không có dữ liệu.
+    // Chỉ bỏ tab gộp cũ vì các KPI dịch bệnh đã được tách thành các tab riêng.
+    removeSheet('Dịch bệnh khác');
+    // Xuất bảng theo đúng cấu trúc cột của từng nguồn KPI, không dùng lại bảng mẫu Excel cũ.
+    // Các tab luôn cố định; khi kỳ không có dữ liệu thì giữ tiêu đề cột nguồn và ghi chú rõ ràng.
+    const sourceBook=window.XLSX.utils.book_new();
+    const sourceDateFields=['Ngày phát hiện','Ngày xảy ra','Ngày ghi nhận','Ngày cập nhật','Ngày báo cáo','Ngày thống kê','Ngày tiêm','Ngày thực hiện tiêm','Ngày triển khai','Ngày phun','Ngày thực hiện','Ngày tiếp nhận','Ngày tiếp nhận mẫu','Ngày lấy mẫu','Ngày gửi mẫu','Ngày xét nghiệm','Ngày có kết quả','Ngày trả kết quả','Ngày giải quyết','Ngày cấp','Ngày'];
+    const sourceDateFilter=(rows)=>rows.filter(r=>inSelectedPeriod(r,sourceDateFields));
+    const sourceRowsByDisease=code=>trendRows.filter(r=>diseaseCode(r)===code&&isInRange(rowDate(r,code),from,to));
+    const makeSourceSheet=(tab,rows,headerSource,sourceLabel,includeTokens=[])=>{
+      const source=(headerSource&&headerSource.length?headerSource:rows)||[];
+      let headers=[];
+      source.forEach(r=>Object.keys(r||{}).forEach(k=>{if(!headers.includes(k))headers.push(k);}));
+      if(includeTokens.length){
+        const shared=headers.filter(h=>/xã|địa bàn|commune|tên xã|ngày|thời gian|đợt|vắc xin|vacxin/i.test(h));
+        const specific=headers.filter(h=>includeTokens.some(t=>norm(h).includes(norm(t))));
+        const chosen=[...new Set([...shared,...specific])]; if(specific.length)headers=chosen;
+      }
+      const dataRows=rows||[];
+      const aoa=[];
+      aoa.push(['BẢNG DỮ LIỆU KPI: '+tab]);
+      aoa.push(['Khoảng thời gian: '+dateLabel(from)+' đến '+dateLabel(to)]);
+      aoa.push(['Nguồn dữ liệu: '+sourceLabel]);
+      if(headers.length){aoa.push(headers);dataRows.forEach(r=>aoa.push(headers.map(h=>r&&r[h]!==undefined?r[h]:'')));}
+      else {aoa.push(['Thông tin']);aoa.push([`Không có dữ liệu trong khoảng ngày đã chọn.`]);}
+      if(headers.length&&!dataRows.length)aoa.push(['Không có dữ liệu trong khoảng ngày đã chọn.']);
+      const sh=window.XLSX.utils.aoa_to_sheet(aoa);
+      // Định dạng tiêu đề và hàng tên cột gần với bảng KPI nguồn, giữ nguyên tên trường nguồn.
+      for(let c=0;c<(headers.length||1);c++){const a=window.XLSX.utils.encode_cell({r:0,c});if(sh[a])sh[a].s={font:{bold:true,color:{rgb:'FFFFFF'},sz:14},fill:{fgColor:{rgb:'174A35'}},alignment:{vertical:'center',wrapText:true}};}
+      for(let c=0;c<(headers.length||1);c++){const a=window.XLSX.utils.encode_cell({r:3,c});if(sh[a])sh[a].s={font:{bold:true,color:{rgb:'FFFFFF'}},fill:{fgColor:{rgb:'287A56'}},alignment:{vertical:'center',horizontal:'center',wrapText:true},border:{bottom:{style:'thin',color:{rgb:'B8C9BF'}}}};}
+      sh['!rows']=[{hpt:28},{hpt:22},{hpt:22},{hpt:36}];
+      sh['!cols']=(headers.length?headers:['Thông tin']).map(h=>({wch:Math.max(14,Math.min(32,String(h).length+3))}));
+      sh['!freeze']={xSplit:0,ySplit:4};
+      sh['!autofilter']=headers.length?{ref:window.XLSX.utils.encode_range({s:{r:3,c:0},e:{r:Math.max(3,aoa.length-1),c:headers.length-1}})}:undefined;
+      if(headers.length)sh['!ref']=window.XLSX.utils.encode_range({s:{r:0,c:0},e:{r:Math.max(3,aoa.length-1),c:headers.length-1}});
+      window.XLSX.utils.book_append_sheet(sourceBook,sh,tab.slice(0,31));
+    };
+    const rawVax=arrayFromApi(vaccineResult).filter(isDetailRow);
+    const rawSpray1=arrayFromApi(spray1Result).filter(isDetailRow),rawSpray2=arrayFromApi(spray2Result).filter(isDetailRow);
+    const rawKsgm=arrayFromApi(ksgmResult).filter(isDetailRow);
+    const periodKsgm=sourceDateFilter(rawKsgm);
+    const sourceSpecs=[
+      ['DTLCP',sourceRowsByDisease('DTLCP'),trendRows,'GIS_DICH_BENH_NGAY (API type=trend), lọc ngày phát sinh/ghi nhận'],
+      ['CGC',sourceRowsByDisease('CGC'),trendRows,'GIS_DICH_BENH_NGAY (API type=trend), lọc ngày phát sinh/ghi nhận'],
+      ['VDNC',sourceRowsByDisease('VDNC'),trendRows,'GIS_DICH_BENH_NGAY (API type=trend), lọc ngày phát sinh/ghi nhận'],
+      ['Dại',sourceRowsByDisease('DAI'),trendRows,'GIS_DICH_BENH_NGAY (API type=trend), lọc ngày phát sinh/ghi nhận'],
+      ['TTHC',tthcPeriodRows,tthcSourceRows,'API type=tthc'],
+      ['Mẫu xét nghiệm',samplePeriodRows,sampleSourceRows,'API type=mauxetnghiem'],
+      ['KSGM',periodKsgm,rawKsgm,'API type=ksgm, lọc ngày nghiệp vụ trong kỳ'],
+      ['Tiêm phòng VDNC',vaccineRows,rawVax,'API type=tiemphong, dữ liệu nguồn KPI tiêm phòng',['vdnc']],
+      ['Tiêm phòng dại',vaccineRows,rawVax,'API type=tiemphong, dữ liệu nguồn KPI tiêm phòng',['dai']],
+      ['Tiêm phòng đợt 1',vaccineRows,rawVax,'API type=tiemphong, dữ liệu nguồn KPI tiêm phòng đợt 1',['dot 1']],
+      ['Tiêm phòng đợt 2',vaccineRows,rawVax,'API type=tiemphong, dữ liệu nguồn KPI tiêm phòng đợt 2',['dot 2']],
+      ['Phun phòng đợt 1',spray1Rows,rawSpray1,'API type=phun, lọc ngày nghiệp vụ trong kỳ'],
+      ['Phun phòng đợt 2',spray2Rows,rawSpray2,'API type=phun2, lọc ngày nghiệp vụ trong kỳ']
+    ];
+    sourceSpecs.forEach(([name,rows,headers,source,tokens])=>makeSourceSheet(name,rows,headers,source,tokens||[]));
     const safeFrom=from.replace(/-/g,''),safeTo=to.replace(/-/g,'');
-    window.XLSX.writeFile(wb,'Bang_so_lieu_thu_y_'+safeFrom+'_den_'+safeTo+'.xlsx');
+    window.XLSX.writeFile(sourceBook,'Bang_so_lieu_KPI_theo_nguon_'+safeFrom+'_den_'+safeTo+'.xlsx');
   }
   // Xem trước bảng tổng hợp theo kiểu bảng chi tiết KPI: mở trong cửa sổ ngay trên WebGIS,
   // cho phép chuyển sheet và chỉ tải file khi người dùng bấm nút tải xuống.
