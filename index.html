@@ -3261,11 +3261,14 @@ document.addEventListener("DOMContentLoaded", function () {
     return d.getTime()>=start.getTime() && d.getTime()<=end.getTime();
   }
   const TREND_API_URL = "https://script.google.com/macros/s/AKfycbyRuJ9Wfv4HtWjMRT2Hox2-mOhBVRjyqLaHhpQjohPEkfHWNyjM004KgO3o7_4nRJtj/exec?type=trend";
-  let trendRows = [];
+  const DAILY_DISEASE_API_URL = TREND_API_URL.replace("?type=trend", "?type=daily");
+  const MONTHLY_DISEASE_API_URL = TREND_API_URL.replace("?type=trend", "?type=monthly");
+  let trendRows = [];          // DTLCP: giữ nguyên nguồn đã chạy ổn định
+  let dailyDiseaseRows = [];   // CGC, VDNC, Dại: GIS_BIEU_DO_NGAY
+  let monthlyDiseaseRows = []; // CGC, VDNC, Dại: GIS_BIEU_DO_THANG
   let trendLoadStarted = false;
   let trendLoadError = "";
-  // Biểu đồ tháng dùng cùng nguồn GIS_DICH_BENH_NGAY với biểu đồ diễn biến theo ngày.
-  // Không gọi sheet tổng hợp tháng riêng, tránh lệch nguồn và phải duy trì dữ liệu trùng lặp.
+  let dailyLoadError = "";
   let monthlyLoadError = "";
 
   function normText(v){
@@ -3274,26 +3277,20 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   function firstValue(row, keys){
     const usable = v => v !== "" && v !== null && v !== undefined;
-    for(const k of keys){
-      if(Object.prototype.hasOwnProperty.call(row,k) && usable(row[k])) return row[k];
-    }
+    for(const k of keys){ if(Object.prototype.hasOwnProperty.call(row,k) && usable(row[k])) return row[k]; }
     const wanted = keys.map(normText);
-    const actual = Object.keys(row);
-    for(let i=0;i<actual.length;i++){
-      if(wanted.includes(normText(actual[i])) && usable(row[actual[i]])) return row[actual[i]];
-    }
+    for(const [k,v] of Object.entries(row || {})){ if(wanted.includes(normText(k)) && usable(v)) return v; }
     return null;
   }
-  // Fallback for source-sheet headers that contain extra words or punctuation.
   function fuzzyValue(row, kind){
     const entries = Object.entries(row || {}).filter(([k,v]) => v !== "" && v !== null && v !== undefined);
-    const normalized = entries.map(([k,v]) => [normText(k),v,k]);
+    const normalized = entries.map(([k,v]) => [normText(k),v]);
     if(kind === "date"){
       const hit = normalized.find(([k]) => k === "ngay" || k.startsWith("ngay ") || k.includes(" ngay ") || k.endsWith(" ngay"));
       return hit ? hit[1] : null;
     }
     if(kind === "case"){
-      const hit = normalized.find(([k]) => (k.includes("mac") || k.includes("ca mac")) && !k.includes("ngay") && !k.includes("ty le"));
+      const hit = normalized.find(([k]) => (k === "mac" || k.includes(" so mac") || k.includes(" so con mac") || k === "ca mac") && !k.includes("ngay"));
       return hit ? hit[1] : null;
     }
     if(kind === "death"){
@@ -3303,215 +3300,150 @@ document.addEventListener("DOMContentLoaded", function () {
     return null;
   }
   function trendDiseaseKey(row){
-    // Ưu tiên tên bệnh; nếu tên bệnh trống thì nhận diện bằng mã bệnh.
-    const rawName = firstValue(row, ["Tên bệnh","Ten benh","Bệnh","Benh","Loai benh","Loại bệnh","Disease"]);
-    const rawCode = firstValue(row, ["Mã bệnh","Ma benh","Mã dịch bệnh","Ma dich benh","Disease code"]);
-    const values = [normText(rawName), normText(rawCode)].filter(Boolean);
-    for(const n of values){
-      if(n === "cgc" || n.includes("cum gia cam") || n.includes("avian influenza")) return "CGC";
-      if(n.includes("dtlcp") || n.includes("dich ta lon chau phi") || n.includes("lon chau phi")) return "DTLCP";
-      if(n.includes("vdnc") || n.includes("viem da noi cuc") || n.includes("lumpy skin")) return "VDNC";
-      if(n === "dai" || n.includes("benh dai") || n === "rabies") return "DAI";
-    }
+    const raw = firstValue(row, ["Bệnh","Tên bệnh","Loại bệnh","Mã bệnh","Disease","Ten benh","Ma benh"]);
+    const n = normText(raw);
+    if(n.includes("dtlcp") || n.includes("dich ta lon chau phi") || n.includes("lon chau phi")) return "DTLCP";
+    if(n === "cgc" || n.includes("cum gia cam")) return "CGC";
+    if(n.includes("vdnc") || n.includes("viem da noi cuc")) return "VDNC";
+    if(n === "dai" || n.includes("benh dai") || n === "rabies") return "DAI";
     return "";
   }
   function parseTrendDate(raw){
-    if(raw instanceof Date && !isNaN(raw.getTime())) {
-      const d = new Date(raw.getFullYear(),raw.getMonth(),raw.getDate()); d.setHours(0,0,0,0); return d;
-    }
+    if(raw instanceof Date && !isNaN(raw.getTime())) return new Date(raw.getFullYear(),raw.getMonth(),raw.getDate());
     if(raw === null || raw === undefined || String(raw).trim() === "") return null;
-    // Hỗ trợ ngày dạng số serial của Excel/Google Sheets.
-    if(typeof raw === "number" && Number.isFinite(raw) && raw > 20000 && raw < 80000){
-      const d = new Date(Date.UTC(1899,11,30) + Math.floor(raw)*86400000);
+    if(typeof raw === "number" && raw > 20000 && raw < 80000){
+      const d = new Date(Date.UTC(1899,11,30) + raw*86400000);
       return new Date(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate());
     }
     const s = String(raw).trim();
     let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
-    if(m){ const d = new Date(+m[1],+m[2]-1,+m[3]); return isNaN(d.getTime()) ? null : d; }
+    if(m) return new Date(+m[1],+m[2]-1,+m[3]);
     m = s.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})/);
-    if(m){ const d = new Date(+m[3],+m[2]-1,+m[1]); return isNaN(d.getTime()) ? null : d; }
+    if(m) return new Date(+m[3],+m[2]-1,+m[1]);
     const d = new Date(s);
     return isNaN(d.getTime()) ? null : new Date(d.getFullYear(),d.getMonth(),d.getDate());
   }
-  function trendCount(raw){
-    if(raw === null || raw === undefined || String(raw).trim() === "") return null;
-    if(typeof raw === "number") return Number.isFinite(raw) ? raw : null;
-    let s=String(raw).trim().replace(/\s/g,"").replace(/[^\d,.-]/g,"");
-    if(!s) return null;
-    // Số lượng con là số nguyên: dấu chấm/phẩy phân nhóm hàng nghìn được bỏ.
-    if(/^-?\d{1,3}([.,]\d{3})+$/.test(s)) s=s.replace(/[.,]/g,"");
-    else if(s.includes(".") && s.includes(",")) s=s.replace(/\./g,"").replace(",",".");
-    else if(s.includes(",")) s=s.replace(",",".");
-    const n=Number(s);
+  function numChart(v){
+    if(typeof v === "number") return Number.isFinite(v) ? v : null;
+    if(v === null || v === undefined || String(v).trim() === "") return null;
+    const n = Number(String(v).replace(/\s/g,"").replace(/\.(?=\d{3}(\D|$))/g,"").replace(/,/g,"."));
     return Number.isFinite(n) ? n : null;
   }
-  function trendValue(row, key){
-    const indicator = normText(firstValue(row, ["Chỉ tiêu","Chi tieu","Tên chỉ tiêu","Ten chi tieu","Loại chỉ tiêu","Loai chi tieu","Nội dung chỉ tiêu"]));
+  function trendValue(row, key, isDailySummary){
+    if(isDailySummary){
+      const wantsCase = key === "VDNC";
+      let v = wantsCase
+        ? firstValue(row,["Mắc","Số mắc","Số con mắc","Số mắc (con)"])
+        : firstValue(row,["Chết / tiêu hủy","Chết/tiêu hủy","Số chết, tiêu hủy","Số con chết, tiêu hủy","Chết, tiêu hủy"]);
+      if(v === null) v = fuzzyValue(row,wantsCase ? "case" : "death");
+      return numChart(v);
+    }
+    const indicator = normText(firstValue(row,["Chỉ tiêu","Tên chỉ tiêu","Loại chỉ tiêu"]));
     const wantsCase = key === "VDNC";
     if(indicator){
-      const isCase = /\b(mac|ca benh|so con mac|benh mac)\b/.test(indicator) || indicator.includes("so con mac");
-      const isDeath = indicator.includes("chet") || indicator.includes("tieu huy") || indicator.includes("tu vong") || indicator.includes("xac dong vat");
+      const isCase = indicator.includes("mac") || indicator.includes("ca benh");
+      const isDeath = indicator.includes("chet") || indicator.includes("tieu huy");
       if(wantsCase && !isCase) return null;
       if(!wantsCase && !isDeath) return null;
-      const amount = firstValue(row, ["Số con theo chỉ tiêu","So con theo chi tieu","Số con","So con","Giá trị","Gia tri","Số lượng","So luong"]);
-      return trendCount(amount);
+      return numChart(firstValue(row,["Số con theo chỉ tiêu","Số con","Số lượng","Giá trị"]));
     }
-    const keys = wantsCase
-      ? ["Mắc","Số mắc (con)","Số mắc","Số con mắc","Ca mắc","Số con mắc bệnh"]
-      : ["Chết / tiêu hủy","Chết/tiêu hủy","Số chết, tiêu hủy","Số con chết/tiêu hủy","Số con chết, tiêu hủy","Chết","Tiêu hủy"];
-    let v = firstValue(row, keys);
-    if(v === null) v = fuzzyValue(row, wantsCase ? "case" : "death");
-    return trendCount(v);
+    const v = wantsCase ? firstValue(row,["Mắc","Số mắc","Số con mắc"]) : firstValue(row,["Chết / tiêu hủy","Chết/tiêu hủy","Số chết, tiêu hủy","Số con chết, tiêu hủy"]);
+    return numChart(v);
+  }
+  async function fetchApiRows(url){
+    const response = await fetch(url,{cache:"no-store"});
+    if(!response.ok) throw new Error("HTTP "+response.status);
+    const result = await response.json();
+    if(result && result.success === false) throw new Error(result.error || "API báo lỗi");
+    const list = Array.isArray(result) ? result : (result && Array.isArray(result.data) ? result.data : null);
+    if(!list) throw new Error("API không trả về mảng dữ liệu");
+    return list;
   }
   async function loadTrendRows(){
     if(trendLoadStarted) return;
     trendLoadStarted = true;
-    const note = document.getElementById("trendNote");
-    try {
-      const response = await fetch(TREND_API_URL, { cache:"no-store" });
-      if(!response.ok) throw new Error("HTTP " + response.status);
-      const result = await response.json();
-      if(result && result.success === false) throw new Error(result.error || "API báo lỗi");
-      const list = Array.isArray(result) ? result : (result && Array.isArray(result.data) ? result.data : null);
-      if(!list) throw new Error("API không trả về mảng dữ liệu");
-      trendRows = list;
-      trendLoadError = "";
-      updateTrend();
-    } catch(err) {
-      trendLoadError = err && err.message ? err.message : String(err);
-      console.error("Không tải được dữ liệu biểu đồ theo ngày:", err);
-      if(note) note.textContent = "Không tải được dữ liệu biểu đồ từ API. Kiểm tra quyền truy cập/CORS và endpoint. (" + trendLoadError + ")";
-    }
+    await Promise.all([
+      fetchApiRows(TREND_API_URL).then(rows=>{trendRows=rows;}).catch(err=>{trendLoadError=err.message||String(err);}),
+      fetchApiRows(DAILY_DISEASE_API_URL).then(rows=>{dailyDiseaseRows=rows;}).catch(err=>{dailyLoadError=err.message||String(err);}),
+      fetchApiRows(MONTHLY_DISEASE_API_URL).then(rows=>{monthlyDiseaseRows=rows;}).catch(err=>{monthlyLoadError=err.message||String(err);})
+    ]);
+    updateTrend();
+  }
+  function chartDiseaseSelected(){
+    const el=document.getElementById("trendDiseaseSelect");
+    return el && ["DTLCP","CGC","VDNC","DAI"].includes(el.value) ? el.value : "DTLCP";
   }
   function updateTrend(){
-    const key = selected(); // Đồng bộ biểu đồ theo lớp dữ liệu đã chọn ở đầu trang; không cần bộ chọn bệnh riêng bên dưới.
+    const key = chartDiseaseSelected();
     const cfg = diseaseConfig[key] || diseaseConfig.DTLCP;
     const note = document.getElementById("trendNote");
-    const trendCanvas = document.getElementById("chartTrend");
+    const canvas = document.getElementById("chartTrend");
+    const sourceRows = key === "DTLCP" ? trendRows : dailyDiseaseRows;
+    const isDailySummary = key !== "DTLCP";
     updateMonthlyChart(key);
-    if(trendChart) { trendChart.destroy(); trendChart=null; }
-    if(trendCanvas && window.Chart && window.Chart.getChart(trendCanvas)) window.Chart.getChart(trendCanvas).destroy();
-
-    if(!trendRows.length){
-      if(note && !trendLoadError) note.textContent = "Đang tải dữ liệu diễn biến theo ngày…";
-      if(trendCanvas && window.Chart){
-        trendChart = new Chart(trendCanvas, {
-          type:"line",
-          data:{labels:[],datasets:[{label:"Chưa có dữ liệu",data:[],borderColor:"#64748b",backgroundColor:"rgba(100,116,139,.12)",tension:.2,pointRadius:3}]},
-          options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
-        });
-      }
+    if(canvas && window.Chart && window.Chart.getChart(canvas)) window.Chart.getChart(canvas).destroy();
+    if(!sourceRows.length){
+      const err = key === "DTLCP" ? trendLoadError : dailyLoadError;
+      if(note) note.textContent = err ? "Không tải được dữ liệu biểu đồ: "+err : (key === "DTLCP" ? "Đang tải dữ liệu DTLCP…" : "Chưa có dữ liệu biểu đồ ngày cho bệnh đang chọn từ GIS_BIEU_DO_NGAY.");
+      if(canvas && window.Chart) new Chart(canvas,{type:"line",data:{labels:[],datasets:[{label:"Chưa có dữ liệu",data:[]}]},options:{responsive:true,maintainAspectRatio:false}});
       return;
     }
-
-    // Gom dữ liệu theo từng kỳ 10 ngày trong tháng: ngày 1–10, 11–20, 21–cuối tháng.
-    // Cộng các bản ghi cùng bệnh trong cùng kỳ để biểu đồ vẫn thể hiện xu hướng lịch sử.
-    const tenDay = new Map();
-    let skipped = 0;
-    let matchedDisease = 0;
-    trendRows.forEach(row => {
-      if(trendDiseaseKey(row) !== key) return;
-      matchedDisease++;
-      let dateRaw = firstValue(row, ["Ngày","Ngày ghi nhận","Ngày phát hiện","Ngày xảy ra","Ngày phát sinh","Ngày tiêu hủy","Ngày chết/tiêu hủy","Ngày chết, tiêu hủy","Ngày cập nhật","Ngày xảy ra ổ dịch","Ngày bắt đầu","Thời gian","Ngày tháng"]);
-      if(dateRaw === null) dateRaw = fuzzyValue(row, "date");
-      const date = parseTrendDate(dateRaw);
-      const value = trendValue(row,key);
-      if(!date || value === null || !Number.isFinite(value)) { skipped++; return; }
-      const year = date.getFullYear();
-      const month = date.getMonth() + 1;
-      const day = date.getDate();
-      const period = day <= 10 ? 1 : (day <= 20 ? 2 : 3);
-      const bucketKey = `${year}-${String(month).padStart(2,"0")}-${period}`;
-      const monthDays = new Date(year, month, 0).getDate();
-      const fromDay = period === 1 ? 1 : (period === 2 ? 11 : 21);
-      const toDay = period === 1 ? 10 : (period === 2 ? 20 : monthDays);
-      if(!tenDay.has(bucketKey)) tenDay.set(bucketKey, {value:0, year, month, period, fromDay, toDay});
-      tenDay.get(bucketKey).value += value;
+    const buckets=new Map(); let matched=0, skipped=0;
+    sourceRows.forEach(row=>{
+      if(trendDiseaseKey(row)!==key) return;
+      matched++;
+      const dateRaw=firstValue(row,["Ngày","Ngày ghi nhận","Ngày phát hiện","Ngày xảy ra","Ngày tiêu hủy","Ngày cập nhật"]) ?? fuzzyValue(row,"date");
+      const date=parseTrendDate(dateRaw);
+      const value=trendValue(row,key,isDailySummary);
+      if(!date || value===null){skipped++;return;}
+      const period=date.getDate()<=10?1:(date.getDate()<=20?2:3);
+      const monthDays=new Date(date.getFullYear(),date.getMonth()+1,0).getDate();
+      const fromDay=period===1?1:(period===2?11:21);
+      const toDay=period===1?10:(period===2?20:monthDays);
+      const id=`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${period}`;
+      if(!buckets.has(id)) buckets.set(id,{value:0,year:date.getFullYear(),month:date.getMonth()+1,fromDay,toDay});
+      buckets.get(id).value+=value;
     });
-
-    const bucketKeys = Array.from(tenDay.keys()).sort();
-    const values = bucketKeys.map(k => tenDay.get(k).value);
-    const displayLabels = bucketKeys.map(k => {
-      const b = tenDay.get(k);
-      return `${String(b.fromDay).padStart(2,"0")}-${String(b.toDay).padStart(2,"0")}/${String(b.month).padStart(2,"0")}/${b.year}`;
-    });
-    const metric = key === "VDNC" ? "Số con mắc bệnh" : "Số con chết/tiêu hủy";
-    if(note){
-      note.textContent = bucketKeys.length
-        ? `${cfg.label} · ${metric} theo kỳ 10 ngày (01–10, 11–20, 21–cuối tháng); đã cộng các bản ghi trong từng kỳ${skipped ? ` · ${skipped} bản ghi thiếu ngày/chỉ tiêu bị bỏ qua` : ""}.`
-        : `${cfg.label}: API có ${trendRows.length} bản ghi${matchedDisease ? `, trong đó ${matchedDisease} bản ghi khớp tên bệnh` : ", nhưng chưa khớp tên bệnh"}; chưa tìm thấy dữ liệu có ngày và chỉ tiêu phù hợp. Các cột API mẫu: ${Object.keys(trendRows.find(r => trendDiseaseKey(r) === key) || trendRows[0] || {}).join(" | ") || "không xác định"}.`;
-    }
-    if(!trendCanvas || !window.Chart) return;
-    const colors = {DTLCP:"#e53935",CGC:"#2e7d32",VDNC:"#1976d2",DAI:"#6a35d1"};
-    const color = colors[key] || "#2457a7";
-    trendChart = new Chart(trendCanvas,{
-      type:"line",
-      data:{
-        labels:displayLabels,
-        datasets:[{
-          label:`${metric} – ${cfg.label}`,
-          data:values,
-          borderColor:color,
-          backgroundColor:color+"22",
-          borderWidth:2,
-          pointRadius:3,
-          pointHoverRadius:5,
-          pointBackgroundColor:color,
-          tension:.2,
-          fill:false,
-          spanGaps:false
-        }]
-      },
-      options:{
-        responsive:true,
-        maintainAspectRatio:false,
-        interaction:{mode:"index",intersect:false},
-        plugins:{
-          legend:{display:true,position:"bottom",labels:{boxWidth:10,font:{size:9}}},
-          tooltip:{callbacks:{label:ctx=>`${metric}: ${Number(ctx.raw||0).toLocaleString("vi-VN")} con`}}
-        },
-        scales:{
-          x:{ticks:{autoSkip:true,maxRotation:55,minRotation:0,font:{size:8}},grid:{display:false}},
-          y:{beginAtZero:true,title:{display:true,text:"Số con"},ticks:{precision:0,font:{size:9}}}
-        }
-      }
-    });
-  }
-  function loadMonthlyRows(){
-    // Dữ liệu tháng được tổng hợp trực tiếp từ trendRows sau khi API type=trend tải xong.
-    if (trendRows.length) updateMonthlyChart((document.getElementById("trendDiseaseSelect")||{}).value||selected());
+    const sorted=[...buckets.values()].sort((a,b)=>a.year-b.year||a.month-b.month||a.fromDay-b.fromDay);
+    const labels=sorted.map(b=>`${String(b.fromDay).padStart(2,"0")}-${String(b.toDay).padStart(2,"0")}/${String(b.month).padStart(2,"0")}/${b.year}`);
+    const values=sorted.map(b=>b.value);
+    const metric=key==="VDNC"?"Số con mắc bệnh":"Số con chết/tiêu hủy";
+    if(note) note.textContent=sorted.length
+      ? `${cfg.label} · ${metric} theo kỳ 10 ngày; nguồn: ${isDailySummary?"GIS_BIEU_DO_NGAY":"GIS_DICH_BENH_NGAY"}${skipped?` · ${skipped} dòng thiếu ngày/chỉ tiêu đã bỏ qua`:""}.`
+      : `${cfg.label}: nguồn có ${sourceRows.length} dòng, khớp ${matched} dòng bệnh nhưng chưa có dòng đủ ngày và chỉ tiêu phù hợp${isDailySummary?" trong GIS_BIEU_DO_NGAY":" trong GIS_DICH_BENH_NGAY"}.`;
+    if(!canvas || !window.Chart) return;
+    const colors={DTLCP:"#e53935",CGC:"#2e7d32",VDNC:"#1976d2",DAI:"#6a35d1"};
+    new Chart(canvas,{type:"line",data:{labels,datasets:[{label:`${metric} – ${cfg.label}`,data:values,borderColor:colors[key],backgroundColor:colors[key]+"22",borderWidth:2,pointRadius:3,tension:.2,fill:false,spanGaps:false}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:"index",intersect:false},plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:10,font:{size:9}}},tooltip:{callbacks:{label:ctx=>`${metric}: ${Number(ctx.raw||0).toLocaleString("vi-VN")} con`}}},scales:{x:{ticks:{autoSkip:true,maxRotation:55,font:{size:8}},grid:{display:false}},y:{beginAtZero:true,title:{display:true,text:"Số con"},ticks:{precision:0,font:{size:9}}}}}});
   }
   function updateMonthlyChart(key){
     const canvas=document.getElementById("chartMonthly"), note=document.getElementById("monthlyNote");
     if(!canvas||!window.Chart)return;
     const cfg=diseaseConfig[key]||diseaseConfig.DTLCP;
-    const candidates=[];
-    let rowsForDisease=[];
-    trendRows.forEach(row=>{
-      if(trendDiseaseKey(row)!==key)return;
-      const dateRaw=firstValue(row,["Ngày","Ngày ghi nhận","Ngày phát hiện","Ngày xảy ra","Ngày phát sinh","Ngày tiêu hủy","Ngày chết/tiêu hủy","Ngày chết, tiêu hủy","Ngày cập nhật","Ngày xảy ra ổ dịch","Ngày bắt đầu","Thời gian","Ngày tháng"]) ?? fuzzyValue(row,"date");
-      const date=parseTrendDate(dateRaw);
-      const value=trendValue(row,key);
-      if(date && value!==null && Number.isFinite(value)) rowsForDisease.push({date,value});
-    });
-    // Chỉ lấy năm mới nhất có dữ liệu của chính bệnh đang chọn, không trộn các năm.
-    const year=rowsForDisease.length?Math.max(...rowsForDisease.map(x=>x.date.getFullYear())):null;
-    const monthly=Array(12).fill(null); let found=0;
-    if(year!==null){
-      rowsForDisease.forEach(item=>{
-        if(item.date.getFullYear()!==year)return;
-        const m=item.date.getMonth();
-        if(monthly[m]===null)monthly[m]=0;
-        monthly[m]+=item.value;
-        found++;
+    const labels=Array.from({length:12},(_,i)=>`Tháng ${i+1}`);
+    const values=Array(12).fill(null);
+    let year=null, found=0;
+    if(key==="DTLCP"){
+      const rows=trendRows.filter(r=>trendDiseaseKey(r)==="DTLCP").map(r=>({date:parseTrendDate(firstValue(r,["Ngày","Ngày ghi nhận","Ngày xảy ra","Ngày tiêu hủy"])),value:trendValue(r,"DTLCP",false)})).filter(x=>x.date&&x.value!==null);
+      if(rows.length){year=Math.max(...rows.map(x=>x.date.getFullYear()));rows.filter(x=>x.date.getFullYear()===year).forEach(x=>{const m=x.date.getMonth();if(values[m]===null)values[m]=0;values[m]+=x.value;found++;});}
+    }else{
+      const diseaseCol=key==="CGC"?"CGC":(key==="VDNC"?"VDNC":"DẠI");
+      const rows=monthlyDiseaseRows;
+      rows.forEach(row=>{
+        const monthRaw=firstValue(row,["Tháng","Thang","Tháng báo cáo","Kỳ"]);
+        const match=String(monthRaw==null?"":monthRaw).match(/(\d{1,2})/);
+        if(!match)return;
+        const month=Number(match[1]); if(month<1||month>12)return;
+        const value=numChart(firstValue(row,[diseaseCol,key]));
+        if(value===null)return;
+        values[month-1]=value;found++;
       });
     }
-    const labels=["Tháng 1","Tháng 2","Tháng 3","Tháng 4","Tháng 5","Tháng 6","Tháng 7","Tháng 8","Tháng 9","Tháng 10","Tháng 11","Tháng 12"];
     const old=window.Chart.getChart(canvas);if(old)old.destroy();
     const colors={DTLCP:"#e53935",CGC:"#2e7d32",VDNC:"#1976d2",DAI:"#6a35d1"};
     const metric=key==="VDNC"?"Số con mắc bệnh":"Số con chết/tiêu hủy";
-    if(note) note.textContent=found?`${cfg.label} · ${metric} theo tháng năm ${year}, tổng hợp từ sheet GIS_DICH_BENH_NGAY; chỉ hiển thị dữ liệu của bệnh đang chọn.`:`${cfg.label}: chưa tìm thấy bản ghi có ngày và chỉ tiêu phù hợp trong sheet GIS_DICH_BENH_NGAY; không tự tạo số liệu.`;
-    new Chart(canvas,{type:"bar",data:{labels,datasets:[{label:`${metric}${year!==null?" – "+year:""}`,data:monthly,backgroundColor:colors[key]||"#477fd1",borderRadius:4,maxBarThickness:36}]},options:{responsive:true,maintainAspectRatio:false,spanGaps:false,plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:10,font:{size:9}}},tooltip:{callbacks:{label:ctx=>ctx.raw===null?"Chưa có số liệu":`${metric}: ${Number(ctx.raw||0).toLocaleString("vi-VN")} con`}}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{beginAtZero:true,title:{display:true,text:"Số con"},ticks:{precision:0,font:{size:9}}}}}});
+    const source=key==="DTLCP"?"GIS_DICH_BENH_NGAY":"GIS_BIEU_DO_THANG";
+    if(note) note.textContent=found?`${cfg.label} · ${metric} theo tháng; nguồn: ${source}. Tháng chưa có dữ liệu được để trống.`:`${cfg.label}: chưa có số liệu tháng phù hợp trong ${source}; không tự điền số 0.`;
+    new Chart(canvas,{type:"bar",data:{labels,datasets:[{label:`${metric} – ${cfg.label}`,data:values,backgroundColor:colors[key],borderRadius:4,maxBarThickness:36}]},options:{responsive:true,maintainAspectRatio:false,spanGaps:false,plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:10,font:{size:9}}},tooltip:{callbacks:{label:ctx=>ctx.raw===null?"Chưa có số liệu":`${metric}: ${Number(ctx.raw||0).toLocaleString("vi-VN")} con`}}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{beginAtZero:true,title:{display:true,text:"Số con"},ticks:{precision:0,font:{size:9}}}}}});
   }
 
   function updateDamage(){
@@ -3572,7 +3504,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.addEventListener("DOMContentLoaded",function(){
     const trendDiseaseSelect=document.getElementById("trendDiseaseSelect");
     if(trendDiseaseSelect) trendDiseaseSelect.addEventListener("change",updateTrend);
-    const layer=document.getElementById("layerSelect"); if(layer) layer.addEventListener("change",function(){ updateTrend(); updateDamage(); });
+    const layer=document.getElementById("layerSelect"); if(layer) layer.addEventListener("change",function(){ updateDamage(); });
     document.querySelectorAll("[data-download-chart]").forEach(b=>b.addEventListener("click",async function(){
       const id=this.dataset.downloadChart;
       const canvas=document.getElementById(id);
@@ -3581,7 +3513,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if(!window.docx || !window.docx.Packer || !window.docxCharts || !window.docxCharts.ChartRun){ alert((window.__docxLibraryError || "Chưa tải được thư viện biểu đồ Word có thể chỉnh sửa.")+" Kiểm tra kết nối Internet/quyền truy cập CDN rồi tải lại trang bằng Ctrl+F5."); return; }
       const {Document,Paragraph,TextRun,Packer,AlignmentType}=window.docx;
       const {ChartRun}=window.docxCharts;
-      const diseaseSelect=document.getElementById("layerSelect");
+      const diseaseSelect=document.getElementById("trendDiseaseSelect");
       const diseaseName=diseaseSelect && id==="chartTrend" ? diseaseSelect.options[diseaseSelect.selectedIndex].text : "";
       const chartTitle=id==="chartTrend" ? ("Diễn biến dịch bệnh – "+diseaseName) : (id==="chartDamageXa" ? "Thiệt hại theo xã" : "Biểu đồ WebGIS");
       const labels=(chart.data.labels||[]).map(v=>String(v));
