@@ -2432,15 +2432,6 @@ body { overflow-x:hidden; overflow-y:auto; background:#f7f8fa; }
         <div class="chart-title">📈 Diễn biến dịch bệnh</div>
         <button class="chart-download" type="button" data-download-chart="chartTrend" title="Tải biểu đồ Word có thể chỉnh sửa" aria-label="Tải biểu đồ diễn biến dạng Word">↓ Tải Word</button>
       </div>
-      <div class="chart-toolbar" aria-label="Chọn bệnh diễn biến">
-        <label for="trendDiseaseSelect" style="font-size:10px;color:#536273;align-self:center;">Chọn bệnh:</label>
-        <select id="trendDiseaseSelect" class="chart-filter" style="cursor:pointer;max-width:220px;">
-          <option value="DTLCP">Dịch tả lợn Châu Phi</option>
-          <option value="CGC">Cúm gia cầm</option>
-          <option value="VDNC">Viêm da nổi cục</option>
-          <option value="DAI">Bệnh dại</option>
-        </select>
-      </div>
       <div class="chart-legend-note" id="trendNote">Đang tải dữ liệu diễn biến theo ngày…</div>
       <div class="chart-body"><canvas id="chartTrend"></canvas></div>
     </div>
@@ -3250,7 +3241,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     return null;
   }
-  function selected(){ const el=document.getElementById("layerSelect"); return el && diseaseConfig[el.value] ? el.value : "DTLCP"; }
+  function selected(){ const el=document.getElementById("layerSelect"); return el ? el.value : "DTLCP"; }
   function inCurrentYearToReport(row, cfg, data){
     const d = dateOf(row, cfg); if(!d) return false;
     const allDates=[];
@@ -3369,15 +3360,18 @@ document.addEventListener("DOMContentLoaded", function () {
     ]);
     updateTrend();
   }
-  function chartDiseaseSelected(){
-    const el=document.getElementById("trendDiseaseSelect");
-    return el && ["DTLCP","CGC","VDNC","DAI"].includes(el.value) ? el.value : "DTLCP";
-  }
+  // Lớp dữ liệu trên bản đồ là lựa chọn duy nhất điều khiển toàn bộ biểu đồ và bảng.
+  function chartDiseaseSelected(){ return selected(); }
   function updateTrend(){
     const key = chartDiseaseSelected();
-    const cfg = diseaseConfig[key] || diseaseConfig.DTLCP;
+    const cfg = diseaseConfig[key];
     const note = document.getElementById("trendNote");
     const canvas = document.getElementById("chartTrend");
+    if(!cfg){
+      if(note) note.textContent="Lớp đang chọn không phải lớp dịch bệnh; biểu đồ dịch bệnh không áp dụng.";
+      if(canvas && window.Chart){const old=window.Chart.getChart(canvas);if(old)old.destroy();new Chart(canvas,{type:"line",data:{labels:[],datasets:[]},options:{responsive:true,maintainAspectRatio:false}});}
+      updateMonthlyChart(key); return;
+    }
     const sourceRows = key === "DTLCP" ? trendRows : dailyDiseaseRows;
     const isDailySummary = key !== "DTLCP";
     updateMonthlyChart(key);
@@ -3418,7 +3412,8 @@ document.addEventListener("DOMContentLoaded", function () {
   function updateMonthlyChart(key){
     const canvas=document.getElementById("chartMonthly"), note=document.getElementById("monthlyNote");
     if(!canvas||!window.Chart)return;
-    const cfg=diseaseConfig[key]||diseaseConfig.DTLCP;
+    const cfg=diseaseConfig[key];
+    if(!cfg){if(note)note.textContent="Lớp đang chọn không phải lớp dịch bệnh; biểu đồ tháng không áp dụng.";const old=window.Chart.getChart(canvas);if(old)old.destroy();new Chart(canvas,{type:"bar",data:{labels:[],datasets:[]},options:{responsive:true,maintainAspectRatio:false}});return;}
     const labels=Array.from({length:12},(_,i)=>`Tháng ${i+1}`);
     const values=Array(12).fill(null);
     let year=null, found=0;
@@ -3448,6 +3443,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function updateDamage(){
     const key=selected(), cfg=diseaseConfig[key], data=rows(), map=new Map();
+    if(!cfg){const note=document.getElementById("damageNote"),canvas=document.getElementById("chartDamageXa");if(note)note.textContent="Lớp đang chọn không phải lớp dịch bệnh; biểu đồ thiệt hại không áp dụng.";if(damageChart){damageChart.destroy();damageChart=null;}if(canvas&&window.Chart){const old=window.Chart.getChart(canvas);if(old)old.destroy();new Chart(canvas,{type:"bar",data:{labels:[],datasets:[]},options:{responsive:true,maintainAspectRatio:false}});}return;}
     // Với VDNC biểu diễn số con mắc bệnh; các lớp bệnh còn lại chỉ biểu diễn số con tiêu hủy.
     const isVDNC = key === "VDNC";
     const valueKeys = cfg.deathKeys;
@@ -3479,7 +3475,8 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   function updateSpecies(){
     const data=rows(), totals=new Map(), cfg=diseaseConfig[selected()];
-    const statusKeys=cfg ? cfg.statusKeys : [];
+    if(!cfg){const note=document.getElementById("speciesNote"),canvas=document.getElementById("chartSpecies");if(note)note.textContent="Lớp đang chọn không phải lớp dịch bệnh; biểu đồ trạng thái không áp dụng.";if(speciesChart){speciesChart.destroy();speciesChart=null;}if(canvas&&window.Chart){const old=window.Chart.getChart(canvas);if(old)old.destroy();new Chart(canvas,{type:"pie",data:{labels:[],datasets:[]},options:{responsive:true,maintainAspectRatio:false}});}return;}
+    const statusKeys=cfg.statusKeys;
     data.forEach(r=>{
       const raw=statusKeys.map(k=>r[k]).find(v=>v!==undefined && v!==null && String(v).trim()!=="");
       if(raw===undefined || raw===null) return;
@@ -3502,9 +3499,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   function refresh(){ updateTrend(); updateDamage(); }
   document.addEventListener("DOMContentLoaded",function(){
-    const trendDiseaseSelect=document.getElementById("trendDiseaseSelect");
-    if(trendDiseaseSelect) trendDiseaseSelect.addEventListener("change",updateTrend);
-    const layer=document.getElementById("layerSelect"); if(layer) layer.addEventListener("change",function(){ updateDamage(); });
+    const layer=document.getElementById("layerSelect"); if(layer) layer.addEventListener("change",function(){ updateTrend(); updateDamage(); updateSpecies(); loadComparisonData(); });
     document.querySelectorAll("[data-download-chart]").forEach(b=>b.addEventListener("click",async function(){
       const id=this.dataset.downloadChart;
       const canvas=document.getElementById(id);
@@ -3513,14 +3508,14 @@ document.addEventListener("DOMContentLoaded", function () {
       if(!window.docx || !window.docx.Packer || !window.docxCharts || !window.docxCharts.ChartRun){ alert((window.__docxLibraryError || "Chưa tải được thư viện biểu đồ Word có thể chỉnh sửa.")+" Kiểm tra kết nối Internet/quyền truy cập CDN rồi tải lại trang bằng Ctrl+F5."); return; }
       const {Document,Paragraph,TextRun,Packer,AlignmentType}=window.docx;
       const {ChartRun}=window.docxCharts;
-      const diseaseSelect=document.getElementById("trendDiseaseSelect");
-      const diseaseName=diseaseSelect && id==="chartTrend" ? diseaseSelect.options[diseaseSelect.selectedIndex].text : "";
+      const activeDisease=selected();
+      const diseaseName=diseaseConfig[activeDisease] ? diseaseConfig[activeDisease].label : "Lớp dữ liệu không phải dịch bệnh";
       const chartTitle=id==="chartTrend" ? ("Diễn biến dịch bệnh – "+diseaseName) : (id==="chartDamageXa" ? "Thiệt hại theo xã" : "Biểu đồ WebGIS");
       const labels=(chart.data.labels||[]).map(v=>String(v));
       const chartType=chart.config.type==="line" ? "line" : (chart.config.type==="pie" || chart.config.type==="doughnut" ? chart.config.type : "column");
       const series=(chart.data.datasets||[]).map((ds,i)=>({name:String(ds.label||("Số liệu "+(i+1))),values:(ds.data||[]).map(v=>{ if(v===null||v===undefined||v==="") return 0; if(typeof v==="object") return Number(v.y||0); const n=Number(String(v).replace(/,/g,"")); return Number.isFinite(n)?n:0; })})).filter(ds=>ds.values.length);
       if(!labels.length || !series.length){ alert("Biểu đồ chưa có dữ liệu hợp lệ để xuất Word."); return; }
-      const metricNote=id==="chartTrend" ? (diseaseSelect && diseaseSelect.value==="VDNC" ? "Chỉ tiêu: số con mắc bệnh; tổng hợp theo kỳ 10 ngày (01–10, 11–20, 21–cuối tháng)." : "Chỉ tiêu: số con chết/tiêu hủy; tổng hợp theo kỳ 10 ngày (01–10, 11–20, 21–cuối tháng).") : "Nguồn: dữ liệu đang hiển thị trên WebGIS.";
+      const metricNote=id==="chartTrend" ? (activeDisease==="VDNC" ? "Chỉ tiêu: số con mắc bệnh; tổng hợp theo kỳ 10 ngày (01–10, 11–20, 21–cuối tháng)." : "Chỉ tiêu: số con chết/tiêu hủy; tổng hợp theo kỳ 10 ngày (01–10, 11–20, 21–cuối tháng).") : "Nguồn: dữ liệu đang hiển thị trên WebGIS.";
       try{
         // Tạo biểu đồ Word gốc (native chart) kèm bảng dữ liệu nhúng; người dùng có thể bấm chuột phải > Edit Data trong Word.
         const nativeType = chartType === "line" ? "line" : (chartType === "pie" ? "pie" : (chartType === "doughnut" ? "doughnut" : "column"));
@@ -3551,42 +3546,49 @@ document.addEventListener("DOMContentLoaded", function () {
       const dateCmp=v=>{if(!v)return null;if(v instanceof Date&&!isNaN(v))return v;let m=String(v).trim().match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);if(m)return new Date(+m[3],+m[2]-1,+m[1]);m=String(v).trim().match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);if(m)return new Date(+m[1],+m[2]-1,+m[3]);const d=new Date(v);return isNaN(d)?null:d;};
       const numberCmp=v=>{if(typeof v==="number")return Number.isFinite(v)?v:0;let x=String(v??"").trim().replace(/\.(?=\d{3}(\D|$))/g,"").replace(/,/g,".").replace(/[^\d.-]/g,"");const n=Number(x);return Number.isFinite(n)?n:0;};
       const fmtCmp=n=>Number(n||0).toLocaleString("vi-VN");
+      const key=selected(), cfg=diseaseConfig[key];
       const now=new Date(), yr=now.getFullYear(), endPrev=new Date(yr-1,now.getMonth(),now.getDate());
       const fmtDate=d=>`${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}`;
       put("comparisonYearPrev",`01/01–${fmtDate(endPrev)}/${yr-1}`);put("comparisonYearCurrent",`01/01–${fmtDate(now)}/${yr}`);
-      const setErr=msg=>ids.forEach(id=>put(id,msg));
-      try{
-        const res=await fetch("https://script.google.com/macros/s/AKfycbyRuJ9Wfv4HtWjMRT2Hox2-mOhBVRjyqLaHhpQjohPEkfHWNyjM004KgO3o7_4nRJtj/exec?type=trend",{cache:"no-store"});
-        if(!res.ok)throw new Error("HTTP "+res.status);
-        const payload=await res.json();const data=Array.isArray(payload)?payload:(Array.isArray(payload.data)?payload.data:[]);
-        if(!data.length)throw new Error("API không trả về bản ghi");
-        const summarizePeriod=(year)=>{
-          const from=new Date(year,0,1), to=new Date(year,now.getMonth(),now.getDate());
-          const rows=data.map(r=>({r,d:dateCmp(valCmp(r,["Ngày","Ngày ghi nhận","Ngày phát hiện","Ngày xảy ra"]))})).filter(x=>x.d&&x.d>=from&&x.d<=to);
-          const communes=new Set(), outbreaks=new Set();let cases=0,dead=0;
-          rows.forEach(({r,d})=>{
-            const disease=String(valCmp(r,["Tên bệnh","Bệnh","Mã bệnh"])).trim();
-            const commune=String(valCmp(r,["Xã","Xã/phường","Tên xã","Tên xã/phường"])).trim();
-            const village=String(valCmp(r,["Thôn/bản","Thôn bản","Tên thôn/bản"])).trim();
-            const house=String(valCmp(r,["Tên hộ","Hộ chăn nuôi","Chủ hộ"])).trim();
-            const indicator=normCmp(valCmp(r,["Chỉ tiêu","Ten chi tieu"]));
+      const sub=document.querySelector(".comparison-subtitle");
+      if(!cfg){ ids.forEach(id=>put(id,"—")); if(sub)sub.textContent="Bảng so sánh chỉ áp dụng khi chọn một lớp dịch bệnh."; return; }
+      if(sub)sub.textContent=`So sánh cùng kỳ của ${cfg.label} (01/01 đến ngày cập nhật), đồng bộ theo lớp dữ liệu đang chọn.`;
+      const source=key==="DTLCP"?trendRows:dailyDiseaseRows;
+      if(!source.length){ids.forEach(id=>put(id,"Đang tải…"));return;}
+      const summarizePeriod=(year)=>{
+        const from=new Date(year,0,1), to=new Date(year,now.getMonth(),now.getDate(),23,59,59,999);
+        const filtered=source.map(r=>({r,d:dateCmp(valCmp(r,["Ngày","Ngày ghi nhận","Ngày phát hiện","Ngày xảy ra","Ngày tiêu hủy"]))})).filter(x=>x.d&&x.d>=from&&x.d<=to&& (key==="DTLCP" || normCmp(valCmp(x.r,["Bệnh","Tên bệnh","Mã bệnh"])).includes(normCmp(cfg.prefix)) || normCmp(valCmp(x.r,["Bệnh","Tên bệnh","Mã bệnh"])).includes(normCmp(cfg.label))));
+        const communes=new Set(), outbreaks=new Set();let cases=0,dead=0;
+        filtered.forEach(({r,d})=>{
+          const commune=String(valCmp(r,["Xã","Xã/phường","Tên xã","Tên xã/phường"])).trim();
+          const village=String(valCmp(r,["Thôn/bản","Thôn bản","Tên thôn/bản"])).trim();
+          const house=String(valCmp(r,["Tên hộ","Hộ chăn nuôi","Chủ hộ"])).trim();
+          if(commune)communes.add(commune);
+          if(key==="DTLCP"){
+            const indicator=normCmp(valCmp(r,["Chỉ tiêu","Tên chỉ tiêu"]));
             const amount=numberCmp(valCmp(r,["Số con theo chỉ tiêu","Số con","Số lượng","Giá trị"]));
-            if(commune)communes.add(commune);
-            if(disease||commune||village||house)outbreaks.add([disease,d.toISOString().slice(0,10),commune,village,house].join("|"));
             if(indicator.includes("mac")||indicator.includes("ca benh"))cases+=amount;
-            if(indicator.includes("chet")||indicator.includes("tieu huy")||indicator.includes("tieuhuy"))dead+=amount;
-          });
-          return {communes:communes.size,outbreaks:outbreaks.size,cases,dead};
-        };
+            if(indicator.includes("chet")||indicator.includes("tieu huy"))dead+=amount;
+            if(commune||village||house)outbreaks.add([d.toISOString().slice(0,10),commune,village,house].join("|"));
+          }else{
+            cases+=numberCmp(valCmp(r,["Mắc","Số mắc","Số con mắc"]));
+            dead+=numberCmp(valCmp(r,["Chết / tiêu hủy","Chết/tiêu hủy","Số chết, tiêu hủy","Chết, tiêu hủy"]));
+            const outbreak=valCmp(r,["Ổ dịch","Số ổ dịch"]);
+            if(outbreak!=="") outbreaks.add([d.toISOString().slice(0,10),commune,village,house,String(outbreak)].join("|"));
+          }
+        });
+        return {communes:communes.size,outbreaks:outbreaks.size,cases,dead};
+      };
+      try{
         const prev=summarizePeriod(yr-1),cur=summarizePeriod(yr);
-        const write=(key,a,b)=>{put(key+"Prev",fmtCmp(a));put(key+"Current",fmtCmp(b));put(key+"Change",a===0?(b===0?"0%":"—"):((b-a)/a*100).toLocaleString("vi-VN",{maximumFractionDigits:1})+"%");};
+        const write=(k,a,b)=>{put(k+"Prev",fmtCmp(a));put(k+"Current",fmtCmp(b));put(k+"Change",a===0?(b===0?"0%":"—"):((b-a)/a*100).toLocaleString("vi-VN",{maximumFractionDigits:1})+"%");};
         write("cmpXa",prev.communes,cur.communes);write("cmpOD",prev.outbreaks,cur.outbreaks);write("cmpMac",prev.cases,cur.cases);write("cmpTieuHuy",prev.dead,cur.dead);
-      }catch(err){console.warn("Không tải được bảng so sánh cùng kỳ:",err);setErr("Chưa tải được");const sub=document.querySelector(".comparison-subtitle");if(sub)sub.textContent="Không tải được dữ liệu so sánh; kiểm tra kết nối API và thử tải lại trang.";}
+      }catch(err){console.warn("Không cập nhật được bảng so sánh theo lớp dịch bệnh:",err);ids.forEach(id=>put(id,"—"));}
     }
     const csvBtn=document.getElementById("btnDownloadComparison"); if(csvBtn) csvBtn.addEventListener("click",function(){ const table=document.querySelector(".comparison-table"); if(!table) return; const csv=Array.from(table.rows).map(row=>Array.from(row.cells).map(c=>'"'+c.innerText.replace(/"/g,'""')+'"').join(",")).join("\r\n"); const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8;"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download="so-sanh-cung-ky.csv"; a.click(); URL.revokeObjectURL(url); });
     refresh();
     loadComparisonData();
-    loadTrendRows();
+    loadTrendRows().then(loadComparisonData);
     window.addEventListener("resize",function(){ if(trendChart) trendChart.resize(); if(damageChart) damageChart.resize();  });
     // Một số bản tải dữ liệu hoàn tất sau DOMContentLoaded.
     let attempts=0; const timer=setInterval(function(){
