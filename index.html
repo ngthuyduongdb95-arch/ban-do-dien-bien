@@ -3303,12 +3303,16 @@ document.addEventListener("DOMContentLoaded", function () {
     return null;
   }
   function trendDiseaseKey(row){
-    const raw = firstValue(row, ["Bệnh","Ten benh","Tên bệnh","Loai benh","Loại bệnh","Disease","Ma benh","Mã bệnh"]);
-    const n = normText(raw);
-    if(n.includes("dtlcp") || n.includes("dich ta lon chau phi") || n.includes("lon chau phi")) return "DTLCP";
-    if(n === "cgc" || n.includes("cum gia cam") || n.includes("cum gia cam")) return "CGC";
-    if(n.includes("vdnc") || n.includes("viem da noi cuc")) return "VDNC";
-    if(n === "dai" || n.includes("benh dai") || n === "rabies") return "DAI";
+    // Ưu tiên tên bệnh; nếu tên bệnh trống thì nhận diện bằng mã bệnh.
+    const rawName = firstValue(row, ["Tên bệnh","Ten benh","Bệnh","Benh","Loai benh","Loại bệnh","Disease"]);
+    const rawCode = firstValue(row, ["Mã bệnh","Ma benh","Mã dịch bệnh","Ma dich benh","Disease code"]);
+    const values = [normText(rawName), normText(rawCode)].filter(Boolean);
+    for(const n of values){
+      if(n === "cgc" || n.includes("cum gia cam") || n.includes("avian influenza")) return "CGC";
+      if(n.includes("dtlcp") || n.includes("dich ta lon chau phi") || n.includes("lon chau phi")) return "DTLCP";
+      if(n.includes("vdnc") || n.includes("viem da noi cuc") || n.includes("lumpy skin")) return "VDNC";
+      if(n === "dai" || n.includes("benh dai") || n === "rabies") return "DAI";
+    }
     return "";
   }
   function parseTrendDate(raw){
@@ -3316,6 +3320,11 @@ document.addEventListener("DOMContentLoaded", function () {
       const d = new Date(raw.getFullYear(),raw.getMonth(),raw.getDate()); d.setHours(0,0,0,0); return d;
     }
     if(raw === null || raw === undefined || String(raw).trim() === "") return null;
+    // Hỗ trợ ngày dạng số serial của Excel/Google Sheets.
+    if(typeof raw === "number" && Number.isFinite(raw) && raw > 20000 && raw < 80000){
+      const d = new Date(Date.UTC(1899,11,30) + Math.floor(raw)*86400000);
+      return new Date(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate());
+    }
     const s = String(raw).trim();
     let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
     if(m){ const d = new Date(+m[1],+m[2]-1,+m[3]); return isNaN(d.getTime()) ? null : d; }
@@ -3324,25 +3333,35 @@ document.addEventListener("DOMContentLoaded", function () {
     const d = new Date(s);
     return isNaN(d.getTime()) ? null : new Date(d.getFullYear(),d.getMonth(),d.getDate());
   }
+  function trendCount(raw){
+    if(raw === null || raw === undefined || String(raw).trim() === "") return null;
+    if(typeof raw === "number") return Number.isFinite(raw) ? raw : null;
+    let s=String(raw).trim().replace(/\s/g,"").replace(/[^\d,.-]/g,"");
+    if(!s) return null;
+    // Số lượng con là số nguyên: dấu chấm/phẩy phân nhóm hàng nghìn được bỏ.
+    if(/^-?\d{1,3}([.,]\d{3})+$/.test(s)) s=s.replace(/[.,]/g,"");
+    else if(s.includes(".") && s.includes(",")) s=s.replace(/\./g,"").replace(",",".");
+    else if(s.includes(",")) s=s.replace(",",".");
+    const n=Number(s);
+    return Number.isFinite(n) ? n : null;
+  }
   function trendValue(row, key){
-    // API GIS_DICH_BENH_NGAY đang trả về chỉ tiêu dưới dạng hai cột:
-    // "Số con theo chỉ tiêu" (giá trị số) và "Chỉ tiêu" (loại số liệu).
-    const indicator = normText(firstValue(row, ["Chỉ tiêu", "Chi tieu", "Tên chỉ tiêu", "Loai chi tieu"]));
+    const indicator = normText(firstValue(row, ["Chỉ tiêu","Chi tieu","Tên chỉ tiêu","Ten chi tieu","Loại chỉ tiêu","Loai chi tieu","Nội dung chỉ tiêu"]));
     const wantsCase = key === "VDNC";
     if(indicator){
-      const isCase = indicator.includes("mac") || indicator.includes("ca benh") || indicator.includes("so con mac");
-      const isDeath = indicator.includes("chet") || indicator.includes("tieu huy") || indicator.includes("chet tieu huy");
+      const isCase = /\b(mac|ca benh|so con mac|benh mac)\b/.test(indicator) || indicator.includes("so con mac");
+      const isDeath = indicator.includes("chet") || indicator.includes("tieu huy") || indicator.includes("tu vong") || indicator.includes("xac dong vat");
       if(wantsCase && !isCase) return null;
       if(!wantsCase && !isDeath) return null;
-      const amount = firstValue(row, ["Số con theo chỉ tiêu", "So con theo chi tieu", "Số con", "Giá trị", "Gia tri", "Số lượng", "So luong"]);
-      return amount === null ? null : num(amount);
+      const amount = firstValue(row, ["Số con theo chỉ tiêu","So con theo chi tieu","Số con","So con","Giá trị","Gia tri","Số lượng","So luong"]);
+      return trendCount(amount);
     }
     const keys = wantsCase
       ? ["Mắc","Số mắc (con)","Số mắc","Số con mắc","Ca mắc","Số con mắc bệnh"]
       : ["Chết / tiêu hủy","Chết/tiêu hủy","Số chết, tiêu hủy","Số con chết/tiêu hủy","Số con chết, tiêu hủy","Chết","Tiêu hủy"];
     let v = firstValue(row, keys);
     if(v === null) v = fuzzyValue(row, wantsCase ? "case" : "death");
-    return v === null ? null : num(v);
+    return trendCount(v);
   }
   async function loadTrendRows(){
     if(trendLoadStarted) return;
@@ -3393,7 +3412,7 @@ document.addEventListener("DOMContentLoaded", function () {
     trendRows.forEach(row => {
       if(trendDiseaseKey(row) !== key) return;
       matchedDisease++;
-      let dateRaw = firstValue(row, ["Ngày","Ngày ghi nhận","Ngày phát hiện","Ngày xảy ra","Ngày tiêu hủy","Ngày chết/tiêu hủy","Ngày chết, tiêu hủy","Ngày cập nhật","Ngày xảy ra ổ dịch","Ngày bắt đầu"]);
+      let dateRaw = firstValue(row, ["Ngày","Ngày ghi nhận","Ngày phát hiện","Ngày xảy ra","Ngày phát sinh","Ngày tiêu hủy","Ngày chết/tiêu hủy","Ngày chết, tiêu hủy","Ngày cập nhật","Ngày xảy ra ổ dịch","Ngày bắt đầu","Thời gian","Ngày tháng"]);
       if(dateRaw === null) dateRaw = fuzzyValue(row, "date");
       const date = parseTrendDate(dateRaw);
       const value = trendValue(row,key);
@@ -3470,7 +3489,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let rowsForDisease=[];
     trendRows.forEach(row=>{
       if(trendDiseaseKey(row)!==key)return;
-      const dateRaw=firstValue(row,["Ngày","Ngày ghi nhận","Ngày phát hiện","Ngày xảy ra","Ngày tiêu hủy","Ngày chết/tiêu hủy","Ngày chết, tiêu hủy","Ngày cập nhật","Ngày xảy ra ổ dịch","Ngày bắt đầu"]) ?? fuzzyValue(row,"date");
+      const dateRaw=firstValue(row,["Ngày","Ngày ghi nhận","Ngày phát hiện","Ngày xảy ra","Ngày phát sinh","Ngày tiêu hủy","Ngày chết/tiêu hủy","Ngày chết, tiêu hủy","Ngày cập nhật","Ngày xảy ra ổ dịch","Ngày bắt đầu","Thời gian","Ngày tháng"]) ?? fuzzyValue(row,"date");
       const date=parseTrendDate(dateRaw);
       const value=trendValue(row,key);
       if(date && value!==null && Number.isFinite(value)) rowsForDisease.push({date,value});
